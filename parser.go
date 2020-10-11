@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"text/template"
@@ -38,7 +39,8 @@ type PeerTemplate struct {
 }
 
 var (
-	configFilename = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
+	configFilename  = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
+	outputDirectory = flag.String("output", "output/", "Directory to write output files to")
 )
 
 func main() {
@@ -125,17 +127,10 @@ func main() {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
-	// Make output directory if it doesn't exist
-	if _, err := os.Stat("output"); os.IsNotExist(err) {
-		if os.Mkdir("output", os.ModePerm) != nil {
-			log.Fatal("Create output directory: %v", err)
-		}
-	}
-
 	// Create peer specific file
 	for peerName, peerData := range config.Peers {
 		// Create the peer specific file
-		peerSpecificFile, err := os.Create("output/AS" + strconv.Itoa(int(peerData.Asn)) + ".txt")
+		peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".txt"))
 		if err != nil {
 			log.Fatalf("Create peer specific output file: %v", err)
 		}
@@ -144,5 +139,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Write peer specific output file: %v", err)
 		}
+
+		log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
 	}
 }

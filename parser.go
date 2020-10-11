@@ -14,7 +14,7 @@ import (
 	"text/template"
 )
 
-type Neighbor struct {
+type Peer struct {
 	Asn          uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet        string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
 	ImportPolicy string   `yaml:"import" toml:"ImportPolicy" json:"import"`
@@ -26,10 +26,10 @@ type Neighbor struct {
 }
 
 type Config struct {
-	Asn      uint32              `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId string              `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes []string            `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers    map[string]Neighbor `yaml:"peers" toml:"Peers" json:"peers"`
+	Asn      uint32          `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId string          `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes []string        `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Peers    map[string]Peer `yaml:"peers" toml:"Peers" json:"peers"`
 }
 
 var (

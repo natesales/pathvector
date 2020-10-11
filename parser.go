@@ -7,24 +7,24 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"net"
 	"strings"
 )
 
 // debian package this, progress bar (maybe?), peeribgdb+irr cache?, multiple BGPD temolates
 
-// Add validate to this
 type Neighbor struct {
-	Asn uint32 `yaml:"asn" toml:"ASN" json:"asn"`
-	//AsSet        string   `yaml:"asn" toml:"Asn" json:"asn"`
+	Asn          uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	AsSet        string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
 	ImportPolicy string   `yaml:"import" toml:"ImportPolicy" json:"import"`
 	ExportPolicy string   `yaml:"export" toml:"ExportPolicy" json:"export"`
-	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"` // or ip address type
+	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 }
 
 type Config struct {
 	Asn      uint32              `yaml:"asn" toml:"ASN" json:"asn"`
 	RouterId string              `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes []string            `yaml:"prefixes" toml:"Prefixes" json:"prefixes"` // or an "ipnetwork" type?
+	Prefixes []string            `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
 	Peers    map[string]Neighbor `yaml:"peers" toml:"Peers" json:"peers"`
 }
 
@@ -66,5 +66,46 @@ func main() {
 		log.Fatalf("Files with extension '%s' are not supported. (Acceptable values are yaml, toml, json", extension)
 	}
 
-	log.Println(config)
+	log.Infof("Loaded config: %+v", config)
+
+	// Validate Router ID in dotted quad format
+	if net.ParseIP(config.RouterId).To4() == nil {
+		log.Fatalf("Router ID %s is not in valid dotted quad notation", config.RouterId)
+	}
+
+	// Validate CIDR notation of originated prefixes
+	for _, addr := range config.Prefixes {
+		if _, _, err := net.ParseCIDR(addr); err != nil {
+			log.Fatalf("%s is not a valid IPv4 or IPv6 prefix in CIDR notation", addr)
+		}
+	}
+
+	// Validate peers
+	for peerName, peerData := range config.Peers {
+		// If no AS-Set is defined and the import policy requires it
+		if peerData.ImportPolicy == "macro" {
+			if peerData.AsSet != "" {
+				log.Fatalf("Peer %s has a filtered import policy and has no AS-Set defined", peerName)
+			} else if !strings.HasPrefix(peerData.AsSet, "AS") { // If AS-Set doesn't start with "AS" TODO: Better validation here. What is a valid AS-Set?
+				log.Warnf("AS-Set for %s (as-set: %s) doesn't start with 'AS' and might be invalid", peerName, peerData.AsSet)
+			}
+		}
+
+		// Validate import policy
+		if !(peerData.ImportPolicy == "any" || peerData.ImportPolicy == "macro" || peerData.ImportPolicy == "none") {
+			log.Fatalf("Peer %s has an invalid import policy. Acceptable values are 'any', 'macro', or 'none'", peerName)
+		}
+
+		// Validate export policy
+		if !(peerData.ExportPolicy == "any" || peerData.ExportPolicy == "cone" || peerData.ExportPolicy == "none") {
+			log.Fatalf("Peer %s has an invalid export policy. Acceptable values are 'any', 'cone', or 'none'", peerName)
+		}
+
+		// Validate neighbor IPs
+		for _, addr := range peerData.NeighborIps {
+			if net.ParseIP(addr) == nil {
+				log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
+			}
+		}
+	}
 }

@@ -11,14 +11,15 @@ import (
 	"strings"
 )
 
-// debian package this, progress bar (maybe?), peeribgdb+irr cache?, multiple BGPD temolates
-
 type Neighbor struct {
 	Asn          uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet        string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
 	ImportPolicy string   `yaml:"import" toml:"ImportPolicy" json:"import"`
 	ExportPolicy string   `yaml:"export" toml:"ExportPolicy" json:"export"`
 	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	Multihop     bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive      bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled     bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
 }
 
 type Config struct {

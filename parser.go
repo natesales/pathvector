@@ -8,7 +8,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
+	"os"
+	"strconv"
 	"strings"
+	"text/template"
 )
 
 type Neighbor struct {
@@ -107,6 +110,34 @@ func main() {
 			if net.ParseIP(addr) == nil {
 				log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
 			}
+		}
+	}
+
+	log.Info("Generating peer specific files")
+
+	peerTemplate, err := template.ParseFiles("templates/peer_specific.tmpl")
+	if err != nil {
+		log.Fatalf("Read peer specific template: %v", err)
+	}
+
+	// Make output directory if it doesn't exist
+	if _, err := os.Stat("output"); os.IsNotExist(err) {
+		if os.Mkdir("output", os.ModePerm) != nil {
+			log.Fatal("Create output directory: %v", err)
+		}
+	}
+
+	// Create peer specific file
+	for _, peerData := range config.Peers {
+		// Create the peer specific file
+		peerSpecificFile, err := os.Create("output/AS" + strconv.Itoa(int(peerData.Asn)) + ".txt")
+		if err != nil {
+			log.Fatalf("Create peer specific output file: %v", err)
+		}
+
+		err = peerTemplate.Execute(peerSpecificFile, peerData)
+		if err != nil {
+			log.Fatalf("Write peer specific output file: %v", err)
 		}
 	}
 }

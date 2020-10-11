@@ -1,0 +1,15 @@
+ASN = 65530
+Router-ID = "192.0.2.1"
+Prefixes = [
+    "192.0.2.0/24",
+    "2001:db8::/48"
+]
+
+[Peers."Hurricane Electric"]
+ASN = 6939
+ImportPolicy = "any"
+ExportPolicy = "cone"
+Neighbors = [
+    "203.0.113.39",
+    "2001:db8:6939::39"
+]

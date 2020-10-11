@@ -1,0 +1,14 @@
+asn: 65530
+router-id: 192.0.2.1
+prefixes:
+  - 192.0.2.0/24
+  - 2001:db8::/48
+
+peers:
+  Hurricane Electric:
+    asn: 6939
+    import: any
+    export: cone
+    neighbors:
+      - 203.0.113.39
+      - 2001:db8:6939::39

@@ -32,6 +32,11 @@ type Config struct {
 	Peers    map[string]Peer `yaml:"peers" toml:"Peers" json:"peers"`
 }
 
+type PeerTemplate struct {
+	Peer Peer
+	Name string
+}
+
 var (
 	configFilename = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
 )
@@ -128,14 +133,14 @@ func main() {
 	}
 
 	// Create peer specific file
-	for _, peerData := range config.Peers {
+	for peerName, peerData := range config.Peers {
 		// Create the peer specific file
 		peerSpecificFile, err := os.Create("output/AS" + strconv.Itoa(int(peerData.Asn)) + ".txt")
 		if err != nil {
 			log.Fatalf("Create peer specific output file: %v", err)
 		}
 
-		err = peerTemplate.Execute(peerSpecificFile, peerData)
+		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{peerData, peerName})
 		if err != nil {
 			log.Fatalf("Write peer specific output file: %v", err)
 		}

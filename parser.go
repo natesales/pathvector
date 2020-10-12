@@ -29,6 +29,7 @@ type Peer struct {
 	PfxFilter6     []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
 	ImportPolicy   string   `yaml:"import" toml:"ImportPolicy" json:"import"`
 	ExportPolicy   string   `yaml:"export" toml:"ExportPolicy" json:"export"`
+	LocalPref      uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
 	NeighborIps    []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 	Multihop       bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
 	Passive        bool     `yaml:"passive" toml:"Passive" json:"passive"`
@@ -254,6 +255,11 @@ func main() {
 			log.Warningf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
 		}
 
+		// Set default local pref
+		if peerData.LocalPref == 0 {
+			peerData.LocalPref = 100
+		}
+
 		var peeringDbData PeeringDbData
 
 		// If MaxPfx limits should be pulled from PeeringDB
@@ -338,6 +344,7 @@ func main() {
 			}
 		}
 
+		// Render the template and write to disk
 		err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
 		if err != nil {
 			log.Fatalf("Execute template: %v", err)

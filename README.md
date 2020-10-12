@@ -50,6 +50,7 @@ Peer Configuration Options
 | pfxlimitaction | Action to take when the max prefix limits are tripped (warn, disable, block, or restart) default: disable |
 | pfxfilter4     | IPv4 prefix filter list in BIRD format                                                                    |
 | pfxfilter6     | IPv6 prefix filter list in BIRD format                                                                    |
+| localpref      | BGP LOCAL_PREF                                                                                            |
 | import-policy  | Peer import policy (any, cone, none)                                                                      |
 | export-policy  | Peer export policy (any, cone, none)                                                                      |
 | automaxpfx     | Should max prefix limits be pulled from PeeringDB?                                                        |

@@ -26,13 +26,14 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
     neighbor {{ $neighbor }} as {{ $peer.Asn }};
     {{ if $peer.Disabled }}disabled;{{ end }}
     {{- if $peer.Passive }}passive;{{ end }}
-    {{- if $peer.Multihop }}multihop 255;{{ end }}
+    {{- if $peer.Multihop }}multihop 255;{{ end -}}
 
     ipv{{ $af }} {
         import keep filtered;
-        import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }};
+        import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action {{ $peer.PfxLimitAction }};
         import filter {
             reject_bogons();
+            bgp.local_pref = {{ $peer.LocalPref }};
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then accept;
             reject;

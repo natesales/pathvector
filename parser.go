@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// All information specific to a single peer network
+// Peer contains all information specific to a single peer network
 type Peer struct {
 	Asn            uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet          string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
@@ -40,7 +40,7 @@ type Peer struct {
 	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 
-// Global configuration about this router and BCG instance
+// Config contains global configuration about this router and BCG instance
 type Config struct {
 	Asn      uint32           `yaml:"asn" toml:"ASN" json:"asn"`
 	RouterId string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
@@ -49,7 +49,7 @@ type Config struct {
 	IrrDb    string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 }
 
-// Peer-specific config sent to template
+// PeerTemplate contains a peer-specific config sent to template
 type PeerTemplate struct {
 	Peer             Peer
 	Name             string
@@ -58,7 +58,7 @@ type PeerTemplate struct {
 	Global           Config
 }
 
-// Global config sent to template
+// GlobalTemplate contains the global config sent to template
 type GlobalTemplate struct {
 	Config        Config
 	OriginString4 string
@@ -67,12 +67,12 @@ type GlobalTemplate struct {
 	OriginList6   []string
 }
 
-// Response from PeeringDB query
+// PeeringDbResponse contains the response from a PeeringDB query
 type PeeringDbResponse struct {
 	Data []PeeringDbData `json:"data"`
 }
 
-// Data from PeeringDB response
+// PeeringDbData contains the actual data from PeeringDB response
 type PeeringDbData struct {
 	Name    string `json:"name"`
 	AsSet   string `json:"irr_as_set"`

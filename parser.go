@@ -19,6 +19,7 @@ import (
 	"time"
 )
 
+// All information specific to a single peer network
 type Peer struct {
 	Asn            uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet          string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
@@ -39,6 +40,7 @@ type Peer struct {
 	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 
+// Global configuration about this router and BCG instance
 type Config struct {
 	Asn      uint32           `yaml:"asn" toml:"ASN" json:"asn"`
 	RouterId string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
@@ -47,6 +49,7 @@ type Config struct {
 	IrrDb    string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 }
 
+// Peer-specific config sent to template
 type PeerTemplate struct {
 	Peer             Peer
 	Name             string
@@ -55,6 +58,7 @@ type PeerTemplate struct {
 	Global           Config
 }
 
+// Global config sent to template
 type GlobalTemplate struct {
 	Config        Config
 	OriginString4 string
@@ -63,10 +67,12 @@ type GlobalTemplate struct {
 	OriginList6   []string
 }
 
+// Response from PeeringDB query
 type PeeringDbResponse struct {
 	Data []PeeringDbData `json:"data"`
 }
 
+// Data from PeeringDB response
 type PeeringDbData struct {
 	Name    string `json:"name"`
 	AsSet   string `json:"irr_as_set"`
@@ -80,6 +86,7 @@ var (
 	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 )
 
+// Query PeeringDB for an ASN
 func getPeeringDbData(asn uint32) PeeringDbData {
 	httpClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
@@ -110,6 +117,7 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 	return peeringDbResponse.Data[0]
 }
 
+// Use bgpq4 to generate a prefix filter and return only the filter lines
 func getPrefixFilter(macro string, family uint8, irrdb string) []string {
 	// Run bgpq4 for BIRD format with aggregation enabled
 	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), macro)
@@ -134,6 +142,7 @@ func getPrefixFilter(macro string, family uint8, irrdb string) []string {
 	return strings.Split(output, "\n")
 }
 
+// Nonbuffered io Reader
 func readNoBuffer(reader io.Reader) string {
 	buf := make([]byte, 1024)
 	n, err := reader.Read(buf[:])
@@ -145,6 +154,7 @@ func readNoBuffer(reader io.Reader) string {
 	return string(buf[:n])
 }
 
+// Run a bird command
 func runBirdCommand(command string) {
 	log.Println("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", *birdSocket)

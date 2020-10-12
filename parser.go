@@ -6,6 +6,7 @@ import (
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -65,6 +66,7 @@ type PeeringDbData struct {
 var (
 	configFilename  = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
 	outputDirectory = flag.String("output", "output/", "Directory to write output files to")
+	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 )
 
 func getPeeringDbData(asn uint32) PeeringDbData {
@@ -121,7 +123,41 @@ func getPrefixFilter(macro string, family uint8) []string {
 	return strings.Split(output, "\n")
 }
 
+func readNoBuffer(reader io.Reader) string {
+	buf := make([]byte, 1024)
+	n, err := reader.Read(buf[:])
+
+	if err != nil {
+		log.Fatalf("BIRD read error: ", err)
+	}
+
+	return string(buf[:n])
+}
+
+func runBirdCommand(command string) {
+	log.Println("Connecting to BIRD socket")
+	conn, err := net.Dial("unix", *birdSocket)
+	if err != nil {
+		log.Fatalf("BIRD socket connect: %v", err)
+	}
+	//noinspection GoUnhandledErrorResult
+	defer conn.Close()
+
+	log.Println("Connected to BIRD socket")
+	log.Printf("BIRD init response: %s", readNoBuffer(conn))
+
+	log.Printf("Sending BIRD command: %s", command)
+	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
+	log.Printf("Sent BIRD command: %s", command)
+	if err != nil {
+		log.Fatalf("BIRD write error:", err)
+	}
+
+	log.Printf("BIRD response: %s", readNoBuffer(conn))
+}
+
 func main() {
+	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")
 
 	peerTemplate, err := template.New("").Funcs(template.FuncMap{
@@ -294,4 +330,6 @@ func main() {
 
 		log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
 	}
+
+	runBirdCommand("configure")
 }

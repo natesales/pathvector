@@ -1,0 +1,261 @@
+# bird.conf
+
+define ASN = {{ .Config.Asn }};
+router id {{ .Config.RouterId }};
+
+define LOCAL_v4 = [
+{{ .OriginString4 }}
+];
+
+define LOCAL_v6 = [
+{{ .OriginString6 }}
+];
+
+protocol static {
+  ipv4;
+  {{- range $i, $prefix := .OriginList4 }}
+  route {{ $prefix }} reject;
+  {{- end }}
+}
+
+protocol static {
+  ipv6;
+  {{- range $i, $prefix := .OriginList6 }}
+  route {{ $prefix }} reject;
+  {{- end }}
+}
+
+# ---- Parameters ----
+
+timeformat base iso long;
+timeformat log iso long;
+timeformat protocol iso long;
+timeformat route iso long;
+
+log syslog all;
+
+protocol device {};
+
+protocol direct {
+  ipv4;
+  ipv6;
+}
+
+protocol kernel {
+  scan time 10;
+  ipv4 {
+    export all;
+    // export filter {
+    //      if source = RTS_STATIC then {
+    //        accept;
+    //      } else {
+    //        krt_prefsrc = IPv4;
+    //        accept;
+    //      }
+    // };
+  };
+}
+
+protocol kernel {
+  scan time 10;
+  ipv6 {
+    export all;
+    // export filter {
+    //      if source = RTS_STATIC then {
+    //        accept;
+    //      } else {
+    //        krt_prefsrc = IPv6;
+    //        accept;
+    //      }
+    // };
+  };
+}
+
+# --- Blackholing ---
+
+protocol static null4 {
+  ipv4;
+  route 192.0.2.1/32 blackhole;
+}
+
+protocol static null6 {
+  ipv6;
+  route fddd:192::1/128 blackhole;
+}
+
+function process_blackholes() {
+  if ((ASN,999) ~ bgp_community) then {
+    if (net.type = NET_IP4 && net.len = 32) then {
+      bgp_next_hop = 192.0.2.1;
+      print "Added null route for ", net;
+    }
+
+    if (net.type = NET_IP6 && net.len = 128) then {
+      bgp_next_hop = fddd:192::1;
+      print "Added null route for ", net;
+    }
+  }
+}
+
+# ---- RPKI ----
+
+roa4 table rpki4;
+roa6 table rpki6;
+
+protocol rpki {
+  roa4 { table rpki4; };
+  roa6 { table rpki6; };
+
+  transport tcp;
+  remote "127.0.0.1" port 8282;
+
+  retry keep 90;
+  refresh keep 900;
+  expire keep 172800;
+}
+
+# ---- Filter Lists ----
+
+define TRANSIT_ASNS = [
+  174,                    # Cogent
+#  209,                    # Qwest (HE carries this on IXPs IPv6 (Jul 12 2018))
+  701,                    # UUNET
+  702,                    # UUNET
+  1239,                   # Sprint
+  1299,                   # Telia
+  2914,                   # NTT Communications
+  3257,                   # GTT Backbone
+  3320,                   # Deutsche Telekom AG (DTAG)
+  3356,                   # Level3 / Lumen
+  3491,                   # PCCW
+  3549,                   # Level3
+  3561,                   # Savvis / CenturyLink
+  4134,                   # Chinanet
+  5511,                   # Orange opentransit
+  6453,                   # Tata Communications
+  6461,                   # Zayo Bandwidth
+  6762,                   # Seabone / Telecom Italia
+  6830,                   # Liberty Global
+  7018                    # AT&T
+];
+
+define BOGONS_v4 = [
+  0.0.0.0/0,              # Default route
+  0.0.0.0/8{8,32},        # IANA - Local Identification
+  10.0.0.0/8{8,32},       # RFC 1918 - Private Use
+  100.64.0.0/10{10,32},   # RFC 6598 - Shared Address Space
+  127.0.0.0/8{8,32},      # IANA - Loopback
+  169.254.0.0/16{16,32},  # RFC 3927 - Link Local
+  172.16.0.0/12{12,32},   # RFC 1918 - Private Use
+  192.0.2.0/24{24,32},    # RFC 5737 - TEST-NET-1
+  192.88.99.0/24{24,32},  # RFC 3068 - 6to4 prefix
+  192.168.0.0/16{16,32},  # RFC 1918 - Private Use
+  198.18.0.0/15{15,32},   # RFC 2544 - Network Interconnect Device Benchmark Testing
+  198.51.100.0/24{24,32}, # RFC 5737 - TEST-NET-2
+  203.0.113.0/24{24,32},  # RFC 5737 - TEST-NET-3
+  224.0.0.0/3{3,32}       # RFC 5771 - Multcast (formerly Class D)
+];
+
+define BOGONS_v6 = [
+  ::/0,                     # Default route
+  ::/8{8,128},              # loopback, unspecified, v4-mapped
+  64:ff9b::/96{96,128},     # RFC 6052 - IPv4-IPv6 Translation
+  100::/8{8,128},           # RFC 6666 - reserved for Discard-Only Address Block
+  200::/7{7,128},           # RFC 4048 - Reserved by IETF
+  400::/6{6,128},           # RFC 4291 - Reserved by IETF
+  800::/5{5,128},           # RFC 4291 - Reserved by IETF
+  1000::/4{4,128},          # RFC 4291 - Reserved by IETF
+  2001::/33{33,128},        # RFC 4380 - Teredo prefix
+  2001:0:8000::/33{33,128}, # RFC 4380 - Teredo prefix
+  2001:2::/48{48,128},      # RFC 5180 - Benchmarking
+  2001:3::/32{32,128},      # RFC 7450 - Automatic Multicast Tunneling
+  2001:10::/28{28,128},     # RFC 4843 - Deprecated ORCHID
+  2001:20::/28{28,128},     # RFC 7343 - ORCHIDv2
+  2001:db8::/32{32,128},    # RFC 3849 - NON-ROUTABLE range to be used for documentation purpose
+  2002::/16{16,128},        # RFC 3068 - 6to4 prefix
+  3ffe::/16{16,128},        # RFC 5156 - used for the 6bone but was returned
+  4000::/3{3,128},          # RFC 4291 - Reserved by IETF
+  5f00::/8{8,128},          # RFC 5156 - used for the 6bone but was returned
+  6000::/3{3,128},          # RFC 4291 - Reserved by IETF
+  8000::/3{3,128},          # RFC 4291 - Reserved by IETF
+  a000::/3{3,128},          # RFC 4291 - Reserved by IETF
+  c000::/3{3,128},          # RFC 4291 - Reserved by IETF
+  e000::/4{4,128},          # RFC 4291 - Reserved by IETF
+  f000::/5{5,128},          # RFC 4291 - Reserved by IETF
+  f800::/6{6,128},          # RFC 4291 - Reserved by IETF
+  fc00::/7{7,128},          # RFC 4193 - Unique Local Unicast
+  fe80::/10{10,128},        # RFC 4291 - Link Local Unicast
+  fec0::/10{10,128},        # RFC 4291 - Reserved by IETF
+  ff00::/8{8,128}           # RFC 4291 - Multicast
+];
+
+define BOGON_ASNS = [
+  0,                      # Reserved. RFC7607
+  23456,                  # AS_TRANS. RFC6793
+  64496..64511,           # Reserved for use in documentation and sample code. RFC5398
+  64512..65534,           # Reserved for Private Use. RFC6996
+  65535,                  # Reserved. RFC7300
+  65536..65551,           # Reserved for use in documentation and sample code. RFC5398
+  65552..131071,          # Reserved.
+  4200000000..4294967294, # Reserved for Private Use. [RFC6996]
+  4294967295              # Reserved. RFC7300
+];
+
+# ---- Functions ----
+
+function _reject(string reason) {
+  print "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+}
+
+function honor_graceful_shutdown() {
+  if (65535, 0) ~ bgp_community then bgp_local_pref = 0;
+}
+
+function reject_transit_paths() {
+  if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
+}
+
+function process_prepends() {
+  if ((ASN,401) ~ bgp_community) then {
+    print "Adding single prepend for ", net;
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,402) ~ bgp_community) then {
+    print "Adding double prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,403) ~ bgp_community) then {
+    print "Adding triple prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+}
+
+function reject_bogons() {
+  if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then _reject("own prefix");
+
+  if (net.type = NET_IP4) then {
+    if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
+    if (net ~ BOGONS_v4) then _reject("bogon prefix");
+    if (net ~ DENYLIST_v4) then _reject("denylisted prefix");
+    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
+    if (net ~ BOGONS_v6) then _reject("bogon prefix");
+    if (net ~ DENYLIST_v6) then _reject("denylisted prefix");
+    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+  }
+
+  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
+  if (bgp_path.len > 100) then _reject("long AS_PATH");
+}
+
+# ---- Peers ----
+
+include "peers/*.conf";

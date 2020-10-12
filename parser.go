@@ -55,6 +55,14 @@ type PeerTemplate struct {
 	Global           Config
 }
 
+type GlobalTemplate struct {
+	Config        Config
+	OriginString4 string
+	OriginString6 string
+	OriginList4   []string
+	OriginList6   []string
+}
+
 type PeeringDbResponse struct {
 	Data []PeeringDbData `json:"data"`
 }
@@ -178,7 +186,14 @@ func main() {
 
 	peerTemplate, err := template.New("").Funcs(template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
-	}).ParseFiles("peer.tmpl")
+	}).ParseFiles("templates/peer.tmpl")
+	if err != nil {
+		log.Fatalf("Read peer specific template: %v", err)
+	}
+
+	globalTemplate, err := template.New("").Funcs(template.FuncMap{
+		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
+	}).ParseFiles("templates/global.tmpl")
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
@@ -234,6 +249,30 @@ func main() {
 		if _, _, err := net.ParseCIDR(addr); err != nil {
 			log.Fatalf("%s is not a valid IPv4 or IPv6 prefix in CIDR notation", addr)
 		}
+	}
+
+	// Create the global output
+	globalFile, err := os.Create(path.Join(*outputDirectory, "bird.conf"))
+	if err != nil {
+		log.Fatalf("Create global BIRD output file: %v", err)
+	}
+
+	var originIpv4, originIpv6 []string
+	for _, prefix := range config.Prefixes {
+		if strings.Contains(prefix, ":") {
+			originIpv6 = append(originIpv6, prefix)
+		} else {
+			originIpv4 = append(originIpv4, prefix)
+		}
+	}
+
+	originList4 := buildBirdSet(originIpv4)
+	originList6 := buildBirdSet(originIpv6)
+
+	// Render the global template and write to disk
+	err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", &GlobalTemplate{config, originList4, originList6, originIpv4, originIpv6})
+	if err != nil {
+		log.Fatalf("Execute template: %v", err)
 	}
 
 	// Validate peers

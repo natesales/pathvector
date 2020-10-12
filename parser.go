@@ -40,7 +40,7 @@ type PeerTemplate struct {
 
 type PeeringDbResponse struct {
 	Data []map[string]interface{} `json:"data"`
-	Meta []map[string]interface{} `json:"data"`
+	Meta []map[string]interface{} `json:"meta"`
 }
 
 type PeeringDbData struct {

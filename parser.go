@@ -192,8 +192,9 @@ func buildBirdSet(filter []string) string {
 }
 
 func main() {
-	log.Info("Starting BCG")
 	flag.Parse()
+
+	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")
 
 	peerTemplate, err := template.New("").Funcs(template.FuncMap{

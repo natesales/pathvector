@@ -159,6 +159,19 @@ func runBirdCommand(command string) {
 	log.Printf("BIRD response: %s", readNoBuffer(conn))
 }
 
+// Build a formatted BIRD prefix list
+func buildBirdSet(filter []string) string {
+	output := ""
+	for i, prefix := range filter {
+		output += "    " + prefix
+		if i != len(filter)-1 {
+			output += ",\n"
+		}
+	}
+
+	return output
+}
+
 func main() {
 	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")
@@ -329,19 +342,8 @@ func main() {
 
 		if peerData.ImportPolicy == "cone" {
 			// Build prefix filter sets in BIRD format
-			for i, prefix := range peerData.PfxFilter4 {
-				pfxFilterString4 += "    " + prefix
-				if i != len(peerData.PfxFilter4)-1 {
-					pfxFilterString4 += ",\n"
-				}
-			}
-
-			for i, prefix := range peerData.PfxFilter6 {
-				pfxFilterString6 += "    " + prefix
-				if i != len(peerData.PfxFilter6)-1 {
-					pfxFilterString6 += ",\n"
-				}
-			}
+			pfxFilterString4 = buildBirdSet(peerData.PfxFilter4)
+			pfxFilterString6 = buildBirdSet(peerData.PfxFilter6)
 		}
 
 		// Render the template and write to disk

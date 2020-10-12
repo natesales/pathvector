@@ -263,7 +263,7 @@ func main() {
 	// Create peer specific file
 	for peerName, peerData := range config.Peers {
 		// Create the peer specific file
-		peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".txt"))
+		peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".conf"))
 		if err != nil {
 			log.Fatalf("Create peer specific output file: %v", err)
 		}

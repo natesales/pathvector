@@ -38,6 +38,18 @@ type PeerTemplate struct {
 	Name string
 }
 
+type PeeringDbResponse struct {
+	Data []map[string]interface{} `json:"data"`
+	Meta []map[string]interface{} `json:"data"`
+}
+
+type PeeringDbData struct {
+	Name    string `json:"name"`
+	AsSet   string `json:"irr_as_set"`
+	MaxPfx4 uint32 `json:"info_prefixes4"`
+	MaxPfx6 uint32 `json:"info_prefixes6"`
+}
+
 var (
 	configFilename  = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
 	outputDirectory = flag.String("output", "output/", "Directory to write output files to")

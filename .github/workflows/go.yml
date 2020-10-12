@@ -5,54 +5,73 @@ on:
     tags: "v*"
 
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.13
+        id: go
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.13
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - name: Get dependencies
+        run: go get -v -t -d ./...
 
-    - name: Get dependencies
-      run: go get -v -t -d ./...
+      - name: Build
+        run: go build -v .
 
-    - name: Build
-      run: go build -v .
+      - name: Get tag name
+        id: vars
+        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
-    - name: Make debian build directory
-      run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/templates/,debian/usr/bin/}
-    
-    - name: Copy bcg binary
-      run: cp bcg debian/usr/bin/
-    
-    - name: Copy templates
-      run: cp templates/* debian/etc/bcg/templates/*
-    
-    - name: Copy example config
-      run: cp config.example.yml debian/etc/bcg/
-    
-    - name: Create debian control file
-      run: |
-        echo "Package: bcg
-        Version: 1.0.0
-        Section: utils
-        Priority: optional
-        Architecture: amd64
-        Maintainer: Nate Sales <nate@natesales.net>
-        Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
+      - name: Make debian build directory
+        run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/templates/,debian/usr/bin/}
 
-    - name: Create debian copyright file
-      run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
+      - name: Copy bcg binary
+        run: cp bcg debian/usr/bin/
 
-    - name: Build debian package
-      run: dpkg-deb --build debian
+      - name: Copy templates
+        run: cp templates/* debian/etc/bcg/templates/*
 
-    - name: Move deb package
-      run: mv debian.deb bcg-1.0.0.deb
+      - name: Copy example config
+        run: cp config.example.yml debian/etc/bcg/
+
+      - name: Create debian control file
+        run: |
+          echo "Package: bcg
+          Version: ${{ steps.vars.outputs.tag }}
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Nate Sales <nate@natesales.net>
+          Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
+
+      - name: Create debian copyright file
+        run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
+
+      - name: Build debian package
+        run: dpkg-deb --build debian
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./debian.deb
+          asset_name: bcg-${{ steps.vars.outputs.tag }}.deb
+          asset_content_type: application/x-deb

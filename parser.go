@@ -193,7 +193,7 @@ func main() {
 			}
 
 			// Check for empty prefix filters
-			if len(peerData.PfxFilter4) == 0 || len(peerData.PfxFilter6) == 0 {
+			if peerData.ImportPolicy != "none" && (len(peerData.PfxFilter4) == 0 || len(peerData.PfxFilter6) == 0) {
 				log.Fatalf("Peer %s has a cone filtered import policy and has no prefix filters defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
 			}
 		}

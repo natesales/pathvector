@@ -124,7 +124,9 @@ func getPrefixFilter(macro string, family uint8) []string {
 func main() {
 	log.Info("Generating peer specific files")
 
-	peerTemplate, err := template.ParseFiles("templates/peer_specific.tmpl")
+	peerTemplate, err := template.New("").Funcs(template.FuncMap{
+		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
+	}).ParseFiles("peer.tmpl")
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
@@ -279,9 +281,9 @@ func main() {
 			}
 		}
 
-		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
+		err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
 		if err != nil {
-			log.Fatalf("Write peer specific output file: %v", err)
+			log.Fatalf("Execute template: %v", err)
 		}
 
 		log.Infof("Wrote peer specific config for AS%d", peerData.Asn)

@@ -1,6 +1,14 @@
 # {{ .Name }} {{ .Peer.Asn }}
 
-define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.MaxPfx4 }}
-define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.MaxPfx6 }}
-define AS{{ .Peer.Asn }}_PFX_v4 = []
-define AS{{ .Peer.Asn }}_PFX_v6 = []
+define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.MaxPfx4 }};
+define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.MaxPfx6 }};
+
+{{- if eq .Peer.ImportPolicy "cone" }}
+define AS{{ .Peer.Asn }}_PFX_v4 = [
+{{.PfxFilterString4}}
+];
+
+define AS{{ .Peer.Asn }}_PFX_v6 = [
+{{.PfxFilterString6}}
+];
+{{ end }}

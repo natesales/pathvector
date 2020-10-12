@@ -23,6 +23,9 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
     local as {{ $global.Asn }};
     neighbor {{ $neighbor }} as {{ $peer.Asn }};
+    {{ if $peer.Disabled }}disabled;{{ end }}
+    {{- if $peer.Passive }}passive;{{ end }}
+    {{- if $peer.Multihop }}multihop 255;{{ end }}
 
     ipv{{ $af }} {
         import keep filtered;

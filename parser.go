@@ -20,19 +20,22 @@ import (
 type Peer struct {
 	Asn          uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet        string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	MaxPfx4      int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
+	MaxPfx6      int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
 	ImportPolicy string   `yaml:"import" toml:"ImportPolicy" json:"import"`
 	ExportPolicy string   `yaml:"export" toml:"ExportPolicy" json:"export"`
 	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 	Multihop     bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
 	Passive      bool     `yaml:"passive" toml:"Passive" json:"passive"`
 	Disabled     bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	AutoMaxPfx   bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
 }
 
 type Config struct {
-	Asn      uint32          `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId string          `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes []string        `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers    map[string]Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	Asn      uint32           `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Peers    map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
 }
 
 type PeerTemplate struct {
@@ -144,6 +147,21 @@ func main() {
 			}
 		}
 
+		// Check for no max prefixes
+		if !peerData.AutoMaxPfx && (peerData.MaxPfx4 == 0 || peerData.MaxPfx6 == 0) {
+			log.Warningf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
+		}
+
+		if peerData.AutoMaxPfx {
+			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
+			peeringDb := getPeeringDbData(peerData.Asn)
+			peerData.MaxPfx4 = int64(peeringDb.MaxPfx4)
+			peerData.MaxPfx6 = int64(peeringDb.MaxPfx6)
+
+			log.Printf("AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
+			log.Printf("AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
+		}
+
 		// Validate import policy
 		if !(peerData.ImportPolicy == "any" || peerData.ImportPolicy == "macro" || peerData.ImportPolicy == "none") {
 			log.Fatalf("Peer %s has an invalid import policy. Acceptable values are 'any', 'macro', or 'none'", peerName)
@@ -162,6 +180,7 @@ func main() {
 		}
 	}
 
+	log.Infof("Modified config: %+v", config)
 	log.Info("Generating peer specific files")
 
 	peerTemplate, err := template.ParseFiles("templates/peer_specific.tmpl")
@@ -177,7 +196,7 @@ func main() {
 			log.Fatalf("Create peer specific output file: %v", err)
 		}
 
-		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{peerData, peerName})
+		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName})
 		if err != nil {
 			log.Fatalf("Write peer specific output file: %v", err)
 		}

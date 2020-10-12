@@ -45,14 +45,6 @@ protocol kernel {
   scan time 10;
   ipv4 {
     export all;
-    // export filter {
-    //      if source = RTS_STATIC then {
-    //        accept;
-    //      } else {
-    //        krt_prefsrc = IPv4;
-    //        accept;
-    //      }
-    // };
   };
 }
 
@@ -60,14 +52,6 @@ protocol kernel {
   scan time 10;
   ipv6 {
     export all;
-    // export filter {
-    //      if source = RTS_STATIC then {
-    //        accept;
-    //      } else {
-    //        krt_prefsrc = IPv6;
-    //        accept;
-    //      }
-    // };
   };
 }
 
@@ -258,4 +242,4 @@ function reject_bogons() {
 
 # ---- Peers ----
 
-include "peers/*.conf";
+include "AS*.conf";

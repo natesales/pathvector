@@ -43,8 +43,10 @@ type Config struct {
 }
 
 type PeerTemplate struct {
-	Peer Peer
-	Name string
+	Peer             Peer
+	Name             string
+	PfxFilterString4 string // Contains string representation of IPv4 prefix filter
+	PfxFilterString6 string // Contains string representation of IPv6 prefix filter
 }
 
 type PeeringDbResponse struct {
@@ -168,9 +170,9 @@ func main() {
 	// Validate peers
 	for peerName, peerData := range config.Peers {
 		// If no AS-Set is defined and the import policy requires it
-		if peerData.ImportPolicy == "macro" {
+		if !peerData.AutoPfxFilter && peerData.ImportPolicy == "cone" {
 			if peerData.AsSet != "" {
-				log.Fatalf("Peer %s has a macro filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable pulling the AS-Set from PeeringDB", peerName)
+				log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable pulling the AS-Set from PeeringDB", peerName)
 			} else if !strings.HasPrefix(peerData.AsSet, "AS") { // If AS-Set doesn't start with "AS" TODO: Better validation here. What is a valid AS-Set?
 				log.Warnf("AS-Set for %s (as-set: %s) doesn't start with 'AS' and might be invalid", peerName, peerData.AsSet)
 			}
@@ -204,8 +206,8 @@ func main() {
 		}
 
 		// Validate import policy
-		if !(peerData.ImportPolicy == "any" || peerData.ImportPolicy == "macro" || peerData.ImportPolicy == "none") {
-			log.Fatalf("Peer %s has an invalid import policy. Acceptable values are 'any', 'macro', or 'none'", peerName)
+		if !(peerData.ImportPolicy == "any" || peerData.ImportPolicy == "cone" || peerData.ImportPolicy == "none") {
+			log.Fatalf("Peer %s has an invalid import policy. Acceptable values are 'any', 'cone', or 'none'", peerName)
 		}
 
 		// Validate export policy
@@ -237,7 +239,26 @@ func main() {
 			log.Fatalf("Create peer specific output file: %v", err)
 		}
 
-		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName})
+		var pfxFilterString4, pfxFilterString6 = "", ""
+
+		if peerData.ImportPolicy == "cone" {
+			// Build prefix filter sets in BIRD format
+			for i, prefix := range peerData.PfxFilter4 {
+				pfxFilterString4 += "    " + prefix
+				if i != len(peerData.PfxFilter4)-1 {
+					pfxFilterString4 += ",\n"
+				}
+			}
+
+			for i, prefix := range peerData.PfxFilter6 {
+				pfxFilterString6 += "    " + prefix
+				if i != len(peerData.PfxFilter6)-1 {
+					pfxFilterString6 += ",\n"
+				}
+			}
+		}
+
+		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6})
 		if err != nil {
 			log.Fatalf("Write peer specific output file: %v", err)
 		}

@@ -81,9 +81,10 @@ type PeeringDbData struct {
 }
 
 var (
-	configFilename  = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
-	outputDirectory = flag.String("output", "output/", "Directory to write output files to")
-	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
+	configFilename     = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
+	outputDirectory    = flag.String("output", "output/", "Directory to write output files to")
+	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
+	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 )
 
 // Query PeeringDB for an ASN
@@ -192,23 +193,22 @@ func buildBirdSet(filter []string) string {
 
 func main() {
 	log.Info("Starting BCG")
+	flag.Parse()
 	log.Info("Generating peer specific files")
 
 	peerTemplate, err := template.New("").Funcs(template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
-	}).ParseFiles("templates/peer.tmpl")
+	}).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
 	globalTemplate, err := template.New("").Funcs(template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
-	}).ParseFiles("templates/global.tmpl")
+	}).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
-
-	flag.Parse()
 
 	configFile, err := ioutil.ReadFile(*configFilename)
 	if err != nil {

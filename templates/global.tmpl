@@ -225,14 +225,12 @@ function reject_bogons() {
   if (net.type = NET_IP4) then {
     if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
     if (net ~ BOGONS_v4) then _reject("bogon prefix");
-    if (net ~ DENYLIST_v4) then _reject("denylisted prefix");
     if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
 
   if (net.type = NET_IP6) then {
     if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
     if (net ~ BOGONS_v6) then _reject("bogon prefix");
-    if (net ~ DENYLIST_v6) then _reject("denylisted prefix");
     if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
 

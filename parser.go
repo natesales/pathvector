@@ -185,7 +185,7 @@ func main() {
 
 		// If no AS-Set is defined and the import policy requires it
 		if !peerData.AutoPfxFilter && peerData.ImportPolicy == "cone" {
-			if peerData.AsSet != "" {
+			if peerData.AsSet == "" {
 				log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable pulling the AS-Set from PeeringDB", peerName)
 			} else if !strings.HasPrefix(peerData.AsSet, "AS") { // If AS-Set doesn't start with "AS" TODO: Better validation here. What is a valid AS-Set?
 				log.Warnf("AS-Set for %s (as-set: %s) doesn't start with 'AS' and might be invalid", peerName, peerData.AsSet)

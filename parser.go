@@ -48,6 +48,7 @@ type PeerTemplate struct {
 	Name             string
 	PfxFilterString4 string // Contains string representation of IPv4 prefix filter
 	PfxFilterString6 string // Contains string representation of IPv6 prefix filter
+	Global           Config
 }
 
 type PeeringDbResponse struct {
@@ -277,7 +278,7 @@ func main() {
 			}
 		}
 
-		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6})
+		err = peerTemplate.Execute(peerSpecificFile, &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
 		if err != nil {
 			log.Fatalf("Write peer specific output file: %v", err)
 		}

@@ -46,6 +46,16 @@ Usage of ./bcg:
         Templates directory (default "/etc/bcg/templates/")
 ```
 
+#### BGP Communities
+bcg uses standard communities for 16-bit ASNs and large communities for 32-bit ASNs.
+
+| Standard | Large     | Meaning                 |
+|----------|-----------|-------------------------|
+| ASN,100  | ASN,0,100 | Originated              |
+| ASN,100  | ASN,0,101 | Learned from upstream   |
+| ASN,100  | ASN,0,102 | Learned from peer       |
+| ASN,100  | ASN,0,103 | Learned from downstream |
+
 #### Global Configuration Options
 
 | Option    | Usage                                                                                                         |

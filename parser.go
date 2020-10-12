@@ -43,6 +43,7 @@ type Config struct {
 	RouterId string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
 	Prefixes []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
 	Peers    map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	IrrDb    string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 }
 
 type PeerTemplate struct {
@@ -100,9 +101,9 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 	return peeringDbResponse.Data[0]
 }
 
-func getPrefixFilter(macro string, family uint8) []string {
+func getPrefixFilter(macro string, family uint8, irrdb string) []string {
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmd := exec.Command("bgpq4", "-Ab"+strconv.Itoa(int(family)), macro)
+	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), macro)
 	stdout, err := cmd.Output()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -203,6 +204,12 @@ func main() {
 
 	log.Infof("Loaded config: %+v", config)
 
+	// Set default IRRDB
+	if config.IrrDb == "" {
+		config.IrrDb = "rr.ntt.net"
+	}
+	log.Infof("Using IRRDB server %s", config.IrrDb)
+
 	// Validate Router ID in dotted quad format
 	if net.ParseIP(config.RouterId).To4() == nil {
 		log.Fatalf("Router ID %s is not in valid dotted quad notation", config.RouterId)
@@ -274,8 +281,8 @@ func main() {
 			}
 
 			log.Infof("Running IRRDB query for AS%d", peerData.Asn)
-			peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4)
-			peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6)
+			peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4, config.IrrDb)
+			peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6, config.IrrDb)
 
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))

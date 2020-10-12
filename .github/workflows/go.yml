@@ -2,7 +2,7 @@ name: Go
 
 on:
   push:
-    branches: [ main ]
+    tags: "v*"
 
 jobs:
 
@@ -27,28 +27,32 @@ jobs:
       run: go build -v .
 
     - name: Make debian build directory
-      run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/,debian/usr/bin/}
+      run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/templates/,debian/usr/bin/}
+    
+    - name: Copy bcg binary
+      run: cp bcg debian/usr/bin/
+    
+    - name: Copy templates
+      run: cp templates/* debian/etc/bcg/templates/*
+    
+    - name: Copy example config
+      run: cp config.example.yml debian/etc/bcg/
     
     - name: Create debian control file
       run: |
         echo "Package: bcg
-        Version: 1.0
+        Version: 1.0.0
         Section: utils
         Priority: optional
         Architecture: amd64
         Maintainer: Nate Sales <nate@natesales.net>
         Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
-        
+
     - name: Create debian copyright file
       run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
-    
+
     - name: Build debian package
       run: dpkg-deb --build debian
-    
-    - name: List output
-      run: ls *.deb
 
-        
-        
-        
-  
+    - name: Move deb package
+      run: mv debian.deb bcg-1.0.0.deb

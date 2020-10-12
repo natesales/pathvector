@@ -33,6 +33,7 @@ type Peer struct {
 	Disabled      bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
 	AutoMaxPfx    bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
 	AutoPfxFilter bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
+	QueryTime     string   `yaml:"-" toml:"-" json:"-"`
 }
 
 type Config struct {
@@ -169,6 +170,9 @@ func main() {
 
 	// Validate peers
 	for peerName, peerData := range config.Peers {
+		// Set the query time to a default string
+		peerData.QueryTime = "[No time-specific operations performed]"
+
 		// If no AS-Set is defined and the import policy requires it
 		if !peerData.AutoPfxFilter && peerData.ImportPolicy == "cone" {
 			if peerData.AsSet != "" {
@@ -192,6 +196,9 @@ func main() {
 
 			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
 			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
+
+			// Update the "latest operation" timestamp
+			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		}
 
 		// If PfxFilter sets should be pulled from PeeringDB
@@ -203,6 +210,9 @@ func main() {
 
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))
+
+			// Update the "latest operation" timestamp
+			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		}
 
 		// Validate import policy

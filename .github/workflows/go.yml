@@ -25,3 +25,30 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: Make debian build directory
+      run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/,debian/usr/bin/}
+    
+    - name: Create debian control file
+      run: |
+        echo "Package: bcg
+        Version: 1.0
+        Section: utils
+        Priority: optional
+        Architecture: amd64
+        Maintainer: Nate Sales <nate@natesales.net>
+        Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
+        
+    - name: Create debian copyright file
+      run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
+    
+    - name: Build debian package
+      run: dpkg-deb --build debian
+    
+    - name: List output
+      run: ls *.deb
+
+        
+        
+        
+  

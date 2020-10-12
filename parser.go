@@ -20,21 +20,22 @@ import (
 )
 
 type Peer struct {
-	Asn           uint32   `yaml:"asn" toml:"ASN" json:"asn"`
-	AsSet         string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
-	MaxPfx4       int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
-	MaxPfx6       int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
-	PfxFilter4    []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
-	PfxFilter6    []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
-	ImportPolicy  string   `yaml:"import" toml:"ImportPolicy" json:"import"`
-	ExportPolicy  string   `yaml:"export" toml:"ExportPolicy" json:"export"`
-	NeighborIps   []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	Multihop      bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive       bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled      bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	AutoMaxPfx    bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
-	AutoPfxFilter bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
-	QueryTime     string   `yaml:"-" toml:"-" json:"-"`
+	Asn            uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	AsSet          string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	MaxPfx4        int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
+	MaxPfx6        int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
+	PfxLimitAction string   `yaml:"pfxlimitaction" yaml:"PfxLimitAction" json:"pfxlimitaction"`
+	PfxFilter4     []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
+	PfxFilter6     []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
+	ImportPolicy   string   `yaml:"import" toml:"ImportPolicy" json:"import"`
+	ExportPolicy   string   `yaml:"export" toml:"ExportPolicy" json:"export"`
+	NeighborIps    []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	Multihop       bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive        bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled       bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
+	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
+	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 
 type Config struct {
@@ -218,6 +219,13 @@ func main() {
 	for peerName, peerData := range config.Peers {
 		// Set the query time to a default string
 		peerData.QueryTime = "[No time-specific operations performed]"
+
+		// Set default pfxlimitaction
+		if peerData.PfxLimitAction == "" {
+			peerData.PfxLimitAction = "disable"
+		} else if !(peerData.PfxLimitAction == "disable" || peerData.PfxLimitAction == "restart" || peerData.PfxLimitAction == "block" || peerData.PfxLimitAction == "warn") {
+			log.Fatalf("Peer %s has an invalid pfxlimitaction. Acceptable values are warn, block, restart, and disable", peerName)
+		}
 
 		// If no AS-Set is defined and the import policy requires it
 		if !peerData.AutoPfxFilter && peerData.ImportPolicy == "cone" {

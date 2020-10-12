@@ -187,12 +187,17 @@ func main() {
 			log.Warningf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
 		}
 
+		var peeringDbData PeeringDbData
+
 		// If MaxPfx limits should be pulled from PeeringDB
 		if peerData.AutoMaxPfx {
-			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
-			peeringDb := getPeeringDbData(peerData.Asn)
-			peerData.MaxPfx4 = int64(peeringDb.MaxPfx4)
-			peerData.MaxPfx6 = int64(peeringDb.MaxPfx6)
+			if peeringDbData == (PeeringDbData{}) {
+				log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
+				peeringDbData = getPeeringDbData(peerData.Asn)
+			}
+
+			peerData.MaxPfx4 = int64(peeringDbData.MaxPfx4)
+			peerData.MaxPfx6 = int64(peeringDbData.MaxPfx6)
 
 			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
 			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
@@ -203,10 +208,14 @@ func main() {
 
 		// If PfxFilter sets should be pulled from PeeringDB
 		if peerData.AutoPfxFilter {
-			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
-			peeringDb := getPeeringDbData(peerData.Asn)
-			peerData.PfxFilter4 = getPrefixFilter(peeringDb.AsSet, 4)
-			peerData.PfxFilter6 = getPrefixFilter(peeringDb.AsSet, 6)
+			if peeringDbData == (PeeringDbData{}) {
+				log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
+				peeringDbData = getPeeringDbData(peerData.Asn)
+			}
+
+			log.Infof("Running IRRDB query for AS%d", peerData.Asn)
+			peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4)
+			peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6)
 
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
 			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))

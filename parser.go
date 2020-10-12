@@ -82,7 +82,7 @@ type PeeringDbData struct {
 
 var (
 	configFilename     = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
-	outputDirectory    = flag.String("output", "output/", "Directory to write output files to")
+	outputDirectory    = flag.String("output", "/etc/bird/", "Directory to write output files to")
 	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 )

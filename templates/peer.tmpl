@@ -34,6 +34,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         import filter {
             reject_bogons();
             bgp_local_pref = {{ $peer.LocalPref }};
+            {{ $peer.ImportCommunity }}
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then accept;
             reject;

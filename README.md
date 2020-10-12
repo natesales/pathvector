@@ -5,8 +5,10 @@
 
 The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.
 
-#### Configuration
+### Installation
+bcg is available for amd64 as a prebuilt deb package and binary for each release. You can also build from source by cloning the repo and running `go build` 
 
+#### Configuration
 BCG can be configured in YAML, TOML, or JSON. All config file formats have the same configuration options but follow a different capitalization structure. YAML and JSON use all lowercase parameter names and TOML uses CapsCase with acronyms capitalized. For example, `router-id` in YAML and JSON is `Router-ID` in TOML.
 
 An example to configure a peer with bogon, IRR, RPKI, and max prefix filtering.
@@ -29,7 +31,21 @@ peers:
       - 2001:db8:6939::39
 ```
 
-Global Configuration Options
+`bcg` can take the following flags:
+
+```      
+Usage of ./bcg:
+  -config string
+        Configuration file in YAML, TOML, or JSON format (default "config.yml")
+  -output string
+        Directory to write output files to (default "output/")
+  -socket string
+        BIRD control socket (default "/run/bird/bird.ctl")
+  -templates string
+        Templates directory (default "/etc/bcg/templates/")
+```
+
+#### Global Configuration Options
 
 | Option    | Usage                                                                                                         |
 | --------- | ------------------------------------------------------------------------------------------------------------- |
@@ -39,7 +55,7 @@ Global Configuration Options
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
 | peers     | Map of name to peer (see below)                                                                               |
 
-Peer Configuration Options
+#### Peer Configuration Options
 
 | Option         | Usage                                                                                                     |
 | -------------- | --------------------------------------------------------------------------------------------------------- |

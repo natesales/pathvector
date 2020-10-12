@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -18,17 +19,20 @@ import (
 )
 
 type Peer struct {
-	Asn          uint32   `yaml:"asn" toml:"ASN" json:"asn"`
-	AsSet        string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
-	MaxPfx4      int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
-	MaxPfx6      int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
-	ImportPolicy string   `yaml:"import" toml:"ImportPolicy" json:"import"`
-	ExportPolicy string   `yaml:"export" toml:"ExportPolicy" json:"export"`
-	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	Multihop     bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive      bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled     bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	AutoMaxPfx   bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
+	Asn           uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	AsSet         string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	MaxPfx4       int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
+	MaxPfx6       int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
+	PfxFilter4    []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
+	PfxFilter6    []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
+	ImportPolicy  string   `yaml:"import" toml:"ImportPolicy" json:"import"`
+	ExportPolicy  string   `yaml:"export" toml:"ExportPolicy" json:"export"`
+	NeighborIps   []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	Multihop      bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive       bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled      bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	AutoMaxPfx    bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
+	AutoPfxFilter bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
 }
 
 type Config struct {
@@ -89,6 +93,30 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 	return peeringDbResponse.Data[0]
 }
 
+func getPrefixFilter(macro string, family uint8) []string {
+	// Run bgpq4 for BIRD format with aggregation enabled
+	cmd := exec.Command("bgpq4", "-Ab"+strconv.Itoa(int(family)), macro)
+	stdout, err := cmd.Output()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	// Remove whitespace and commas from output
+	output := strings.ReplaceAll(string(stdout), ",\n    ", "\n")
+
+	// Remove array prefix
+	output = strings.ReplaceAll(output, "NN = [\n    ", "")
+
+	// Remove array suffix
+	output = strings.ReplaceAll(output, "];", "")
+
+	// Remove whitespace (in this case there should only be trailing whitespace)
+	output = strings.TrimSpace(output)
+
+	// Split output by newline
+	return strings.Split(output, "\n")
+}
+
 func main() {
 	flag.Parse()
 
@@ -142,7 +170,7 @@ func main() {
 		// If no AS-Set is defined and the import policy requires it
 		if peerData.ImportPolicy == "macro" {
 			if peerData.AsSet != "" {
-				log.Fatalf("Peer %s has a filtered import policy and has no AS-Set defined", peerName)
+				log.Fatalf("Peer %s has a macro filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable pulling the AS-Set from PeeringDB", peerName)
 			} else if !strings.HasPrefix(peerData.AsSet, "AS") { // If AS-Set doesn't start with "AS" TODO: Better validation here. What is a valid AS-Set?
 				log.Warnf("AS-Set for %s (as-set: %s) doesn't start with 'AS' and might be invalid", peerName, peerData.AsSet)
 			}
@@ -153,14 +181,26 @@ func main() {
 			log.Warningf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
 		}
 
+		// If MaxPfx limits should be pulled from PeeringDB
 		if peerData.AutoMaxPfx {
 			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
 			peeringDb := getPeeringDbData(peerData.Asn)
 			peerData.MaxPfx4 = int64(peeringDb.MaxPfx4)
 			peerData.MaxPfx6 = int64(peeringDb.MaxPfx6)
 
-			log.Printf("AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
-			log.Printf("AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
+			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
+			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
+		}
+
+		// If PfxFilter sets should be pulled from PeeringDB
+		if peerData.AutoPfxFilter {
+			log.Infof("Running IRRDB query for AS%d", peerData.Asn)
+			peeringDb := getPeeringDbData(peerData.Asn)
+			peerData.PfxFilter4 = getPrefixFilter(peeringDb.AsSet, 4)
+			peerData.PfxFilter6 = getPrefixFilter(peeringDb.AsSet, 6)
+
+			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
+			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))
 		}
 
 		// Validate import policy

@@ -1,0 +1,8 @@
+# Binary
+bcg
+
+# Output files
+output/*
+
+# JetBrains configs
+.idea/

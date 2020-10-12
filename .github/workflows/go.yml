@@ -35,7 +35,7 @@ jobs:
         run: cp bcg debian/usr/bin/
 
       - name: Copy templates
-        run: cp templates/* debian/etc/bcg/templates/*
+        run: cp templates/* debian/etc/bcg/templates/
 
       - name: Copy example config
         run: cp config.example.yml debian/etc/bcg/

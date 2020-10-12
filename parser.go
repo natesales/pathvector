@@ -194,7 +194,7 @@ func main() {
 
 		// If PfxFilter sets should be pulled from PeeringDB
 		if peerData.AutoPfxFilter {
-			log.Infof("Running IRRDB query for AS%d", peerData.Asn)
+			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
 			peeringDb := getPeeringDbData(peerData.Asn)
 			peerData.PfxFilter4 = getPrefixFilter(peeringDb.AsSet, 4)
 			peerData.PfxFilter6 = getPrefixFilter(peeringDb.AsSet, 6)

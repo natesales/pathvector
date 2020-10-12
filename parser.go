@@ -8,11 +8,13 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 type Peer struct {
@@ -39,8 +41,7 @@ type PeerTemplate struct {
 }
 
 type PeeringDbResponse struct {
-	Data []map[string]interface{} `json:"data"`
-	Meta []map[string]interface{} `json:"meta"`
+	Data []PeeringDbData `json:"data"`
 }
 
 type PeeringDbData struct {
@@ -54,6 +55,35 @@ var (
 	configFilename  = flag.String("config", "config.yml", "Configuration file in YAML, TOML, or JSON format")
 	outputDirectory = flag.String("output", "output/", "Directory to write output files to")
 )
+
+func getPeeringDbData(asn uint32) PeeringDbData {
+	httpClient := http.Client{Timeout: time.Second * 2}
+	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
+	if err != nil {
+		log.Fatalf("PeeringDB GET: %v", err)
+	}
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		log.Fatalf("PeeringDB GET Request: %v", err)
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Fatalf("PeeringDB Read: %v", err)
+	}
+
+	var peeringDbResponse PeeringDbResponse
+	if err := json.Unmarshal(body, &peeringDbResponse); err != nil {
+		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
+	}
+
+	return peeringDbResponse.Data[0]
+}
 
 func main() {
 	flag.Parse()

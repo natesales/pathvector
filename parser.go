@@ -38,6 +38,7 @@ type Peer struct {
 	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
 	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
 	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
+	CommunityType  string   `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -321,6 +322,13 @@ func main() {
 		// Set default local pref
 		if peerData.LocalPref == 0 {
 			peerData.LocalPref = 100
+		}
+
+		// Set BGP community type
+		if peerData.Asn > 65536 { // 32-bit
+			peerData.CommunityType = "large"
+		} else { // 16-bit
+			peerData.CommunityType = "standard"
 		}
 
 		var peeringDbData PeeringDbData

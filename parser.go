@@ -67,7 +67,7 @@ var (
 )
 
 func getPeeringDbData(asn uint32) PeeringDbData {
-	httpClient := http.Client{Timeout: time.Second * 2}
+	httpClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
 	if err != nil {
 		log.Fatalf("PeeringDB GET (This peer might not have a PeeringDB page): %v", err)

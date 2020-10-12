@@ -122,6 +122,13 @@ func getPrefixFilter(macro string, family uint8) []string {
 }
 
 func main() {
+	log.Info("Generating peer specific files")
+
+	peerTemplate, err := template.ParseFiles("templates/peer_specific.tmpl")
+	if err != nil {
+		log.Fatalf("Read peer specific template: %v", err)
+	}
+
 	flag.Parse()
 
 	configFile, err := ioutil.ReadFile(*configFilename)
@@ -244,12 +251,6 @@ func main() {
 	}
 
 	log.Infof("Modified config: %+v", config)
-	log.Info("Generating peer specific files")
-
-	peerTemplate, err := template.ParseFiles("templates/peer_specific.tmpl")
-	if err != nil {
-		log.Fatalf("Read peer specific template: %v", err)
-	}
 
 	// Create peer specific file
 	for peerName, peerData := range config.Peers {

@@ -72,6 +72,7 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 	}
 
 	if res.Body != nil {
+		//noinspection GoUnhandledErrorResult
 		defer res.Body.Close()
 	}
 

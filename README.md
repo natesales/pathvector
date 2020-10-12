@@ -1,6 +1,6 @@
 # bcg
 
-[![Go Report](https://goreportcard.com/badge/github.com/natesales/bcg?style=for-the-badge)](https://goreportcard.com/badge/github.com/natesales/bcg) 
+[![Go Report](https://goreportcard.com/badge/github.com/natesales/bcg?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/bcg) 
 [![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/) 
 
 The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.

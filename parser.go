@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -17,6 +18,10 @@ import (
 	"strings"
 	"text/template"
 	"time"
+)
+
+var (
+	release string // This is set by go build
 )
 
 // Peer contains all information specific to a single peer network
@@ -85,6 +90,7 @@ var (
 	outputDirectory    = flag.String("output", "/etc/bird/", "Directory to write output files to")
 	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
+	printVersion       = flag.Bool("version", false, "Print bcg version and exit")
 )
 
 // Query PeeringDB for an ASN
@@ -192,7 +198,21 @@ func buildBirdSet(filter []string) string {
 }
 
 func main() {
+	if release == "" {
+		release = "No release set"
+	}
+
+	flag.Usage = func() {
+		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
+
+	if *printVersion {
+		fmt.Printf("bcg version (%s) https://github.com/natesales/bcg\n", release)
+		os.Exit(0)
+	}
 
 	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")

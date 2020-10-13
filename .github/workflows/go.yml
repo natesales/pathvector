@@ -22,7 +22,7 @@ jobs:
         run: go get -v -t -d ./...
 
       - name: Build
-        run: go build -v .
+        run: go build -v . -ldflags "-X main.release='${{ steps.vars.outputs.tag }}'"
 
       - name: Get tag name
         id: vars

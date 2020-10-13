@@ -34,14 +34,35 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         import filter {
             reject_bogons();
             bgp_local_pref = {{ $peer.LocalPref }};
-            {{ $peer.ImportCommunity }}
             {{- if eq $peer.ImportPolicy "cone" }}
-            if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then accept;
+            if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
+                bgp_large_community.add((ASN,0,102));
+                accept;
+            }
             reject;
             {{- else if eq $peer.ImportPolicy "any" }}
+            bgp_large_community.add((ASN,0,101));
             accept;
             {{- else if eq $peer.ImportPolicy "none" }}
             reject;
+            {{- end }}
+        };
+        export filter {
+            {{- if eq $peer.ExportPolicy "none" }}
+            reject;
+            {{- else if eq $peer.ExportPolicy "any" }}
+            if ((ASN,0,101) ~ bgp_large_community) then accept;
+            if ((ASN,0,102) ~ bgp_large_community) then accept;
+            if ((ASN,0,103) ~ bgp_large_community) then accept;
+            if (net ~ LOCAL_v{{ $af }}) then {
+                if ((ASN,0,100) ~ bgp_large_community) then accept;
+                accept;
+            }
+            {{- else if eq $peer.ImportPolicy "cone" }}
+            if (net ~ LOCAL_v{{ $af }}) then {
+                if ((ASN,0,100) ~ bgp_large_community) then accept;
+                accept;
+            }
             {{- end }}
         };
     };

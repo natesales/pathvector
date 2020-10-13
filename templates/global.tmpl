@@ -91,7 +91,7 @@ protocol rpki {
   roa6 { table rpki6; };
 
   transport tcp;
-  remote "127.0.0.1" port 8282;
+  remote "{{ .Config.RtrServer }}" port 8282;
 
   retry keep 90;
   refresh keep 900;

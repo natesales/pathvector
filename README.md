@@ -64,6 +64,7 @@ bcg uses RFC 8092 BGP Large Communities
 | router-id | Router ID of this router                                                                                      |
 | prefixes  | List of prefixes to originate                                                                                 |
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
+| rtrserver | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                              |
 | peers     | Map of name to peer (see below)                                                                               |
 
 #### Peer Configuration Options

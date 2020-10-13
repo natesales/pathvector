@@ -47,11 +47,12 @@ type Peer struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn      uint32           `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers    map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
-	IrrDb    string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	Asn       uint32           `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId  string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes  []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Peers     map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	IrrDb     string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	RtrServer string           `yaml:"rtrserver" toml:"RPKIServer" json:"rtrserver"`
 }
 
 // PeerTemplate contains a peer-specific config sent to template
@@ -267,6 +268,12 @@ func main() {
 	// Set default IRRDB
 	if config.IrrDb == "" {
 		config.IrrDb = "rr.ntt.net"
+	}
+	log.Infof("Using IRRDB server %s", config.IrrDb)
+
+	// Set default RTR server
+	if config.RtrServer == "" {
+		config.RtrServer = "127.0.0.1"
 	}
 	log.Infof("Using IRRDB server %s", config.IrrDb)
 

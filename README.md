@@ -47,7 +47,7 @@ Usage of ./bcg:
 ```
 
 #### BGP Communities
-bcg uses standard communities for 16-bit ASNs and large communities for 32-bit ASNs.
+bcg uses RFC 8092 BGP Large Communities
 
 | Large     | Meaning                 |
 |-----------|-------------------------|

@@ -21,24 +21,23 @@ import (
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn             uint32   `yaml:"asn" toml:"ASN" json:"asn"`
-	AsSet           string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
-	MaxPfx4         int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
-	MaxPfx6         int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
-	PfxLimitAction  string   `yaml:"pfxlimitaction" yaml:"PfxLimitAction" json:"pfxlimitaction"`
-	PfxFilter4      []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
-	PfxFilter6      []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
-	ImportPolicy    string   `yaml:"import" toml:"ImportPolicy" json:"import"`
-	ExportPolicy    string   `yaml:"export" toml:"ExportPolicy" json:"export"`
-	LocalPref       uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
-	NeighborIps     []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	Multihop        bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive         bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled        bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	AutoMaxPfx      bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
-	AutoPfxFilter   bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
-	QueryTime       string   `yaml:"-" toml:"-" json:"-"`
-	ImportCommunity string   `yaml:"-" toml:"-" json:"-"`
+	Asn            uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	AsSet          string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	MaxPfx4        int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
+	MaxPfx6        int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
+	PfxLimitAction string   `yaml:"pfxlimitaction" yaml:"PfxLimitAction" json:"pfxlimitaction"`
+	PfxFilter4     []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
+	PfxFilter6     []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
+	ImportPolicy   string   `yaml:"import" toml:"ImportPolicy" json:"import"`
+	ExportPolicy   string   `yaml:"export" toml:"ExportPolicy" json:"export"`
+	LocalPref      uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
+	NeighborIps    []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	Multihop       bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive        bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled       bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
+	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
+	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -314,45 +313,21 @@ func main() {
 			}
 		}
 
-		// Check for no max prefixes
-		if !peerData.AutoMaxPfx && (peerData.MaxPfx4 == 0 || peerData.MaxPfx6 == 0) {
-			log.Warningf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
+		// Open up prefix limits if upstream
+		if peerData.ImportPolicy == "any" {
+			log.Warnf("Peer %s has no max-prefix limits configured and is an upstream session. Setting limits to 1M IPv4 and 10k IPv6", peerName)
+			peerData.MaxPfx4 = 1000000
+			peerData.MaxPfx4 = 10000
+		} else {
+			// Check for no max prefixes
+			if !peerData.AutoMaxPfx && (peerData.MaxPfx4 == 0 || peerData.MaxPfx6 == 0) {
+				log.Fatalf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
+			}
 		}
 
 		// Set default local pref
 		if peerData.LocalPref == 0 {
 			peerData.LocalPref = 100
-		}
-
-		// Set BGP community
-		if peerData.Asn > 65536 { // 32-bit
-			log.Infof("Peer %s %d has a 32-bit ASN, using large communities.", peerName, peerData.Asn)
-			if peerData.ImportPolicy == "any" && peerData.ExportPolicy == "cone" { // Upstream
-				log.Infof("Peer %s appears to be a upstream, setting ASN:0:101 community.", peerName)
-				peerData.ImportCommunity = "bgp_large_community.add((ASN,0,101));"
-			} else if peerData.ImportPolicy == "cone" && peerData.ExportPolicy == "cone" { // Peer
-				log.Infof("Peer %s appears to be a peer, setting ASN:0:102 community.", peerName)
-				peerData.ImportCommunity = "bgp_large_community.add((ASN,0,102));"
-			} else if peerData.ImportPolicy == "cone" && peerData.ExportPolicy == "any" { // Downstream
-				log.Infof("Peer %s appears to be a downstream, setting ASN:0:103 community.", peerName)
-				peerData.ImportCommunity = "bgp_large_community.add((ASN,0,103));"
-			} else {
-				log.Warnf("Peer %s has an unknown policy configuration, routes will not be redistributed.", peerName)
-			}
-		} else { // 16-bit
-			log.Infof("Peer %s %d has a 16-bit ASN, using standard communities.", peerName, peerData.Asn)
-			if peerData.ImportPolicy == "any" && peerData.ExportPolicy == "cone" { // Upstream
-				log.Infof("Peer %s appears to be a upstream, setting ASN,101 community.", peerName)
-				peerData.ImportCommunity = "bgp_community.add((ASN,101));"
-			} else if peerData.ImportPolicy == "cone" && peerData.ExportPolicy == "cone" { // Peer
-				log.Infof("Peer %s appears to be a peer, setting ASN,102 community.", peerName)
-				peerData.ImportCommunity = "bgp_community.add((ASN,102));"
-			} else if peerData.ImportPolicy == "cone" && peerData.ExportPolicy == "any" { // Downstream
-				log.Infof("Peer %s appears to be a downstream, setting ASN,103 community.", peerName)
-				peerData.ImportCommunity = "bgp_community.add((ASN,103));"
-			} else {
-				log.Warnf("Peer %s has an unknown policy configuration, routes will not be redistributed.", peerName)
-			}
 		}
 
 		var peeringDbData PeeringDbData

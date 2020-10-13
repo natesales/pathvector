@@ -26,7 +26,7 @@ jobs:
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
 
       - name: Build
-        run: go build -ldflags "-X main.release='${{ steps.vars.outputs.tag }}' -v"
+        run: go build -ldflags "-X main.release=${{ steps.vars.outputs.tag }} -v"
 
       - name: Make debian build directory
         run: mkdir -p {debian/DEBIAN/,debian/etc/bcg/templates/,debian/usr/bin/}

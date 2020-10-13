@@ -35,15 +35,17 @@ peers:
 `bcg` can take the following flags:
 
 ```      
-Usage of ./bcg:
+Usage for bcg https://github.com/natesales/bcg:
   -config string
         Configuration file in YAML, TOML, or JSON format (default "config.yml")
   -output string
-        Directory to write output files to (default "output/")
+        Directory to write output files to (default "/etc/bird/")
   -socket string
         BIRD control socket (default "/run/bird/bird.ctl")
   -templates string
         Templates directory (default "/etc/bcg/templates/")
+  -version
+        Print bcg version and exit
 ```
 
 #### BGP Communities

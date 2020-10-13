@@ -33,6 +33,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action {{ $peer.PfxLimitAction }};
         import filter {
             reject_bogons();
+            strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {

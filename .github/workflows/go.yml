@@ -51,12 +51,12 @@ jobs:
           Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
 
       - name: Create debian copyright file
-        run: |
-          echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
-          mv debian.deb bcg-${{ steps.vars.outputs.tag }}.deb
+        run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
 
       - name: Build debian package
-        run: dpkg-deb --build debian
+        run: |
+          dpkg-deb --build debian
+          mv debian.deb bcg-${{ steps.vars.outputs.tag }}.deb
 
       - name: Create Release
         id: create_release

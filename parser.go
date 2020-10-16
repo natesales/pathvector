@@ -366,7 +366,7 @@ func main() {
 			log.Warnf("Peer %s has no max-prefix limits configured and is an upstream session. Setting limits to 1M IPv4 and 10k IPv6", peerName)
 			peerData.MaxPfx4 = 1000000
 			peerData.MaxPfx4 = 10000
-		} else {
+		} else if peerData.ImportPolicy == "cone" {
 			// Check for no max prefixes
 			if !peerData.AutoMaxPfx && (peerData.MaxPfx4 == 0 || peerData.MaxPfx6 == 0) {
 				log.Fatalf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)

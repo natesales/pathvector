@@ -37,6 +37,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             reject_bogons();
             strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
+            honor_graceful_shutdown();
 
             {{- range $i, $expression := $peer.PreImport }}
             {{ $expression }}

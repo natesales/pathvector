@@ -66,6 +66,9 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
 
 All peers with an import filter of `cone` will apply further strict filtering by either an AS Set or manual prefix list. Max-prefix limits are also enforced for every peer.
 
+#### Local Preference
+All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). Local pref can be adjusted on a per-peer basis with the `localpref` option under the peer block.
+
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 

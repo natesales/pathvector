@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/kennygrant/sanitize"
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -207,6 +208,23 @@ func buildBirdSet(filter []string) string {
 	}
 
 	return output
+}
+
+// Normalize a string to be filename-safe
+func normalize(input string) string {
+	// Remove non-alphanumeric characters
+	input = sanitize.Path(input)
+
+	// Make uppercase
+	input = strings.ToUpper(input)
+
+	// Replace spaces with underscores
+	input = strings.ReplaceAll(input, " ", "_")
+
+	// Replace slashes with dashes
+	input = strings.ReplaceAll(input, "/", "-")
+
+	return input
 }
 
 func main() {
@@ -439,7 +457,7 @@ func main() {
 	if !*dryRun {
 		for peerName, peerData := range config.Peers {
 			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".conf"))
+			peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}

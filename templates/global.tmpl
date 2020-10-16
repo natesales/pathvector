@@ -228,6 +228,8 @@ function process_prepends() {
 
 function reject_bogons() {
   if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then _reject("own prefix");
+  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
+  if (bgp_path.len > 100) then _reject("long AS_PATH");
 
   if (net.type = NET_IP4) then {
     if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
@@ -240,9 +242,6 @@ function reject_bogons() {
     if (net ~ BOGONS_v6) then _reject("bogon prefix");
     if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
-
-  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
-  if (bgp_path.len > 100) then _reject("long AS_PATH");
 }
 
 # ---- Peers ----

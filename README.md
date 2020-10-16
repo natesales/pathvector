@@ -7,7 +7,7 @@
 The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.
 
 ### Installation
-bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), and [bgpq4](https://github.com/bgp/bgpq4). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. bcg is available for amd64 as a prebuilt deb package and binary for each release. You can also build from source by cloning the repo and running `go build` 
+bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), and [bgpq4](https://github.com/bgp/bgpq4). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. bcg is available for amd64 as a prebuilt deb package and binary for each release. Releases can be downloaded from Github or by adding `deb [trusted=yes] https://apt.fury.io/natesales/ /` to your `/etc/apt/source.list` file. You can also build from source by cloning the repo and running `go build` 
 
 #### Configuration
 BCG can be configured in YAML, TOML, or JSON. All config file formats have the same configuration options but follow a different capitalization structure. YAML and JSON use all lowercase parameter names and TOML uses CapsCase with acronyms capitalized. For example, `router-id` in YAML and JSON is `Router-ID` in TOML.

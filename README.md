@@ -69,6 +69,9 @@ All peers with an import filter of `cone` will apply further strict filtering by
 #### Local Preference
 All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). Local pref can be adjusted on a per-peer basis with the `localpref` option under the peer block.
 
+#### Pre-import and Pre-export conditions
+There are many features of BIRD that aren't part of bcg. If you want to add a statement before importing or exporting of routes, you can supply a multiline in `preimport` or `preexport` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively.
+
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 

@@ -39,9 +39,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();
 
-            {{- range $i, $expression := $peer.PreImport }}
-            {{ $expression }}
-            {{- end -}}
+            {{ $peer.PreImport }}
 
             {{- if not (eq $peer.Prepends 0) }}
             {{- range $i := Iterate $peer.Prepends }}
@@ -63,6 +61,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             {{- end }}
         };
         export filter {
+            {{ $peer.PreExport }}
             {{- if eq $peer.ExportPolicy "none" }}
             reject;
             {{- else if eq $peer.ExportPolicy "any" }}

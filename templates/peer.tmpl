@@ -15,6 +15,7 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 {{ end -}}
 
 {{ $peer := .Peer }}
+{{ $name := .Name }}
 {{- $global := .Global }}
 {{- $af := "4" }}
 {{- range $i, $neighbor := .Peer.NeighborIps }}
@@ -24,7 +25,7 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
     local as {{ $global.Asn }};
     neighbor {{ $neighbor }} as {{ $peer.Asn }};
-    description "{{ $peer.Asn }} {{ .Name }}";
+    description "{{ $peer.Asn }} {{ $name }}";
     {{ if $peer.Disabled }}disabled;{{ end }}
     {{- if $peer.Passive }}passive;{{ end }}
     {{- if $peer.Multihop }}multihop 255;{{ end -}}
@@ -36,6 +37,11 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             reject_bogons();
             strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
+
+            {{- range $i, $expression := $peer.PreImport }}
+            {{ $expression }}
+            {{- end -}}
+
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102));

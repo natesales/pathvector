@@ -42,6 +42,7 @@ type Peer struct {
 	Disabled       bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
 	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
 	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
+	PreImport      []string `yaml:"preimport" toml:"PreImport" json:"preimport"`
 	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 

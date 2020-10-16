@@ -48,6 +48,24 @@ Usage for bcg https://github.com/natesales/bcg:
         Print bcg version and exit
 ```
 
+#### How does filtering work?
+bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or manual prefix lists which rejects the following:
+- Own prefixes as defined in the global `prefixes` list
+- Have a [bogon ASN](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L176) anywhere in the AS_PATH
+- Have a total AS_PATH length of more than 100
+- IPv4 prefixes that are...
+    - length > 24
+    - length < 8
+    - RPKI invalid
+    - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L126)
+- IPv6 prefixes that are...
+    - length > 48
+    - length < 12
+    - RPKI invalid
+    - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L143)
+
+All peers with an import filter of `cone` will apply further strict filtering by either an AS Set or manual prefix list. Max-prefix limits are also enforced for every peer.
+
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 

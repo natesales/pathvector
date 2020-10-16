@@ -220,7 +220,7 @@ func main() {
 	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")
 
-	peerTemplate, err := template.New("").Funcs(template.FuncMap{
+	funcMap := template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
 		"Iterate": func(count *uint) []uint {
 			var i uint
@@ -230,22 +230,14 @@ func main() {
 			}
 			return Items
 		},
-	}).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
+	}
+
+	peerTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
-	globalTemplate, err := template.New("").Funcs(template.FuncMap{
-		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
-		"Iterate": func(count *uint) []uint {
-			var i uint
-			var Items []uint
-			for i = 0; i < (*count); i++ {
-				Items = append(Items, i)
-			}
-			return Items
-		},
-	}).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
+	globalTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}

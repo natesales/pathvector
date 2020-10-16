@@ -95,6 +95,7 @@ var (
 	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 	printVersion       = flag.Bool("version", false, "Print bcg version and exit")
+	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
 )
 
 // Query PeeringDB for an ASN
@@ -319,9 +320,11 @@ func main() {
 	originList6 := buildBirdSet(originIpv6)
 
 	// Render the global template and write to disk
-	err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", &GlobalTemplate{config, originList4, originList6, originIpv4, originIpv6})
-	if err != nil {
-		log.Fatalf("Execute template: %v", err)
+	if !*dryRun {
+		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", &GlobalTemplate{config, originList4, originList6, originIpv4, originIpv6})
+		if err != nil {
+			log.Fatalf("Execute template: %v", err)
+		}
 	}
 
 	// Validate peers
@@ -426,29 +429,31 @@ func main() {
 	log.Infof("Modified config: %+v", config)
 
 	// Create peer specific file
-	for peerName, peerData := range config.Peers {
-		// Create the peer specific file
-		peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".conf"))
-		if err != nil {
-			log.Fatalf("Create peer specific output file: %v", err)
+	if !*dryRun {
+		for peerName, peerData := range config.Peers {
+			// Create the peer specific file
+			peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+".conf"))
+			if err != nil {
+				log.Fatalf("Create peer specific output file: %v", err)
+			}
+
+			var pfxFilterString4, pfxFilterString6 = "", ""
+
+			if peerData.ImportPolicy == "cone" {
+				// Build prefix filter sets in BIRD format
+				pfxFilterString4 = buildBirdSet(peerData.PfxFilter4)
+				pfxFilterString6 = buildBirdSet(peerData.PfxFilter6)
+			}
+
+			// Render the template and write to disk
+			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
+			if err != nil {
+				log.Fatalf("Execute template: %v", err)
+			}
+
+			log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
 		}
 
-		var pfxFilterString4, pfxFilterString6 = "", ""
-
-		if peerData.ImportPolicy == "cone" {
-			// Build prefix filter sets in BIRD format
-			pfxFilterString4 = buildBirdSet(peerData.PfxFilter4)
-			pfxFilterString6 = buildBirdSet(peerData.PfxFilter6)
-		}
-
-		// Render the template and write to disk
-		err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
-		if err != nil {
-			log.Fatalf("Execute template: %v", err)
-		}
-
-		log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
+		runBirdCommand("configure")
 	}
-
-	runBirdCommand("configure")
 }

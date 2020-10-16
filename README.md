@@ -38,6 +38,8 @@ peers:
 Usage for bcg https://github.com/natesales/bcg:
   -config string
         Configuration file in YAML, TOML, or JSON format (default "config.yml")
+  -dryrun
+        Skip modifying BIRD config. This can be used to test that your config syntax is correct.
   -output string
         Directory to write output files to (default "/etc/bird/")
   -socket string

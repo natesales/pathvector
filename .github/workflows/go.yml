@@ -89,10 +89,4 @@ jobs:
           asset_content_type: application/x-deb
 
       - name: Update debian repo
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          port: ${{ secrets.PORT }}
-          script: /home/caddy/update-repo.sh
+        run: curl -F package=@bcg-${{ steps.vars.outputs.tag }}.deb https://{{ secrets.TOKEN }}@push.fury.io/natesales/

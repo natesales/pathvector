@@ -107,8 +107,8 @@ bcg uses RFC 8092 BGP Large Communities
 | pfxfilter4     | IPv4 prefix filter list in BIRD format                                                                    |
 | pfxfilter6     | IPv6 prefix filter list in BIRD format                                                                    |
 | localpref      | BGP LOCAL_PREF                                                                                            |
-| import-policy  | Peer import policy (any, cone, none)                                                                      |
-| export-policy  | Peer export policy (any, cone, none)                                                                      |
+| import         | Peer import policy (any, cone, none)                                                                      |
+| export         | Peer export policy (any, cone, none)                                                                      |
 | automaxpfx     | Should max prefix limits be pulled from PeeringDB?                                                        |
 | autopfxfilter  | Should prefix filters be pulled from IRR data?                                                            |
 | disabled       | Should neighbor sessions be disabled?                                                                     |

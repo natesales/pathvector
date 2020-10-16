@@ -51,7 +51,9 @@ jobs:
           Description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support." > debian/DEBIAN/control
 
       - name: Create debian copyright file
-        run: echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
+        run: |
+          echo "Copyright 2020 Nathan Sales." > debian/DEBIAN/copyright
+          mv debian.deb bcg-${{ steps.vars.outputs.tag }}.deb
 
       - name: Build debian package
         run: dpkg-deb --build debian
@@ -74,7 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./debian.deb
+          asset_path: bcg-${{ steps.vars.outputs.tag }}.deb
           asset_name: bcg-${{ steps.vars.outputs.tag }}.deb
           asset_content_type: application/x-deb
 

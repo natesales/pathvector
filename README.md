@@ -116,4 +116,5 @@ bcg uses RFC 8092 BGP Large Communities
 | multihop       | Should neighbor sessions allow multihop?                                                                  |
 | neighbors      | List of neighbor IP addresses                                                                             |
 | preimport      | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
+| preexport      | List of BIRD expressions to execute before the export filter                                              |
 | prepends       | Number of times to prepend local AS to                                                                    |

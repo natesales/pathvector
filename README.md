@@ -107,3 +107,5 @@ bcg uses RFC 8092 BGP Large Communities
 | passive        | Should neighbor sessions listen passively for BGP TCP connections?                                        |
 | multihop       | Should neighbor sessions allow multihop?                                                                  |
 | neighbors      | List of neighbor IP addresses                                                                             |
+| preimport      | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
+| prepends       | Number of times to prepend local AS to                                                                    |

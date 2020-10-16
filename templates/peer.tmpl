@@ -42,6 +42,12 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             {{ $expression }}
             {{- end -}}
 
+            {{- if not (eq $peer.Prepends 0) }}
+            {{- range $i := Iterate $peer.Prepends }}
+            bgp_path.prepend(ASN);
+            {{- end -}}
+            {{- end -}}
+
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102));

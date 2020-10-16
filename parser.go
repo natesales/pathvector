@@ -43,6 +43,7 @@ type Peer struct {
 	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
 	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
 	PreImport      []string `yaml:"preimport" toml:"PreImport" json:"preimport"`
+	Prepends       uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
 	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
 }
 
@@ -221,6 +222,14 @@ func main() {
 
 	peerTemplate, err := template.New("").Funcs(template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
+		"Iterate": func(count *uint) []uint {
+			var i uint
+			var Items []uint
+			for i = 0; i < (*count); i++ {
+				Items = append(Items, i)
+			}
+			return Items
+		},
 	}).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
@@ -228,6 +237,14 @@ func main() {
 
 	globalTemplate, err := template.New("").Funcs(template.FuncMap{
 		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
+		"Iterate": func(count *uint) []uint {
+			var i uint
+			var Items []uint
+			for i = 0; i < (*count); i++ {
+				Items = append(Items, i)
+			}
+			return Items
+		},
 	}).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)

@@ -131,11 +131,18 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines
 func getPrefixFilter(macro string, family uint8, irrdb string) []string {
+	var asSet string
+	if strings.Contains(macro, "::") {
+		asSet = strings.Split(macro, "::")[1]
+	} else {
+		asSet = macro
+	}
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), macro)
+	log.Infof("Running bgpq4 -h %s -Ab%d %s", irrdb, family, asSet)
+	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), asSet)
 	stdout, err := cmd.Output()
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalf("bgpq4 error: %v", err.Error())
 	}
 
 	// Remove whitespace and commas from output

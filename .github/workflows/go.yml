@@ -87,3 +87,12 @@ jobs:
           asset_path: ./bcg
           asset_name: bcg-${{ steps.vars.outputs.tag }}-amd64
           asset_content_type: application/x-deb
+
+      - name: Update debian repo
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: /home/caddy/update-repo.sh

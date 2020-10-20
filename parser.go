@@ -312,7 +312,7 @@ func main() {
 	if config.RtrServer == "" {
 		config.RtrServer = "127.0.0.1"
 	}
-	log.Infof("Using IRRDB server %s", config.IrrDb)
+	log.Infof("Using RTR server %s", config.IrrDb)
 
 	// Validate Router ID in dotted quad format
 	if net.ParseIP(config.RouterId).To4() == nil {

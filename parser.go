@@ -374,7 +374,7 @@ func main() {
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
 			peerData.MaxPrefix4 = peeringDbData.MaxPfx4
-			peerData.MaxPrefix4 = peeringDbData.MaxPfx6
+			peerData.MaxPrefix6 = peeringDbData.MaxPfx6
 
 			if strings.Contains(peeringDbData.AsSet, "::") {
 				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]

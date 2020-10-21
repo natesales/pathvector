@@ -3,27 +3,29 @@
 define ASN = {{ .Config.Asn }};
 router id {{ .Config.RouterId }};
 
+{{- if .OriginList4 }}
 define LOCAL_v4 = [
 {{ .OriginString4 }}
 ];
-
-define LOCAL_v6 = [
-{{ .OriginString6 }}
-];
-
-protocol static {
+protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginList4 }}
   route {{ $prefix }} reject;
   {{- end }}
 }
+{{ end -}}
 
-protocol static {
+{{- if .OriginList6 }}
+define LOCAL_v6 = [
+{{ .OriginString6 }}
+];
+protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginList6 }}
   route {{ $prefix }} reject;
   {{- end }}
 }
+{{- end }}
 
 # ---- Parameters ----
 

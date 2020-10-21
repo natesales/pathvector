@@ -79,8 +79,8 @@ type PeeringDbResponse struct {
 type PeeringDbData struct {
 	Name    string `json:"name"`
 	AsSet   string `json:"irr_as_set"`
-	MaxPfx4 uint32 `json:"info_prefixes4"`
-	MaxPfx6 uint32 `json:"info_prefixes6"`
+	MaxPfx4 uint   `json:"info_prefixes4"`
+	MaxPfx6 uint   `json:"info_prefixes6"`
 }
 
 var (
@@ -372,8 +372,8 @@ func main() {
 		if peerData.Type != "upstream" {
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
-			peerData.MaxPrefix4 = uint(peeringDbData.MaxPfx4)
-			peerData.MaxPrefix4 = uint(peeringDbData.MaxPfx6)
+			peerData.MaxPrefix4 = peeringDbData.MaxPfx4
+			peerData.MaxPrefix4 = peeringDbData.MaxPfx6
 
 			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPrefix4)
 			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPrefix6)

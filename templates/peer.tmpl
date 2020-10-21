@@ -38,15 +38,12 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();
-
             {{ $peer.PreImport }}
-
             {{- if not (eq $peer.Prepends 0) }}
             {{- range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{- end -}}
             {{- end -}}
-
             {{- if eq $peer.ImportPolicy "cone" }}
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102));
@@ -61,23 +58,17 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             {{- end }}
         };
         export filter {
-            {{ $peer.PreExport }}
-            {{- if eq $peer.ExportPolicy "none" }}
-            reject;
-            {{- else if eq $peer.ExportPolicy "any" }}
-            if ((ASN,0,101) ~ bgp_large_community) then accept;
-            if ((ASN,0,102) ~ bgp_large_community) then accept;
-            if ((ASN,0,103) ~ bgp_large_community) then accept;
-            if (net ~ LOCAL_v{{ $af }}) then {
-                if ((ASN,0,100) ~ bgp_large_community) then accept;
-                accept;
-            }
-            {{- else if eq $peer.ImportPolicy "cone" }}
-            if (net ~ LOCAL_v{{ $af }}) then {
-                if ((ASN,0,100) ~ bgp_large_community) then accept;
-                accept;
-            }
+            {{- $peer.PreExport }}
+            {{- if eq $peer.ExportPolicy "any" }}
+            if ((ASN,0,100) ~ bgp_large_community) then accept; # Originated
+            if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
+            if ((ASN,0,102) ~ bgp_large_community) then accept; # Peer
+            if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
+            {{- else if eq $peer.ExportPolicy "cone" }}
+            if ((ASN,0,100) ~ bgp_large_community) then accept; # Originated
+            if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{- end }}
+            reject;
         };
     };
 }

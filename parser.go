@@ -358,7 +358,7 @@ func main() {
 
 		// Set default local pref
 		if peerData.LocalPref == 0 {
-			log.Infof("%s \"%s\" has no max prefix limits defined. Setting to 100", peerData.Type, peerName)
+			log.Infof("%s \"%s\" has no local pref defined. Setting to 100", peerData.Type, peerName)
 			peerData.LocalPref = 100
 		}
 

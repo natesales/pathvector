@@ -351,6 +351,9 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range config.Peers {
+		// Set default query time
+		peerData.QueryTime = "[No operations performed]"
+
 		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
 
 		// Validate peer type
@@ -365,6 +368,7 @@ func main() {
 
 		// Only query PeeringDB for peers and downstreams
 		if peerData.Type != "upstream" {
+			peerData.QueryTime = time.Now().Format(time.RFC1123)
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
 			peerData.MaxPrefix4 = peeringDbData.MaxPfx4
@@ -383,16 +387,16 @@ func main() {
 			peerData.MaxPrefix6 = 100000  // 100k routes
 		}
 
-		log.Infof("    Local pref: %d", peerData.LocalPref)
+		log.Infof("    local pref: %d", peerData.LocalPref)
 		log.Infof("    max prefixes: IPv4 %d, IPv6 %d", peerData.MaxPrefix4, peerData.MaxPrefix6)
 
 		// Check for additional options
 		if peerData.AsSet != "" {
-			log.Infof("    AS Set: %s", peerData.AsSet)
+			log.Infof("    as-set: %s", peerData.AsSet)
 		}
 
 		if peerData.Prepends > 0 {
-			log.Infof("    Prepends: %d", peerData.Prepends)
+			log.Infof("    prepends: %d", peerData.Prepends)
 		}
 
 		if peerData.Multihop {
@@ -407,45 +411,20 @@ func main() {
 			log.Infof("    disabled")
 		}
 
-		//PreImport   string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
-		//PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
-		//NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-		//
-		//AsSet      string `yaml:"-" toml:"-" json:"-"`
-		//QueryTime  string `yaml:"-" toml:"-" json:"-"`
-		//MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
-		//MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
+		if peerData.PreImport != "" {
+			log.Infof("    pre-import: %s", peerData.PreImport)
+		}
 
-		//
-		//	// If PfxFilter sets should be pulled from PeeringDB
-		//	if peerData.AutoPfxFilter {
-		//		if peeringDbData == (PeeringDbData{}) {
-		//			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
-		//			peeringDbData = getPeeringDbData(peerData.Asn)
-		//		}
-		//
-		//		log.Infof("Running IRRDB query for AS%d", peerData.Asn)
-		//		peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4, config.IrrDb)
-		//		peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6, config.IrrDb)
-		//
-		//		log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
-		//		log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))
-		//
-		//		// Update the "latest operation" timestamp
-		//		peerData.QueryTime = time.Now().Format(time.RFC1123)
-		//	}
-		//
-		//	// Validate neighbor IPs
-		//	for _, addr := range peerData.NeighborIps {
-		//		if net.ParseIP(addr) == nil {
-		//			log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
-		//		}
-		//	}
-		//
-		//	log.Infof("Policy for AS%d: import %s, export %s", peerData.Asn, peerData.ImportPolicy, peerData.ExportPolicy)
+		if peerData.PreExport != "" {
+			log.Infof("    post-import: %s", peerData.PreExport)
+		}
+
+		// Log neighbor IPs
+		log.Infof("    neighbors:")
+		for _, ip := range peerData.NeighborIps {
+			log.Infof("      %s", ip)
+		}
 	}
-
-	log.Infof("Modified config: %+v", config)
 
 	// Create peer specific file
 	if !*dryRun {

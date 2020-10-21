@@ -449,6 +449,8 @@ func main() {
 				log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
 			}
 		}
+
+		log.Infof("Policy for AS%d: import %s, export %s", peerData.Asn, peerData.ImportPolicy, peerData.ExportPolicy)
 	}
 
 	log.Infof("Modified config: %+v", config)

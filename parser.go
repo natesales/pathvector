@@ -418,7 +418,7 @@ func main() {
 		}
 
 		if peerData.PreExport != "" {
-			log.Infof("    post-import: %s", peerData.PreExport)
+			log.Infof("    pre-export: %s", peerData.PreExport)
 		}
 
 		// Log neighbor IPs

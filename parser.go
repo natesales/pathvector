@@ -36,7 +36,10 @@ type Peer struct {
 	PreImport   string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
 	PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
 	NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	QueryTime   string   `yaml:"-" toml:"-" json:"-"`
+
+	QueryTime  string `yaml:"-" toml:"-" json:"-"`
+	MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
+	MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -299,7 +302,6 @@ func main() {
 
 	// Load the config file from configFilename flag
 	config := loadConfig()
-
 	log.Infof("Loaded config: %+v", config)
 
 	// Set default IRRDB
@@ -332,6 +334,7 @@ func main() {
 		log.Fatalf("Create global BIRD output file: %v", err)
 	}
 
+	// Assemble originIpv{4,6} lists by address family
 	var originIpv4, originIpv6 []string
 	for _, prefix := range config.Prefixes {
 		if strings.Contains(prefix, ":") {
@@ -354,59 +357,26 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range config.Peers {
-		// Set the query time to a default string
-		peerData.QueryTime = "[No time-specific operations performed]"
-
+		// Validate peer type
 		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream") {
 			log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
 		}
 
-		// If no AS-Set is defined and the import policy requires it
-		if !peerData.AutoPfxFilter && peerData.ImportPolicy == "cone" {
-			// Check for empty AS-Set
-			if peerData.AsSet == "" {
-				log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
-			} else if !strings.HasPrefix(peerData.AsSet, "AS") { // If AS-Set doesn't start with "AS" TODO: Better validation here. What is a valid AS-Set?
-				log.Warnf("AS-Set for %s (as-set: %s) doesn't start with 'AS' and might be invalid", peerName, peerData.AsSet)
-			}
-
-			// Check for empty prefix filters
-			if peerData.ImportPolicy != "none" && (len(peerData.PfxFilter4) == 0 || len(peerData.PfxFilter6) == 0) {
-				log.Fatalf("Peer %s has a cone filtered import policy and has no prefix filters defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
-			}
-		}
-
-		// Open up prefix limits if upstream
-		if peerData.ImportPolicy == "any" {
-			log.Warnf("Peer %s has no max-prefix limits configured and is an upstream session. Setting limits to 1M IPv4 and 10k IPv6", peerName)
-			peerData.MaxPfx4 = 1000000
-			peerData.MaxPfx6 = 100000
-		} else if peerData.ImportPolicy == "cone" {
-			// Check for no max prefixes
-			if !peerData.AutoMaxPfx && (peerData.MaxPfx4 == 0 || peerData.MaxPfx6 == 0) {
-				log.Fatalf("Peer %s has no max-prefix limits configured. Set automaxpfx to true to pull from PeeringDB.", peerName)
-			}
-		}
-
 		// Set default local pref
 		if peerData.LocalPref == 0 {
+			log.Infof("Peer %s has no max prefix limits defined. Setting to 100", peerName)
 			peerData.LocalPref = 100
 		}
 
-		var peeringDbData PeeringDbData
+		// Only query PeeringDB for peers and downstreams
+		if peerData.Type != "upstream" {
+			peeringDbData := getPeeringDbData(peerData.Asn)
 
-		// If MaxPfx limits should be pulled from PeeringDB
-		if peerData.AutoMaxPfx {
-			if peeringDbData == (PeeringDbData{}) {
-				log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
-				peeringDbData = getPeeringDbData(peerData.Asn)
-			}
+			peerData.MaxPrefix4 = uint(peeringDbData.MaxPfx4)
+			peerData.MaxPrefix4 = uint(peeringDbData.MaxPfx6)
 
-			peerData.MaxPfx4 = int64(peeringDbData.MaxPfx4)
-			peerData.MaxPfx6 = int64(peeringDbData.MaxPfx6)
-
-			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPfx4)
-			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPfx6)
+			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPrefix4)
+			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPrefix6)
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
@@ -428,16 +398,6 @@ func main() {
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
-		}
-
-		// Validate import policy
-		if !(peerData.ImportPolicy == "any" || peerData.ImportPolicy == "cone" || peerData.ImportPolicy == "none") {
-			log.Fatalf("Peer %s has an invalid import policy. Acceptable values are 'any', 'cone', or 'none'", peerName)
-		}
-
-		// Validate export policy
-		if !(peerData.ExportPolicy == "any" || peerData.ExportPolicy == "cone" || peerData.ExportPolicy == "none") {
-			log.Fatalf("Peer %s has an invalid export policy. Acceptable values are 'any', 'cone', or 'none'", peerName)
 		}
 
 		// Validate neighbor IPs

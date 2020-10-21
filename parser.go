@@ -27,6 +27,7 @@ var release string // This is set by go build
 type Peer struct {
 	Asn         uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	AsSet       string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	Type        string   `yaml:"type" toml:"Type" json:"type"`
 	Prepends    uint32   `yaml:"prepends" toml:"Prepends" json:"prepends"`
 	LocalPref   uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
 	Multihop    bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
@@ -216,6 +217,42 @@ func normalize(input string) string {
 	return input
 }
 
+// Load a configuration file (YAML, JSON, or TOML)
+func loadConfig() Config {
+	configFile, err := ioutil.ReadFile(*configFilename)
+	if err != nil {
+		log.Fatalf("Reading %s: %v", *configFilename, err)
+	}
+
+	var config Config
+
+	_splitFilename := strings.Split(*configFilename, ".")
+	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
+	case "yaml", "yml":
+		log.Info("Using YAML configuration format")
+		err := yaml.Unmarshal(configFile, &config)
+		if err != nil {
+			log.Fatalf("YAML Unmarshal: %v", err)
+		}
+	case "toml":
+		log.Info("Using TOML configuration format")
+		err := toml.Unmarshal(configFile, &config)
+		if err != nil {
+			log.Fatalf("TOML Unmarshal: %v", err)
+		}
+	case "json":
+		log.Info("Using JSON configuration format")
+		err := json.Unmarshal(configFile, &config)
+		if err != nil {
+			log.Fatalf("JSON Unmarshal: %v", err)
+		}
+	default:
+		log.Fatalf("Files with extension '%s' are not supported. (Acceptable values are yaml, toml, json", extension)
+	}
+
+	return config
+}
+
 func main() {
 	if release == "" {
 		release = "No release set"
@@ -248,46 +285,20 @@ func main() {
 		},
 	}
 
+	// Generate peer template
 	peerTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
+	// Generate global template
 	globalTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
 	if err != nil {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
-	configFile, err := ioutil.ReadFile(*configFilename)
-	if err != nil {
-		log.Fatalf("Reading %s: %v", *configFilename, err)
-	}
-
-	var config Config
-
-	_splitFilename := strings.Split(*configFilename, ".")
-	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
-	case "yaml", "yml":
-		log.Info("Using YAML configuration format")
-		err = yaml.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("YAML Unmarshal: %v", err)
-		}
-	case "toml":
-		log.Info("Using TOML configuration format")
-		err = toml.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("TOML Unmarshal: %v", err)
-		}
-	case "json":
-		log.Info("Using JSON configuration format")
-		err = json.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("JSON Unmarshal: %v", err)
-		}
-	default:
-		log.Fatalf("Files with extension '%s' are not supported. (Acceptable values are yaml, toml, json", extension)
-	}
+	// Load the config file from configFilename flag
+	config := loadConfig()
 
 	log.Infof("Loaded config: %+v", config)
 
@@ -341,16 +352,13 @@ func main() {
 		}
 	}
 
-	// Validate peers
+	// Iterate over peers
 	for peerName, peerData := range config.Peers {
 		// Set the query time to a default string
 		peerData.QueryTime = "[No time-specific operations performed]"
 
-		// Set default pfxlimitaction
-		if peerData.PfxLimitAction == "" {
-			peerData.PfxLimitAction = "disable"
-		} else if !(peerData.PfxLimitAction == "disable" || peerData.PfxLimitAction == "restart" || peerData.PfxLimitAction == "block" || peerData.PfxLimitAction == "warn") {
-			log.Fatalf("Peer %s has an invalid pfxlimitaction. Acceptable values are warn, block, restart, and disable", peerName)
+		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream") {
+			log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
 		}
 
 		// If no AS-Set is defined and the import policy requires it

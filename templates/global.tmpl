@@ -209,6 +209,13 @@ function strip_communities() {
   bgp_large_community.delete((ASN,0,103));
 }
 
+function accept_local() {
+  if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then {
+    bgp_large_community.add(ASN,0,100); # Originated
+    accept;
+  }
+}
+
 function process_prepends() {
   if ((ASN,401) ~ bgp_community) then {
     print "Adding single prepend for ", net;

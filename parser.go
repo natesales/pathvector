@@ -26,7 +26,6 @@ var release string // This is set by go build
 // Peer contains all information specific to a single peer network
 type Peer struct {
 	Asn         uint32   `yaml:"asn" toml:"ASN" json:"asn"`
-	AsSet       string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
 	Type        string   `yaml:"type" toml:"Type" json:"type"`
 	Prepends    uint32   `yaml:"prepends" toml:"Prepends" json:"prepends"`
 	LocalPref   uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
@@ -37,6 +36,7 @@ type Peer struct {
 	PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
 	NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 
+	AsSet      string `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string `yaml:"-" toml:"-" json:"-"`
 	MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
 	MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
@@ -124,13 +124,7 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines
-func getPrefixFilter(macro string, family uint8, irrdb string) []string {
-	var asSet string
-	if strings.Contains(macro, "::") {
-		asSet = strings.Split(macro, "::")[1]
-	} else {
-		asSet = macro
-	}
+func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
 	// Run bgpq4 for BIRD format with aggregation enabled
 	log.Infof("Running bgpq4 -h %s -Ab%d %s", irrdb, family, asSet)
 	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), asSet)
@@ -359,12 +353,12 @@ func main() {
 	for peerName, peerData := range config.Peers {
 		// Validate peer type
 		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatalf("Peer %s has a cone filtered import policy and has no AS-Set defined. Set autopfxfilter to true to enable automatic IRRDB imports", peerName)
+			log.Fatalf("\"%s\" type attribute is invalid. Must be upstream, peer, or downstream", peerName)
 		}
 
 		// Set default local pref
 		if peerData.LocalPref == 0 {
-			log.Infof("Peer %s has no max prefix limits defined. Setting to 100", peerName)
+			log.Infof("%s \"%s\" has no max prefix limits defined. Setting to 100", peerData.Type, peerName)
 			peerData.LocalPref = 100
 		}
 
@@ -375,39 +369,47 @@ func main() {
 			peerData.MaxPrefix4 = peeringDbData.MaxPfx4
 			peerData.MaxPrefix4 = peeringDbData.MaxPfx6
 
-			log.Printf("AutoMaxPfx AS%d MaxPfx4: %d", peerData.Asn, peerData.MaxPrefix4)
-			log.Printf("AutoMaxPfx AS%d MaxPfx6: %d", peerData.Asn, peerData.MaxPrefix6)
+			if strings.Contains(peeringDbData.AsSet, "::") {
+				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
+			} else {
+				peerData.AsSet = peeringDbData.AsSet
+			}
+
+			log.Printf("Peer %s max4: %d, max6: %d, as-set: %s", peerName, peerData.MaxPrefix4, peerData.MaxPrefix6, peerData.AsSet)
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
+		} else { // If upstream
+			peerData.MaxPrefix4 = 1000000 // 1M routes
+			peerData.MaxPrefix6 = 100000  // 100k routes
 		}
-
-		// If PfxFilter sets should be pulled from PeeringDB
-		if peerData.AutoPfxFilter {
-			if peeringDbData == (PeeringDbData{}) {
-				log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
-				peeringDbData = getPeeringDbData(peerData.Asn)
-			}
-
-			log.Infof("Running IRRDB query for AS%d", peerData.Asn)
-			peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4, config.IrrDb)
-			peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6, config.IrrDb)
-
-			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
-			log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))
-
-			// Update the "latest operation" timestamp
-			peerData.QueryTime = time.Now().Format(time.RFC1123)
-		}
-
-		// Validate neighbor IPs
-		for _, addr := range peerData.NeighborIps {
-			if net.ParseIP(addr) == nil {
-				log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
-			}
-		}
-
-		log.Infof("Policy for AS%d: import %s, export %s", peerData.Asn, peerData.ImportPolicy, peerData.ExportPolicy)
+		//
+		//	// If PfxFilter sets should be pulled from PeeringDB
+		//	if peerData.AutoPfxFilter {
+		//		if peeringDbData == (PeeringDbData{}) {
+		//			log.Infof("Running PeeringDB query for AS%d", peerData.Asn)
+		//			peeringDbData = getPeeringDbData(peerData.Asn)
+		//		}
+		//
+		//		log.Infof("Running IRRDB query for AS%d", peerData.Asn)
+		//		peerData.PfxFilter4 = getPrefixFilter(peeringDbData.AsSet, 4, config.IrrDb)
+		//		peerData.PfxFilter6 = getPrefixFilter(peeringDbData.AsSet, 6, config.IrrDb)
+		//
+		//		log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter4))
+		//		log.Printf("AutoPfxFilter AS%d Aggregated Entries: %d", peerData.Asn, len(peerData.PfxFilter6))
+		//
+		//		// Update the "latest operation" timestamp
+		//		peerData.QueryTime = time.Now().Format(time.RFC1123)
+		//	}
+		//
+		//	// Validate neighbor IPs
+		//	for _, addr := range peerData.NeighborIps {
+		//		if net.ParseIP(addr) == nil {
+		//			log.Fatalf("Neighbor address of peer %s (addr: %s) is not a valid IPv4 or IPv6 address", peerName, addr)
+		//		}
+		//	}
+		//
+		//	log.Infof("Policy for AS%d: import %s, export %s", peerData.Asn, peerData.ImportPolicy, peerData.ExportPolicy)
 	}
 
 	log.Infof("Modified config: %+v", config)
@@ -423,11 +425,11 @@ func main() {
 
 			var pfxFilterString4, pfxFilterString6 = "", ""
 
-			if peerData.ImportPolicy == "cone" {
-				// Build prefix filter sets in BIRD format
-				pfxFilterString4 = buildBirdSet(peerData.PfxFilter4)
-				pfxFilterString6 = buildBirdSet(peerData.PfxFilter6)
-			}
+			//if peerData.ImportPolicy == "cone" {
+			//	// Build prefix filter sets in BIRD format
+			//	pfxFilterString4 = buildBirdSet(peerData.MaxPrefix4)
+			//	pfxFilterString6 = buildBirdSet(peerData.MaxPrefix6)
+			//}
 
 			// Render the template and write to disk
 			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})

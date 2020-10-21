@@ -211,7 +211,7 @@ function strip_communities() {
 
 function accept_local() {
   if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then {
-    bgp_large_community.add(ASN,0,100); # Originated
+    bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }
 }

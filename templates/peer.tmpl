@@ -59,13 +59,17 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         };
         export filter {
             {{- $peer.PreExport }}
-            {{- if eq $peer.ExportPolicy "any" }}
-            if ((ASN,0,100) ~ bgp_large_community) then accept; # Originated
+            {{- if eq $peer.ExportPolicy "any" -}}
+            {{ if $global.Prefixes }}
+            accept_local(); # Originated
+            {{- end }}
             if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
             if ((ASN,0,102) ~ bgp_large_community) then accept; # Peer
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            {{- else if eq $peer.ExportPolicy "cone" }}
-            if ((ASN,0,100) ~ bgp_large_community) then accept; # Originated
+            {{- else if eq $peer.ExportPolicy "cone" -}}
+            {{ if $global.Prefixes }}
+            accept_local(); # Originated
+            {{- end }}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{- end }}
             reject;

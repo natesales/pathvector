@@ -361,6 +361,8 @@ func main() {
 			log.Fatalf("    type attribute is invalid. Must be upstream, peer, or downstream", peerName)
 		}
 
+		log.Infof("    type: %s", peerData.Type)
+
 		// Set default local pref
 		if peerData.LocalPref == 0 {
 			peerData.LocalPref = 100

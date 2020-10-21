@@ -351,14 +351,15 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range config.Peers {
+		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
+
 		// Validate peer type
 		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatalf("\"%s\" type attribute is invalid. Must be upstream, peer, or downstream", peerName)
+			log.Fatalf("    type attribute is invalid. Must be upstream, peer, or downstream", peerName)
 		}
 
 		// Set default local pref
 		if peerData.LocalPref == 0 {
-			log.Infof("%s \"%s\" has no local pref defined. Setting to 100", peerData.Type, peerName)
 			peerData.LocalPref = 100
 		}
 
@@ -375,14 +376,46 @@ func main() {
 				peerData.AsSet = peeringDbData.AsSet
 			}
 
-			log.Printf("Peer %s max4: %d, max6: %d, as-set: %s", peerName, peerData.MaxPrefix4, peerData.MaxPrefix6, peerData.AsSet)
-
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		} else { // If upstream
 			peerData.MaxPrefix4 = 1000000 // 1M routes
 			peerData.MaxPrefix6 = 100000  // 100k routes
 		}
+
+		log.Infof("    Local pref: %d", peerData.LocalPref)
+		log.Infof("    max prefixes: IPv4 %d, IPv6 %d", peerData.MaxPrefix4, peerData.MaxPrefix6)
+
+		// Check for additional options
+		if peerData.AsSet != "" {
+			log.Infof("    AS Set: %s", peerData.AsSet)
+		}
+
+		if peerData.Prepends > 0 {
+			log.Infof("    Prepends: %d", peerData.Prepends)
+		}
+
+		if peerData.Multihop {
+			log.Infof("    multihop")
+		}
+
+		if peerData.Passive {
+			log.Infof("    passive")
+		}
+
+		if peerData.Disabled {
+			log.Infof("    disabled")
+		}
+
+		//PreImport   string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
+		//PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
+		//NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+		//
+		//AsSet      string `yaml:"-" toml:"-" json:"-"`
+		//QueryTime  string `yaml:"-" toml:"-" json:"-"`
+		//MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
+		//MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
+
 		//
 		//	// If PfxFilter sets should be pulled from PeeringDB
 		//	if peerData.AutoPfxFilter {

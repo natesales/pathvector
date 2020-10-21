@@ -21,32 +21,21 @@ import (
 	"time"
 )
 
-var (
-	release string // This is set by go build
-)
+var release string // This is set by go build
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn            uint32   `yaml:"asn" toml:"ASN" json:"asn"`
-	AsSet          string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
-	MaxPfx4        int64    `yaml:"maxpfx4" yaml:"MaxPfx4" json:"maxpfx4"`
-	MaxPfx6        int64    `yaml:"maxpfx6" yaml:"MaxPfx6" json:"maxpfx6"`
-	PfxLimitAction string   `yaml:"pfxlimitaction" yaml:"PfxLimitAction" json:"pfxlimitaction"`
-	PfxFilter4     []string `yaml:"pfxfilter4" yaml:"PfxFilter4" json:"PfxFilter4"`
-	PfxFilter6     []string `yaml:"pfxfilter6" yaml:"PfxFilter6" json:"PfxFilter6"`
-	ImportPolicy   string   `yaml:"import" toml:"ImportPolicy" json:"import"`
-	ExportPolicy   string   `yaml:"export" toml:"ExportPolicy" json:"export"`
-	LocalPref      uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
-	NeighborIps    []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	Multihop       bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive        bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled       bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	AutoMaxPfx     bool     `yaml:"automaxpfx" toml:"AutoMaxPfx" json:"automaxpfx"`
-	AutoPfxFilter  bool     `yaml:"autopfxfilter" toml:"AutoPfxFilter" json:"autopfxfilter"`
-	PreImport      string   `yaml:"preimport" toml:"PreImport" json:"preimport"`
-	PreExport      string   `yaml:"preexport" toml:"PreExport" json:"preexport"`
-	Prepends       uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	QueryTime      string   `yaml:"-" toml:"-" json:"-"`
+	Asn         uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	AsSet       string   `yaml:"as-set" toml:"AS-Set" json:"as-set"`
+	Prepends    uint32   `yaml:"prepends" toml:"Prepends" json:"prepends"`
+	LocalPref   uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
+	Multihop    bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive     bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled    bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	PreImport   string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
+	PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
+	NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	QueryTime   string   `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -56,7 +45,7 @@ type Config struct {
 	Prefixes  []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
 	Peers     map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
 	IrrDb     string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer string           `yaml:"rtrserver" toml:"RPKIServer" json:"rtrserver"`
+	RtrServer string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 }
 
 // PeerTemplate contains a peer-specific config sent to template

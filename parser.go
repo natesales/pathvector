@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-var release string // This is set by go build
+var release = "devel" // This is set by go build
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
@@ -88,7 +88,6 @@ var (
 	outputDirectory    = flag.String("output", "/etc/bird/", "Directory to write output files to")
 	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
-	printVersion       = flag.Bool("version", false, "Print bcg version and exit")
 	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
 )
 
@@ -251,10 +250,6 @@ func loadConfig() Config {
 }
 
 func main() {
-	if release == "" {
-		release = "No release set"
-	}
-
 	flag.Usage = func() {
 		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
 		flag.PrintDefaults()
@@ -262,16 +257,14 @@ func main() {
 
 	flag.Parse()
 
-	if *printVersion {
-		fmt.Printf("bcg version (%s) https://github.com/natesales/bcg\n", release)
-		os.Exit(0)
-	}
-
 	log.Info("Starting BCG")
 	log.Info("Generating peer specific files")
 
 	funcMap := template.FuncMap{
-		"Contains": func(s, substr string) bool { return strings.Contains(s, substr) },
+		"Contains": func(s, substr string) bool {
+			return strings.Contains(s, substr)
+		},
+
 		"Iterate": func(count *uint) []uint {
 			var i uint
 			var Items []uint

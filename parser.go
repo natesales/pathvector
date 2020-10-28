@@ -384,8 +384,7 @@ func main() {
 			if peerData.MaxPfx4 == "" {
 				log.Warnf("Peer %s has no IPv4 max-prefix limits configured and is an upstream session. Setting limits to 1M IPv4", peerName)
 				peerData.MaxPfx4 = 1000000
-			}
-			if peerData.MaxPfx6 == "" {
+			} else if peerData.MaxPfx6 == "" {
 				log.Warnf("Peer %s has no IPv6 max-prefix limits configured and is an upstream session. Setting limits to 80k IPv6", peerName)
 				peerData.MaxPfx6 = 80000
 			}

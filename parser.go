@@ -28,7 +28,7 @@ type Peer struct {
 	Asn         uint32   `yaml:"asn" toml:"ASN" json:"asn"`
 	Type        string   `yaml:"type" toml:"Type" json:"type"`
 	Prepends    uint32   `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref   uint32   `yaml:"localpref" toml:"LocalPref" json:"localpref"`
+	LocalPref   uint32   `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
 	Multihop    bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
 	Passive     bool     `yaml:"passive" toml:"Passive" json:"passive"`
 	Disabled    bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`

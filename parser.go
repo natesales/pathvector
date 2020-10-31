@@ -328,6 +328,10 @@ func main() {
 	log.Debug("Finished writing global config")
 	log.Debug("Building origin sets")
 
+	if len(config.Prefixes) == 0 {
+		log.Fatal("There are no origin prefixes defined")
+	}
+
 	// Assemble originIpv{4,6} lists by address family
 	var originIpv4, originIpv6 []string
 	for _, prefix := range config.Prefixes {

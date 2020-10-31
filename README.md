@@ -97,7 +97,7 @@ bcg uses RFC 8092 BGP Large Communities
 | Option         | Usage                                                                                                     |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
 | asn            | Neighbor ASN                                                                                              |
-| type           | Type of peer (upstream, peer, downstream)                                                                 |
+| type           | Type of peer (upstream, peer, downstream, import-valid)                                                   |
 | local-pref     | BGP LOCAL_PREF                                                                                            |
 | disabled       | Should neighbor sessions be disabled?                                                                     |
 | passive        | Should neighbor sessions listen passively for BGP TCP connections?                                        |

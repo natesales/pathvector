@@ -3,7 +3,7 @@
 define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.MaxPrefix4 }};
 define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.MaxPrefix6 }};
 
-{{ if not (eq .Peer.Type "upstream") -}}
+{{ if or (eq .Peer.Type "peer") (eq .Peer.Type "downstream") -}}
 define AS{{ .Peer.Asn }}_PFX_v4 = [
 {{ BirdSet .Peer.PrefixSet4 }}
 ];
@@ -59,6 +59,9 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
                 accept;
             }
             reject;
+            {{ else if eq $peer.Type "import-valid" -}}
+            bgp_large_community.add((ASN,0,102)); # Learned from peer
+            accept;
             {{ end }}
         };
 
@@ -67,7 +70,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             accept_local(); # Originated
             {{ if eq $peer.Type "upstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            {{ else if eq $peer.Type "peer" -}}
+            {{ else if or (eq $peer.Type "peer") (eq $peer.Type "import-valid") -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{ else if eq $peer.Type "downstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream

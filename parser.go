@@ -115,7 +115,7 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
 	}
 
-	return peeringDbResponse.Data[0]
+	return peeringDbResponse.Data[0] // TODO: Add a check here
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines
@@ -379,8 +379,8 @@ func main() {
 		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
 
 		// Validate peer type
-		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatalf("    type attribute is invalid. Must be upstream, peer, or downstream", peerName)
+		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream" || peerData.Type == "import-valid") {
+			log.Fatalf("    type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
 		}
 
 		log.Infof("    type: %s", peerData.Type)
@@ -391,7 +391,7 @@ func main() {
 		}
 
 		// Only query PeeringDB and IRRDB for peers and downstreams
-		if peerData.Type != "upstream" {
+		if peerData.Type == "peer" || peerData.Type == "downstream" {
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
@@ -409,7 +409,7 @@ func main() {
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
-		} else { // If upstream
+		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
 			peerData.MaxPrefix4 = 1000000 // 1M routes
 			peerData.MaxPrefix6 = 100000  // 100k routes
 		}

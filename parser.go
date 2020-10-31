@@ -78,6 +78,7 @@ var (
 	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
+	debug              = flag.Bool("debug", false, "Show debugging messages")
 )
 
 // Query PeeringDB for an ASN
@@ -240,7 +241,7 @@ func loadConfig() Config {
 
 func main() {
 	// Enable debug logging in development releases
-	if release == "devel" {
+	if release == "devel" || *debug {
 		log.SetLevel(log.DebugLevel)
 	}
 

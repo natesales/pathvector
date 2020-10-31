@@ -241,7 +241,8 @@ func loadConfig() Config {
 
 func main() {
 	// Enable debug logging in development releases
-	if release == "devel" || *debug {
+	if //noinspection GoBoolExpressions
+	release == "devel" || *debug {
 		log.SetLevel(log.DebugLevel)
 	}
 

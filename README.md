@@ -23,10 +23,7 @@ prefixes:
 peers:
   Cloudflare:
     asn: 13335
-    import: cone
-    export: cone
-    automaxprefix: true
-    autopfxfilter: true
+    type: peer
     neighbors:
       - 203.0.113.39
       - 2001:db8:6939::39
@@ -37,17 +34,17 @@ peers:
 ```      
 Usage for bcg https://github.com/natesales/bcg:
   -config string
-        Configuration file in YAML, TOML, or JSON format (default "config.yml")
+    	Configuration file in YAML, TOML, or JSON format (default "/etc/bcg/config.yml")
+  -debug
+    	Show debugging messages
   -dryrun
-        Skip modifying BIRD config. This can be used to test that your config syntax is correct.
+    	Skip modifying BIRD config. This can be used to test that your config syntax is correct.
   -output string
-        Directory to write output files to (default "/etc/bird/")
+    	Directory to write output files to (default "/etc/bird/")
   -socket string
-        BIRD control socket (default "/run/bird/bird.ctl")
+    	BIRD control socket (default "/run/bird/bird.ctl")
   -templates string
-        Templates directory (default "/etc/bcg/templates/")
-  -version
-        Print bcg version and exit
+    	Templates directory (default "/etc/bcg/templates/")
 ```
 
 #### How does filtering work?
@@ -69,7 +66,7 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
 All peers with an import filter of `cone` will apply further strict filtering by either an AS Set or manual prefix list. Max-prefix limits are also enforced for every peer.
 
 #### Local Preference
-All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). Local pref can be adjusted on a per-peer basis with the `localpref` option under the peer block.
+All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). LOCAL_PREF can be adjusted on a per-peer basis with the `localpref` option under the peer block.
 
 #### Pre-import and Pre-export conditions
 There are many features of BIRD that aren't part of bcg. If you want to add a statement before importing or exporting of routes, you can supply a multiline in `preimport` or `preexport` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively.
@@ -92,7 +89,7 @@ bcg uses RFC 8092 BGP Large Communities
 | router-id | Router ID of this router                                                                                      |
 | prefixes  | List of prefixes to originate                                                                                 |
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
-| rtrserver | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                              |
+| rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                              |
 | peers     | Map of name to peer (see below)                                                                               |
 
 #### Peer Configuration Options
@@ -100,21 +97,12 @@ bcg uses RFC 8092 BGP Large Communities
 | Option         | Usage                                                                                                     |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
 | asn            | Neighbor ASN                                                                                              |
-| as-set         | Neighbor IRR AS-SET                                                                                       |
-| maxpfx4        | Maximum number of IPv4 prefixes to accept before enacting `pfxlimitaction`                                |
-| maxpfx6        | Maximum number of IPv6 prefixes to accept before enacting `pfxlimitaction`                                |
-| pfxlimitaction | Action to take when the max prefix limits are tripped (warn, disable, block, or restart) default: disable |
-| pfxfilter4     | IPv4 prefix filter list in BIRD format                                                                    |
-| pfxfilter6     | IPv6 prefix filter list in BIRD format                                                                    |
+| type           | Type of peer (upstream, peer, downstream)                                                                 |
 | localpref      | BGP LOCAL_PREF                                                                                            |
-| import         | Peer import policy (any, cone, none)                                                                      |
-| export         | Peer export policy (any, cone, none)                                                                      |
-| automaxpfx     | Should max prefix limits be pulled from PeeringDB?                                                        |
-| autopfxfilter  | Should prefix filters be pulled from IRR data?                                                            |
 | disabled       | Should neighbor sessions be disabled?                                                                     |
 | passive        | Should neighbor sessions listen passively for BGP TCP connections?                                        |
 | multihop       | Should neighbor sessions allow multihop?                                                                  |
 | neighbors      | List of neighbor IP addresses                                                                             |
-| preimport      | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
-| preexport      | List of BIRD expressions to execute before the export filter                                              |
+| pre-import     | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
+| pre-export     | List of BIRD expressions to execute before the export filter                                              |
 | prepends       | Number of times to prepend local AS to                                                                    |

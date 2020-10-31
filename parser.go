@@ -51,8 +51,8 @@ type Config struct {
 	IrrDb     string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 	RtrServer string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 
-	OriginSet4 string `yaml:"-" toml:"-" json:"-"`
-	OriginSet6 string `yaml:"-" toml:"-" json:"-"`
+	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
+	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`
 }
 
 // PeeringDbResponse contains the response from a PeeringDB query
@@ -176,19 +176,6 @@ func runBirdCommand(command string) {
 	log.Printf("BIRD response: %s", readNoBuffer(conn))
 }
 
-// Build a formatted BIRD prefix list
-func buildBirdSet(filter []string) string {
-	output := ""
-	for i, prefix := range filter {
-		output += "    " + prefix
-		if i != len(filter)-1 {
-			output += ",\n"
-		}
-	}
-
-	return output
-}
-
 // Normalize a string to be filename-safe
 func normalize(input string) string {
 	// Remove non-alphanumeric characters
@@ -270,6 +257,19 @@ func main() {
 			}
 			return Items
 		},
+
+		"BirdSet": func(filter []string) string {
+			// Build a formatted BIRD prefix list
+			output := ""
+			for i, prefix := range filter {
+				output += "    " + prefix
+				if i != len(filter)-1 {
+					output += ",\n"
+				}
+			}
+
+			return output
+		},
 	}
 
 	log.Debug("Loading templates")
@@ -350,8 +350,10 @@ func main() {
 	log.Debug("OriginIpv4: ", originIpv4)
 	log.Debug("OriginIpv6: ", originIpv6)
 
-	config.OriginSet4 = buildBirdSet(originIpv4)
-	config.OriginSet6 = buildBirdSet(originIpv6)
+	//config.OriginSet4 = buildBirdSet(originIpv4)
+	//config.OriginSet6 = buildBirdSet(originIpv6)
+	config.OriginSet4 = originIpv4
+	config.OriginSet6 = originIpv6
 
 	// Render the global template and write to disk
 	if !*dryRun {
@@ -442,11 +444,8 @@ func main() {
 		for _, ip := range peerData.NeighborIps {
 			log.Infof("      %s", ip)
 		}
-	}
 
-	// Create peer specific file
-	if !*dryRun {
-		for peerName, peerData := range config.Peers {
+		if !*dryRun {
 			// Create the peer specific file
 			peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
 			if err != nil {
@@ -468,8 +467,12 @@ func main() {
 			}
 
 			log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
+		} else {
+			log.Infof("Dry run is enabled, skipped writing peer config")
 		}
+	}
 
+	if !*dryRun {
 		runBirdCommand("configure")
 	}
 }

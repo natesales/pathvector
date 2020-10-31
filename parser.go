@@ -36,11 +36,13 @@ type Peer struct {
 	PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
 	NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 
-	AsSet      string `yaml:"-" toml:"-" json:"-"`
-	QueryTime  string `yaml:"-" toml:"-" json:"-"`
-	MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
-	MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
-	Name       string `yaml:"-" toml:"-" json:"-"`
+	AsSet      string   `yaml:"-" toml:"-" json:"-"`
+	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
+	MaxPrefix4 uint     `yaml:"-" toml:"-" json:"-"`
+	MaxPrefix6 uint     `yaml:"-" toml:"-" json:"-"`
+	Name       string   `yaml:"-" toml:"-" json:"-"`
+	PrefixSet4 []string `yaml:"-" toml:"-" json:"-"`
+	PrefixSet6 []string `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -351,8 +353,6 @@ func main() {
 	log.Debug("OriginIpv4: ", originIpv4)
 	log.Debug("OriginIpv6: ", originIpv6)
 
-	//config.OriginSet4 = buildBirdSet(originIpv4)
-	//config.OriginSet6 = buildBirdSet(originIpv6)
 	config.OriginSet4 = originIpv4
 	config.OriginSet6 = originIpv6
 
@@ -390,7 +390,7 @@ func main() {
 			peerData.LocalPref = 100
 		}
 
-		// Only query PeeringDB for peers and downstreams
+		// Only query PeeringDB and IRRDB for peers and downstreams
 		if peerData.Type != "upstream" {
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 			peeringDbData := getPeeringDbData(peerData.Asn)
@@ -403,6 +403,9 @@ func main() {
 			} else {
 				peerData.AsSet = peeringDbData.AsSet
 			}
+
+			peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, config.IrrDb)
+			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, config.IrrDb)
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)

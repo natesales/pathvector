@@ -40,6 +40,7 @@ type Peer struct {
 	QueryTime  string `yaml:"-" toml:"-" json:"-"`
 	MaxPrefix4 uint   `yaml:"-" toml:"-" json:"-"`
 	MaxPrefix6 uint   `yaml:"-" toml:"-" json:"-"`
+	Name       string `yaml:"-" toml:"-" json:"-"`
 }
 
 // Config contains global configuration about this router and BCG instance
@@ -369,6 +370,9 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range config.Peers {
+		// Set peerName
+		peerData.Name = peerName
+
 		// Set default query time
 		peerData.QueryTime = "[No operations performed]"
 

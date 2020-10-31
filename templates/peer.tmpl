@@ -62,14 +62,12 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         };
         export filter {
             {{- $peer.PreExport }}
-            {{- if eq $peer.Type "upstream" -}}
             accept_local(); # Originated
+            {{- if eq $peer.Type "upstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{- else if eq $peer.Type "peer" -}}
-            accept_local(); # Originated
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{- else if eq $peer.Type "downstream" -}}
-            accept_local(); # Originated
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Upstream
             {{- end }}

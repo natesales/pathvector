@@ -7,9 +7,16 @@ Prefixes = [
 
 [Peers."Hurricane Electric"]
 ASN = 6939
-ImportPolicy = "any"
-ExportPolicy = "cone"
+Type = "upstream"
 Neighbors = [
     "203.0.113.39",
     "2001:db8:6939::39"
+]
+
+[Peers."Nate Sales"]
+ASN = 34553
+Type = "peer"
+Neighbors = [
+    "203.0.113.34",
+    "2001:db8:6939::34"
 ]

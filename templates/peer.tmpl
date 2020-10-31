@@ -43,7 +43,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             {{- end -}}
             {{- end -}}
             {{ if eq $peer.Type "upstream" -}}
-            bgp_large_community.add((ASN,0,102)); # Learned from upstream
+            bgp_large_community.add((ASN,0,101)); # Learned from upstream
             reject;
             {{ else if eq $peer.Type "peer" -}}
             reject_transit();
@@ -54,7 +54,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             {{ else if eq $peer.Type "downstream" -}}
             reject_transit();
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
-                bgp_large_community.add((ASN,0,102)); # Learned from downstream
+                bgp_large_community.add((ASN,0,103)); # Learned from downstream
                 accept;
             }
             {{ end }}
@@ -69,7 +69,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{ else if eq $peer.Type "downstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            if ((ASN,0,103) ~ bgp_large_community) then accept; # Upstream
+            if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
             {{ end -}}
             reject;
         };

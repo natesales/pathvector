@@ -27,8 +27,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
     description "AS{{ $peer.Asn }} {{ $peer.Name }}";
     {{ if $peer.Disabled }}disabled;{{ end }}
     {{- if $peer.Passive }}passive;{{ end }}
-    {{- if $peer.Multihop }}multihop 255;{{ end -}}
-
+    {{- if $peer.Multihop }}multihop 255;{{ end }}
     ipv{{ $af }} {
         import keep filtered;
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
@@ -43,34 +42,35 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             bgp_path.prepend(ASN);
             {{- end -}}
             {{- end -}}
-            {{- if eq $peer.Type "upstream" }}
+            {{ if eq $peer.Type "upstream" -}}
             bgp_large_community.add((ASN,0,102)); # Learned from upstream
             reject;
-            {{- else if eq $peer.Type "peer" }}
+            {{ else if eq $peer.Type "peer" -}}
             reject_transit();
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102)); # Learned from peer
                 accept;
             }
-            {{- else if eq $peer.Type "downstream" }}
+            {{ else if eq $peer.Type "downstream" -}}
             reject_transit();
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102)); # Learned from downstream
                 accept;
             }
-            {{- end }}
+            {{ end }}
         };
+
         export filter {
-            {{- $peer.PreExport }}
+            {{ $peer.PreExport -}}
             accept_local(); # Originated
-            {{- if eq $peer.Type "upstream" -}}
+            {{ if eq $peer.Type "upstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            {{- else if eq $peer.Type "peer" -}}
+            {{ else if eq $peer.Type "peer" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            {{- else if eq $peer.Type "downstream" -}}
+            {{ else if eq $peer.Type "downstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Upstream
-            {{- end }}
+            {{ end -}}
             reject;
         };
     };

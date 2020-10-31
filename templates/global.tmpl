@@ -212,18 +212,18 @@ function accept_local() {
 }
 
 function process_prepends() {
-  if ((ASN,401) ~ bgp_community) then {
+  if ((ASN,0,401) ~ bgp_community) then {
     print "Adding single prepend for ", net;
     bgp_path.prepend(ASN);
   }
 
-  if ((ASN,402) ~ bgp_community) then {
+  if ((ASN,0,402) ~ bgp_community) then {
     print "Adding double prepend for ", net;
     bgp_path.prepend(ASN);
     bgp_path.prepend(ASN);
   }
 
-  if ((ASN,403) ~ bgp_community) then {
+  if ((ASN,0,403) ~ bgp_community) then {
     print "Adding triple prepend for ", net;
     bgp_path.prepend(ASN);
     bgp_path.prepend(ASN);

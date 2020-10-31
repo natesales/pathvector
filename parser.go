@@ -119,7 +119,7 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 		log.Fatalf("Peer %d doesn't have a valid PeeringDB entry. Try import-valid or ask the network to update their account.", asn)
 	}
 
-	return peeringDbResponse.Data[0] // TODO: Add a check here
+	return peeringDbResponse.Data[0]
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines

@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -369,6 +370,16 @@ func main() {
 			log.Fatalf("Execute template: %v", err)
 		}
 		log.Debug("Finished writing global config file")
+
+		files, err := filepath.Glob(path.Join(*outputDirectory, "AS*.conf"))
+		if err != nil {
+			panic(err)
+		}
+		for _, f := range files {
+			if err := os.Remove(f); err != nil {
+				log.Fatalf("Removing old config files: %v", err)
+			}
+		}
 	} else {
 		log.Info("Dry run is enabled, skipped writing global config file")
 	}

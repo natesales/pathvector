@@ -115,6 +115,10 @@ func getPeeringDbData(asn uint32) PeeringDbData {
 		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
 	}
 
+	if len(peeringDbResponse.Data) < 1 {
+		log.Fatalf("Peer %d doesn't have a valid PeeringDB entry. Try import-valid or ask the network to update their account.", asn)
+	}
+
 	return peeringDbResponse.Data[0] // TODO: Add a check here
 }
 

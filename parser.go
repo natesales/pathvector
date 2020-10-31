@@ -239,6 +239,11 @@ func loadConfig() Config {
 }
 
 func main() {
+	// Enable debug logging in development releases
+	if release == "devel" {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	flag.Usage = func() {
 		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
 		flag.PrintDefaults()

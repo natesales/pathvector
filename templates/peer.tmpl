@@ -22,7 +22,7 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 {{ $af = "6" }}
 {{- end -}}
 protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
-    local as {{ $global.Asn }};
+    local as ASN;
     neighbor {{ $neighbor }} as {{ $peer.Asn }};
     description "AS{{ $peer.Asn }} {{ $peer.Name }}";
     {{ if $peer.Disabled }}disabled;{{ end }}

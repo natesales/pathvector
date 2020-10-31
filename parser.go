@@ -52,24 +52,6 @@ type Config struct {
 	RtrServer string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 }
 
-// PeerTemplate contains a peer-specific config sent to template
-type PeerTemplate struct {
-	Peer             Peer
-	Name             string
-	PfxFilterString4 string // Contains string representation of IPv4 prefix filter
-	PfxFilterString6 string // Contains string representation of IPv6 prefix filter
-	Global           Config
-}
-
-// GlobalTemplate contains the global config sent to template
-type GlobalTemplate struct {
-	Config        Config
-	OriginString4 string
-	OriginString6 string
-	OriginList4   []string
-	OriginList6   []string
-}
-
 // PeeringDbResponse contains the response from a PeeringDB query
 type PeeringDbResponse struct {
 	Data []PeeringDbData `json:"data"`
@@ -83,6 +65,13 @@ type PeeringDbData struct {
 	MaxPfx6 uint   `json:"info_prefixes6"`
 }
 
+// Config struct passed to peer template
+type PeerTemplate struct {
+	Peer   Peer
+	Config Config
+}
+
+// Flags
 var (
 	configFilename     = flag.String("config", "/etc/bcg/config.yml", "Configuration file in YAML, TOML, or JSON format")
 	outputDirectory    = flag.String("output", "/etc/bird/", "Directory to write output files to")
@@ -254,11 +243,9 @@ func main() {
 		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
 		flag.PrintDefaults()
 	}
-
 	flag.Parse()
 
 	log.Info("Starting BCG")
-	log.Info("Generating peer specific files")
 
 	funcMap := template.FuncMap{
 		"Contains": func(s, substr string) bool {
@@ -275,6 +262,8 @@ func main() {
 		},
 	}
 
+	log.Debug("Loading templates")
+
 	// Generate peer template
 	peerTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
@@ -287,9 +276,14 @@ func main() {
 		log.Fatalf("Read peer specific template: %v", err)
 	}
 
+	log.Debug("Finished loading templates")
+
 	// Load the config file from configFilename flag
+	log.Debugf("Loading config from %s", *configFilename)
 	config := loadConfig()
 	log.Infof("Loaded config: %+v", config)
+
+	log.Debug("Linting global configuration")
 
 	// Set default IRRDB
 	if config.IrrDb == "" {
@@ -315,11 +309,17 @@ func main() {
 		}
 	}
 
+	log.Debug("Finished linting global config")
+	log.Debug("Writing global config")
+
 	// Create the global output
 	globalFile, err := os.Create(path.Join(*outputDirectory, "bird.conf"))
 	if err != nil {
 		log.Fatalf("Create global BIRD output file: %v", err)
 	}
+
+	log.Debug("Finished writing global config")
+	log.Debug("Building origin sets")
 
 	// Assemble originIpv{4,6} lists by address family
 	var originIpv4, originIpv6 []string
@@ -331,15 +331,24 @@ func main() {
 		}
 	}
 
-	originList4 := buildBirdSet(originIpv4)
-	originList6 := buildBirdSet(originIpv6)
+	log.Debug("Finished building origin sets")
+
+	originSet4 := buildBirdSet(originIpv4)
+	originSet6 := buildBirdSet(originIpv6)
+
+	log.Info(originSet4)
+	log.Info(originSet6)
 
 	// Render the global template and write to disk
 	if !*dryRun {
-		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", &GlobalTemplate{config, originList4, originList6, originIpv4, originIpv6})
+		log.Debug("Writing global config file")
+		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", config)
 		if err != nil {
 			log.Fatalf("Execute template: %v", err)
 		}
+		log.Debug("Finished writing global config file")
+	} else {
+		log.Info("dry run enabled, skipped writing global config file")
 	}
 
 	// Iterate over peers
@@ -430,8 +439,8 @@ func main() {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}
 
-			var pfxFilterString4, pfxFilterString6 = "", ""
-
+			//var pfxFilterString4, pfxFilterString6 = "", ""
+			//
 			//if peerData.ImportPolicy == "cone" {
 			//	// Build prefix filter sets in BIRD format
 			//	pfxFilterString4 = buildBirdSet(peerData.MaxPrefix4)
@@ -439,7 +448,7 @@ func main() {
 			//}
 
 			// Render the template and write to disk
-			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, peerName, pfxFilterString4, pfxFilterString6, config})
+			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
 			}

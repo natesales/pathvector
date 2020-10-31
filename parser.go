@@ -288,7 +288,7 @@ func main() {
 	// Load the config file from configFilename flag
 	log.Debugf("Loading config from %s", *configFilename)
 	config := loadConfig()
-	log.Infof("Loaded config: %+v", config)
+	log.Debug("Finished loading config")
 
 	log.Debug("Linting global configuration")
 
@@ -355,7 +355,7 @@ func main() {
 		}
 		log.Debug("Finished writing global config file")
 	} else {
-		log.Info("dry run enabled, skipped writing global config file")
+		log.Info("Dry run is enabled, skipped writing global config file")
 	}
 
 	// Iterate over peers

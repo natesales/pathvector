@@ -50,6 +50,9 @@ type Config struct {
 	Peers     map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
 	IrrDb     string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 	RtrServer string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+
+	OriginSet4 string `yaml:"-" toml:"-" json:"-"`
+	OriginSet6 string `yaml:"-" toml:"-" json:"-"`
 }
 
 // PeeringDbResponse contains the response from a PeeringDB query
@@ -344,11 +347,11 @@ func main() {
 
 	log.Debug("Finished building origin sets")
 
-	originSet4 := buildBirdSet(originIpv4)
-	originSet6 := buildBirdSet(originIpv6)
+	log.Debug("OriginIpv4: ", originIpv4)
+	log.Debug("OriginIpv6: ", originIpv6)
 
-	log.Info(originSet4)
-	log.Info(originSet6)
+	config.OriginSet4 = buildBirdSet(originIpv4)
+	config.OriginSet6 = buildBirdSet(originIpv6)
 
 	// Render the global template and write to disk
 	if !*dryRun {

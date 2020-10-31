@@ -19,6 +19,7 @@ import (
 	"strings"
 	"text/template"
 	"time"
+	"unicode"
 )
 
 var release = "devel" // This is set by go build
@@ -375,7 +376,12 @@ func main() {
 	// Iterate over peers
 	for peerName, peerData := range config.Peers {
 		// Set peerName
-		peerData.Name = peerName
+		_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
+		if unicode.IsDigit(rune(_peerName[0])) {
+			_peerName = "PEER_" + _peerName
+		}
+
+		peerData.Name = _peerName
 
 		// Set default query time
 		peerData.QueryTime = "[No operations performed]"

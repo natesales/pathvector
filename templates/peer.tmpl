@@ -21,7 +21,7 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 {{- if Contains $neighbor ":" }}
 {{ $af = "6" }}
 {{- end -}}
-protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
+protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     local as ASN;
     neighbor {{ $neighbor }} as {{ $peer.Asn }};
     description "AS{{ $peer.Asn }} {{ $peer.Name }}";

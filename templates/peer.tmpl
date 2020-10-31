@@ -46,13 +46,13 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
             bgp_large_community.add((ASN,0,101)); # Learned from upstream
             reject;
             {{ else if eq $peer.Type "peer" -}}
-            reject_transit();
+            reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102)); # Learned from peer
                 accept;
             }
             {{ else if eq $peer.Type "downstream" -}}
-            reject_transit();
+            reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,103)); # Learned from downstream
                 accept;

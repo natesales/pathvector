@@ -32,6 +32,7 @@ protocol bgp AS{{ $peer.Asn }}v{{ $af }}_{{ $i }} {
         import keep filtered;
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
         import filter {
+            {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
             reject_bogons();
             strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};

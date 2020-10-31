@@ -463,14 +463,6 @@ func main() {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}
 
-			//var pfxFilterString4, pfxFilterString6 = "", ""
-			//
-			//if peerData.ImportPolicy == "cone" {
-			//	// Build prefix filter sets in BIRD format
-			//	pfxFilterString4 = buildBirdSet(peerData.MaxPrefix4)
-			//	pfxFilterString6 = buildBirdSet(peerData.MaxPrefix6)
-			//}
-
 			// Render the template and write to disk
 			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
 			if err != nil {

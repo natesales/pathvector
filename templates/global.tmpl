@@ -1,27 +1,29 @@
 # bird.conf
 
-define ASN = {{ .Config.Asn }};
-router id {{ .Config.RouterId }};
+define ASN = {{ .Asn }};
+router id {{ .RouterId }};
 
-{{- if .OriginList4 }}
+{{ if .OriginSet4 -}}
 define LOCAL_v4 = [
-{{ .OriginString4 }}
+{{ BirdSet .OriginSet4 }}
 ];
+
 protocol static static4 {
   ipv4;
-  {{- range $i, $prefix := .OriginList4 }}
+  {{- range $i, $prefix := .OriginSet4 }}
   route {{ $prefix }} reject;
   {{- end }}
 }
-{{ end -}}
+{{- end }}
 
-{{- if .OriginList6 }}
+{{ if .OriginSet6 -}}
 define LOCAL_v6 = [
-{{ .OriginString6 }}
+{{ BirdSet .OriginSet6 }}
 ];
+
 protocol static static6 {
   ipv6;
-  {{- range $i, $prefix := .OriginList6 }}
+  {{- range $i, $prefix := .OriginSet6 }}
   route {{ $prefix }} reject;
   {{- end }}
 }
@@ -45,16 +47,12 @@ protocol direct {
 
 protocol kernel {
   scan time 10;
-  ipv4 {
-    export all;
-  };
+  ipv4 { export all; };
 }
 
 protocol kernel {
   scan time 10;
-  ipv6 {
-    export all;
-  };
+  ipv6 { export all; };
 }
 
 # --- Blackholing ---
@@ -93,7 +91,7 @@ protocol rpki {
   roa6 { table rpki6; };
 
   transport tcp;
-  remote "{{ .Config.RtrServer }}" port 8282;
+  remote "{{ .RtrServer }}" port 8282;
 
   retry keep 90;
   refresh keep 900;
@@ -203,10 +201,7 @@ function reject_transit_paths() {
 }
 
 function strip_communities() {
-  bgp_large_community.delete((ASN,0,100));
-  bgp_large_community.delete((ASN,0,101));
-  bgp_large_community.delete((ASN,0,102));
-  bgp_large_community.delete((ASN,0,103));
+  bgp_large_community.delete([(ASN, *, *)]);
 }
 
 function accept_local() {

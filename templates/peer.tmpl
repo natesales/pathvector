@@ -1,7 +1,7 @@
 # {{ .Peer.Name }} {{ .Peer.Asn }} last operation at {{ .Peer.QueryTime }}
 
-define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.MaxPrefix4 }};
-define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.MaxPrefix6 }};
+define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
+define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
 
 {{ if or (eq .Peer.Type "peer") (eq .Peer.Type "downstream") -}}
 define AS{{ .Peer.Asn }}_PFX_v4 = [

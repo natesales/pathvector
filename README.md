@@ -109,3 +109,5 @@ bcg uses RFC 8092 BGP Large Communities
 | pre-import     | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
 | pre-export     | List of BIRD expressions to execute before the export filter                                              |
 | prepends       | Number of times to prepend local AS to                                                                    |
+| import-limit4  | Maximum number of IPv4 prefixes to allow before disabling the session                                     |
+| import-limit6  | Maximum number of IPv6 prefixes to allow before disabling the session                                     |

@@ -27,21 +27,21 @@ var release = "devel" // This is set by go build
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn         uint     `yaml:"asn" toml:"ASN" json:"asn"`
-	Type        string   `yaml:"type" toml:"Type" json:"type"`
-	Prepends    uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref   uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
-	Multihop    bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive     bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled    bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	PreImport   string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
-	PreExport   string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
-	NeighborIps []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	Asn          uint     `yaml:"asn" toml:"ASN" json:"asn"`
+	Type         string   `yaml:"type" toml:"Type" json:"type"`
+	Prepends     uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
+	LocalPref    uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
+	Multihop     bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive      bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled     bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	PreImport    string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
+	PreExport    string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
+	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	ImportLimit4 uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
+	ImportLimit6 uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
-	MaxPrefix4 uint     `yaml:"-" toml:"-" json:"-"`
-	MaxPrefix6 uint     `yaml:"-" toml:"-" json:"-"`
 	Name       string   `yaml:"-" toml:"-" json:"-"`
 	PrefixSet4 []string `yaml:"-" toml:"-" json:"-"`
 	PrefixSet6 []string `yaml:"-" toml:"-" json:"-"`
@@ -416,8 +416,15 @@ func main() {
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
-			peerData.MaxPrefix4 = peeringDbData.MaxPfx4
-			peerData.MaxPrefix6 = peeringDbData.MaxPfx6
+			if peerData.ImportLimit4 == 0 {
+				peerData.ImportLimit4 = peeringDbData.MaxPfx4
+				log.Infof("Peer %s has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
+			}
+
+			if peerData.ImportLimit6 == 0 {
+				peerData.ImportLimit6 = peeringDbData.MaxPfx6
+				log.Infof("Peer %s has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
+			}
 
 			if strings.Contains(peeringDbData.AsSet, "::") {
 				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
@@ -431,12 +438,12 @@ func main() {
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-			peerData.MaxPrefix4 = 1000000 // 1M routes
-			peerData.MaxPrefix6 = 100000  // 100k routes
+			peerData.ImportLimit4 = 1000000 // 1M routes
+			peerData.ImportLimit6 = 100000  // 100k routes
 		}
 
 		log.Infof("    local pref: %d", peerData.LocalPref)
-		log.Infof("    max prefixes: IPv4 %d, IPv6 %d", peerData.MaxPrefix4, peerData.MaxPrefix6)
+		log.Infof("    max prefixes: IPv4 %d, IPv6 %d", peerData.ImportLimit4, peerData.ImportLimit6)
 
 		// Check for additional options
 		if peerData.AsSet != "" {

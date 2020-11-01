@@ -41,9 +41,9 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{- if not (eq $peer.Prepends 0) }}
             {{- range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
-            {{- end -}}
-            {{- end -}}
-            {{ if eq $peer.Type "upstream" -}}
+            {{ end }}
+            {{ end }}
+            {{- if eq $peer.Type "upstream" -}}
             bgp_large_community.add((ASN,0,101)); # Learned from upstream
             accept;
             {{ else if eq $peer.Type "peer" -}}

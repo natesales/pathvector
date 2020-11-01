@@ -27,10 +27,10 @@ var release = "devel" // This is set by go build
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn         uint32   `yaml:"asn" toml:"ASN" json:"asn"`
+	Asn         uint     `yaml:"asn" toml:"ASN" json:"asn"`
 	Type        string   `yaml:"type" toml:"Type" json:"type"`
-	Prepends    uint32   `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref   uint32   `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
+	Prepends    uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
+	LocalPref   uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
 	Multihop    bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
 	Passive     bool     `yaml:"passive" toml:"Passive" json:"passive"`
 	Disabled    bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
@@ -49,7 +49,7 @@ type Peer struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn       uint32           `yaml:"asn" toml:"ASN" json:"asn"`
+	Asn       uint             `yaml:"asn" toml:"ASN" json:"asn"`
 	RouterId  string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
 	Prefixes  []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
 	Peers     map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
@@ -90,7 +90,7 @@ var (
 )
 
 // Query PeeringDB for an ASN
-func getPeeringDbData(asn uint32) PeeringDbData {
+func getPeeringDbData(asn uint) PeeringDbData {
 	httpClient := http.Client{Timeout: time.Second * 5}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
 	if err != nil {

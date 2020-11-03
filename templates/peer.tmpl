@@ -63,17 +63,14 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{- else if eq $peer.Type "import-valid" -}}
             bgp_large_community.add((ASN,0,102)); # Learned from peer
             accept;
-            {{ end }}
+            {{- end }}
         };
 
         export filter {
             {{ $peer.PreExport -}}
 
-            {{- if $global.OriginSet4 }}
-            accept_local4(); # Originated
-            {{ end -}}
-            {{- if $global.OriginSet6 }}
-            accept_local6(); # Originated
+            {{- if or $global.OriginSet4 $global.OriginSet6 }}
+            accept_local(); # Originated
             {{ end -}}
 
             {{ if eq $peer.Type "upstream" -}}

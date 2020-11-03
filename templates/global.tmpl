@@ -239,7 +239,12 @@ function process_prepends() {
 }
 
 function reject_bogons() {
-  if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then _reject("own prefix");
+  {{ if .OriginSet4 -}}
+  if (net ~ LOCAL_v4) then _reject("own prefix");
+  {{- end }}
+  {{ if .OriginSet6 -}}
+  if (net ~ LOCAL_v6) then _reject("own prefix");
+  {{- end }}
   if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
   if (bgp_path.len > 100) then _reject("long AS_PATH");
 

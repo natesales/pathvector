@@ -204,8 +204,15 @@ function strip_communities() {
   bgp_large_community.delete([(ASN, *, *)]);
 }
 
-function accept_local() {
-  if (net ~ LOCAL_v4 || net ~ LOCAL_v6) then {
+function accept_local4() {
+  if (net ~ LOCAL_v4 ) then {
+    bgp_large_community.add((ASN,0,100)); # Originated
+    accept;
+  }
+}
+
+function accept_local6() {
+  if (net ~ LOCAL_v6 ) then {
     bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }

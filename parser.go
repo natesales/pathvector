@@ -338,29 +338,30 @@ func main() {
 	}
 
 	log.Debug("Finished writing global config")
-	log.Debug("Building origin sets")
 
 	if len(config.Prefixes) == 0 {
-		log.Fatal("There are no origin prefixes defined")
-	}
+		log.Info("There are no origin prefixes defined")
+	} else {
+		log.Debug("Building origin sets")
 
-	// Assemble originIpv{4,6} lists by address family
-	var originIpv4, originIpv6 []string
-	for _, prefix := range config.Prefixes {
-		if strings.Contains(prefix, ":") {
-			originIpv6 = append(originIpv6, prefix)
-		} else {
-			originIpv4 = append(originIpv4, prefix)
+		// Assemble originIpv{4,6} lists by address family
+		var originIpv4, originIpv6 []string
+		for _, prefix := range config.Prefixes {
+			if strings.Contains(prefix, ":") {
+				originIpv6 = append(originIpv6, prefix)
+			} else {
+				originIpv4 = append(originIpv4, prefix)
+			}
 		}
+
+		log.Debug("Finished building origin sets")
+
+		log.Debug("OriginIpv4: ", originIpv4)
+		log.Debug("OriginIpv6: ", originIpv6)
+
+		config.OriginSet4 = originIpv4
+		config.OriginSet6 = originIpv6
 	}
-
-	log.Debug("Finished building origin sets")
-
-	log.Debug("OriginIpv4: ", originIpv4)
-	log.Debug("OriginIpv6: ", originIpv6)
-
-	config.OriginSet4 = originIpv4
-	config.OriginSet6 = originIpv6
 
 	// Render the global template and write to disk
 	if !*dryRun {
@@ -438,19 +439,19 @@ func main() {
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-			
+
 			//Check if upstream has MaxPrefix4/6 set, if not set sensible defaults and if they are configured too low, warn the user
 			if peerData.ImportLimit4 == 0 {
 				peerData.ImportLimit4 = 1000000 // 1M routes
 				log.Infof("Upstream %s has no IPv4 import limit configured. Setting to 1000000", peerName)
-			} else if peerData.ImportLimit4 <=900000 {
+			} else if peerData.ImportLimit4 <= 900000 {
 				log.Infof("Upstream %s has a low IPv4 import limit configured. You may want to increase the MaxPrefix4 limit.", peerName)
 			}
 
 			if peerData.ImportLimit6 == 0 {
-				peerData.ImportLimit6 = 100000  // 100k routes
+				peerData.ImportLimit6 = 100000 // 100k routes
 				log.Infof("Upstream %s has no IPv6 import limit configured. Setting to 100000", peerName)
-			} else if peerData.ImportLimit6 <=98000 {
+			} else if peerData.ImportLimit6 <= 98000 {
 				log.Infof("Upstream %s has a low IPv6 import limit configured. You may want to increase the MaxPrefix6 limit.", peerName)
 			}
 		}

@@ -29,7 +29,9 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     {{- if $peer.Passive }}passive;{{ end }}
     {{- if $peer.Multihop }}multihop 255;{{ end }}
     ipv{{ $af }} {
+        {{ if $global.KeepFiltered -}}
         import keep filtered;
+        {{- end }}
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
@@ -85,4 +87,4 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         };
     };
 }
-{{end}}
+{{ end }}

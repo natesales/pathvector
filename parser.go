@@ -49,12 +49,13 @@ type Peer struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn       uint             `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId  string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes  []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers     map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
-	IrrDb     string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	Asn          uint             `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId     string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes     []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Peers        map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	IrrDb        string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	RtrServer    string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	KeepFiltered bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
 
 	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`

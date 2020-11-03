@@ -14,12 +14,14 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 
 {{ end -}}
 
-{{ $peer := .Peer }}
-{{- $global := .Config }}
-{{- $af := "4" }}
-{{- range $i, $neighbor := .Peer.NeighborIps }}
-{{- if Contains $neighbor ":" }}
-{{ $af = "6" }}
+{{ $peer := .Peer -}}
+{{- $global := .Config -}}
+{{- $af := "" -}}
+{{- range $i, $neighbor := .Peer.NeighborIps -}}
+{{- if Contains $neighbor ":" -}}
+{{- $af = "6" }}
+{{- else -}}
+{{- $af = "4" }}
 {{- end -}}
 protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     local as ASN;
@@ -31,7 +33,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     ipv{{ $af }} {
         {{ if $global.KeepFiltered -}}
         import keep filtered;
-        {{- end }}
+        {{ end -}}
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {

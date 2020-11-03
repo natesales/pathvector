@@ -47,12 +47,20 @@ protocol direct {
 
 protocol kernel {
   scan time 10;
+  {{ if .OriginSet4 -}}
   ipv4 { export all; };
+  {{- else }}
+  ipv4 { export none; };
+  {{ end }}
 }
 
 protocol kernel {
   scan time 10;
+  {{ if .OriginSet6 -}}
   ipv6 { export all; };
+  {{- else }}
+  ipv6 { export none; };
+  {{ end }}
 }
 
 # --- Blackholing ---

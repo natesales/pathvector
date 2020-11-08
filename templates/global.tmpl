@@ -45,7 +45,7 @@ protocol direct { ipv4; ipv6; }
 protocol kernel {
   scan time 10;
   {{ if .OriginSet4 -}}
-  ipv4 { export all; };
+  ipv4 { export where (source != RTS_STATIC); };
   {{- else }}
   ipv4 { export none; };
   {{ end }}
@@ -54,7 +54,7 @@ protocol kernel {
 protocol kernel {
   scan time 10;
   {{ if .OriginSet6 -}}
-  ipv6 { export all; };
+  ipv6 { export where (source != RTS_STATIC); };
   {{- else }}
   ipv6 { export none; };
   {{ end }}

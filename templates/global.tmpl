@@ -4,19 +4,27 @@ define ASN = {{ .Asn }};
 router id {{ .RouterId }};
 
 {{ if .OriginSet4 -}}
+define LOCAL_v4 = [
+{{ BirdSet .OriginSet4 }}
+];
+
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginSet4 }}
-  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
+  route {{ $prefix }} reject;
   {{- end }}
 }
 {{- end }}
 
 {{ if .OriginSet6 -}}
+define LOCAL_v6 = [
+{{ BirdSet .OriginSet6 }}
+];
+
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginSet6 }}
-  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
+  route {{ $prefix }} reject;
   {{- end }}
 }
 {{- end }}
@@ -31,20 +39,13 @@ timeformat route iso long;
 log syslog all;
 
 protocol device {};
+
 protocol direct { ipv4; ipv6; }
 
 protocol kernel {
   scan time 10;
   {{ if .OriginSet4 -}}
-  ipv4 {
-    import filter {
-      if (net ~ [
-      {{ BirdSet .OriginSet4 }}
-      ]) then bgp_large_community.add((ASN,0,100));
-      accept;
-    };
-    export all;
-  };
+  ipv4 { export all; };
   {{- else }}
   ipv4 { export none; };
   {{ end }}
@@ -53,15 +54,7 @@ protocol kernel {
 protocol kernel {
   scan time 10;
   {{ if .OriginSet6 -}}
-  ipv6 {
-    import filter {
-      if (net ~ [
-      {{ BirdSet .OriginSet6 }}
-      ]) then bgp_large_community.add((ASN,0,100));
-      accept;
-    };
-    export all;
-  };
+  ipv6 { export all; };
   {{- else }}
   ipv6 { export none; };
   {{ end }}

@@ -110,6 +110,7 @@ bcg uses RFC 8092 BGP Large Communities
 | passive        | Should neighbor sessions listen passively for BGP TCP connections?                                        |
 | multihop       | Should neighbor sessions allow multihop?                                                                  |
 | password       | BGP MD5 Password                                                                                          |
+| port           | BGP Port (default 179)                                                                                    |
 | neighbors      | List of neighbor IP addresses                                                                             |
 | pre-import     | List of BIRD expressions to execute after the prefilter and before the prefix filter                      |
 | pre-export     | List of BIRD expressions to execute before the export filter                                              |

@@ -35,6 +35,7 @@ type Peer struct {
 	Passive      bool     `yaml:"passive" toml:"Passive" json:"passive"`
 	Disabled     bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
 	Password     string   `yaml:"password" toml:"Password" json:"password"`
+	Port         uint16   `yaml:"port" toml:"Port" json:"port"`
 	PreImport    string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
 	PreExport    string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
 	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`

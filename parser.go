@@ -445,16 +445,16 @@ func main() {
 			// Check if upstream has MaxPrefix4/6 set, if not set sensible defaults and if they are configured too low, warn the user
 			if peerData.ImportLimit4 == 0 {
 				peerData.ImportLimit4 = 1000000 // 1M routes
-				log.Infof("Upstream/Import-Valid %s has no IPv4 import limit configured. Setting to 1000000", peerName)
+				log.Infof("Upstream/Import-Valid %s has no IPv4 import limit configured. Setting to 1,000,000", peerName)
 			} else if peerData.ImportLimit4 <= 900000 {
-				log.Infof("Upstream/Import-Valid %s has a low IPv4 import limit configured. You may want to increase the MaxPrefix4 limit.", peerName)
+				log.Infof("Upstream/Import-Valid %s has a low IPv4 import limit configured. You may want to increase the import limit.", peerName)
 			}
 
 			if peerData.ImportLimit6 == 0 {
-				peerData.ImportLimit6 = 100000 // 100k routes
-				log.Infof("Upstream/Import-Valid %s has no IPv6 import limit configured. Setting to 100000", peerName)
+				peerData.ImportLimit6 = 150000 // 150k routes
+				log.Infof("Upstream/Import-Valid %s has no IPv6 import limit configured. Setting to 150,000", peerName)
 			} else if peerData.ImportLimit6 <= 98000 {
-				log.Infof("Upstream/Import-Valid %s has a low IPv6 import limit configured. You may want to increase the MaxPrefix6 limit.", peerName)
+				log.Infof("Upstream/Import-Valid %s has a low IPv6 import limit configured. You may want to increase the import limit.", peerName)
 			}
 		}
 

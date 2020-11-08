@@ -11,7 +11,7 @@ define LOCAL_v4 = [
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginSet4 }}
-  route {{ $prefix }} reject { bgp_large_community.add(ASN,0,100) };
+  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
   {{- end }}
 }
 {{- end }}
@@ -24,7 +24,7 @@ define LOCAL_v6 = [
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginSet6 }}
-  route {{ $prefix }} reject { bgp_large_community.add(ASN,0,100) };
+  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
   {{- end }}
 }
 {{- end }}

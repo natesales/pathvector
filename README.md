@@ -63,10 +63,10 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
     - RPKI invalid
     - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L143)
 
-All peers with an import filter of `cone` will apply further strict filtering by either an AS Set or manual prefix list. Max-prefix limits are also enforced for every peer.
+All peers with a type of `peer` will apply further strict filtering by IRR using their AS-Set defined in PeeringDB. Max-prefix limits are also enforced for every peer.
 
 #### Local Preference
-All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). LOCAL_PREF can be adjusted on a per-peer basis with the `localpref` option under the peer block.
+All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). LOCAL_PREF can be adjusted on a per-peer basis with the `local-pref` option under the peer block.
 
 #### Pre-import and Pre-export conditions
 There are many features of BIRD that aren't part of bcg. If you want to add a statement before importing or exporting of routes, you can supply a multiline string in `pre-import` or `pre-export` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively.

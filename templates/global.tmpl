@@ -11,7 +11,7 @@ define LOCAL_v4 = [
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginSet4 }}
-  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
+  route {{ $prefix }} reject;
   {{- end }}
 }
 {{- end }}
@@ -24,7 +24,7 @@ define LOCAL_v6 = [
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginSet6 }}
-  route {{ $prefix }} reject { bgp_large_community.add((ASN,0,100)); };
+  route {{ $prefix }} reject;
   {{- end }}
 }
 {{- end }}
@@ -210,6 +210,22 @@ function reject_transit_paths() {
 
 function strip_communities() {
   bgp_large_community.delete([(ASN, *, *)]);
+}
+
+function accept_local() {
+  {{ if .OriginSet4 -}}
+  if (net ~ LOCAL_v4 ) then {
+    bgp_large_community.add((ASN,0,100)); # Originated
+    accept;
+  }
+  {{- end }}
+
+  {{ if .OriginSet6 -}}
+  if (net ~ LOCAL_v6 ) then {
+    bgp_large_community.add((ASN,0,100)); # Originated
+    accept;
+  }
+  {{- end }}
 }
 
 function process_prepends() {

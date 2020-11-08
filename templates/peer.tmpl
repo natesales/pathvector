@@ -74,7 +74,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ $peer.PreExport -}}
 
             {{- if or $global.OriginSet4 $global.OriginSet6 }}
-            if ((ASN,0,100) ~ bgp_large_community) then accept; # Originated
+            accept_local(); # Originated
             {{ end -}}
 
             {{ if eq $peer.Type "upstream" -}}

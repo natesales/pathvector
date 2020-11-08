@@ -31,7 +31,7 @@ peers:
 
 `bcg` can take the following flags:
 
-```      
+```
 Usage for bcg https://github.com/natesales/bcg:
   -config string
     	Configuration file in YAML, TOML, or JSON format (default "/etc/bcg/config.yml")
@@ -120,4 +120,4 @@ bcg uses RFC 8092 BGP Large Communities
 <summary>Remarks</summary>
 import-limit4 will default to 1M for upstreams & import-valid if not set and use peeringDB max-prefix limit for peer & downstream
 import-limit6 will default to 100k for upstreams & import-valid if not set and use peeringDB max-prefix limit for peer & downstream
-</details>  
+</details>

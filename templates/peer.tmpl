@@ -43,7 +43,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();
             {{ $peer.PreImport }}
-            {{- if not (eq $peer.Prepends 0) }}
+            {{ if not (eq $peer.Prepends 0) }}
             {{- range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}
@@ -73,7 +73,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
 
         export filter {
             {{ $peer.PreExport }}
-            {{- if or $global.OriginSet4 $global.OriginSet6 -}}
+            {{ if or $global.OriginSet4 $global.OriginSet6 -}}
             accept_local(); # Originated
             {{ end -}}
             {{ if eq $peer.Type "upstream" -}}

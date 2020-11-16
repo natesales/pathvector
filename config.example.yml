@@ -5,16 +5,10 @@ prefixes:
   - 2001:db8::/48
 
 peers:
-  Hurricane Electric:
-    asn: 6939
-    type: upstream
-    neighbors:
-      - 203.0.113.39
-      - 2001:db8:6939::39
-
-  Nate Sales:
-    asn: 34553
+  Serverion:
+#    asn: 213035
+    asn: 398987
     type: peer
     neighbors:
-      - 203.0.113.34
-      - 2001:db8:6939::34
+      - 185.1.95.110
+      - 2001:7f8:b7::a521:3035:1

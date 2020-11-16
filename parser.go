@@ -146,6 +146,11 @@ func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
 	// Remove array suffix
 	output = strings.ReplaceAll(output, "];", "")
 
+	// Check for empty IRR
+	if output == "" {
+		return []string{}
+	}
+
 	// Remove whitespace (in this case there should only be trailing whitespace)
 	output = strings.TrimSpace(output)
 
@@ -281,6 +286,18 @@ func main() {
 			}
 
 			return output
+		},
+
+		"NotEmpty": func(arr []string) bool {
+			return len(arr) != 0
+		},
+
+		"CheckProtocol": func(v4set []string, v6set []string, family string) bool {
+			if family == "4" {
+				return len(v4set) != 0
+			} else {
+				return len(v6set) != 0
+			}
 		},
 	}
 

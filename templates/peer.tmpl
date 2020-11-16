@@ -4,14 +4,17 @@ define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
 define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
 
 {{ if or (eq .Peer.Type "peer") (eq .Peer.Type "downstream") -}}
+{{ if NotEmpty .Peer.PrefixSet4 }}
 define AS{{ .Peer.Asn }}_PFX_v4 = [
 {{ BirdSet .Peer.PrefixSet4 }}
 ];
+{{ end }}
 
+{{ if NotEmpty .Peer.PrefixSet6 }}
 define AS{{ .Peer.Asn }}_PFX_v6 = [
 {{ BirdSet .Peer.PrefixSet6 }}
 ];
-
+{{ end }}
 {{ end -}}
 
 {{ $peer := .Peer -}}
@@ -23,6 +26,7 @@ define AS{{ .Peer.Asn }}_PFX_v6 = [
 {{- else -}}
 {{- $af = "4" }}
 {{- end -}}
+{{ if CheckProtocol $peer.PrefixSet4 $peer.PrefixSet6 $af }}
 protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     local as ASN;
     neighbor {{ $neighbor }} as {{ $peer.Asn }}{{ if $peer.Port }} port {{ $peer.Port }}{{ end }};
@@ -89,4 +93,5 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     };
 }
 
+{{ end }}
 {{ end }}

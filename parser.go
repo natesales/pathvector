@@ -148,6 +148,7 @@ func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
 
 	// Check for empty IRR
 	if output == "" {
+		log.Warnf("Peer with as-set %s has no IPv%d prefixes. Disabled IPv%d connectivity.", asSet, family, family)
 		return []string{}
 	}
 

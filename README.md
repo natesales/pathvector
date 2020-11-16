@@ -77,6 +77,9 @@ Next hop self will be enabled on BGP sessions where the neighbor ASN and local A
 #### Manual configuration
 If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before the peers defined in the bcg config file.
 
+#### Single-stack support
+bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured. 
+
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 

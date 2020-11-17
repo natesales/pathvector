@@ -293,11 +293,15 @@ func main() {
 			return len(arr) != 0
 		},
 
-		"CheckProtocol": func(v4set []string, v6set []string, family string) bool {
-			if family == "4" {
-				return len(v4set) != 0
+		"CheckProtocol": func(v4set []string, v6set []string, family string, peerType string) bool {
+			if peerType == "downstream" || peerType == "peer" { // Only match IRR filtered peer types
+				if family == "4" {
+					return len(v4set) != 0
+				} else {
+					return len(v6set) != 0
+				}
 			} else {
-				return len(v6set) != 0
+				return true
 			}
 		},
 	}

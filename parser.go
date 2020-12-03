@@ -61,6 +61,7 @@ type Config struct {
 
 	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`
+	Hostname   string   `yaml:"-" toml:"-" json:"-"`
 }
 
 // PeeringDbResponse contains the response from a PeeringDB query
@@ -357,6 +358,11 @@ func main() {
 	}
 
 	log.Debug("Finished linting global config")
+
+	config.Hostname, err = os.Hostname()
+	if err != nil {
+		log.Warn("Unable to get hostname")
+	}
 
 	if len(config.Prefixes) == 0 {
 		log.Info("There are no origin prefixes defined")

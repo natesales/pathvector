@@ -264,10 +264,12 @@ func main() {
 
 	funcMap := template.FuncMap{
 		"Contains": func(s, substr string) bool {
+			// String contains
 			return strings.Contains(s, substr)
 		},
 
 		"Iterate": func(count *uint) []uint {
+			// Create array with `count` entries
 			var i uint
 			var Items []uint
 			for i = 0; i < (*count); i++ {
@@ -290,6 +292,7 @@ func main() {
 		},
 
 		"NotEmpty": func(arr []string) bool {
+			// Is `arr` empty?
 			return len(arr) != 0
 		},
 
@@ -300,7 +303,7 @@ func main() {
 				} else {
 					return len(v6set) != 0
 				}
-			} else {
+			} else { // If the peer type isn't going to be IRR filtered, ignore it.
 				return true
 			}
 		},

@@ -1,0 +1,139 @@
+<html>
+    <head>
+        <title>Routing Dashboard for AS{{ .Asn }}</title>
+        <style>
+            body {
+                color: white;
+                background-color: black;
+                font-family: 'Courier New', monospace;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .table-wrapper {
+                border: 2px white solid;
+                border-radius: 15px;
+                padding-bottom: 10px;
+                width: 90%;
+                margin-bottom: 25px;
+            }
+
+            .table-wrapper h2 {
+                padding-left: 15px;
+            }
+
+            table {
+                border-collapse: collapse;
+                border-top-left-radius: 15px;
+                width: 100%;
+                overflow-x: scroll;
+            }
+
+            th {
+                background-color: #202020;
+                border-bottom: 1px solid #555555;
+                color: white;
+                margin: 0;
+            }
+
+            tr {
+                display: table-row !important;
+                background-color: #111111;
+            }
+
+            td, th {
+                padding-top: 15px;
+                padding-bottom: 15px;
+                padding-left: 20px;
+                padding-right: 20px;
+                text-align: left;
+            }
+
+            footer {
+                text-align: center;
+                padding: 25px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Routing Dashboard for AS{{ .Asn }} {{ .Hostname }}</h1>
+
+        <div class="table-wrapper">
+            <h2>Router</h2>
+
+            <table>
+            <thead>
+                <tr>
+                    <th>ASN</th>
+                    <th>Router ID</th>
+                    <th>Peers</th>
+                    <th>IRRDB</th>
+                    <th>RTR Server</th>
+                    <th>Prefixes</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>{{ .Asn }}</td>
+                    <td>{{ .RouterId }}</td>
+                    <td>{{ len .Peers }}</td>
+                    <td>{{ .IrrDb }}</td>
+                    <td>{{ .RtrServer }}</td>
+                    <td>
+                    {{- range $k, $prefix := .Prefixes }}
+                    {{ $prefix }}<br>
+                    {{ end }}
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+        </div>
+
+        <div class="table-wrapper">
+            <h2>Peers</h2>
+
+            <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ASN</th>
+                    <th>AS-SET</th>
+                    <th>Type</th>
+                    <th>Local Pref</th>
+                    <th>Prepends</th>
+                    <th>Import Limit</th>
+                    <th>Neighbor IPs</th>
+                    <th>Options</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {{- range $i, $peer := .Peers }}
+                <tr>
+                    <td>{{ $peer.Name }}</td>
+                    <td>{{ $peer.Asn }}</td>
+                    <td>{{ $peer.AsSet }}</td>
+                    <td>{{ $peer.Type }}</td>
+                    <td>{{ $peer.LocalPref }}</td>
+                    <td>{{ $peer.Prepends }}</td>
+                    <td>{{ $peer.ImportLimit4 }} IPv4<br>{{ $peer.ImportLimit6 }} IPv6</td>
+                    <td>
+                    {{- range $j, $ip := $peer.NeighborIps }}
+                    {{ $ip }}<br>
+                    {{ end }}
+                    </td>
+                    <td>{{ if $peer.Multihop }}multihop{{ end }} {{ if $peer.Disabled }}disabled{{ end }} {{ if $peer.Passive }}passive{{ end }}</td>
+                </tr>
+            {{- end }}
+            </tbody>
+            </table>
+        </div>
+
+        <footer>Powered by <a href="https://github.com/natesales/bcg">bcg</a>.</footer>
+    </body>
+</html>
+
+

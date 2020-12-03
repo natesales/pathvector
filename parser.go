@@ -91,6 +91,8 @@ var (
 	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
 	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
 	debug              = flag.Bool("debug", false, "Show debugging messages")
+	uiFile             = flag.String("uifile", "/tmp/bcg-ui.html", "File to store web UI index page")
+	noui               = flag.Bool("noui", false, "Disable generating web UI")
 )
 
 // Query PeeringDB for an ASN
@@ -324,6 +326,12 @@ func main() {
 		log.Fatalf("Read global template: %v", err)
 	}
 
+	// Generate UI template
+	uiTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "ui.tmpl"))
+	if err != nil {
+		log.Fatalf("Read ui template: %v", err)
+	}
+
 	log.Debug("Finished loading templates")
 
 	// Load the config file from configFilename flag
@@ -416,7 +424,7 @@ func main() {
 			}
 		}
 	} else {
-		log.Info("Dry run is enabled, skipped writing global config file")
+		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
 	}
 
 	// Iterate over peers
@@ -547,6 +555,22 @@ func main() {
 	}
 
 	if !*dryRun {
+		// Create the ui output file
+		log.Debug("Creating global config")
+		uiFileObj, err := os.Create(*uiFile)
+		if err != nil {
+			log.Fatalf("Create UI output file: %v", err)
+		}
+		log.Debug("Finished creating UI file")
+
+		// Render the UI template and write to disk
+		log.Debug("Writing ui file")
+		err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+		if err != nil {
+			log.Fatalf("Execute ui template: %v", err)
+		}
+		log.Debug("Finished writing ui file")
+
 		runBirdCommand("configure")
 	}
 }

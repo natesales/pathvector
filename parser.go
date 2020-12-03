@@ -260,7 +260,7 @@ func main() {
 	}
 	flag.Parse()
 
-	log.Info("Starting BCG")
+	log.Infof("Starting BCG %s", release)
 
 	funcMap := template.FuncMap{
 		"Contains": func(s, substr string) bool {

@@ -314,13 +314,13 @@ func main() {
 	// Generate peer template
 	peerTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
 	if err != nil {
-		log.Fatalf("Read peer specific template: %v", err)
+		log.Fatalf("Read peer template: %v", err)
 	}
 
 	// Generate global template
 	globalTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
 	if err != nil {
-		log.Fatalf("Read peer specific template: %v", err)
+		log.Fatalf("Read global template: %v", err)
 	}
 
 	log.Debug("Finished loading templates")

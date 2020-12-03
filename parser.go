@@ -357,15 +357,6 @@ func main() {
 	}
 
 	log.Debug("Finished linting global config")
-	log.Debug("Writing global config")
-
-	// Create the global output
-	globalFile, err := os.Create(path.Join(*outputDirectory, "bird.conf"))
-	if err != nil {
-		log.Fatalf("Create global BIRD output file: %v", err)
-	}
-
-	log.Debug("Finished writing global config")
 
 	if len(config.Prefixes) == 0 {
 		log.Info("There are no origin prefixes defined")
@@ -391,15 +382,24 @@ func main() {
 		config.OriginSet6 = originIpv6
 	}
 
-	// Render the global template and write to disk
 	if !*dryRun {
+		// Create the global output file
+		log.Debug("Creating global config")
+		globalFile, err := os.Create(path.Join(*outputDirectory, "bird.conf"))
+		if err != nil {
+			log.Fatalf("Create global BIRD output file: %v", err)
+		}
+		log.Debug("Finished creating global config file")
+
+		// Render the global template and write to disk
 		log.Debug("Writing global config file")
 		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", config)
 		if err != nil {
-			log.Fatalf("Execute template: %v", err)
+			log.Fatalf("Execute global template: %v", err)
 		}
 		log.Debug("Finished writing global config file")
 
+		// Remove old peer-specific configs
 		files, err := filepath.Glob(path.Join(*outputDirectory, "AS*.conf"))
 		if err != nil {
 			panic(err)
@@ -536,7 +536,7 @@ func main() {
 
 			log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
 		} else {
-			log.Infof("Dry run is enabled, skipped writing peer config")
+			log.Infof("Dry run is enabled, skipped writing peer config(s)")
 		}
 	}
 

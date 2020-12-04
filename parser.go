@@ -555,21 +555,23 @@ func main() {
 	}
 
 	if !*dryRun {
-		// Create the ui output file
-		log.Debug("Creating global config")
-		uiFileObj, err := os.Create(*uiFile)
-		if err != nil {
-			log.Fatalf("Create UI output file: %v", err)
-		}
-		log.Debug("Finished creating UI file")
+		if !*noui {
+			// Create the ui output file
+			log.Debug("Creating global config")
+			uiFileObj, err := os.Create(*uiFile)
+			if err != nil {
+				log.Fatalf("Create UI output file: %v", err)
+			}
+			log.Debug("Finished creating UI file")
 
-		// Render the UI template and write to disk
-		log.Debug("Writing ui file")
-		err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
-		if err != nil {
-			log.Fatalf("Execute ui template: %v", err)
+			// Render the UI template and write to disk
+			log.Debug("Writing ui file")
+			err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+			if err != nil {
+				log.Fatalf("Execute ui template: %v", err)
+			}
+			log.Debug("Finished writing ui file")
 		}
-		log.Debug("Finished writing ui file")
 
 		runBirdCommand("configure")
 	}

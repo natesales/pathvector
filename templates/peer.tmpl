@@ -81,6 +81,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             accept_local(); # Originated
             {{ end -}}
             {{ if eq $peer.Type "upstream" -}}
+            if ((ASN,0,200) ~ bgp_large_community) then reject; # Don't export to upstreams
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{ else if or (eq $peer.Type "peer") (eq $peer.Type "import-valid") -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream

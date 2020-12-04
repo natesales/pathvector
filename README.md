@@ -87,12 +87,13 @@ bcg *should* have reasonable single-stack peering support but is not fully teste
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 
-| Large     | Meaning                 |
-|-----------|-------------------------|
-| ASN,0,100 | Originated              |
-| ASN,0,101 | Learned from upstream   |
-| ASN,0,102 | Learned from peer       |
-| ASN,0,103 | Learned from downstream |
+| Large     | Meaning                   |
+|-----------|---------------------------|
+| ASN,0,100 | Originated                |
+| ASN,0,101 | Learned from upstream     |
+| ASN,0,102 | Learned from peer         |
+| ASN,0,103 | Learned from downstream   |
+| ASN,0,200 | Don't export to upstreams |
 
 #### Global Configuration Options
 

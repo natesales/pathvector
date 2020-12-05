@@ -40,7 +40,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         import keep filtered;
         {{ end -}}
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
-        {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end -}}
+        {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
             reject_bogons();
             strip_communities();

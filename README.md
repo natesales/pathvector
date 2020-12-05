@@ -87,6 +87,9 @@ bcg *should* have reasonable single-stack peering support but is not fully teste
 #### BGP Communities
 bcg uses RFC 8092 BGP Large Communities
 
+#### Private ASNs
+bcg strips private ASNs before exporting to upstream sessions in range `[64512..65534, 4200000000..4294967294]`.
+
 | Large     | Meaning                   |
 |-----------|---------------------------|
 | ASN,0,100 | Originated                |

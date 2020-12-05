@@ -42,7 +42,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
-            reject_bogons();
+            {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
             strip_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();

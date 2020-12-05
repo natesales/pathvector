@@ -125,6 +125,7 @@ bcg uses RFC 8092 BGP Large Communities
 | prepends       | Number of times to prepend local AS to                                                                    |
 | import-limit4  | Maximum number of IPv4 prefixes to allow before disabling the session                                     |
 | import-limit6  | Maximum number of IPv6 prefixes to allow before disabling the session                                     |
+| skip-filter    | Disable the universal bogon filter (Dangerous!)                                                           |
 <details>
 <summary>Remarks</summary>
 import-limit4 will default to 1M for upstreams & import-valid if not set and use peeringDB max-prefix limit for peer & downstream

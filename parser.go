@@ -41,6 +41,7 @@ type Peer struct {
 	NeighborIps  []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
 	ImportLimit4 uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
 	ImportLimit6 uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
+	SkipFilter   bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`

@@ -59,6 +59,7 @@ protocol kernel {
   {{- else }}
   ipv6 { export none; };
   {{ end }}
+  {{ if .MergePaths }}merge paths;{{ end }}
 }
 
 # --- Blackholing ---

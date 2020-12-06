@@ -49,6 +49,7 @@ protocol kernel {
   {{- else }}
   ipv4 { export none; };
   {{ end }}
+  {{ if .MergePaths }}merge paths;{{ end }}
 }
 
 protocol kernel {

@@ -59,6 +59,7 @@ type Config struct {
 	IrrDb        string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 	RtrServer    string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 	KeepFiltered bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
+	MergePaths   bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
 
 	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`

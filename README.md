@@ -109,6 +109,7 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                             |
 | keep-filtered | Should BIRD keep filtered routes                                                                          |
 | peers     | Map of name to peer (see below)                                                                               |
+| merge-paths     | Enable merge paths on kernel export                                                                     |
 
 #### Peer Configuration Options
 

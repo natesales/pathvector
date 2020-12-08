@@ -65,7 +65,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             reject;
             {{- else if eq $peer.Type "downstream" -}}
             reject_transit_paths();
-            if (net ~ AS{{ $peer.Asn }}_PFX_v{{ $af }}) then {
+            if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,103)); # Learned from downstream
                 accept;
             }

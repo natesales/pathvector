@@ -111,8 +111,10 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
 | rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                             |
 | keep-filtered | Should BIRD keep filtered routes                                                                          |
-| peers     | Map of name to peer (see below)                                                                               |
-| merge-paths     | Enable merge paths on kernel export                                                                     |
+| peers         | Map of name to peer (see below)                                                                               |
+| merge-paths   | Enable merge paths on kernel export                                                                     |
+| pref-src4     | Preferred source IPv4 to export to kernel                                                               |
+| pref-src6     | Preferred source IPv6 to export to kernel                                                               |
 
 #### Peer Configuration Options
 

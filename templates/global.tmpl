@@ -44,21 +44,35 @@ protocol direct { ipv4; ipv6; }
 
 protocol kernel {
   scan time 10;
-  {{ if .OriginSet4 -}}
-  ipv4 { export where (source != RTS_STATIC); };
-  {{- else }}
-  ipv4 { export none; };
+  ipv4 {
+  {{ if .PrefSrc4 -}}
+    if source = RTS_STATIC then {
+      accept;
+    } else {
+      krt_prefsrc = {{ .PrefSrc4 }};
+      accept;
+    }
+  {{ else }}
+    accept;
   {{ end }}
+  };
   {{ if .MergePaths }}merge paths;{{ end }}
 }
 
 protocol kernel {
   scan time 10;
-  {{ if .OriginSet6 -}}
-  ipv6 { export where (source != RTS_STATIC); };
-  {{- else }}
-  ipv6 { export none; };
+  ipv6 {
+  {{ if .PrefSrc6 -}}
+    if source = RTS_STATIC then {
+      accept;
+    } else {
+      krt_prefsrc = {{ .PrefSrc6 }};
+      accept;
+    }
+  {{ else }}
+    accept;
   {{ end }}
+  };
   {{ if .MergePaths }}merge paths;{{ end }}
 }
 

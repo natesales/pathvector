@@ -60,6 +60,8 @@ type Config struct {
 	RtrServer    string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 	KeepFiltered bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
 	MergePaths   bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
+	PrefSrc4     string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
+	PrefSrc6     string           `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
 
 	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`

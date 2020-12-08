@@ -96,7 +96,10 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | ASN,0,101 | Learned from upstream     |
 | ASN,0,102 | Learned from peer         |
 | ASN,0,103 | Learned from downstream   |
-| ASN,0,200 | Don't export to upstreams |
+| ASN,1,200 | Don't export to upstreams |
+| ASN,1,301 | Prepend once              |
+| ASN,1,302 | Prepend twice             |
+| ASN,1,303 | Prepend three times       |
 
 #### Global Configuration Options
 

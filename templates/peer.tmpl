@@ -43,7 +43,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
-            strip_communities();
+            strip_info_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();
             {{ $peer.PreImport }}
@@ -80,9 +80,10 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ $peer.PreExport }}
             {{ if or $global.OriginSet4 $global.OriginSet6 -}}
             accept_local(); # Originated
+            process_prepends();
             {{ end -}}
             {{ if eq $peer.Type "upstream" -}}
-            if ((ASN,0,200) ~ bgp_large_community) then reject; # Don't export to upstreams
+            if ((ASN,1,200) ~ bgp_large_community) then reject; # Don't export to upstreams
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{ else if or (eq $peer.Type "peer") (eq $peer.Type "import-valid") -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream

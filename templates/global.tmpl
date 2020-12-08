@@ -207,8 +207,8 @@ function reject_transit_paths() {
   if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
 }
 
-function strip_communities() {
-  bgp_large_community.delete([(ASN, *, *)]);
+function strip_info_communities() {
+  bgp_large_community.delete([(ASN, 0, *)]);
 }
 
 function accept_local() {
@@ -228,22 +228,24 @@ function accept_local() {
 }
 
 function process_prepends() {
-  if ((ASN,0,401) ~ bgp_community) then {
-    print "Adding single prepend for ", net;
-    bgp_path.prepend(ASN);
-  }
+  if ((ASN,0,103) ~ bgp_community) then { # Learned from downstream
+    if ((ASN,1,401) ~ bgp_community) then {
+      print "Adding single prepend for ", net;
+      bgp_path.prepend(ASN);
+    }
 
-  if ((ASN,0,402) ~ bgp_community) then {
-    print "Adding double prepend for ", net;
-    bgp_path.prepend(ASN);
-    bgp_path.prepend(ASN);
-  }
+    if ((ASN,1,402) ~ bgp_community) then {
+      print "Adding double prepend for ", net;
+      bgp_path.prepend(ASN);
+      bgp_path.prepend(ASN);
+    }
 
-  if ((ASN,0,403) ~ bgp_community) then {
-    print "Adding triple prepend for ", net;
-    bgp_path.prepend(ASN);
-    bgp_path.prepend(ASN);
-    bgp_path.prepend(ASN);
+    if ((ASN,1,403) ~ bgp_community) then {
+      print "Adding triple prepend for ", net;
+      bgp_path.prepend(ASN);
+      bgp_path.prepend(ASN);
+      bgp_path.prepend(ASN);
+    }
   }
 }
 

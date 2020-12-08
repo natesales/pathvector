@@ -246,19 +246,19 @@ function accept_local() {
 }
 
 function process_prepends() {
-  if ((ASN,0,103) ~ bgp_community) then { # Learned from downstream
-    if ((ASN,1,401) ~ bgp_community) then {
+  if ((ASN,0,103) ~ bgp_large_community) then { # Learned from downstream
+    if ((ASN,1,401) ~ bgp_large_community) then {
       print "Adding single prepend for ", net;
       bgp_path.prepend(ASN);
     }
 
-    if ((ASN,1,402) ~ bgp_community) then {
+    if ((ASN,1,402) ~ bgp_large_community) then {
       print "Adding double prepend for ", net;
       bgp_path.prepend(ASN);
       bgp_path.prepend(ASN);
     }
 
-    if ((ASN,1,403) ~ bgp_community) then {
+    if ((ASN,1,403) ~ bgp_large_community) then {
       print "Adding triple prepend for ", net;
       bgp_path.prepend(ASN);
       bgp_path.prepend(ASN);

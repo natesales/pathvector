@@ -88,6 +88,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
             {{ else if eq $peer.Type "downstream" -}}
             if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
+            if ((ASN,0,102) ~ bgp_large_community) then accept; # Peer
             if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
             {{ end -}}
             reject;

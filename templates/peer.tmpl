@@ -1,7 +1,7 @@
 # {{ .Peer.Name }} {{ .Peer.Asn }} last operation at {{ .Peer.QueryTime }}
 
-define AS{{ .Peer.Asn }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
-define AS{{ .Peer.Asn }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
+define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
+define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
 
 {{ if or (eq .Peer.Type "peer") (eq .Peer.Type "downstream") -}}
 {{ if NotEmpty .Peer.PrefixSet4 }}
@@ -39,7 +39,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         {{ if $global.KeepFiltered -}}
         import keep filtered;
         {{ end -}}
-        import limit AS{{ $peer.Asn }}_MAXPFX_v{{ $af }} action disable;
+        import limit AS{{ $peer.Asn }}_{{ $peer.Name }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}

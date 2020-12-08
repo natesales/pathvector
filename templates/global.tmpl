@@ -45,16 +45,18 @@ protocol direct { ipv4; ipv6; }
 protocol kernel {
   scan time 10;
   ipv4 {
-  {{ if .PrefSrc4 -}}
-    if source = RTS_STATIC then {
+    export filter {
+      {{ if .PrefSrc4 -}}
+      if source = RTS_STATIC then {
+        accept;
+      } else {
+        krt_prefsrc = {{ .PrefSrc4 }};
+        accept;
+      }
+      {{ else }}
       accept;
-    } else {
-      krt_prefsrc = {{ .PrefSrc4 }};
-      accept;
-    }
-  {{ else }}
-    accept;
-  {{ end }}
+      {{ end }}
+    };
   };
   {{ if .MergePaths }}merge paths;{{ end }}
 }
@@ -62,16 +64,18 @@ protocol kernel {
 protocol kernel {
   scan time 10;
   ipv6 {
-  {{ if .PrefSrc6 -}}
-    if source = RTS_STATIC then {
+    export filter {
+      {{ if .PrefSrc6 -}}
+      if source = RTS_STATIC then {
+        accept;
+      } else {
+        krt_prefsrc = {{ .PrefSrc6 }};
+        accept;
+      }
+      {{ else }}
       accept;
-    } else {
-      krt_prefsrc = {{ .PrefSrc6 }};
-      accept;
-    }
-  {{ else }}
-    accept;
-  {{ end }}
+      {{ end }}
+    };
   };
   {{ if .MergePaths }}merge paths;{{ end }}
 }

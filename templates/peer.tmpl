@@ -35,6 +35,8 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     {{- if $peer.Passive }}passive;{{ end }}
     {{- if $peer.Multihop }}multihop 255;{{ end }}
     {{- if $peer.Password }}password "{{ $peer.Password }}";{{ end }}
+    {{- if $peer.RsClient }}rs client;{{ end }}
+    {{- if $peer.RrClient }}rr client;{{ end }}
     ipv{{ $af }} {
         {{ if $global.KeepFiltered -}}
         import keep filtered;

@@ -214,7 +214,7 @@ define BOGON_ASNS = [
 # ---- Functions ----
 
 function _reject(string reason) {
-  print "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+  reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
 }
 
 function honor_graceful_shutdown() {

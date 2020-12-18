@@ -37,13 +37,13 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     {{- if $peer.Password }}password "{{ $peer.Password }}";{{ end }}
     {{- if $peer.RsClient }}rs client;{{ end }}
     {{- if $peer.RrClient }}rr client;{{ end }}
+    {{ $peer.SessionGlobal }}
     ipv{{ $af }} {
         {{ if $global.KeepFiltered -}}
         import keep filtered;
         {{ end -}}
         import limit AS{{ $peer.Asn }}_{{ $peer.Name }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
-        {{ $peer.SessionGlobal }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
             strip_info_communities();

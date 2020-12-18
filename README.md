@@ -137,6 +137,7 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | skip-filter    | Disable the universal bogon filter (Dangerous!)                                                           |
 | rs-client      | Enable route server client                                                                                |
 | rr-client      | Enable route reflector client                                                                             |
+| bfd            | Enable BFD                                                                                                |
 | session-global | String to add to session global config                                                                    |
 <details>
 <summary>Remarks</summary>

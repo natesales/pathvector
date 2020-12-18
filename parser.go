@@ -44,6 +44,7 @@ type Peer struct {
 	SkipFilter    bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
 	RsClient      bool     `yaml:"rs-client" toml:"RSClient" json:"rs-client"`
 	RrClient      bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
+	Bfd           bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
 	SessionGlobal string   `yaml:"session-global" toml:"SessionGlobal" json:"SessionGlobal"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`

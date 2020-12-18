@@ -37,6 +37,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     {{- if $peer.Password }}password "{{ $peer.Password }}";{{ end }}
     {{- if $peer.RsClient }}rs client;{{ end }}
     {{- if $peer.RrClient }}rr client;{{ end }}
+    {{- if $peer.Bfd }}bfd on;{{ end }}
     {{ $peer.SessionGlobal }}
     ipv{{ $af }} {
         {{ if $global.KeepFiltered -}}

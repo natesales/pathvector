@@ -43,6 +43,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         {{ end -}}
         import limit AS{{ $peer.Asn }}_{{ $peer.Name }}_MAXPFX_v{{ $af }} action disable;
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
+        {{ $peer.SessionGlobal }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
             strip_info_communities();

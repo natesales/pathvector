@@ -79,7 +79,7 @@ There are many features of BIRD that aren't part of bcg. If you want to add a st
 Next hop self will be enabled on BGP sessions where the neighbor ASN and local ASN are the same (iBGP sessions).
 
 #### Manual configuration
-If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before the peers defined in the bcg config file.
+If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before loading the rest of the config.
 
 #### Single-stack support
 bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured. 

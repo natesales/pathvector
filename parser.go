@@ -318,6 +318,11 @@ func main() {
 				return true
 			}
 		},
+
+		"CurrentTime": func() string {
+			// get current timestamp
+			return time.Now().Format(time.RFC1123)
+		},
 	}
 
 	log.Debug("Loading templates")

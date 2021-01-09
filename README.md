@@ -56,15 +56,14 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
 - Own prefixes as defined in the global `prefixes` list
 - Have a [bogon ASN](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L176) anywhere in the AS_PATH
 - Have a total AS_PATH length of more than 100
+- RPKI invalid
 - IPv4 prefixes that are...
     - length > 24
     - length < 8
-    - RPKI invalid
     - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L126)
 - IPv6 prefixes that are...
     - length > 48
     - length < 12
-    - RPKI invalid
     - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L143)
 
 All peers with a type of `peer` will apply further strict filtering by IRR using their AS-Set defined in PeeringDB. Max-prefix limits are also enforced for every peer.
@@ -111,10 +110,10 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
 | rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                             |
 | keep-filtered | Should BIRD keep filtered routes                                                                          |
-| peers         | Map of name to peer (see below)                                                                               |
-| merge-paths   | Enable merge paths on kernel export                                                                     |
-| pref-src4     | Preferred source IPv4 to export to kernel                                                               |
-| pref-src6     | Preferred source IPv6 to export to kernel                                                               |
+| peers         | Map of name to peer (see below)                                                                           |
+| merge-paths   | Enable merge paths on kernel export                                                                       |
+| pref-src4     | Preferred source IPv4 to export to kernel                                                                 |
+| pref-src6     | Preferred source IPv6 to export to kernel                                                                 |
 
 #### Peer Configuration Options
 

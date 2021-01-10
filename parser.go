@@ -482,6 +482,10 @@ func main() {
 				log.Infof("Peer %s has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
 			}
 
+			if peeringDbData.AsSet == "" {
+				log.Fatalf("%s has no as-set in PeeringDB", peerName)
+			}
+
 			if strings.Contains(peeringDbData.AsSet, "::") {
 				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
 			} else {

@@ -474,16 +474,16 @@ func main() {
 
 			if peerData.ImportLimit4 == 0 {
 				peerData.ImportLimit4 = peeringDbData.MaxPfx4
-				log.Infof("Peer %s has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
+				log.Infof("Network %s has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
 			}
 
 			if peerData.ImportLimit6 == 0 {
 				peerData.ImportLimit6 = peeringDbData.MaxPfx6
-				log.Infof("Peer %s has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
+				log.Infof("Network %s has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
 			}
 
 			if peeringDbData.AsSet == "" {
-				log.Fatalf("%s has no as-set in PeeringDB", peerName)
+				log.Fatalf("Network %s has no as-set in PeeringDB", peerName)
 			}
 
 			if strings.Contains(peeringDbData.AsSet, "::") {
@@ -514,43 +514,40 @@ func main() {
 			}
 		}
 
-		log.Infof("    local pref: %d", peerData.LocalPref)
-		log.Infof("    max prefixes: IPv4 %d, IPv6 %d", peerData.ImportLimit4, peerData.ImportLimit6)
+		log.Infof("Network %s local pref: %d", peerName, peerData.LocalPref)
+		log.Infof("Network %s max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
 
 		// Check for additional options
 		if peerData.AsSet != "" {
-			log.Infof("    as-set: %s", peerData.AsSet)
+			log.Infof("Network %s as-set: %s", peerName, peerData.AsSet)
 		}
 
 		if peerData.Prepends > 0 {
-			log.Infof("    prepends: %d", peerData.Prepends)
+			log.Infof("Network %s prepends: %d", peerName, peerData.Prepends)
 		}
 
 		if peerData.Multihop {
-			log.Infof("    multihop")
+			log.Infof("Network %s multihop", peerName)
 		}
 
 		if peerData.Passive {
-			log.Infof("    passive")
+			log.Infof("Network %s passive", peerName)
 		}
 
 		if peerData.Disabled {
-			log.Infof("    disabled")
+			log.Infof("Network %s disabled", peerName)
 		}
 
 		if peerData.PreImport != "" {
-			log.Infof("    pre-import: %s", peerData.PreImport)
+			log.Infof("Network %s pre-import: %s", peerName, peerData.PreImport)
 		}
 
 		if peerData.PreExport != "" {
-			log.Infof("    pre-export: %s", peerData.PreExport)
+			log.Infof("Network %s pre-export: %s", peerName, peerData.PreExport)
 		}
 
 		// Log neighbor IPs
-		log.Infof("    neighbors:")
-		for _, ip := range peerData.NeighborIps {
-			log.Infof("      %s", ip)
-		}
+		log.Infof("Network %s neighbors: %s", peerName, strings.Join(peerData.NeighborIps, ", "))
 
 		if !*dryRun {
 			// Create the peer specific file
@@ -565,7 +562,7 @@ func main() {
 				log.Fatalf("Execute template: %v", err)
 			}
 
-			log.Infof("Wrote peer specific config for AS%d", peerData.Asn)
+			log.Infof("Wrote peer specific config for %s", peerName)
 		} else {
 			log.Infof("Dry run is enabled, skipped writing peer config(s)")
 		}

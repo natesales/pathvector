@@ -457,10 +457,10 @@ func main() {
 
 		// Validate peer type
 		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream" || peerData.Type == "import-valid") {
-			log.Fatalf("    type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
+			log.Fatalf("Network %s type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
 		}
 
-		log.Infof("    type: %s", peerData.Type)
+		log.Infof("Network %s type: %s", peerName, peerData.Type)
 
 		// Set default local pref
 		if peerData.LocalPref == 0 {

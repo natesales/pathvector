@@ -1,4 +1,4 @@
-# {{ .Peer.Name }} {{ .Peer.Asn }} last operation at {{ .Peer.QueryTime }}
+# {{ .Peer.Name }} AS{{ .Peer.Asn }} last operation at {{ .Peer.QueryTime }}
 
 define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
 define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};

@@ -62,6 +62,7 @@ type Config struct {
 	Peers        map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
 	IrrDb        string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 	RtrServer    string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	RtrPort      int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
 	KeepFiltered bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
 	MergePaths   bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
 	PrefSrc4     string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
@@ -365,6 +366,12 @@ func main() {
 		config.RtrServer = "127.0.0.1"
 	}
 	log.Infof("Using RTR server %s", config.RtrServer)
+
+	// Set default RTR port
+	if config.RtrPort == 0 {
+		config.RtrPort = 8282
+	}
+	log.Infof("Using RTR port %d", config.RtrPort)
 
 	// Validate Router ID in dotted quad format
 	if net.ParseIP(config.RouterId).To4() == nil {

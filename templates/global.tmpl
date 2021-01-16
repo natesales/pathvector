@@ -116,7 +116,7 @@ protocol rpki {
   roa6 { table rpki6; };
 
   transport tcp;
-  remote "{{ .RtrServer }}" port 8282;
+  remote "{{ .RtrServer }}" port {{ .RtrPort }};
 
   retry keep 90;
   refresh keep 900;

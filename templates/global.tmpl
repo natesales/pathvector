@@ -150,7 +150,7 @@ define TRANSIT_ASNS = [
 ];
 
 define BOGONS_v4 = [
-  0.0.0.0/0,              # Default route
+  {{ if .FilterDefault -}}0.0.0.0/0,              # Default route{{ end }}
   0.0.0.0/8{8,32},        # IANA - Local Identification
   10.0.0.0/8{8,32},       # RFC 1918 - Private Use
   100.64.0.0/10{10,32},   # RFC 6598 - Shared Address Space
@@ -167,7 +167,7 @@ define BOGONS_v4 = [
 ];
 
 define BOGONS_v6 = [
-  ::/0,                     # Default route
+  {{ if .FilterDefault -}}::/0,                     # Default route{{ end }}
   ::/8{8,128},              # loopback, unspecified, v4-mapped
   64:ff9b::/96{96,128},     # RFC 6052 - IPv4-IPv6 Translation
   100::/8{8,128},           # RFC 6666 - reserved for Discard-Only Address Block

@@ -114,6 +114,7 @@ bcg strips private ASNs before exporting to upstream sessions in range `[64512..
 | merge-paths   | Enable merge paths on kernel export                                                                       |
 | pref-src4     | Preferred source IPv4 to export to kernel                                                                 |
 | pref-src6     | Preferred source IPv6 to export to kernel                                                                 |
+| filter-default | Should default routes be denied?                                                                         |
 
 #### Peer Configuration Options
 

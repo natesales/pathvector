@@ -89,6 +89,9 @@ bcg uses RFC 8092 BGP Large Communities
 #### Private ASNs
 bcg strips private ASNs before exporting to upstream sessions in range `[64512..65534, 4200000000..4294967294]`.
 
+#### "Peerlock Lite"
+Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in path ([Peerlock Lite](https://github.com/job/peerlock)).
+
 #### Communities
 
 | Large     | Meaning                   |

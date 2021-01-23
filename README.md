@@ -89,6 +89,8 @@ bcg uses RFC 8092 BGP Large Communities
 #### Private ASNs
 bcg strips private ASNs before exporting to upstream sessions in range `[64512..65534, 4200000000..4294967294]`.
 
+#### Communities
+
 | Large     | Meaning                   |
 |-----------|---------------------------|
 | ASN,0,100 | Originated                |

@@ -325,6 +325,11 @@ func main() {
 			// get current timestamp
 			return time.Now().Format(time.RFC1123)
 		},
+
+		"UnixTimestamp": func() string {
+			// get current timestamp in UNIX format
+			return strconv.Itoa(int(time.Now().Unix()))
+		},
 	}
 
 	log.Debug("Loading templates")

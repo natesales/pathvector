@@ -552,6 +552,10 @@ func main() {
 			log.Infof("[%s] disabled", peerName)
 		}
 
+		if peerData.EnforceFirstAs {
+			log.Infof("[%s] enforce-first-as", peerName)
+		}
+
 		if peerData.PreImport != "" {
 			log.Infof("[%s] pre-import: %s", peerName, peerData.PreImport)
 		}

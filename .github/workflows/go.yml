@@ -58,6 +58,10 @@ jobs:
           dpkg-deb --build debian
           mv debian.deb bcg-${{ steps.vars.outputs.tag }}.deb
 
+      - name: Build templates archive
+        run: |
+          tar -czvf templates-${{ steps.vars.outputs.tag }}.tar.gz templates/*
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -89,6 +93,16 @@ jobs:
           asset_path: ./bcg
           asset_name: bcg-${{ steps.vars.outputs.tag }}-amd64
           asset_content_type: application/x-deb
+
+      - name: Upload templates archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./templates-${{ steps.vars.outputs.tag }}.tar.gz
+          asset_name: templates-${{ steps.vars.outputs.tag }}.tar.gz
+          asset_content_type: application/gzip
 
       - name: Update debian repo
         run: curl -F package=@bcg-${{ steps.vars.outputs.tag }}.deb https://${{ secrets.TOKEN }}@push.fury.io/natesales/

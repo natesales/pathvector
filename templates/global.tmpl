@@ -291,6 +291,10 @@ function reject_bogons() {
   }
 }
 
+function enforce_first_as(int peer_asn) {
+  if (bgp_path.first != peer_asn) then _reject("invalid first AS");
+}
+
 # ---- Peers ----
 
 include "manual*.conf";

@@ -47,6 +47,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
+            {{ if $peer.EnforceFirstAs }}enforce_first_as({{ $peer.Asn }});{{ end }}
             strip_info_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();

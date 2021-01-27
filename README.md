@@ -144,6 +144,7 @@ Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in pat
 | rr-client      | Enable route reflector client                                                                             |
 | bfd            | Enable BFD                                                                                                |
 | session-global | String to add to session global config                                                                    |
+| enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                     |
 <details>
 <summary>Remarks</summary>
 import-limit4 will default to 1M for upstreams & import-valid if not set and use peeringDB max-prefix limit for peer & downstream

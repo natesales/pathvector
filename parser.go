@@ -103,7 +103,7 @@ var (
 	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
 	debug              = flag.Bool("debug", false, "Show debugging messages")
 	uiFile             = flag.String("uifile", "/tmp/bcg-ui.html", "File to store web UI index page")
-	noui               = flag.Bool("noui", false, "Disable generating web UI")
+	noUi               = flag.Bool("noui", false, "Disable generating web UI")
 )
 
 // Query PeeringDB for an ASN
@@ -587,7 +587,7 @@ func main() {
 	}
 
 	if !*dryRun {
-		if !*noui {
+		if !*noUi {
 			// Create the ui output file
 			log.Debug("Creating global config")
 			uiFileObj, err := os.Create(*uiFile)

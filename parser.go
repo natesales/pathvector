@@ -276,6 +276,7 @@ func main() {
 
 	log.Infof("Starting BCG %s", release)
 
+	// Template functions
 	funcMap := template.FuncMap{
 		"Contains": func(s, substr string) bool {
 			// String contains
@@ -462,6 +463,7 @@ func main() {
 			_peerName = "PEER_" + _peerName
 		}
 
+		// Set normalized peer name
 		peerData.Name = _peerName
 
 		// Set default query time

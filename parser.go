@@ -179,7 +179,7 @@ func readNoBuffer(reader io.Reader) string {
 	n, err := reader.Read(buf[:])
 
 	if err != nil {
-		log.Fatalf("BIRD read error: ", err)
+		log.Fatalf("BIRD read error: %s\n", err)
 	}
 
 	return string(buf[:n])
@@ -202,7 +202,7 @@ func runBirdCommand(command string) {
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
 	log.Printf("Sent BIRD command: %s", command)
 	if err != nil {
-		log.Fatalf("BIRD write error:", err)
+		log.Fatalf("BIRD write error: %s\n", err)
 	}
 
 	log.Printf("BIRD response: %s", readNoBuffer(conn))

@@ -514,19 +514,15 @@ func main() {
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-			// Check if upstream has MaxPrefix4/6 set, if not set sensible defaults and if they are configured too low, warn the user
+			// Check for a zero prefix import limit
 			if peerData.ImportLimit4 == 0 {
 				peerData.ImportLimit4 = 1000000 // 1M routes
-				log.Infof("Upstream/Import-Valid %s has no IPv4 import limit configured. Setting to 1,000,000", peerName)
-			} else if peerData.ImportLimit4 <= 900000 {
-				log.Infof("Upstream/Import-Valid %s has a low IPv4 import limit configured. You may want to increase the import limit.", peerName)
+				log.Fatalf("[%s] has no IPv4 import limit configured. Setting to 1,000,000", peerName)
 			}
 
 			if peerData.ImportLimit6 == 0 {
 				peerData.ImportLimit6 = 150000 // 150k routes
-				log.Infof("Upstream/Import-Valid %s has no IPv6 import limit configured. Setting to 150,000", peerName)
-			} else if peerData.ImportLimit6 <= 98000 {
-				log.Infof("Upstream/Import-Valid %s has a low IPv6 import limit configured. You may want to increase the import limit.", peerName)
+				log.Fatalf("[%s] has no IPv6 import limit configured. Setting to 150,000", peerName)
 			}
 		}
 

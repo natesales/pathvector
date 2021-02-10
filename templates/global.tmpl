@@ -90,7 +90,7 @@ protocol static null4 {
 
 protocol static null6 {
   ipv6;
-  route fddd:192::1/128 blackhole;
+  route 100::1/128 blackhole;
 }
 
 function process_blackholes() {
@@ -101,7 +101,7 @@ function process_blackholes() {
     }
 
     if (net.type = NET_IP6 && net.len = 128) then {
-      bgp_next_hop = fddd:192::1;
+      bgp_next_hop = 100::1;
       print "Added null route for ", net;
     }
   }

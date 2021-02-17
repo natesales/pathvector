@@ -517,12 +517,12 @@ func main() {
 			// Check for a zero prefix import limit
 			if peerData.ImportLimit4 == 0 {
 				peerData.ImportLimit4 = 1000000 // 1M routes
-				log.Fatalf("[%s] has no IPv4 import limit configured. Setting to 1,000,000", peerName)
+				log.Infof("[%s] has no IPv4 import limit configured. Setting to 1,000,000", peerName)
 			}
 
 			if peerData.ImportLimit6 == 0 {
 				peerData.ImportLimit6 = 150000 // 150k routes
-				log.Fatalf("[%s] has no IPv6 import limit configured. Setting to 150,000", peerName)
+				log.Infof("[%s] has no IPv6 import limit configured. Setting to 150,000", peerName)
 			}
 		}
 

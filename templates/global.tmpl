@@ -30,6 +30,17 @@ protocol static static6 {
 }
 {{- end }}
 
+{{ if .DefaultEnabled -}}
+protocol static default4 {
+  ipv4;
+  route 0.0.0.0/0 reject;
+}
+protocol static default6 {
+  ipv6;
+  route ::/0 reject;
+}
+{{- end }}
+
 # ---- Parameters ----
 
 timeformat base iso long;

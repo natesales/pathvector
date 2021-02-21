@@ -181,6 +181,7 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                     |
 | export-default | Should a default route be sent over the session? (default false)                                            |
 | no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
+| allow-blackholes | Accept community (ASN,0,666) to blackhole /32 and /128 prefixes |
 
 <details>
 <summary>Remarks</summary>

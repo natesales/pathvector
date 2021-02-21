@@ -59,12 +59,17 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ end }}
             {{- if eq $peer.Type "upstream" -}}
             bgp_large_community.add((ASN,0,101)); # Learned from upstream
-            bgp_path.delete([64512..65534, 4200000000..4294967294]); # Strip private ASNs
+            {{ if $peer.AllowBlackholes }}
+            process_blackholes();
+            {{ end }}
             accept;
             {{- else if eq $peer.Type "peer" -}}
             reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102)); # Learned from peer
+                {{ if $peer.AllowBlackholes }}
+                process_blackholes();
+                {{ end }}
                 accept;
             }
             reject;
@@ -72,11 +77,17 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,103)); # Learned from downstream
+                {{ if $peer.AllowBlackholes }}
+                process_blackholes();
+                {{ end }}
                 accept;
             }
             reject;
             {{- else if eq $peer.Type "import-valid" -}}
             bgp_large_community.add((ASN,0,102)); # Learned from peer
+            {{ if $peer.AllowBlackholes }}
+            process_blackholes();
+            {{ end }}
             accept;
             {{- end }}
         };

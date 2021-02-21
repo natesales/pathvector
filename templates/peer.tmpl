@@ -101,7 +101,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ end -}}
             {{ end -}}
 
-            {{ if $peer.SendDefault -}}
+            {{ if $peer.ExportDefault -}}
             if (proto = "default{{ $af }}") then accept; # Send default route
             {{ end }}
             reject;

@@ -48,6 +48,7 @@ type Peer struct {
 	Bfd            bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
 	EnforceFirstAs bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
 	SessionGlobal  string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
+	SendDefault    bool     `yaml:"send-default" toml:"SendDefault" json:"send-default"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`

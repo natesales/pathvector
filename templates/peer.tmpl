@@ -97,6 +97,9 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             if ((ASN,0,102) ~ bgp_large_community) then accept; # Peer
             if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
             {{ end -}}
+            {{ if $peer.SendDefault -}}
+            if (proto = "default{{ $af }}") then accept; # Send default route
+            {{ end }}
             reject;
         };
     };

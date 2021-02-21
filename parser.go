@@ -100,6 +100,19 @@ type PeerTemplate struct {
 	Config Config
 }
 
+// Config constants
+const (
+	DefaultTimeFormat = time.RFC1123
+
+	DefaultIPv4TableSize = 1000000
+	DefaultIPv6TableSize = 150000
+
+	DefaultRtrServer = "127.0.0.1"
+	DefaultRtrPort   = 8282
+
+	DefaultIRRServer = "rr.ntt.net"
+)
+
 // Flags
 var (
 	configFilename     = flag.String("config", "/etc/bcg/config.yml", "Configuration file in YAML, TOML, or JSON format")
@@ -332,7 +345,7 @@ func main() {
 
 		"CurrentTime": func() string {
 			// get current timestamp
-			return time.Now().Format(time.RFC1123)
+			return time.Now().Format(DefaultTimeFormat)
 		},
 
 		"UnixTimestamp": func() string {
@@ -372,19 +385,19 @@ func main() {
 
 	// Set default IRRDB
 	if config.IrrDb == "" {
-		config.IrrDb = "rr.ntt.net"
+		config.IrrDb = DefaultIRRServer
 	}
 	log.Infof("Using IRRDB server %s", config.IrrDb)
 
 	// Set default RTR server
 	if config.RtrServer == "" {
-		config.RtrServer = "127.0.0.1"
+		config.RtrServer = DefaultRtrServer
 	}
 	log.Infof("Using RTR server %s", config.RtrServer)
 
 	// Set default RTR port
 	if config.RtrPort == 0 {
-		config.RtrPort = 8282
+		config.RtrPort = DefaultRtrPort
 	}
 	log.Infof("Using RTR port %d", config.RtrPort)
 
@@ -492,7 +505,7 @@ func main() {
 
 		// Only query PeeringDB and IRRDB for peers and downstreams
 		if peerData.Type == "peer" || peerData.Type == "downstream" {
-			peerData.QueryTime = time.Now().Format(time.RFC1123)
+			peerData.QueryTime = time.Now().Format(DefaultTimeFormat)
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
 			if peerData.ImportLimit4 == 0 {
@@ -519,17 +532,17 @@ func main() {
 			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, config.IrrDb)
 
 			// Update the "latest operation" timestamp
-			peerData.QueryTime = time.Now().Format(time.RFC1123)
+			peerData.QueryTime = time.Now().Format(DefaultTimeFormat)
 		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
 			// Check for a zero prefix import limit
 			if peerData.ImportLimit4 == 0 {
-				peerData.ImportLimit4 = 1000000 // 1M routes
-				log.Infof("[%s] has no IPv4 import limit configured. Setting to 1,000,000", peerName)
+				peerData.ImportLimit4 = DefaultIPv4TableSize
+				log.Infof("[%s] has no IPv4 import limit configured. Setting to %d", peerName, DefaultIPv4TableSize)
 			}
 
 			if peerData.ImportLimit6 == 0 {
-				peerData.ImportLimit6 = 150000 // 150k routes
-				log.Infof("[%s] has no IPv6 import limit configured. Setting to 150,000", peerName)
+				peerData.ImportLimit6 = DefaultIPv6TableSize
+				log.Infof("[%s] has no IPv6 import limit configured. Setting to %d", peerName, DefaultIPv6TableSize)
 			}
 		}
 

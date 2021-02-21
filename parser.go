@@ -49,6 +49,7 @@ type Peer struct {
 	EnforceFirstAs bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
 	SessionGlobal  string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
 	SendDefault    bool     `yaml:"send-default" toml:"SendDefault" json:"send-default"`
+	NoSpecifics    bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
@@ -532,6 +533,8 @@ func main() {
 
 		log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
 		log.Infof("[%s] max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
+		log.Infof("[%s] send-default: %v", peerName, peerData.SendDefault)
+		log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 
 		// Check for additional options
 		if peerData.AsSet != "" {

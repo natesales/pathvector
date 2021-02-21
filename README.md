@@ -133,6 +133,7 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | ASN,1,301 | Prepend once              |
 | ASN,1,302 | Prepend twice             |
 | ASN,1,303 | Prepend three times       |
+| ASN,1,666 | Blackhole (must be enabled with `allow-blackholes` |
 
 #### Global Configuration Options
 
@@ -177,7 +178,7 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                     |
 | export-default | Should a default route be sent over the session? (default false)                                            |
 | no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
-| allow-blackholes | Accept community (ASN,0,666) to blackhole /32 and /128 prefixes |
+| allow-blackholes | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes |
 | strip-private-asns | Should private ASNs be stripped from path before exporting? (in range `[64512..65534, 4200000000..4294967294]`) |
 
 <details>

@@ -105,7 +105,7 @@ protocol static null6 {
 }
 
 function process_blackholes() {
-  if ((ASN,0,666) ~ bgp_large_community) then {
+  if ((ASN,1,666) ~ bgp_large_community) then {
     if (net.type = NET_IP4 && net.len = 32) then {
       bgp_next_hop = 192.0.2.1;
       print "Added null route for ", net;

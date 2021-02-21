@@ -116,10 +116,6 @@ objects will not have sessions of that address family configured.
 
 bcg uses RFC 8092 BGP Large Communities
 
-#### Private ASNs
-
-bcg strips private ASNs before exporting to upstream sessions in range `[64512..65534, 4200000000..4294967294]`.
-
 #### "Peerlock Lite"
 
 Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in
@@ -182,6 +178,7 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | export-default | Should a default route be sent over the session? (default false)                                            |
 | no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
 | allow-blackholes | Accept community (ASN,0,666) to blackhole /32 and /128 prefixes |
+| strip-private-asns | Should private ASNs be stripped from path before exporting? (in range `[64512..65534, 4200000000..4294967294]`) |
 
 <details>
 <summary>Remarks</summary>

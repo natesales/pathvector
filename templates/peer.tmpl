@@ -94,6 +94,11 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
 
         export filter {
             {{ $peer.PreExport }}
+
+            {{ if $peer.StripPrivateASNs }}
+            bgp_path.delete([64512..65534, 4200000000..4294967294]); # Strip private ASNs
+            {{ end }}
+
             {{ if or $global.OriginSet4 $global.OriginSet6 -}}
             accept_local(); # Originated
             process_prepends();

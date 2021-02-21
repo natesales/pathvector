@@ -47,7 +47,7 @@ type Peer struct {
 	RrClient       bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
 	Bfd            bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
 	EnforceFirstAs bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
-	SessionGlobal  string   `yaml:"session-global" toml:"SessionGlobal" json:"SessionGlobal"`
+	SessionGlobal  string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`

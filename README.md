@@ -51,6 +51,8 @@ Usage for bcg https://github.com/natesales/bcg:
         Show debugging messages
   -dryrun
         Skip modifying BIRD config. This can be used to test that your config syntax is correct.
+  -noreconfig
+        Disable birdc configure at end of run
   -noui
         Disable generating web UI
   -output string

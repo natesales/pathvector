@@ -4,10 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/kennygrant/sanitize"
-	"github.com/pelletier/go-toml"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"net"
@@ -21,6 +17,11 @@ import (
 	"text/template"
 	"time"
 	"unicode"
+
+	"github.com/kennygrant/sanitize"
+	"github.com/pelletier/go-toml"
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 var release = "devel" // This is set by go build
@@ -57,18 +58,19 @@ type Peer struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn           uint             `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId      string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes      []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers         map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
-	IrrDb         string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer     string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
-	RtrPort       int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
-	KeepFiltered  bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
-	MergePaths    bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4      string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
-	PrefSrc6      string           `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
-	FilterDefault bool             `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
+	Asn            uint             `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId       string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes       []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Peers          map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	IrrDb          string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	RtrServer      string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	RtrPort        int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
+	KeepFiltered   bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
+	MergePaths     bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
+	PrefSrc4       string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
+	PrefSrc6       string           `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
+	FilterDefault  bool             `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
+	DefaultEnabled bool             `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
 
 	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`

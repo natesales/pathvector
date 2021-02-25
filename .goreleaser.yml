@@ -53,4 +53,4 @@ nfpms:
 publishers:
   - name: fury.io
     dir: "{{ dir .ArtifactPath }}"
-    cmd: curl -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/
+    cmd: curl -s -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/

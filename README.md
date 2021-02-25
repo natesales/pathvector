@@ -10,8 +10,8 @@ The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix
 
 bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr),
 and [bgpq4](https://github.com/bgp/bgpq4). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path
-before running bcg. bcg is available for amd64 as a prebuilt deb package and binary for each release. Releases can be
-downloaded from Github and in my public code repositories - see https://github.com/natesales/repo for more info. You can
+before running bcg. Releases can be
+downloaded from Github and from my public code repositories - see https://github.com/natesales/repo for more info. You can
 also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update
 IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/bin/bcg` to your crontab will update the filters
 at 12 AM and PM. If you're using ZSH you might also be interested in
@@ -180,4 +180,4 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | allow-blackholes | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes |
 | strip-private-asns | Should private ASNs be stripped from path before exporting? (in range `[64512..65534, 4200000000..4294967294]`) |
 | communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`) |
-| large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0`) |
+| large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |

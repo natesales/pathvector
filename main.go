@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var release = "devel" // This is set by go build
+var version = "dev" // set by the build process
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
@@ -284,17 +284,17 @@ func loadConfig() Config {
 func main() {
 	// Enable debug logging in development releases
 	if //noinspection GoBoolExpressions
-	release == "devel" || *debug {
+	version == "devel" || *debug {
 		log.SetLevel(log.DebugLevel)
 	}
 
 	flag.Usage = func() {
-		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
+		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", version)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
 
-	log.Infof("Starting BCG %s", release)
+	log.Infof("Starting bcg %s", version)
 
 	// Template functions
 	funcMap := template.FuncMap{

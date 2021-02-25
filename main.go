@@ -526,14 +526,24 @@ func main() {
 				log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
 			}
 
-			if peeringDbData.AsSet == "" {
-				log.Fatalf("[%s] has no as-set in PeeringDB", peerName)
+			// If the as-set has a space in it, split and pick the first element
+			if strings.Contains(peeringDbData.AsSet, " ") {
+				peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
+				log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
 			}
 
+			// Trim IRRDB prefix
 			if strings.Contains(peeringDbData.AsSet, "::") {
 				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
+				log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
 			} else {
 				peerData.AsSet = peeringDbData.AsSet
+			}
+
+			if peeringDbData.AsSet == "" {
+				log.Fatalf("[%s] has no as-set in PeeringDB", peerName)
+			} else {
+				log.Infof("[%s] as-set from PeeringDB: %s\n", peerName, peeringDbData.AsSet)
 			}
 
 			peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, config.IrrDb)
@@ -611,6 +621,7 @@ func main() {
 			}
 
 			// Render the template and write to disk
+			log.Infof("[%s] Writing config", peerName)
 			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)

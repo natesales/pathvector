@@ -27,7 +27,7 @@ changelog:
       - '^docs:'
       - '^test:'
 nfpms:
-  - id: default
+  - id: nfpm-default
     package_name: bcg
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
@@ -52,5 +52,7 @@ nfpms:
 
 publishers:
   - name: fury.io
+    ids:
+      - nfpm-default
     dir: "{{ dir .ArtifactPath }}"
     cmd: curl -s -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/

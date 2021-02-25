@@ -6,3 +6,6 @@ output/*
 
 # JetBrains configs
 .idea/
+
+# Release
+dist/

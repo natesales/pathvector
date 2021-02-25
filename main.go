@@ -116,14 +116,14 @@ const (
 
 // Flags
 var (
-	configFilename  = flag.String("config", "/etc/bcg/config.yml", "Configuration file in YAML, TOML, or JSON format")
-	outputDirectory = flag.String("output", "/etc/bird/", "Directory to write output files to")
+	configFilename  = flag.String("config", "/etc/bcg/config.yml", "configuration file in YAML, TOML, or JSON format")
+	outputDirectory = flag.String("output", "/etc/bird/", "directory to write output files to")
 	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
-	dryRun          = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
-	debug           = flag.Bool("debug", false, "Show debugging messages")
-	uiFile          = flag.String("uifile", "/tmp/bcg-ui.html", "File to store web UI index page")
-	noUi            = flag.Bool("noui", false, "Disable generating web UI")
-	noReconfigure   = flag.Bool("noreconfig", false, "Disable birdc configure at end of run")
+	dryRun          = flag.Bool("dryRun", false, "skip modifying BIRD config")
+	debug           = flag.Bool("debug", false, "show debugging messages")
+	uiFile          = flag.String("uiFile", "/tmp/bcg-ui.html", "file to store web UI")
+	noGenerateUi    = flag.Bool("noGenerateUi", false, "disable generating web UI")
+	noReconfigure   = flag.Bool("noreconfig", false, "disable configuring bird at end of run")
 )
 
 // Query PeeringDB for an ASN
@@ -614,7 +614,7 @@ func main() {
 	}
 
 	if !*dryRun {
-		if !*noUi {
+		if !*noGenerateUi {
 			// Create the ui output file
 			log.Debug("Creating global config")
 			uiFileObj, err := os.Create(*uiFile)

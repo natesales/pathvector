@@ -123,7 +123,7 @@ var (
 	debug           = flag.Bool("debug", false, "show debugging messages")
 	uiFile          = flag.String("uiFile", "/tmp/bcg-ui.html", "file to store web UI")
 	noGenerateUi    = flag.Bool("noGenerateUi", false, "disable generating web UI")
-	noReconfigure   = flag.Bool("noreconfig", false, "disable configuring bird at end of run")
+	noConfigure     = flag.Bool("noConfigure", false, "disable configuring bird at end of run")
 )
 
 // Query PeeringDB for an ASN
@@ -632,7 +632,7 @@ func main() {
 			log.Debug("Finished writing ui file")
 		}
 
-		if !*noReconfigure {
+		if !*noConfigure {
 			log.Infoln("reconfiguring bird")
 			runBirdCommand("configure")
 		} else {

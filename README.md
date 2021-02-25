@@ -53,7 +53,7 @@ Usage for bcg https://github.com/natesales/bcg:
         skip modifying BIRD config
   -noGenerateUi
         disable generating web UI
-  -noreconfig
+  -noConfigure
         disable configuring bird at end of run
   -output string
         directory to write output files to (default "/etc/bird/")

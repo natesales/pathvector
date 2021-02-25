@@ -46,23 +46,21 @@ peers:
 ```
 Usage for bcg https://github.com/natesales/bcg:
   -config string
-        Configuration file in YAML, TOML, or JSON format (default "/etc/bcg/config.yml")
+        configuration file in YAML, TOML, or JSON format (default "/etc/bcg/config.yml")
   -debug
-        Show debugging messages
-  -dryrun
-        Skip modifying BIRD config. This can be used to test that your config syntax is correct.
+        show debugging messages
+  -dryRun
+        skip modifying BIRD config
+  -noGenerateUi
+        disable generating web UI
   -noreconfig
-        Disable birdc configure at end of run
-  -noui
-        Disable generating web UI
+        disable configuring bird at end of run
   -output string
-        Directory to write output files to (default "/etc/bird/")
+        directory to write output files to (default "/etc/bird/")
   -socket string
         BIRD control socket (default "/run/bird/bird.ctl")
-  -templates string
-        Templates directory (default "/etc/bcg/templates/")
-  -uifile string
-        File to store web UI index page (default "/tmp/bcg-ui.html")
+  -uiFile string
+        file to store web UI (default "/tmp/bcg-ui.html")
 ```
 
 #### How does filtering work?

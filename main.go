@@ -54,6 +54,8 @@ type Peer struct {
 	NoSpecifics        bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
 	AllowBlackholes    bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
 	StripPrivateASNs   bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
+	Communities        []string `yaml:"communities" toml:"Communities" json:"communities"`
+	LargeCommunities   []string `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
@@ -558,6 +560,8 @@ func main() {
 		log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 		log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
 		log.Infof("[%s] strip-private-asns: %v", peerName, peerData.StripPrivateASNs)
+		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
+		log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
 
 		// Check for additional options
 		if peerData.AsSet != "" {

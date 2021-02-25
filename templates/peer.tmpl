@@ -96,6 +96,14 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         export filter {
             {{ $peer.PreExport }}
 
+            {{- range $i, $community := $peer.Communities -}}
+            bgp_community.add(({{ $community }}));
+            {{ end }}
+
+            {{- range $i, $community := $peer.LargeCommunities -}}
+            bgp_large_community.add(({{ $community }}));
+            {{ end }}
+
             {{ if $peer.StripPrivateASNs }}
             bgp_path.delete([64512..65534, 4200000000..4294967294]); # Strip private ASNs
             {{ end }}

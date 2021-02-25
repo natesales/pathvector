@@ -306,6 +306,10 @@ function enforce_first_as(int peer_asn) {
   if (bgp_path.first != peer_asn) then _reject("invalid first AS");
 }
 
+function enforce_peer_nexthop(ip addr) {
+  if (bgp_next_hop != addr) then _reject("nexhop doesn't match neighbor address");
+}
+
 # ---- Peers ----
 
 include "manual*.conf";

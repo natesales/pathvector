@@ -29,30 +29,31 @@ var version = "dev" // set by the build process
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn              uint     `yaml:"asn" toml:"ASN" json:"asn"`
-	Type             string   `yaml:"type" toml:"Type" json:"type"`
-	Prepends         uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref        uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
-	Multihop         bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive          bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled         bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	Password         string   `yaml:"password" toml:"Password" json:"password"`
-	Port             uint16   `yaml:"port" toml:"Port" json:"port"`
-	PreImport        string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
-	PreExport        string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
-	NeighborIps      []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	ImportLimit4     uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
-	ImportLimit6     uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
-	SkipFilter       bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
-	RsClient         bool     `yaml:"rs-client" toml:"RSClient" json:"rs-client"`
-	RrClient         bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
-	Bfd              bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
-	EnforceFirstAs   bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
-	SessionGlobal    string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
-	ExportDefault    bool     `yaml:"export-default" toml:"ExportDefault" json:"export-default"`
-	NoSpecifics      bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
-	AllowBlackholes  bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
-	StripPrivateASNs bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
+	Asn                uint     `yaml:"asn" toml:"ASN" json:"asn"`
+	Type               string   `yaml:"type" toml:"Type" json:"type"`
+	Prepends           uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
+	LocalPref          uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
+	Multihop           bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
+	Passive            bool     `yaml:"passive" toml:"Passive" json:"passive"`
+	Disabled           bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
+	Password           string   `yaml:"password" toml:"Password" json:"password"`
+	Port               uint16   `yaml:"port" toml:"Port" json:"port"`
+	PreImport          string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
+	PreExport          string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
+	NeighborIps        []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
+	ImportLimit4       uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
+	ImportLimit6       uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
+	SkipFilter         bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
+	RsClient           bool     `yaml:"rs-client" toml:"RSClient" json:"rs-client"`
+	RrClient           bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
+	Bfd                bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
+	EnforceFirstAs     bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
+	EnforcePeerNexthop bool     `yaml:"enforce-peer-nexthop" toml:"EnforcePeerNexthop" json:"enforce-peer-nexthop"`
+	SessionGlobal      string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
+	ExportDefault      bool     `yaml:"export-default" toml:"ExportDefault" json:"export-default"`
+	NoSpecifics        bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
+	AllowBlackholes    bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
+	StripPrivateASNs   bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
@@ -581,6 +582,10 @@ func main() {
 
 		if peerData.EnforceFirstAs {
 			log.Infof("[%s] enforce-first-as", peerName)
+		}
+
+		if peerData.EnforcePeerNexthop {
+			log.Infof("[%s] enforce-peer-nexthop", peerName)
 		}
 
 		if peerData.PreImport != "" {

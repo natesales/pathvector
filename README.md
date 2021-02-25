@@ -174,6 +174,7 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | bfd            | Enable BFD                                                                                                |
 | session-global | String to add to session global config                                                                    |
 | enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                     |
+| enforce-peer-nexthop | Reject routes where the next hop doesn't match the neighbor address                                     |
 | export-default | Should a default route be sent over the session? (default false)                                            |
 | no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
 | allow-blackholes | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes |

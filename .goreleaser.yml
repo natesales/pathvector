@@ -1,0 +1,58 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+scoop:
+  name: bcg
+  commit_author:
+    name: natesales
+    email: nate@natesales.net
+  commit_msg_template: Scoop update for {{ .ProjectName }} version {{ .Tag }}
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+nfpms:
+  - id: default
+    package_name: bcg
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+    vendor: Nate Sales
+    homepage: https://natesales.net/
+    maintainer: Nate Sales <nate@natesales.net>
+    description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.
+    license: GNU GPL-3.0
+    section: utils
+    priority: extra
+
+    formats:
+      - deb
+      - rpm
+
+    dependencies:
+      - bgpq4
+      - bird2
+
+    recommends:
+      - gortr
+
+publishers:
+  - name: fury.io
+    ids:
+      - packages
+    dir: "{{ dir .ArtifactPath }}"
+    cmd: curl -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -24,7 +25,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var release = "devel" // This is set by go build
+var version = "dev" // set by the build process
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
@@ -115,15 +116,14 @@ const (
 
 // Flags
 var (
-	configFilename     = flag.String("config", "/etc/bcg/config.yml", "Configuration file in YAML, TOML, or JSON format")
-	outputDirectory    = flag.String("output", "/etc/bird/", "Directory to write output files to")
-	templatesDirectory = flag.String("templates", "/etc/bcg/templates/", "Templates directory")
-	birdSocket         = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
-	dryRun             = flag.Bool("dryrun", false, "Skip modifying BIRD config. This can be used to test that your config syntax is correct.")
-	debug              = flag.Bool("debug", false, "Show debugging messages")
-	uiFile             = flag.String("uifile", "/tmp/bcg-ui.html", "File to store web UI index page")
-	noUi               = flag.Bool("noui", false, "Disable generating web UI")
-	noReconfigure      = flag.Bool("noreconfig", false, "Disable birdc configure at end of run")
+	configFilename  = flag.String("config", "/etc/bcg/config.yml", "configuration file in YAML, TOML, or JSON format")
+	outputDirectory = flag.String("output", "/etc/bird/", "directory to write output files to")
+	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
+	dryRun          = flag.Bool("dryRun", false, "skip modifying BIRD config")
+	debug           = flag.Bool("debug", false, "show debugging messages")
+	uiFile          = flag.String("uiFile", "/tmp/bcg-ui.html", "file to store web UI")
+	noGenerateUi    = flag.Bool("noGenerateUi", false, "disable generating web UI")
+	noReconfigure   = flag.Bool("noreconfig", false, "disable configuring bird at end of run")
 )
 
 // Query PeeringDB for an ASN
@@ -281,20 +281,25 @@ func loadConfig() Config {
 	return config
 }
 
+// Templates
+
+//go:embed templates/*
+var templates embed.FS
+
 func main() {
 	// Enable debug logging in development releases
 	if //noinspection GoBoolExpressions
-	release == "devel" || *debug {
+	version == "devel" || *debug {
 		log.SetLevel(log.DebugLevel)
 	}
 
 	flag.Usage = func() {
-		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", release)
+		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", version)
 		flag.PrintDefaults()
 	}
 	flag.Parse()
 
-	log.Infof("Starting BCG %s", release)
+	log.Infof("Starting bcg %s", version)
 
 	// Template functions
 	funcMap := template.FuncMap{
@@ -357,19 +362,19 @@ func main() {
 	log.Debug("Loading templates")
 
 	// Generate peer template
-	peerTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "peer.tmpl"))
+	peerTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/peer.tmpl")
 	if err != nil {
 		log.Fatalf("Read peer template: %v", err)
 	}
 
 	// Generate global template
-	globalTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "global.tmpl"))
+	globalTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/global.tmpl")
 	if err != nil {
 		log.Fatalf("Read global template: %v", err)
 	}
 
 	// Generate UI template
-	uiTemplate, err := template.New("").Funcs(funcMap).ParseFiles(path.Join(*templatesDirectory, "ui.tmpl"))
+	uiTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/ui.tmpl")
 	if err != nil {
 		log.Fatalf("Read ui template: %v", err)
 	}
@@ -609,7 +614,7 @@ func main() {
 	}
 
 	if !*dryRun {
-		if !*noUi {
+		if !*noGenerateUi {
 			// Create the ui output file
 			log.Debug("Creating global config")
 			uiFileObj, err := os.Create(*uiFile)

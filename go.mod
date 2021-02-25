@@ -1,6 +1,6 @@
 module github.com/natesales/bcg
 
-go 1.14
+go 1.16
 
 require (
 	github.com/kennygrant/sanitize v1.2.4

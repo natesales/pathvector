@@ -3,6 +3,7 @@ module github.com/natesales/bcg
 go 1.16
 
 require (
+	github.com/jessevdk/go-flags v1.4.0
 	github.com/kennygrant/sanitize v1.2.4
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pelletier/go-toml v1.8.1

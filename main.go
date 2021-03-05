@@ -3,8 +3,6 @@ package main
 import (
 	"embed"
 	"encoding/json"
-	"flag"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
@@ -19,6 +17,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/jessevdk/go-flags"
 	"github.com/kennygrant/sanitize"
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
@@ -118,16 +117,16 @@ const (
 )
 
 // Flags
-var (
-	configFilename  = flag.String("config", "/etc/bcg/config.yml", "configuration file in YAML, TOML, or JSON format")
-	outputDirectory = flag.String("output", "/etc/bird/", "directory to write output files to")
-	birdSocket      = flag.String("socket", "/run/bird/bird.ctl", "BIRD control socket")
-	dryRun          = flag.Bool("dryRun", false, "skip modifying BIRD config")
-	debug           = flag.Bool("debug", false, "show debugging messages")
-	uiFile          = flag.String("uiFile", "/tmp/bcg-ui.html", "file to store web UI")
-	noGenerateUi    = flag.Bool("noGenerateUi", false, "disable generating web UI")
-	noConfigure     = flag.Bool("noConfigure", false, "disable configuring bird at end of run")
-)
+var opts struct {
+	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/bcg/config.yml"`
+	Output      string `short:"o" long:"output" description:"Directory to write output files to" default:"/etc/bird/"`
+	Socket      string `short:"s" long:"socket" description:"BIRD control socket" default:"/run/bird/bird.ctl"`
+	UiFile      string `short:"u" long:"ui-file" description:"File to store web UI" default:"/tmp/bcg-ui.html"`
+	NoUi        bool   `short:"n" long:"no-ui" description:"Don't generate web UI"`
+	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
+	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
+	NoConfigure bool   `long:"no-configure" description:"Don't configure BIRD"`
+}
 
 // Query PeeringDB for an ASN
 func getPeeringDbData(asn uint) PeeringDbData {
@@ -211,7 +210,7 @@ func readNoBuffer(reader io.Reader) string {
 // Run a bird command
 func runBirdCommand(command string) {
 	log.Println("Connecting to BIRD socket")
-	conn, err := net.Dial("unix", *birdSocket)
+	conn, err := net.Dial("unix", opts.Socket)
 	if err != nil {
 		log.Fatalf("BIRD socket connect: %v", err)
 	}
@@ -250,14 +249,14 @@ func normalize(input string) string {
 
 // Load a configuration file (YAML, JSON, or TOML)
 func loadConfig() Config {
-	configFile, err := ioutil.ReadFile(*configFilename)
+	configFile, err := ioutil.ReadFile(opts.ConfigFile)
 	if err != nil {
-		log.Fatalf("Reading %s: %v", *configFilename, err)
+		log.Fatalf("Reading %s: %v", opts.ConfigFile, err)
 	}
 
 	var config Config
 
-	_splitFilename := strings.Split(*configFilename, ".")
+	_splitFilename := strings.Split(opts.ConfigFile, ".")
 	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
 	case "yaml", "yml":
 		log.Info("Using YAML configuration format")
@@ -290,17 +289,19 @@ func loadConfig() Config {
 var templates embed.FS
 
 func main() {
-	// Enable debug logging in development releases
-	if //noinspection GoBoolExpressions
-	version == "devel" || *debug {
-		log.SetLevel(log.DebugLevel)
+	_, err := flags.ParseArgs(&opts, os.Args)
+	if err != nil {
+		if !strings.Contains(err.Error(), "Usage") {
+			log.Fatal(err)
+		}
+		os.Exit(1)
 	}
 
-	flag.Usage = func() {
-		fmt.Printf("Usage for bcg (%s) https://github.com/natesales/bcg:\n", version)
-		flag.PrintDefaults()
+	// Enable debug logging in development releases
+	if //noinspection GoBoolExpressions
+	version == "devel" || opts.Verbose {
+		log.SetLevel(log.DebugLevel)
 	}
-	flag.Parse()
 
 	log.Infof("Starting bcg %s", version)
 
@@ -385,7 +386,7 @@ func main() {
 	log.Debug("Finished loading templates")
 
 	// Load the config file from configFilename flag
-	log.Debugf("Loading config from %s", *configFilename)
+	log.Debugf("Loading config from %s", opts.ConfigFile)
 	config := loadConfig()
 	log.Debug("Finished loading config")
 
@@ -452,10 +453,10 @@ func main() {
 		config.OriginSet6 = originIpv6
 	}
 
-	if !*dryRun {
+	if !opts.DryRun {
 		// Create the global output file
 		log.Debug("Creating global config")
-		globalFile, err := os.Create(path.Join(*outputDirectory, "bird.conf"))
+		globalFile, err := os.Create(path.Join(opts.Output, "bird.conf"))
 		if err != nil {
 			log.Fatalf("Create global BIRD output file: %v", err)
 		}
@@ -470,7 +471,7 @@ func main() {
 		log.Debug("Finished writing global config file")
 
 		// Remove old peer-specific configs
-		files, err := filepath.Glob(path.Join(*outputDirectory, "AS*.conf"))
+		files, err := filepath.Glob(path.Join(opts.Output, "AS*.conf"))
 		if err != nil {
 			panic(err)
 		}
@@ -613,9 +614,9 @@ func main() {
 		// Log neighbor IPs
 		log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIps, ", "))
 
-		if !*dryRun {
+		if !opts.DryRun {
 			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(*outputDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
+			peerSpecificFile, err := os.Create(path.Join(opts.Output, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}
@@ -633,11 +634,11 @@ func main() {
 		}
 	}
 
-	if !*dryRun {
-		if !*noGenerateUi {
+	if !opts.DryRun {
+		if !opts.NoUi {
 			// Create the ui output file
 			log.Debug("Creating global config")
-			uiFileObj, err := os.Create(*uiFile)
+			uiFileObj, err := os.Create(opts.UiFile)
 			if err != nil {
 				log.Fatalf("Create UI output file: %v", err)
 			}
@@ -652,7 +653,7 @@ func main() {
 			log.Debug("Finished writing ui file")
 		}
 
-		if !*noConfigure {
+		if !opts.NoConfigure {
 			log.Infoln("reconfiguring bird")
 			runBirdCommand("configure")
 		} else {

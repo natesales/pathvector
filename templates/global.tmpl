@@ -84,8 +84,9 @@ protocol kernel {
       } else if source = RTS_BGP then {
         krt_prefsrc = {{ .PrefSrc6 }};
         accept;
+      } else {
+        reject;
       }
-      reject;
       {{ else }}
       accept;
       {{ end }}

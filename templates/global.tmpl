@@ -61,12 +61,11 @@ protocol kernel {
       {{ if .PrefSrc4 -}}
       if source = RTS_STATIC then {
         accept;
-      } else if source = RTS_BGP {
+      } else if source = RTS_BGP then {
         krt_prefsrc = {{ .PrefSrc4 }};
         accept;
-      } else {
-        reject;
       }
+      reject;
       {{ else }}
       accept;
       {{ end }}
@@ -82,12 +81,11 @@ protocol kernel {
       {{ if .PrefSrc6 -}}
       if source = RTS_STATIC then {
         accept;
-      } else if source = RTS_BGP {
+      } else if source = RTS_BGP then {
         krt_prefsrc = {{ .PrefSrc6 }};
         accept;
-      } else {
-        reject;
       }
+      reject;
       {{ else }}
       accept;
       {{ end }}

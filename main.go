@@ -241,7 +241,7 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
-		// Set peerName
+		// Add peer prefix if the first character of peerName is a number
 		_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
 		if unicode.IsDigit(rune(_peerName[0])) {
 			_peerName = "PEER_" + _peerName
@@ -325,12 +325,12 @@ func main() {
 			log.Fatal("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
 		}
 
+		// Print peer info
 		log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
 		log.Infof("[%s] max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
 		log.Infof("[%s] export-default: %v", peerName, peerData.ExportDefault)
 		log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 		log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
-		log.Infof("[%s] strip-private-asns: %v", peerName, peerData.StripPrivateASNs)
 
 		if len(peerData.Communities) > 0 {
 			log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))

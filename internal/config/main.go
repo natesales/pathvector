@@ -50,7 +50,6 @@ type Peer struct {
 	ExportDefault      bool     `yaml:"export-default" toml:"ExportDefault" json:"export-default"`
 	NoSpecifics        bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
 	AllowBlackholes    bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
-	StripPrivateASNs   bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
 	Communities        []string `yaml:"communities" toml:"Communities" json:"communities"`
 	LargeCommunities   []string `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
 	Description        string   `yaml:"description" toml:"Description" json:"description"`

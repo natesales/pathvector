@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"encoding/json"
-	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -22,6 +21,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 
+	"github.com/natesales/bcg/internal/bird"
 	"github.com/natesales/bcg/internal/templating"
 )
 
@@ -199,41 +199,6 @@ func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
 
 	// Split output by newline
 	return strings.Split(output, "\n")
-}
-
-// Nonbuffered io Reader
-func readNoBuffer(reader io.Reader) string {
-	buf := make([]byte, 1024)
-	n, err := reader.Read(buf[:])
-
-	if err != nil {
-		log.Fatalf("BIRD read error: %s\n", err)
-	}
-
-	return string(buf[:n])
-}
-
-// Run a bird command
-func runBirdCommand(command string) {
-	log.Println("Connecting to BIRD socket")
-	conn, err := net.Dial("unix", opts.Socket)
-	if err != nil {
-		log.Fatalf("BIRD socket connect: %v", err)
-	}
-	//noinspection GoUnhandledErrorResult
-	defer conn.Close()
-
-	log.Println("Connected to BIRD socket")
-	log.Printf("BIRD init response: %s", readNoBuffer(conn))
-
-	log.Printf("Sending BIRD command: %s", command)
-	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
-	log.Printf("Sent BIRD command: %s", command)
-	if err != nil {
-		log.Fatalf("BIRD write error: %s\n", err)
-	}
-
-	log.Printf("BIRD response: %s", readNoBuffer(conn))
 }
 
 // Normalize a string to be filename-safe
@@ -603,7 +568,9 @@ func main() {
 
 		if !opts.NoConfigure {
 			log.Infoln("reconfiguring bird")
-			runBirdCommand("configure")
+			if err = bird.RunCommand("configure", opts.Socket); err != nil {
+				log.Fatal(err)
+			}
 		} else {
 			log.Infoln("noreconfig is set, NOT reconfiguring bird")
 		}

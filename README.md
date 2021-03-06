@@ -4,8 +4,6 @@
 [![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Release](https://img.shields.io/github/v/release/natesales/bcg?style=for-the-badge)](https://github.com/natesales/bcg/releases)
 
-![bcg screenshot](carbon.png)
-
 The automatic router configuration generator for BGP with bogon, IRR, RPKI, and max prefix filtering support.
 
 ### Installation

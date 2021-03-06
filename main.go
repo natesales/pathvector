@@ -4,7 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -17,74 +16,14 @@ import (
 
 	"github.com/jessevdk/go-flags"
 	"github.com/kennygrant/sanitize"
-	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 
 	"github.com/natesales/bcg/internal/bird"
+	"github.com/natesales/bcg/internal/config"
 	"github.com/natesales/bcg/internal/templating"
 )
 
 var version = "dev" // set by the build process
-
-// Peer contains all information specific to a single peer network
-type Peer struct {
-	Asn                uint     `yaml:"asn" toml:"ASN" json:"asn"`
-	Type               string   `yaml:"type" toml:"Type" json:"type"`
-	Prepends           uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref          uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
-	Multihop           bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive            bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled           bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	Password           string   `yaml:"password" toml:"Password" json:"password"`
-	Port               uint16   `yaml:"port" toml:"Port" json:"port"`
-	PreImport          string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
-	PreExport          string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
-	NeighborIps        []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	AsSet              string   `yaml:"as-set" toml:"ASSet" json:"as-set"`
-	ImportLimit4       uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
-	ImportLimit6       uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
-	SkipFilter         bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
-	RsClient           bool     `yaml:"rs-client" toml:"RSClient" json:"rs-client"`
-	RrClient           bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
-	Bfd                bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
-	EnforceFirstAs     bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
-	EnforcePeerNexthop bool     `yaml:"enforce-peer-nexthop" toml:"EnforcePeerNexthop" json:"enforce-peer-nexthop"`
-	SessionGlobal      string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
-	ExportDefault      bool     `yaml:"export-default" toml:"ExportDefault" json:"export-default"`
-	NoSpecifics        bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
-	AllowBlackholes    bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
-	StripPrivateASNs   bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
-	Communities        []string `yaml:"communities" toml:"Communities" json:"communities"`
-	LargeCommunities   []string `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
-	Description        string   `yaml:"description" toml:"Description" json:"description"`
-
-	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
-	Name       string   `yaml:"-" toml:"-" json:"-"`
-	PrefixSet4 []string `yaml:"-" toml:"-" json:"-"`
-	PrefixSet6 []string `yaml:"-" toml:"-" json:"-"`
-}
-
-// Config contains global configuration about this router and BCG instance
-type Config struct {
-	Asn            uint             `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId       string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes       []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers          map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
-	IrrDb          string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer      string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
-	RtrPort        int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
-	KeepFiltered   bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
-	MergePaths     bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4       string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
-	PrefSrc6       string           `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
-	FilterDefault  bool             `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
-	DefaultEnabled bool             `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
-
-	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
-	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`
-	Hostname   string   `yaml:"-" toml:"-" json:"-"`
-}
 
 // PeeringDbResponse contains the response from a PeeringDB query
 type PeeringDbResponse struct {
@@ -99,21 +38,10 @@ type PeeringDbData struct {
 	MaxPfx6 uint   `json:"info_prefixes6"`
 }
 
-// Config struct passed to peer template
-type PeerTemplate struct {
-	Peer   Peer
-	Config Config
-}
-
 // Config constants
 const (
 	DefaultIPv4TableSize = 1000000
 	DefaultIPv6TableSize = 150000
-
-	DefaultRtrServer = "127.0.0.1"
-	DefaultRtrPort   = 8282
-
-	DefaultIRRServer = "rr.ntt.net"
 )
 
 // Flags
@@ -218,43 +146,8 @@ func normalize(input string) string {
 	return input
 }
 
-// Load a configuration file (YAML, JSON, or TOML)
-func loadConfig() Config {
-	configFile, err := ioutil.ReadFile(opts.ConfigFile)
-	if err != nil {
-		log.Fatalf("Reading %s: %v", opts.ConfigFile, err)
-	}
-
-	var config Config
-
-	_splitFilename := strings.Split(opts.ConfigFile, ".")
-	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
-	case "yaml", "yml":
-		log.Info("Using YAML configuration format")
-		err := yaml.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("YAML Unmarshal: %v", err)
-		}
-	case "toml":
-		log.Info("Using TOML configuration format")
-		err := toml.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("TOML Unmarshal: %v", err)
-		}
-	case "json":
-		log.Info("Using JSON configuration format")
-		err := json.Unmarshal(configFile, &config)
-		if err != nil {
-			log.Fatalf("JSON Unmarshal: %v", err)
-		}
-	default:
-		log.Fatalf("Files with extension '%s' are not supported. (Acceptable values are yaml, toml, json", extension)
-	}
-
-	return config
-}
-
 func main() {
+	// Parse cli flags
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
 		if !strings.Contains(err.Error(), "Usage") {
@@ -287,56 +180,24 @@ func main() {
 
 	// Load the config file from configFilename flag
 	log.Debugf("Loading config from %s", opts.ConfigFile)
-	config := loadConfig()
-	log.Debug("Finished loading config")
-
-	log.Debug("Linting global configuration")
-
-	// Set default IRRDB
-	if config.IrrDb == "" {
-		config.IrrDb = DefaultIRRServer
-	}
-	log.Infof("Using IRRDB server %s", config.IrrDb)
-
-	// Set default RTR server
-	if config.RtrServer == "" {
-		config.RtrServer = DefaultRtrServer
-	}
-	log.Infof("Using RTR server %s", config.RtrServer)
-
-	// Set default RTR port
-	if config.RtrPort == 0 {
-		config.RtrPort = DefaultRtrPort
-	}
-	log.Infof("Using RTR port %d", config.RtrPort)
-
-	// Validate Router ID in dotted quad format
-	if net.ParseIP(config.RouterId).To4() == nil {
-		log.Fatalf("Router ID %s is not in valid dotted quad notation", config.RouterId)
+	globalConfig, err := config.Load(opts.ConfigFile)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	// Validate CIDR notation of originated prefixes
-	for _, addr := range config.Prefixes {
-		if _, _, err := net.ParseCIDR(addr); err != nil {
-			log.Fatalf("%s is not a valid IPv4 or IPv6 prefix in CIDR notation", addr)
-		}
-	}
-
-	log.Debug("Finished linting global config")
-
-	config.Hostname, err = os.Hostname()
+	globalConfig.Hostname, err = os.Hostname()
 	if err != nil {
 		log.Warn("Unable to get hostname")
 	}
 
-	if len(config.Prefixes) == 0 {
+	if len(globalConfig.Prefixes) == 0 {
 		log.Info("There are no origin prefixes defined")
 	} else {
 		log.Debug("Building origin sets")
 
 		// Assemble originIpv{4,6} lists by address family
 		var originIpv4, originIpv6 []string
-		for _, prefix := range config.Prefixes {
+		for _, prefix := range globalConfig.Prefixes {
 			if strings.Contains(prefix, ":") {
 				originIpv6 = append(originIpv6, prefix)
 			} else {
@@ -349,8 +210,8 @@ func main() {
 		log.Debug("OriginIpv4: ", originIpv4)
 		log.Debug("OriginIpv6: ", originIpv6)
 
-		config.OriginSet4 = originIpv4
-		config.OriginSet6 = originIpv6
+		globalConfig.OriginSet4 = originIpv4
+		globalConfig.OriginSet6 = originIpv6
 	}
 
 	if !opts.DryRun {
@@ -364,7 +225,7 @@ func main() {
 
 		// Render the global template and write to disk
 		log.Debug("Writing global config file")
-		err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", config)
+		err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
 		if err != nil {
 			log.Fatalf("Execute global template: %v", err)
 		}
@@ -385,7 +246,7 @@ func main() {
 	}
 
 	// Iterate over peers
-	for peerName, peerData := range config.Peers {
+	for peerName, peerData := range globalConfig.Peers {
 		// Set peerName
 		_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
 		if unicode.IsDigit(rune(_peerName[0])) {
@@ -406,16 +267,6 @@ func main() {
 		}
 
 		log.Infof("[%s] type: %s", peerName, peerData.Type)
-
-		// Set default local pref
-		if peerData.LocalPref == 0 {
-			peerData.LocalPref = 100
-		}
-
-		// Set default description
-		if peerData.Description == "" {
-			peerData.Description = "AS" + strconv.Itoa(int(peerData.Asn)) + " " + peerName
-		}
 
 		// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
 		if peerData.Type == "peer" || peerData.Type == "downstream" {
@@ -457,8 +308,8 @@ func main() {
 				log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
 			}
 
-			peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, config.IrrDb)
-			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, config.IrrDb)
+			peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
+			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
 
 			// Update the "latest operation" timestamp
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
@@ -536,7 +387,7 @@ func main() {
 
 			// Render the template and write to disk
 			log.Infof("[%s] Writing config", peerName)
-			err = templating.PeerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
+			err = templating.PeerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &config.Wrapper{Peer: *peerData, Config: *globalConfig})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
 			}
@@ -559,7 +410,7 @@ func main() {
 
 			// Render the UI template and write to disk
 			log.Debug("Writing ui file")
-			err = templating.UiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+			err = templating.UiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", globalConfig)
 			if err != nil {
 				log.Fatalf("Execute ui template: %v", err)
 			}

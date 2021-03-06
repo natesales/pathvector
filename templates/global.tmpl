@@ -59,7 +59,7 @@ protocol kernel {
   ipv4 {
     export filter {
       {{ if .PrefSrc4 -}}
-      if source = RTS_STATIC then {
+      if source = RTS_STATIC {{ if .OriginSet4 -}}&& source != LOCAL_v4{{ end }} then {
         accept;
       } else if source = RTS_BGP then {
         krt_prefsrc = {{ .PrefSrc4 }};
@@ -79,7 +79,7 @@ protocol kernel {
   ipv6 {
     export filter {
       {{ if .PrefSrc6 -}}
-      if source = RTS_STATIC then {
+      if source = RTS_STATIC {{ if .OriginSet6 -}}&& source != LOCAL_v6{{ end }} then {
         accept;
       } else if source = RTS_BGP then {
         krt_prefsrc = {{ .PrefSrc6 }};

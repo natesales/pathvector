@@ -1,0 +1,12 @@
+vrrp_instance {{ .Name }} {
+        state {{ .State }}
+        interface {{ .Interface }}
+        virtual_router_id {{ .VRRID }}
+        priority {{ .Priority }}
+        advert_int 1
+        virtual_ipaddress {
+              {{- range $i, $vip := .VIPs4 }}
+              {{ $vip }}
+              {{- end }}
+        }
+}

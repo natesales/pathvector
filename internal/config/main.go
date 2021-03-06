@@ -60,12 +60,25 @@ type Peer struct {
 	PrefixSet6 []string `yaml:"-" toml:"-" json:"-"`
 }
 
+// VRRPInstance stores a VRRP instance
+type VRRPInstance struct {
+	State     string   `yaml:"state" json:"state" toml:"State"`
+	Interface string   `yaml:"interface" json:"interface" toml:"Interface"`
+	VRRID     uint     `yaml:"vrrid" json:"vrrid" toml:"VRRID"`
+	Priority  uint8    `yaml:"priority" json:"priority" toml:"Priority"`
+	VIPs      []string `yaml:"vips" json:"vips" toml:"VIPs"`
+
+	VIPs4 []string `yaml:"-" json:"-" toml:"-"`
+	VIPs6 []string `yaml:"-" json:"-" toml:"-"`
+}
+
 // Config contains global configuration about this router and BCG instance
 type Config struct {
 	Asn            uint             `yaml:"asn" toml:"ASN" json:"asn"`
 	RouterId       string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
 	Prefixes       []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
 	Peers          map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
+	VRRPInstances  []*VRRPInstance  `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
 	IrrDb          string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
 	RtrServer      string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
 	RtrPort        int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
@@ -180,6 +193,40 @@ func Load(filename string) (*Config, error) {
 	// Set individual peer defaults
 	for name, peer := range config.Peers {
 		setPeerDefaults(name, peer)
+	}
+
+	// Parse VRRP configs
+	for _, vrrpInstance := range config.VRRPInstances {
+		// Sort VIPs by address family
+		for _, vip := range vrrpInstance.VIPs {
+			ip, _, err := net.ParseCIDR(vip)
+			if err != nil {
+				return nil, errorx.Decorate(err, "Invalid VIP")
+			}
+
+			if ip.To4() == nil { // If IPv6
+				vrrpInstance.VIPs6 = append(vrrpInstance.VIPs6, vip)
+			} else { // If IPv4
+				vrrpInstance.VIPs4 = append(vrrpInstance.VIPs4, vip)
+			}
+		}
+
+		// Validate vrrpInstance
+		if vrrpInstance.State == "primary" {
+			vrrpInstance.State = "MASTER"
+		} else if vrrpInstance.State == "backup" {
+			vrrpInstance.State = "BACKUP"
+		} else {
+			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
+		}
+
+		if vrrpInstance.Interface == "" {
+			return nil, errors.New("VRRP interface is not defined")
+		}
+
+		if len(vrrpInstance.VIPs) < 1 {
+			return nil, errors.New("VRRP instance must have at least one VIP defined")
+		}
 	}
 
 	return &config, nil // nil error

@@ -1,12 +1,23 @@
-vrrp_instance {{ .Name }} {
-        state {{ .State }}
-        interface {{ .Interface }}
-        virtual_router_id {{ .VRRID }}
-        priority {{ .Priority }}
-        advert_int 1
-        virtual_ipaddress {
-              {{- range $i, $vip := .VIPs4 }}
-              {{ $vip }}
-              {{- end }}
-        }
+{{- range $instanceId, $instance := . -}}
+vrrp_instance VRRP{{ $instanceId }} {
+    state {{ .State }}
+    interface {{ .Interface }}
+    virtual_router_id {{ .VRRID }}
+    priority {{ .Priority }}
+    advert_int 1
+    {{- if .VIPs4 }}
+    virtual_ipaddress {
+        {{- range $i, $vip := .VIPs4 }}
+        {{ $vip }}
+        {{- end }}
+    }
+    {{- end }}
+    {{- if .VIPs6 }}
+    virtual_ipaddress_excluded {
+        {{- range $i, $vip := .VIPs6 }}
+        {{ $vip }}
+        {{- end }}
+    }
+    {{- end }}
 }
+{{- end }}

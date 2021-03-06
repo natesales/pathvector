@@ -4,11 +4,11 @@
 [![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Release](https://img.shields.io/github/v/release/natesales/bcg?style=for-the-badge)](https://github.com/natesales/bcg/releases)
 
-The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.
+The automatic router configuration generator for BGP with bogon, IRR, RPKI, and max prefix filtering support.
 
 ### Installation
 
-bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), and [bgpq4](https://github.com/bgp/bgpq4). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from Github and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/bin/bcg` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
+bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), [bgpq4](https://github.com/bgp/bgpq4), and optionally [keepalived](https://github.com/acassen/keepalived). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from Github and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/bin/bcg` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
 
 #### Configuration
 
@@ -101,6 +101,10 @@ bcg uses RFC 8092 BGP Large Communities
 
 Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in path ([Peerlock Lite](https://github.com/job/peerlock)).
 
+#### VRRP
+
+bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config key containing a list of VRRP instances to your bcg config file.
+
 #### Communities
 
 | Large     | Meaning                   |
@@ -132,7 +136,7 @@ Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in pat
 | filter-default | Should default routes be denied?                                                                         |
 | enable-default | Add static default routes                                                                                |
 
-#### Peer Configuration Options
+#### BGP Peer Configuration Options
 
 | Option         | Usage                                                                                                     |
 | -------------- | --------------------------------------------------------------------------------------------------------- |
@@ -157,10 +161,19 @@ Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in pat
 | bfd            | Enable BFD                                                                                                |
 | session-global | String to add to session global config                                                                    |
 | enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                     |
-| enforce-peer-nexthop | Reject routes where the next hop doesn't match the neighbor address                                     |
-| export-default | Should a default route be sent over the session? (default false)                                            |
+| enforce-peer-nexthop | Reject routes where the next hop doesn't match the neighbor address                                 |
+| export-default | Should a default route be sent over the session? (default false)                                          |
 | no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
 | allow-blackholes | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes |
 | communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`) |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
 | description | Description string (just for human reference) |
+
+#### VRRP instance config options
+| Option      | Usage                                                                          |
+| ----------- | ------------------------------------------------------------------------------ |
+| state       | VRRP state (`primary` or `backup`)                                             |
+| interface   | Interface to run VRRP on                                                       |
+| vrrid       | VRRP Router ID (must be the same for multiple routers in the same VRRP domain  |
+| priority    | VRRP router selection priority                                                 |
+| vips        | List of Virtual IPs                                                            |

@@ -72,6 +72,7 @@ var funcMap = template.FuncMap{
 var PeerTemplate *template.Template
 var GlobalTemplate *template.Template
 var UiTemplate *template.Template
+var VRRPTemplate *template.Template
 
 // Load loads the templates from the embedded filesystem
 func Load(fs embed.FS) error {
@@ -93,6 +94,12 @@ func Load(fs embed.FS) error {
 	UiTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
 	if err != nil {
 		return errorx.Decorate(err, "Reading ui template")
+	}
+
+	// Generate VRRP template
+	VRRPTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
+	if err != nil {
+		return errorx.Decorate(err, "Reading VRRP template")
 	}
 
 	return nil // nil error

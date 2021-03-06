@@ -625,14 +625,6 @@ func main() {
 			log.Infof("[%s] enforce-peer-nexthop", peerName)
 		}
 
-		if peerData.PreImport != "" {
-			log.Infof("[%s] pre-import: %s", peerName, peerData.PreImport)
-		}
-
-		if peerData.PreExport != "" {
-			log.Infof("[%s] pre-export: %s", peerName, peerData.PreExport)
-		}
-
 		// Log neighbor IPs
 		log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIps, ", "))
 

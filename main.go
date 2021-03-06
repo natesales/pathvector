@@ -55,6 +55,7 @@ type Peer struct {
 	StripPrivateASNs   bool     `yaml:"strip-private-asns" toml:"StripPrivateASNs" json:"strip-private-asns"`
 	Communities        []string `yaml:"communities" toml:"Communities" json:"communities"`
 	LargeCommunities   []string `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
+	Description        string   `yaml:"description" toml:"Description" json:"description"`
 
 	AsSet      string   `yaml:"-" toml:"-" json:"-"`
 	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
@@ -510,6 +511,11 @@ func main() {
 		// Set default local pref
 		if peerData.LocalPref == 0 {
 			peerData.LocalPref = 100
+		}
+
+		// Set default description
+		if peerData.Description == "" {
+			peerData.Description = "AS" + strconv.Itoa(int(peerData.Asn)) + " " + peerName
 		}
 
 		// Only query PeeringDB and IRRDB for peers and downstreams

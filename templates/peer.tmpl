@@ -30,7 +30,7 @@ define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_PFX_v6 = [
 protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     local as ASN;
     neighbor {{ $neighbor }} as {{ $peer.Asn }}{{ if $peer.Port }} port {{ $peer.Port }}{{ end }};
-    description "AS{{ $peer.Asn }} {{ $peer.Name }}";
+    description "{{ $peer.Description }}";
     {{ if $peer.Disabled }}disabled;{{ end }}
     {{- if $peer.Passive }}passive;{{ end }}
     {{- if $peer.Multihop }}multihop 255;{{ end }}

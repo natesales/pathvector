@@ -181,3 +181,4 @@ path ([Peerlock Lite](https://github.com/job/peerlock)).
 | strip-private-asns | Should private ASNs be stripped from path before exporting? (in range `[64512..65534, 4200000000..4294967294]`) |
 | communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`) |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
+| description | Description string (just for human reference) |

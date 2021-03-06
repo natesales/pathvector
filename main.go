@@ -593,8 +593,14 @@ func main() {
 		log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 		log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
 		log.Infof("[%s] strip-private-asns: %v", peerName, peerData.StripPrivateASNs)
-		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
-		log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
+
+		if len(peerData.Communities) > 0 {
+			log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
+		}
+
+		if len(peerData.LargeCommunities) > 0 {
+			log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
+		}
 
 		// Check for additional options
 		if peerData.AsSet != "" {

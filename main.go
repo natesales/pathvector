@@ -127,6 +127,7 @@ var opts struct {
 	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
 	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
 	NoConfigure bool   `long:"no-configure" description:"Don't configure BIRD"`
+	ShowVersion bool   `long:"version" description:"Show version and exit"`
 }
 
 // Query PeeringDB for an ASN
@@ -302,6 +303,11 @@ func main() {
 	if //noinspection GoBoolExpressions
 	version == "devel" || opts.Verbose {
 		log.SetLevel(log.DebugLevel)
+	}
+
+	if opts.ShowVersion {
+		log.Printf("bcg version %s (https://github.com/natesales/bcg)\n", version)
+		os.Exit(0)
 	}
 
 	log.Infof("Starting bcg %s", version)

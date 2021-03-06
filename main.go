@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 	"unicode"
 
@@ -22,6 +21,8 @@ import (
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/natesales/bcg/internal/templating"
 )
 
 var version = "dev" // set by the build process
@@ -106,8 +107,6 @@ type PeerTemplate struct {
 
 // Config constants
 const (
-	DefaultTimeFormat = time.RFC1123
-
 	DefaultIPv4TableSize = 1000000
 	DefaultIPv6TableSize = 150000
 
@@ -129,6 +128,11 @@ var opts struct {
 	NoConfigure bool   `long:"no-configure" description:"Don't configure BIRD"`
 	ShowVersion bool   `long:"version" description:"Show version and exit"`
 }
+
+// Embedded filesystem
+
+//go:embed templates/*
+var embedFs embed.FS
 
 // Query PeeringDB for an ASN
 func getPeeringDbData(asn uint) PeeringDbData {
@@ -285,11 +289,6 @@ func loadConfig() Config {
 	return config
 }
 
-// Templates
-
-//go:embed templates/*
-var templates embed.FS
-
 func main() {
 	_, err := flags.ParseArgs(&opts, os.Args)
 	if err != nil {
@@ -312,82 +311,11 @@ func main() {
 
 	log.Infof("Starting bcg %s", version)
 
-	// Template functions
-	funcMap := template.FuncMap{
-		"Contains": func(s, substr string) bool {
-			// String contains
-			return strings.Contains(s, substr)
-		},
+	// Parse template files
 
-		"Iterate": func(count *uint) []uint {
-			// Create array with `count` entries
-			var i uint
-			var Items []uint
-			for i = 0; i < (*count); i++ {
-				Items = append(Items, i)
-			}
-			return Items
-		},
-
-		"BirdSet": func(filter []string) string {
-			// Build a formatted BIRD prefix list
-			output := ""
-			for i, prefix := range filter {
-				output += "    " + prefix
-				if i != len(filter)-1 {
-					output += ",\n"
-				}
-			}
-
-			return output
-		},
-
-		"NotEmpty": func(arr []string) bool {
-			// Is `arr` empty?
-			return len(arr) != 0
-		},
-
-		"CheckProtocol": func(v4set []string, v6set []string, family string, peerType string) bool {
-			if peerType == "downstream" || peerType == "peer" { // Only match IRR filtered peer types
-				if family == "4" {
-					return len(v4set) != 0
-				} else {
-					return len(v6set) != 0
-				}
-			} else { // If the peer type isn't going to be IRR filtered, ignore it.
-				return true
-			}
-		},
-
-		"CurrentTime": func() string {
-			// get current timestamp
-			return time.Now().Format(DefaultTimeFormat)
-		},
-
-		"UnixTimestamp": func() string {
-			// get current timestamp in UNIX format
-			return strconv.Itoa(int(time.Now().Unix()))
-		},
-	}
-
-	log.Debug("Loading templates")
-
-	// Generate peer template
-	peerTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/peer.tmpl")
+	err = templating.Load(embedFs)
 	if err != nil {
-		log.Fatalf("Read peer template: %v", err)
-	}
-
-	// Generate global template
-	globalTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/global.tmpl")
-	if err != nil {
-		log.Fatalf("Read global template: %v", err)
-	}
-
-	// Generate UI template
-	uiTemplate, err := template.New("").Funcs(funcMap).ParseFS(templates, "templates/ui.tmpl")
-	if err != nil {
-		log.Fatalf("Read ui template: %v", err)
+		log.Fatal(err)
 	}
 
 	log.Debug("Finished loading templates")
@@ -471,7 +399,7 @@ func main() {
 
 		// Render the global template and write to disk
 		log.Debug("Writing global config file")
-		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", config)
+		err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", config)
 		if err != nil {
 			log.Fatalf("Execute global template: %v", err)
 		}
@@ -526,7 +454,7 @@ func main() {
 
 		// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
 		if peerData.Type == "peer" || peerData.Type == "downstream" {
-			peerData.QueryTime = time.Now().Format(DefaultTimeFormat)
+			peerData.QueryTime = time.Now().Format(time.RFC1123)
 			peeringDbData := getPeeringDbData(peerData.Asn)
 
 			if peerData.ImportLimit4 == 0 {
@@ -568,7 +496,7 @@ func main() {
 			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, config.IrrDb)
 
 			// Update the "latest operation" timestamp
-			peerData.QueryTime = time.Now().Format(DefaultTimeFormat)
+			peerData.QueryTime = time.Now().Format(time.RFC1123)
 		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
 			// Check for a zero prefix import limit
 			if peerData.ImportLimit4 == 0 {
@@ -643,7 +571,7 @@ func main() {
 
 			// Render the template and write to disk
 			log.Infof("[%s] Writing config", peerName)
-			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
+			err = templating.PeerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &PeerTemplate{*peerData, config})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
 			}
@@ -666,7 +594,7 @@ func main() {
 
 			// Render the UI template and write to disk
 			log.Debug("Writing ui file")
-			err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+			err = templating.UiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
 			if err != nil {
 				log.Fatalf("Execute ui template: %v", err)
 			}

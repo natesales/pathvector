@@ -190,23 +190,22 @@ func main() {
 	} else {
 		log.Debug("Building origin sets")
 
-		// Assemble originIpv{4,6} lists by address family
-		var originIpv4, originIpv6 []string
+		// Assemble originIPv{4,6} lists by address family
+		var originIPv4, originIPv6 []string
 		for _, prefix := range globalConfig.Prefixes {
 			if strings.Contains(prefix, ":") {
-				originIpv6 = append(originIpv6, prefix)
+				originIPv6 = append(originIPv6, prefix)
 			} else {
-				originIpv4 = append(originIpv4, prefix)
+				originIPv4 = append(originIPv4, prefix)
 			}
 		}
 
 		log.Debug("Finished building origin sets")
+		log.Debug("OriginIPv4: ", originIPv4)
+		log.Debug("OriginIPv6: ", originIPv6)
 
-		log.Debug("OriginIpv4: ", originIpv4)
-		log.Debug("OriginIpv6: ", originIpv6)
-
-		globalConfig.OriginSet4 = originIpv4
-		globalConfig.OriginSet6 = originIpv6
+		globalConfig.OriginSet4 = originIPv4
+		globalConfig.OriginSet6 = originIPv6
 	}
 
 	if !opts.DryRun {
@@ -371,7 +370,7 @@ func main() {
 		}
 
 		// Log neighbor IPs
-		log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIps, ", "))
+		log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIPs, ", "))
 
 		if !opts.DryRun {
 			// Create the peer specific file

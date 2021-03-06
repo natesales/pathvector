@@ -20,7 +20,7 @@ define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_PFX_v6 = [
 {{ $peer := .Peer -}}
 {{- $global := .Config -}}
 {{- $af := "" -}}
-{{- range $i, $neighbor := .Peer.NeighborIps -}}
+{{- range $i, $neighbor := .Peer.NeighborIPs -}}
 {{- if Contains $neighbor ":" -}}
 {{- $af = "6" }}
 {{- else -}}

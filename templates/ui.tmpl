@@ -120,7 +120,7 @@
                     <td>{{ $peer.Prepends }}</td>
                     <td>{{ $peer.ImportLimit4 }} IPv4<br>{{ $peer.ImportLimit6 }} IPv6</td>
                     <td>
-                    {{- range $j, $ip := $peer.NeighborIps }}
+                    {{- range $j, $ip := $peer.NeighborIPs }}
                     {{ $ip }}<br>
                     {{ end }}
                     </td>

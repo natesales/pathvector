@@ -185,11 +185,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	globalConfig.Hostname, err = os.Hostname()
-	if err != nil {
-		log.Warn("Unable to get hostname")
-	}
-
 	if len(globalConfig.Prefixes) == 0 {
 		log.Info("There are no origin prefixes defined")
 	} else {

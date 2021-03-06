@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 
@@ -163,6 +164,12 @@ func Load(filename string) (*Config, error) {
 		}
 	default:
 		return nil, errors.New("Files with extension " + extension + " are not supported. Acceptable values are yaml, toml, json")
+	}
+
+	// Get hostname
+	config.Hostname, err = os.Hostname()
+	if err != nil {
+		return nil, errorx.Decorate(err, "Getting hostname")
 	}
 
 	// Set global config defaults

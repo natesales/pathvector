@@ -35,23 +35,23 @@ peers:
 `bcg` can take the following flags:
 
 ```
-Usage for bcg https://github.com/natesales/bcg:
-  -config string
-        configuration file in YAML, TOML, or JSON format (default "/etc/bcg/config.yml")
-  -debug
-        show debugging messages
-  -dryRun
-        skip modifying BIRD config
-  -noGenerateUi
-        disable generating web UI
-  -noConfigure
-        disable configuring bird at end of run
-  -output string
-        directory to write output files to (default "/etc/bird/")
-  -socket string
-        BIRD control socket (default "/run/bird/bird.ctl")
-  -uiFile string
-        file to store web UI (default "/tmp/bcg-ui.html")
+Usage:
+  bcg [OPTIONS]
+
+Application Options:
+  -c, --config=            Configuration file in YAML, TOML, or JSON format (default: /etc/bcg/config.yml)
+  -o, --output=            Directory to write output files to (default: /etc/bird/)
+  -s, --socket=            BIRD control socket (default: /run/bird/bird.ctl)
+  -k, --keepalived-config= Configuration file for keepalived (default: /etc/keepalived/keepalived.conf)
+  -u, --ui-file=           File to store web UI (default: /tmp/bcg-ui.html)
+  -n, --no-ui              Don't generate web UI
+  -v, --verbose            Show verbose log messages
+  -d, --dry-run            Don't modify BIRD config
+      --no-configure       Don't configure BIRD
+      --version            Show version and exit
+
+Help Options:
+  -h, --help               Show this help message
 ```
 
 #### How does filtering work?

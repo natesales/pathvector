@@ -170,6 +170,7 @@ bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VR
 | description | Description string (just for human reference)                                                                         |
 
 #### VRRP instance config options
+
 | Option      | Usage                                                                          |
 | ----------- | ------------------------------------------------------------------------------ |
 | state       | VRRP state (`primary` or `backup`)                                             |

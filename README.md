@@ -97,7 +97,7 @@ bcg *should* have reasonable single-stack peering support but is not fully teste
 
 bcg uses RFC 8092 BGP Large Communities
 
-#### "Peerlock Lite"
+#### Peerlock Lite
 
 Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in path ([Peerlock Lite](https://github.com/job/peerlock)).
 

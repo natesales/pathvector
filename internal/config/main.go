@@ -125,7 +125,7 @@ func setConfigDefaults(config *Config) error {
 	// Validate CIDR notation of originated prefixes
 	for _, addr := range config.Prefixes {
 		if _, _, err := net.ParseCIDR(addr); err != nil {
-			return errors.New(addr + " is not a valid IPv4 or IPv6 prefix in CIDR notation")
+			return errors.New("Address " + addr + " is not a valid IPv4 or IPv6 prefix in CIDR notation")
 		}
 	}
 
@@ -149,7 +149,7 @@ func setPeerDefaults(name string, peer *Peer) {
 func Load(filename string) (*Config, error) {
 	configFile, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errorx.Decorate(err, "reading config file")
+		return nil, errorx.Decorate(err, "Reading config file")
 	}
 
 	var config Config

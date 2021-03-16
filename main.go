@@ -249,8 +249,8 @@ func main() {
 		}
 
 		log.Debug("Finished building origin sets")
-		log.Debug("OriginIPv4: ", originIPv4)
-		log.Debug("OriginIPv6: ", originIPv6)
+		log.Debug("Origin IPv4: ", originIPv4)
+		log.Debug("Origin IPv6: ", originIPv6)
 
 		globalConfig.OriginSet4 = originIPv4
 		globalConfig.OriginSet6 = originIPv6
@@ -431,12 +431,12 @@ func main() {
 		}
 
 		if !opts.NoConfigure {
-			log.Infoln("reconfiguring bird")
+			log.Infoln("Reconfiguring BIRD")
 			if err = bird.RunCommand("configure", opts.Socket); err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			log.Infoln("noreconfig is set, NOT reconfiguring bird")
+			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
 		}
 	}
 }

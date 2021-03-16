@@ -147,6 +147,53 @@ func normalize(input string) string {
 	return input
 }
 
+// printPeerInfo prints a peer's configuration to the log
+func printPeerInfo(peerName string, peerData *config.Peer) {
+	log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIPs, ", "))
+	log.Infof("[%s] type: %s", peerName, peerData.Type)
+	log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
+	log.Infof("[%s] max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
+	log.Infof("[%s] export-default: %v", peerName, peerData.ExportDefault)
+	log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
+	log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
+
+	if len(peerData.Communities) > 0 {
+		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
+	}
+
+	if len(peerData.LargeCommunities) > 0 {
+		log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
+	}
+
+	if peerData.AsSet != "" {
+		log.Infof("[%s] as-set: %s", peerName, peerData.AsSet)
+	}
+
+	if peerData.Prepends > 0 {
+		log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
+	}
+
+	if peerData.Multihop {
+		log.Infof("[%s] multihop", peerName)
+	}
+
+	if peerData.Passive {
+		log.Infof("[%s] passive", peerName)
+	}
+
+	if peerData.Disabled {
+		log.Infof("[%s] disabled", peerName)
+	}
+
+	if peerData.EnforceFirstAs {
+		log.Infof("[%s] enforce-first-as", peerName)
+	}
+
+	if peerData.EnforcePeerNexthop {
+		log.Infof("[%s] enforce-peer-nexthop", peerName)
+	}
+}
+
 func main() {
 	// Parse cli flags
 	_, err := flags.ParseArgs(&opts, os.Args)
@@ -261,8 +308,6 @@ func main() {
 			log.Fatalf("[%s] type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
 		}
 
-		log.Infof("[%s] type: %s", peerName, peerData.Type)
-
 		// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
 		if peerData.Type == "peer" || peerData.Type == "downstream" {
 			peerData.QueryTime = time.Now().Format(time.RFC1123)
@@ -327,51 +372,7 @@ func main() {
 		}
 
 		// Print peer info
-		log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
-		log.Infof("[%s] max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
-		log.Infof("[%s] export-default: %v", peerName, peerData.ExportDefault)
-		log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
-		log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
-
-		if len(peerData.Communities) > 0 {
-			log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
-		}
-
-		if len(peerData.LargeCommunities) > 0 {
-			log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
-		}
-
-		// Check for additional options
-		if peerData.AsSet != "" {
-			log.Infof("[%s] as-set: %s", peerName, peerData.AsSet)
-		}
-
-		if peerData.Prepends > 0 {
-			log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
-		}
-
-		if peerData.Multihop {
-			log.Infof("[%s] multihop", peerName)
-		}
-
-		if peerData.Passive {
-			log.Infof("[%s] passive", peerName)
-		}
-
-		if peerData.Disabled {
-			log.Infof("[%s] disabled", peerName)
-		}
-
-		if peerData.EnforceFirstAs {
-			log.Infof("[%s] enforce-first-as", peerName)
-		}
-
-		if peerData.EnforcePeerNexthop {
-			log.Infof("[%s] enforce-peer-nexthop", peerName)
-		}
-
-		// Log neighbor IPs
-		log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIPs, ", "))
+		printPeerInfo(peerName, peerData)
 
 		if !opts.DryRun {
 			// Create the peer specific file

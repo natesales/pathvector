@@ -233,29 +233,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if len(globalConfig.Prefixes) == 0 {
-		log.Info("There are no origin prefixes defined")
-	} else {
-		log.Debug("Building origin sets")
-
-		// Assemble originIPv{4,6} lists by address family
-		var originIPv4, originIPv6 []string
-		for _, prefix := range globalConfig.Prefixes {
-			if strings.Contains(prefix, ":") {
-				originIPv6 = append(originIPv6, prefix)
-			} else {
-				originIPv4 = append(originIPv4, prefix)
-			}
-		}
-
-		log.Debug("Finished building origin sets")
-		log.Debug("Origin IPv4: ", originIPv4)
-		log.Debug("Origin IPv6: ", originIPv6)
-
-		globalConfig.OriginSet4 = originIPv4
-		globalConfig.OriginSet6 = originIPv6
-	}
-
 	if !opts.DryRun {
 		// Create the global output file
 		log.Debug("Creating global config")

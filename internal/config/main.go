@@ -198,12 +198,29 @@ func Load(filename string) (*Config, error) {
 		setPeerDefaults(name, peer)
 	}
 
+	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
+	for _, prefix := range config.Prefixes {
+		pfx, _, err := net.ParseCIDR(prefix)
+		if err != nil {
+			return nil, errorx.Decorate(err, "Invalid origin prefix: "+prefix)
+		}
+
+		if pfx.To4() == nil { // If IPv6
+			config.OriginSet6 = append(config.OriginSet6, prefix)
+		} else { // If IPv4
+			config.OriginSet4 = append(config.OriginSet4, prefix)
+		}
+	}
+
+	log.Info("Origin IPv4: ", config.OriginSet4)
+	log.Info("Origin IPv6: ", config.OriginSet6)
+
+	// Initialize static maps
+	config.Static4 = map[string]string{}
+	config.Static6 = map[string]string{}
+
 	// Parse static routes
 	for prefix, nexthop := range config.Statics {
-		// Initialize static maps
-		config.Static4 = map[string]string{}
-		config.Static6 = map[string]string{}
-
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errorx.Decorate(err, "Invalid static prefix: "+prefix)
@@ -217,14 +234,14 @@ func Load(filename string) (*Config, error) {
 		} else { // If IPv4
 			config.Static4[prefix] = nexthop
 		}
+	}
 
-		// Print static routes
-		if len(config.Static4) > 0 {
-			log.Infof("IPv4 statics: %+v", config.Static4)
-		}
-		if len(config.Static6) > 0 {
-			log.Infof("IPv6 statics: %+v", config.Static6)
-		}
+	// Print static routes
+	if len(config.Static4) > 0 {
+		log.Infof("IPv4 statics: %+v", config.Static4)
+	}
+	if len(config.Static6) > 0 {
+		log.Infof("IPv6 statics: %+v", config.Static6)
 	}
 
 	// Parse VRRP configs

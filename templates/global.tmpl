@@ -8,7 +8,9 @@ router id {{ .RouterId }};
 define LOCAL_v4 = [
 {{ BirdSet .OriginSet4 }}
 ];
+{{- end }}
 
+{{if or .Static4 .OriginSet6 }}
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginSet4 }}
@@ -24,7 +26,9 @@ protocol static static4 {
 define LOCAL_v6 = [
 {{ BirdSet .OriginSet6 }}
 ];
+{{- end }}
 
+{{if or .Static4 .OriginSet6 }}
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginSet6 }}

@@ -134,6 +134,8 @@ bcg uses RFC 8092 BGP Large Communities
 | pref-src6     | Preferred source IPv6 to export to kernel                                                                 |
 | filter-default | Should default routes be denied?                                                                         |
 | enable-default | Add static default routes                                                                                |
+| communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)                 |
+| large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
 
 #### BGP Peer Configuration Options
 

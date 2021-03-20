@@ -74,21 +74,23 @@ type VRRPInstance struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn            uint              `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId       string            `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes       []string          `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Statics        map[string]string `yaml:"statics" toml:"Statics" json:"statics"`
-	Peers          map[string]*Peer  `yaml:"peers" toml:"Peers" json:"peers"`
-	VRRPInstances  []*VRRPInstance   `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
-	IrrDb          string            `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer      string            `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
-	RtrPort        int               `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
-	KeepFiltered   bool              `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
-	MergePaths     bool              `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4       string            `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
-	PrefSrc6       string            `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
-	FilterDefault  bool              `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
-	DefaultEnabled bool              `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
+	Asn              uint              `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId         string            `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes         []string          `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Statics          map[string]string `yaml:"statics" toml:"Statics" json:"statics"`
+	Peers            map[string]*Peer  `yaml:"peers" toml:"Peers" json:"peers"`
+	VRRPInstances    []*VRRPInstance   `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
+	IrrDb            string            `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	RtrServer        string            `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	RtrPort          int               `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
+	KeepFiltered     bool              `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
+	MergePaths       bool              `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
+	PrefSrc4         string            `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
+	PrefSrc6         string            `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
+	FilterDefault    bool              `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
+	DefaultEnabled   bool              `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
+	Communities      []string          `yaml:"communities" toml:"Communities" json:"communities"`
+	LargeCommunities []string          `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
 
 	OriginSet4 []string          `yaml:"-" toml:"-" json:"-"`
 	OriginSet6 []string          `yaml:"-" toml:"-" json:"-"`

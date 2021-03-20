@@ -96,6 +96,14 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         export filter {
             {{ $peer.PreExport }}
 
+            {{- range $i, $community := $global.LargeCommunities -}}
+            bgp_large_community.add(({{ $community }}));
+            {{ end }}
+
+            {{- range $i, $community := $global.Communities -}}
+            bgp_community.add(({{ $community }}));
+            {{ end }}
+
             {{- range $i, $community := $peer.Communities -}}
             bgp_community.add(({{ $community }}));
             {{ end }}

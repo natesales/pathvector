@@ -407,7 +407,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("Execute template: %v", err)
 		}
-	} else {
+	}
+
+	if opts.DryRun {
 		log.Infof("Dry run is enabled, not writing VRRP config")
 	}
 

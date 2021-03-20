@@ -74,24 +74,27 @@ type VRRPInstance struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn            uint             `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId       string           `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes       []string         `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Peers          map[string]*Peer `yaml:"peers" toml:"Peers" json:"peers"`
-	VRRPInstances  []*VRRPInstance  `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
-	IrrDb          string           `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer      string           `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
-	RtrPort        int              `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
-	KeepFiltered   bool             `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
-	MergePaths     bool             `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4       string           `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
-	PrefSrc6       string           `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
-	FilterDefault  bool             `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
-	DefaultEnabled bool             `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
+	Asn            uint              `yaml:"asn" toml:"ASN" json:"asn"`
+	RouterId       string            `yaml:"router-id" toml:"Router-ID" json:"router-id"`
+	Prefixes       []string          `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
+	Statics        map[string]string `yaml:"statics" toml:"Statics" json:"statics"`
+	Peers          map[string]*Peer  `yaml:"peers" toml:"Peers" json:"peers"`
+	VRRPInstances  []*VRRPInstance   `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
+	IrrDb          string            `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
+	RtrServer      string            `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
+	RtrPort        int               `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
+	KeepFiltered   bool              `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
+	MergePaths     bool              `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
+	PrefSrc4       string            `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
+	PrefSrc6       string            `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
+	FilterDefault  bool              `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
+	DefaultEnabled bool              `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
 
-	OriginSet4 []string `yaml:"-" toml:"-" json:"-"`
-	OriginSet6 []string `yaml:"-" toml:"-" json:"-"`
-	Hostname   string   `yaml:"-" toml:"-" json:"-"`
+	OriginSet4 []string          `yaml:"-" toml:"-" json:"-"`
+	OriginSet6 []string          `yaml:"-" toml:"-" json:"-"`
+	Static4    map[string]string `yaml:"-" toml:"-" json:"-"`
+	Static6    map[string]string `yaml:"-" toml:"-" json:"-"`
+	Hostname   string            `yaml:"-" toml:"-" json:"-"`
 }
 
 // Wrapper stores a Peer and Config passed to the template
@@ -193,6 +196,35 @@ func Load(filename string) (*Config, error) {
 	// Set individual peer defaults
 	for name, peer := range config.Peers {
 		setPeerDefaults(name, peer)
+	}
+
+	// Parse static routes
+	for prefix, nexthop := range config.Statics {
+		// Initialize static maps
+		config.Static4 = map[string]string{}
+		config.Static6 = map[string]string{}
+
+		pfx, _, err := net.ParseCIDR(prefix)
+		if err != nil {
+			return nil, errorx.Decorate(err, "Invalid static prefix: "+prefix)
+		}
+		if net.ParseIP(nexthop) == nil {
+			return nil, errorx.Decorate(err, "Invalid static next hop: "+nexthop)
+		}
+
+		if pfx.To4() == nil { // If IPv6
+			config.Static6[prefix] = nexthop
+		} else { // If IPv4
+			config.Static4[prefix] = nexthop
+		}
+
+		// Print static routes
+		if len(config.Static4) > 0 {
+			log.Infof("IPv4 statics: %+v", config.Static4)
+		}
+		if len(config.Static6) > 0 {
+			log.Infof("IPv6 statics: %+v", config.Static6)
+		}
 	}
 
 	// Parse VRRP configs

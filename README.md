@@ -126,6 +126,7 @@ bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VR
 | asn       | ASN of this router                                                                                            |
 | router-id | Router ID of this router                                                                                      |
 | prefixes  | List of prefixes to originate                                                                                 |
+| statics   | Map of static route to nexthop                                                                                |
 | irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
 | rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                             |
 | keep-filtered | Should BIRD keep filtered routes                                                                          |

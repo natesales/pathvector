@@ -93,10 +93,6 @@ If bcg doesn't have a feature you need (and you can't use pre-import/pre-export 
 
 bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured.
 
-#### BGP Communities
-
-bcg uses RFC 8092 BGP Large Communities
-
 #### Peerlock Lite
 
 Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in path ([Peerlock Lite](https://github.com/job/peerlock)).
@@ -106,6 +102,8 @@ Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in pat
 bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config key containing a list of VRRP instances to your bcg config file.
 
 #### Communities
+
+bcg uses RFC 8092 BGP Large Communities
 
 | Large     | Meaning                                            |
 |-----------|--------------------------------------------------- |

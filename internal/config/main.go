@@ -25,39 +25,39 @@ const (
 
 // Peer contains all information specific to a single peer network
 type Peer struct {
-	Asn                uint     `yaml:"asn" toml:"ASN" json:"asn"`
-	Type               string   `yaml:"type" toml:"Type" json:"type"`
-	Prepends           uint     `yaml:"prepends" toml:"Prepends" json:"prepends"`
-	LocalPref          uint     `yaml:"local-pref" toml:"LocalPref" json:"local-pref"`
-	Multihop           bool     `yaml:"multihop" toml:"Multihop" json:"multihop"`
-	Passive            bool     `yaml:"passive" toml:"Passive" json:"passive"`
-	Disabled           bool     `yaml:"disabled" toml:"Disabled" json:"disabled"`
-	Password           string   `yaml:"password" toml:"Password" json:"password"`
-	Port               uint16   `yaml:"port" toml:"Port" json:"port"`
-	PreImport          string   `yaml:"pre-import" toml:"PreImport" json:"pre-import"`
-	PreExport          string   `yaml:"pre-export" toml:"PreExport" json:"pre-export"`
-	NeighborIPs        []string `yaml:"neighbors" toml:"Neighbors" json:"neighbors"`
-	AsSet              string   `yaml:"as-set" toml:"ASSet" json:"as-set"`
-	ImportLimit4       uint     `yaml:"import-limit4" toml:"ImportLimit4" json:"import-limit4"`
-	ImportLimit6       uint     `yaml:"import-limit6" toml:"ImportLimit6" json:"import-limit6"`
-	SkipFilter         bool     `yaml:"skip-filter" toml:"SkipFilter" json:"skip-filter"`
-	RsClient           bool     `yaml:"rs-client" toml:"RSClient" json:"rs-client"`
-	RrClient           bool     `yaml:"rr-client" toml:"RRClient" json:"rr-client"`
-	Bfd                bool     `yaml:"bfd" toml:"BFD" json:"bfd"`
-	EnforceFirstAs     bool     `yaml:"enforce-first-as" toml:"EnforceFirstAS" json:"enforce-first-as"`
-	EnforcePeerNexthop bool     `yaml:"enforce-peer-nexthop" toml:"EnforcePeerNexthop" json:"enforce-peer-nexthop"`
-	SessionGlobal      string   `yaml:"session-global" toml:"SessionGlobal" json:"session-global"`
-	ExportDefault      bool     `yaml:"export-default" toml:"ExportDefault" json:"export-default"`
-	NoSpecifics        bool     `yaml:"no-specifics" toml:"NoSpecifics" json:"no-specifics"`
-	AllowBlackholes    bool     `yaml:"allow-blackholes" toml:"AllowBlackholes" json:"allow-blackholes"`
-	Communities        []string `yaml:"communities" toml:"Communities" json:"communities"`
-	LargeCommunities   []string `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
-	Description        string   `yaml:"description" toml:"Description" json:"description"`
+	Asn                uint     `yaml:"asn" json:"asn" toml:"ASN"`
+	Type               string   `yaml:"type" json:"type" toml:"Type"`
+	Prepends           uint     `yaml:"prepends" json:"prepends" toml:"Prepends"`
+	LocalPref          uint     `yaml:"local-pref" json:"local-pref" toml:"LocalPref"`
+	Multihop           bool     `yaml:"multihop" json:"multihop" toml:"Multihop"`
+	Passive            bool     `yaml:"passive" json:"passive" toml:"Passive"`
+	Disabled           bool     `yaml:"disabled" json:"disabled" toml:"Disabled"`
+	Password           string   `yaml:"password" json:"password" toml:"Password"`
+	Port               uint16   `yaml:"port" json:"port" toml:"Port"`
+	PreImport          string   `yaml:"pre-import" json:"pre-import" toml:"PreImport"`
+	PreExport          string   `yaml:"pre-export" json:"pre-export" toml:"PreExport"`
+	NeighborIPs        []string `yaml:"neighbors" json:"neighbors" toml:"Neighbors"`
+	AsSet              string   `yaml:"as-set" json:"as-set" toml:"ASSet"`
+	ImportLimit4       uint     `yaml:"import-limit4" json:"import-limit4" toml:"ImportLimit4"`
+	ImportLimit6       uint     `yaml:"import-limit6" json:"import-limit6" toml:"ImportLimit6"`
+	SkipFilter         bool     `yaml:"skip-filter" json:"skip-filter" toml:"SkipFilter"`
+	RsClient           bool     `yaml:"rs-client" json:"rs-client" toml:"RSClient"`
+	RrClient           bool     `yaml:"rr-client" json:"rr-client" toml:"RRClient"`
+	Bfd                bool     `yaml:"bfd" json:"bfd" toml:"BFD"`
+	EnforceFirstAs     bool     `yaml:"enforce-first-as" json:"enforce-first-as" toml:"EnforceFirstAS"`
+	EnforcePeerNexthop bool     `yaml:"enforce-peer-nexthop" json:"enforce-peer-nexthop" toml:"EnforcePeerNexthop"`
+	SessionGlobal      string   `yaml:"session-global" json:"session-global" toml:"SessionGlobal"`
+	ExportDefault      bool     `yaml:"export-default" json:"export-default" toml:"ExportDefault"`
+	NoSpecifics        bool     `yaml:"no-specifics" json:"no-specifics" toml:"NoSpecifics"`
+	AllowBlackholes    bool     `yaml:"allow-blackholes" json:"allow-blackholes" toml:"AllowBlackholes"`
+	Communities        []string `yaml:"communities" json:"communities" toml:"Communities"`
+	LargeCommunities   []string `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
+	Description        string   `yaml:"description" json:"description" toml:"Description"`
 
-	QueryTime  string   `yaml:"-" toml:"-" json:"-"`
-	Name       string   `yaml:"-" toml:"-" json:"-"`
-	PrefixSet4 []string `yaml:"-" toml:"-" json:"-"`
-	PrefixSet6 []string `yaml:"-" toml:"-" json:"-"`
+	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
+	Name       string   `yaml:"-" json:"-" toml:"-"`
+	PrefixSet4 []string `yaml:"-" json:"-" toml:"-"`
+	PrefixSet6 []string `yaml:"-" json:"-" toml:"-"`
 }
 
 // VRRPInstance stores a VRRP instance
@@ -74,29 +74,29 @@ type VRRPInstance struct {
 
 // Config contains global configuration about this router and BCG instance
 type Config struct {
-	Asn              uint              `yaml:"asn" toml:"ASN" json:"asn"`
-	RouterId         string            `yaml:"router-id" toml:"Router-ID" json:"router-id"`
-	Prefixes         []string          `yaml:"prefixes" toml:"Prefixes" json:"prefixes"`
-	Statics          map[string]string `yaml:"statics" toml:"Statics" json:"statics"`
-	Peers            map[string]*Peer  `yaml:"peers" toml:"Peers" json:"peers"`
-	VRRPInstances    []*VRRPInstance   `yaml:"vrrp" toml:"VRRP" json:"vrrp"`
-	IrrDb            string            `yaml:"irrdb" toml:"IRRDB" json:"irrdb"`
-	RtrServer        string            `yaml:"rtr-server" toml:"RTR-Server" json:"rtr-server"`
-	RtrPort          int               `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
-	KeepFiltered     bool              `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
-	MergePaths       bool              `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4         string            `yaml:"pref-src4" toml:"PrefSrc4" json:"pref-src4"`
-	PrefSrc6         string            `yaml:"pref-src6" toml:"PrefSrc6" json:"pref-src6"`
-	FilterDefault    bool              `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
-	DefaultEnabled   bool              `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
-	Communities      []string          `yaml:"communities" toml:"Communities" json:"communities"`
-	LargeCommunities []string          `yaml:"large-communities" toml:"LargeCommunities" json:"large-communities"`
+	Asn              uint              `yaml:"asn" json:"asn" toml:"ASN"`
+	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`
+	Prefixes         []string          `yaml:"prefixes" json:"prefixes" toml:"Prefixes"`
+	Statics          map[string]string `yaml:"statics" json:"statics" toml:"Statics"`
+	Peers            map[string]*Peer  `yaml:"peers" json:"peers" toml:"Peers"`
+	VRRPInstances    []*VRRPInstance   `yaml:"vrrp" json:"vrrp" toml:"VRRP"`
+	IrrDb            string            `yaml:"irrdb" json:"irrdb" toml:"IRRDB"`
+	RtrServer        string            `yaml:"rtr-server" json:"rtr-server" toml:"RTR-Server"`
+	RtrPort          int               `yaml:"rtr-port" json:"rtr-port" toml:"RTR-Port"`
+	KeepFiltered     bool              `yaml:"keep-filtered" json:"keep-filtered" toml:"KeepFiltered"`
+	MergePaths       bool              `yaml:"merge-paths" json:"merge-paths" toml:"MergePaths"`
+	PrefSrc4         string            `yaml:"pref-src4" json:"pref-src4" toml:"PrefSrc4"`
+	PrefSrc6         string            `yaml:"pref-src6" json:"pref-src6" toml:"PrefSrc6"`
+	FilterDefault    bool              `yaml:"filter-default" json:"filter-default" toml:"FilterDefault"`
+	DefaultEnabled   bool              `yaml:"enable-default" json:"enable-default" toml:"EnableDefault"`
+	Communities      []string          `yaml:"communities" json:"communities" toml:"Communities"`
+	LargeCommunities []string          `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
 
-	OriginSet4 []string          `yaml:"-" toml:"-" json:"-"`
-	OriginSet6 []string          `yaml:"-" toml:"-" json:"-"`
-	Static4    map[string]string `yaml:"-" toml:"-" json:"-"`
-	Static6    map[string]string `yaml:"-" toml:"-" json:"-"`
-	Hostname   string            `yaml:"-" toml:"-" json:"-"`
+	OriginSet4 []string          `yaml:"-" json:"-" toml:"-"`
+	OriginSet6 []string          `yaml:"-" json:"-" toml:"-"`
+	Static4    map[string]string `yaml:"-" json:"-" toml:"-"`
+	Static6    map[string]string `yaml:"-" json:"-" toml:"-"`
+	Hostname   string            `yaml:"-" json:"-" toml:"-"`
 }
 
 // Wrapper stores a Peer and Config passed to the template

@@ -8,16 +8,10 @@ router id {{ .RouterId }};
 define LOCAL_v4 = [
 {{ BirdSet .OriginSet4 }}
 ];
-{{- end }}
-
-{{if or .Static4 .OriginSet6 }}
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .OriginSet4 }}
   route {{ $prefix }} reject;
-  {{- end }}
-  {{- range $prefix, $nexthop := .Static4 }}
-  route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
 {{- end }}
@@ -26,16 +20,28 @@ protocol static static4 {
 define LOCAL_v6 = [
 {{ BirdSet .OriginSet6 }}
 ];
-{{- end }}
-
-{{if or .Static4 .OriginSet6 }}
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .OriginSet6 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := .Static6 }}
-  route {{ $prefix }} via {{ $nexthop }};
+}
+{{- end }}
+
+{{ if .Static4 -}}
+protocol static explstatic4 {
+  ipv4;
+  {{- range $i, $prefix := .Static4 }}
+  route {{ $prefix }} reject;
+  {{- end }}
+}
+{{- end }}
+
+{{ if .Static6 -}}
+protocol static explstatic6 {
+  ipv6;
+  {{- range $i, $prefix := .Static6 }}
+  route {{ $prefix }} reject;
   {{- end }}
 }
 {{- end }}

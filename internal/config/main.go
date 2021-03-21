@@ -85,8 +85,8 @@ type Config struct {
 	RtrPort          int               `yaml:"rtr-port" toml:"RTR-Port" json:"rtr-port"`
 	KeepFiltered     bool              `yaml:"keep-filtered" toml:"KeepFiltered" json:"keep-filtered"`
 	MergePaths       bool              `yaml:"merge-paths" toml:"MergePaths" json:"merge-paths"`
-	PrefSrc4         string            `yaml:"pref-src4" toml:"PrefSrc4" json:"PrefSrc4"`
-	PrefSrc6         string            `yaml:"pref-src6" toml:"PrefSrc6" json:"PrefSrc6"`
+	PrefSrc4         string            `yaml:"pref-src4" toml:"PrefSrc4" json:"pref-src4"`
+	PrefSrc6         string            `yaml:"pref-src6" toml:"PrefSrc6" json:"pref-src6"`
 	FilterDefault    bool              `yaml:"filter-default" toml:"FilterDefault" json:"filter-default"`
 	DefaultEnabled   bool              `yaml:"enable-default" toml:"EnableDefault" json:"enable-default"`
 	Communities      []string          `yaml:"communities" toml:"Communities" json:"communities"`

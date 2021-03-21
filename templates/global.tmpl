@@ -31,8 +31,8 @@ protocol static static6 {
 {{ if .Static4 -}}
 protocol static explstatic4 {
   ipv4;
-  {{- range $i, $prefix := .Static4 }}
-  route {{ $prefix }} reject;
+  {{- range $prefix, $nexthop := .Static4 }}
+  route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
 {{- end }}
@@ -40,8 +40,8 @@ protocol static explstatic4 {
 {{ if .Static6 -}}
 protocol static explstatic6 {
   ipv6;
-  {{- range $i, $prefix := .Static6 }}
-  route {{ $prefix }} reject;
+  {{- range $prefix, $nexthop := .Static6 }}
+  route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
 {{- end }}

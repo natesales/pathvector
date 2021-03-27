@@ -2,7 +2,9 @@
 # bird.conf
 
 define ASN = {{ .Asn }};
+{{ if .RouterId }}
 router id {{ .RouterId }};
+{{- end }}
 
 {{ if .OriginSet4 -}}
 define LOCAL_v4 = [

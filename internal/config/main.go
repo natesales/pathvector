@@ -123,7 +123,7 @@ func setConfigDefaults(config *Config) error {
 	}
 
 	// Validate Router ID in dotted quad format
-	if net.ParseIP(config.RouterId).To4() == nil {
+	if config.RouterId != "" && net.ParseIP(config.RouterId).To4() == nil {
 		return errors.New("Router ID " + config.RouterId + " is not in valid dotted quad notation")
 	}
 

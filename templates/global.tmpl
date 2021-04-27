@@ -70,7 +70,7 @@ protocol kernel {
   scan time 10;
   ipv4 {
     export filter {
-      if (proto = "explstatic4" || proto = "explstatic6") then accept;
+      if (proto = "explstatic4") then accept;
       {{ if .PrefSrc4 -}}
       if source = RTS_STATIC {{ if .OriginSet4 -}}&& proto != "static4"{{ end }} then {
         accept;
@@ -91,6 +91,7 @@ protocol kernel {
   scan time 10;
   ipv6 {
     export filter {
+      if (proto = "explstatic6") then accept;
       {{ if .PrefSrc6 -}}
       if source = RTS_STATIC {{ if .OriginSet6 -}}&& proto != "static6"{{ end }} then {
         accept;

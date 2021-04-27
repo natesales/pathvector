@@ -28,7 +28,7 @@ define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_PFX_v6 = [
 {{- end -}}
 {{ if CheckProtocol $peer.PrefixSet4 $peer.PrefixSet6 $af $peer.Type }}
 protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
-    local as ASN;
+    local {{ $peer.Listen }} as ASN;
     neighbor {{ $neighbor }} as {{ $peer.Asn }}{{ if $peer.Port }} port {{ $peer.Port }}{{ end }};
     description "{{ $peer.Description }}";
     {{ if $peer.Disabled }}disabled;{{ end }}

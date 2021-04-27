@@ -53,6 +53,7 @@ type Peer struct {
 	Communities        []string `yaml:"communities" json:"communities" toml:"Communities"`
 	LargeCommunities   []string `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
 	Description        string   `yaml:"description" json:"description" toml:"Description"`
+	Listen             string   `yaml:"listen" json:"listen" toml:"Listen"`
 
 	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
 	Name       string   `yaml:"-" json:"-" toml:"-"`

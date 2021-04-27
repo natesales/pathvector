@@ -8,7 +8,7 @@ The automatic router configuration generator for BGP with bogon, IRR, RPKI, and 
 
 ### Installation
 
-bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), [bgpq4](https://github.com/bgp/bgpq4), and optionally [keepalived](https://github.com/acassen/keepalived). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from Github and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/bcg` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
+bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), [bgpq4](https://github.com/bgp/bgpq4), and optionally [keepalived](https://github.com/acassen/keepalived). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from GitHub and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/bcg` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
 
 #### Configuration
 
@@ -136,6 +136,8 @@ bcg uses RFC 8092 BGP Large Communities
 | enable-default | Add static default routes                                                                                |
 | communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)                 |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
+| kernel-inject4 | List of protocols to inject into the kernel table |
+| kernel-inject6 | List of protocols to inject into the kernel table |
 
 #### BGP Peer Configuration Options
 

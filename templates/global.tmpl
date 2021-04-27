@@ -70,6 +70,9 @@ protocol kernel {
   scan time 10;
   ipv4 {
     export filter {
+      {{- range $i, $rule := .KernelInject4 }}
+      if (proto = "{{ $rule }}") then accept;
+      {{- end }}
       if (proto = "explstatic4") then accept;
       {{ if .PrefSrc4 -}}
       if source = RTS_STATIC {{ if .OriginSet4 -}}&& proto != "static4"{{ end }} then {
@@ -91,6 +94,9 @@ protocol kernel {
   scan time 10;
   ipv6 {
     export filter {
+      {{- range $i, $rule := .KernelInject6 }}
+      if (proto = "{{ $rule }}") then accept;
+      {{- end }}
       if (proto = "explstatic6") then accept;
       {{ if .PrefSrc6 -}}
       if source = RTS_STATIC {{ if .OriginSet6 -}}&& proto != "static6"{{ end }} then {

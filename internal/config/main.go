@@ -54,6 +54,7 @@ type Peer struct {
 	LargeCommunities   []string `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
 	Description        string   `yaml:"description" json:"description" toml:"Description"`
 	Listen             string   `yaml:"listen" json:"listen" toml:"Listen"`
+	MaxPfxAction       string   `yaml:"max-prefix-action" json:"max-prefix-action" toml:"MaxPrefixAction"`
 
 	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
 	Name       string   `yaml:"-" json:"-" toml:"-"`
@@ -150,6 +151,11 @@ func setPeerDefaults(name string, peer *Peer) {
 	// Set default description
 	if peer.Description == "" {
 		peer.Description = "AS" + strconv.Itoa(int(peer.Asn)) + " " + name
+	}
+
+	// Set default max prefix violation action
+	if peer.MaxPfxAction == "" {
+		peer.MaxPfxAction = "disable"
 	}
 }
 

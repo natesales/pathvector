@@ -8,11 +8,20 @@ The automatic router configuration generator for BGP with bogon, IRR, RPKI, and 
 
 ### Installation
 
-bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr), [bgpq4](https://github.com/bgp/bgpq4), and optionally [keepalived](https://github.com/acassen/keepalived). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from GitHub and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/bcg` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
+bcg depends on [bird2](https://gitlab.nic.cz/labs/bird/), [GoRTR](https://github.com/cloudflare/gortr)
+, [bgpq4](https://github.com/bgp/bgpq4), and optionally [keepalived](https://github.com/acassen/keepalived). Make sure
+the `bird` and `gortr` daemons are running and `bgpq4` is in path before running bcg. Releases can be downloaded from
+GitHub and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build
+from source by cloning the repo and running `go build`. It's recommended to run bcg every 12 hours to update IRR prefix
+lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/bcg` to your crontab will update the filters at
+12 AM and PM. If you're using ZSH you might also be interested in
+my [birdc completion](https://github.com/natesales/zsh-bird-completions).
 
 #### Configuration
 
-BCG can be configured in YAML, TOML, or JSON. All config file formats have the same configuration options but follow a different capitalization structure. YAML and JSON use all lowercase parameter names and TOML uses CapsCase with acronyms capitalized. For example, `router-id` in YAML and JSON is `Router-ID` in TOML.
+BCG can be configured in YAML, TOML, or JSON. All config file formats have the same configuration options but follow a
+different capitalization structure. YAML and JSON use all lowercase parameter names and TOML uses CapsCase with acronyms
+capitalized. For example, `router-id` in YAML and JSON is `Router-ID` in TOML.
 
 An example to configure a peer with bogon, IRR, RPKI, and max prefix filtering.
 
@@ -56,7 +65,8 @@ Help Options:
 
 #### How does filtering work?
 
-bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or manual prefix lists which rejects the following:
+bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or manual prefix lists which rejects the
+following:
 
 - Own prefixes as defined in the global `prefixes` list
 - Have a [bogon ASN](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L176) anywhere in the AS_PATH
@@ -71,15 +81,20 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
     - length < 12
     - contained in the [bogons list](https://github.com/natesales/bcg/blob/main/templates/global.tmpl#L143)
 
-All peers with a type of `peer` will apply further strict filtering by IRR using their AS-Set defined in PeeringDB. Max-prefix limits are also enforced for every peer.
+All peers with a type of `peer` will apply further strict filtering by IRR using their AS-Set defined in PeeringDB.
+Max-prefix limits are also enforced for every peer.
 
 #### Local Preference
 
-All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). LOCAL_PREF can be adjusted on a per-peer basis with the `local-pref` option under the peer block.
+All sessions have a default BGP LOCAL_PREF of 100, except for routes tagged with
+community `65535, 0` ([RFC8326 Graceful Shutdown](https://tools.ietf.org/html/rfc8326)). LOCAL_PREF can be adjusted on a
+per-peer basis with the `local-pref` option under the peer block.
 
 #### Pre-import and Pre-export conditions
 
-There are many features of BIRD that aren't part of bcg. If you want to add a statement before importing or exporting of routes, you can supply a multiline string in `pre-import` or `pre-export` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively.
+There are many features of BIRD that aren't part of bcg. If you want to add a statement before importing or exporting of
+routes, you can supply a multiline string in `pre-import` or `pre-export` in the peer block to include that snippet of
+BIRD code after the import prefilter or before the export filter respectively.
 
 #### iBGP
 
@@ -87,19 +102,23 @@ Next hop self will be enabled on BGP sessions where the neighbor ASN and local A
 
 #### Manual configuration
 
-If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before loading the rest of the config.
+If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure
+BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before loading the rest of the config.
 
 #### Single-stack support
 
-bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured.
+bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6}
+objects will not have sessions of that address family configured.
 
 #### Peerlock Lite
 
-Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in path ([Peerlock Lite](https://github.com/job/peerlock)).
+Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in
+path ([Peerlock Lite](https://github.com/job/peerlock)).
 
 #### VRRP
 
-bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config key containing a list of VRRP instances to your bcg config file.
+bcg can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config
+key containing a list of VRRP instances to your bcg config file.
 
 #### Communities
 
@@ -172,6 +191,7 @@ bcg uses RFC 8092 BGP Large Communities
 | communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)                 |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
 | description | Description string (just for human reference)                                                                         |
+| max-prefix-action | Max prefix violation action |
 
 #### VRRP instance config options
 

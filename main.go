@@ -156,6 +156,12 @@ func printPeerInfo(peerName string, peerData *config.Peer) {
 	log.Infof("[%s] export-default: %v", peerName, peerData.ExportDefault)
 	log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 	log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
+	log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
+	log.Infof("[%s] multihop", peerName)
+	log.Infof("[%s] passive", peerName)
+	log.Infof("[%s] disabled", peerName)
+	log.Infof("[%s] enforce-first-as", peerName)
+	log.Infof("[%s] enforce-peer-nexthop", peerName)
 
 	if len(peerData.Communities) > 0 {
 		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
@@ -167,30 +173,6 @@ func printPeerInfo(peerName string, peerData *config.Peer) {
 
 	if peerData.AsSet != "" {
 		log.Infof("[%s] as-set: %s", peerName, peerData.AsSet)
-	}
-
-	if peerData.Prepends > 0 {
-		log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
-	}
-
-	if peerData.Multihop {
-		log.Infof("[%s] multihop", peerName)
-	}
-
-	if peerData.Passive {
-		log.Infof("[%s] passive", peerName)
-	}
-
-	if peerData.Disabled {
-		log.Infof("[%s] disabled", peerName)
-	}
-
-	if peerData.EnforceFirstAs {
-		log.Infof("[%s] enforce-first-as", peerName)
-	}
-
-	if peerData.EnforcePeerNexthop {
-		log.Infof("[%s] enforce-peer-nexthop", peerName)
 	}
 }
 

@@ -195,6 +195,7 @@ bcg uses RFC 8092 BGP Large Communities
 | description          | Description string (just for human reference)                                                                     |
 | max-prefix-action    | Max prefix violation action                                                                                       |
 | no-peeringdb         | Don't query PeeringDB for peering information                                                                     |
+| next-hop-self        | Enable "next hop self;" for specifix peers                                                                        |
 
 #### VRRP instance config options
 

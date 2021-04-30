@@ -177,7 +177,7 @@ bcg uses RFC 8092 BGP Large Communities
 | pre-export           | BIRD expression to evaluate before the export filter                                                              |
 | pre-import-final     | BIRD expression to evaluate right before the static return condition on import (accept or reject)                 |
 | pre-export-final     | BIRD expression to evaluate right before the static return condition on export (accept or reject)                 |
-| prepends             | Number of times to prepend local AS to                                                                            |
+| prepends             | Number of times to prepend local AS to on export                                                                  |
 | import-limit4        | Maximum number of IPv4 prefixes to allow before disabling the session                                             |
 | import-limit6        | Maximum number of IPv6 prefixes to allow before disabling the session                                             |
 | skip-filter          | Disable the universal bogon filter (Dangerous!)                                                                   |

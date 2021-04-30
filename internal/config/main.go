@@ -55,6 +55,7 @@ type Peer struct {
 	Description        string   `yaml:"description" json:"description" toml:"Description"`
 	Listen             string   `yaml:"listen" json:"listen" toml:"Listen"`
 	MaxPfxAction       string   `yaml:"max-prefix-action" json:"max-prefix-action" toml:"MaxPrefixAction"`
+	NoPeeringDB        bool     `yaml:"no-peeringdb" json:"no-peeringdb" toml:"NoPeeringDB"`
 
 	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
 	Name       string   `yaml:"-" json:"-" toml:"-"`

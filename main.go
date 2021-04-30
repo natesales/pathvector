@@ -285,67 +285,69 @@ func main() {
 			log.Fatalf("[%s] type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
 		}
 
-		// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
-		if peerData.Type == "peer" || peerData.Type == "downstream" {
-			peerData.QueryTime = time.Now().Format(time.RFC1123)
-			peeringDbData := getPeeringDbData(peerData.Asn)
+		if !peerData.NoPeeringDB {
+			// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
+			if peerData.Type == "peer" || peerData.Type == "downstream" {
+				peerData.QueryTime = time.Now().Format(time.RFC1123)
+				peeringDbData := getPeeringDbData(peerData.Asn)
 
-			if peerData.ImportLimit4 == 0 {
-				peerData.ImportLimit4 = peeringDbData.MaxPfx4
-				log.Infof("[%s] has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
-			}
-
-			if peerData.ImportLimit6 == 0 {
-				peerData.ImportLimit6 = peeringDbData.MaxPfx6
-				log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
-			}
-
-			// Only set AS-SET from PeeringDB if it isn't configure manually
-			if peerData.AsSet == "" {
-				// If the as-set has a space in it, split and pick the first element
-				if strings.Contains(peeringDbData.AsSet, " ") {
-					peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
-					log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
+				if peerData.ImportLimit4 == 0 {
+					peerData.ImportLimit4 = peeringDbData.MaxPfx4
+					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
 				}
 
-				// Trim IRRDB prefix
-				if strings.Contains(peeringDbData.AsSet, "::") {
-					peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
-					log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+				if peerData.ImportLimit6 == 0 {
+					peerData.ImportLimit6 = peeringDbData.MaxPfx6
+					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
+				}
+
+				// Only set AS-SET from PeeringDB if it isn't configure manually
+				if peerData.AsSet == "" {
+					// If the as-set has a space in it, split and pick the first element
+					if strings.Contains(peeringDbData.AsSet, " ") {
+						peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
+						log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
+					}
+
+					// Trim IRRDB prefix
+					if strings.Contains(peeringDbData.AsSet, "::") {
+						peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
+						log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+					} else {
+						peerData.AsSet = peeringDbData.AsSet
+					}
+
+					if peeringDbData.AsSet == "" {
+						log.Fatalf("[%s] has no as-set in PeeringDB", peerName)
+					} else {
+						log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
+					}
 				} else {
-					peerData.AsSet = peeringDbData.AsSet
+					log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
 				}
 
-				if peeringDbData.AsSet == "" {
-					log.Fatalf("[%s] has no as-set in PeeringDB", peerName)
-				} else {
-					log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
+				peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
+				peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
+
+				// Update the "latest operation" timestamp
+				peerData.QueryTime = time.Now().Format(time.RFC1123)
+			} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
+				// Check for a zero prefix import limit
+				if peerData.ImportLimit4 == 0 {
+					peerData.ImportLimit4 = DefaultIPv4TableSize
+					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d", peerName, DefaultIPv4TableSize)
 				}
-			} else {
-				log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
-			}
 
-			peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
-			peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
-
-			// Update the "latest operation" timestamp
-			peerData.QueryTime = time.Now().Format(time.RFC1123)
-		} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-			// Check for a zero prefix import limit
-			if peerData.ImportLimit4 == 0 {
-				peerData.ImportLimit4 = DefaultIPv4TableSize
-				log.Infof("[%s] has no IPv4 import limit configured. Setting to %d", peerName, DefaultIPv4TableSize)
-			}
-
-			if peerData.ImportLimit6 == 0 {
-				peerData.ImportLimit6 = DefaultIPv6TableSize
-				log.Infof("[%s] has no IPv6 import limit configured. Setting to %d", peerName, DefaultIPv6TableSize)
+				if peerData.ImportLimit6 == 0 {
+					peerData.ImportLimit6 = DefaultIPv6TableSize
+					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d", peerName, DefaultIPv6TableSize)
+				}
 			}
 		}
 
 		// If as-set is empty and the peer type requires it
 		if peerData.AsSet == "" && (peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatal("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
+			log.Fatalf("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
 		}
 
 		// Print peer info

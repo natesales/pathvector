@@ -192,6 +192,7 @@ bcg uses RFC 8092 BGP Large Communities
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
 | description | Description string (just for human reference)                                                                         |
 | max-prefix-action | Max prefix violation action |
+| no-peeringdb | Don't query PeeringDB for peering information |
 
 #### VRRP instance config options
 

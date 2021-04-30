@@ -110,16 +110,16 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
 
             bgp_path.delete([64512..65534, 4200000000..4294967294]); # Strip private ASNs
 
-            {{ if or $global.OriginSet4 $global.OriginSet6 -}}
-            accept_local(); # Originated
-            process_prepends();
-            {{ end -}}
-
             {{ if not (eq $peer.Prepends 0) }}
             {{- range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}
             {{ end }}
+            
+            {{ if or $global.OriginSet4 $global.OriginSet6 -}}
+            process_prepends();
+            accept_local(); # Originated
+            {{ end -}}
 
             {{ if not $peer.NoSpecifics -}}
             {{ if eq $peer.Type "upstream" -}}

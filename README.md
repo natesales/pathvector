@@ -138,61 +138,63 @@ bcg uses RFC 8092 BGP Large Communities
 
 #### Global Configuration Options
 
-| Option    | Usage                                                                                                         |
-| --------- | ------------------------------------------------------------------------------------------------------------- |
-| asn       | ASN of this router                                                                                            |
-| router-id | Router ID of this router                                                                                      |
-| prefixes  | List of prefixes to originate                                                                                 |
-| statics   | Map of static route to nexthop                                                                                |
-| irrdb     | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs) |
-| rtr-server | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                             |
-| keep-filtered | Should BIRD keep filtered routes                                                                          |
-| peers         | Map of name to peer (see below)                                                                           |
-| merge-paths   | Enable merge paths on kernel export                                                                       |
-| pref-src4     | Preferred source IPv4 to export to kernel                                                                 |
-| pref-src6     | Preferred source IPv6 to export to kernel                                                                 |
-| filter-default | Should default routes be denied?                                                                         |
-| enable-default | Add static default routes                                                                                |
-| communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)                 |
+| Option            | Usage                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| asn               | ASN of this router                                                                                              |
+| router-id         | Router ID of this router                                                                                        |
+| prefixes          | List of prefixes to originate                                                                                   |
+| statics           | Map of static route to nexthop                                                                                  |
+| irrdb             | IRRDB to query prefix sets from (default is rr.ntt.net which includes generated route objects from RPKI ROAs)   |
+| rtr-server        | IP address or hostname of RPKI RTR server (default is 127.0.0.1)                                                |
+| keep-filtered     | Should BIRD keep filtered routes                                                                                |
+| peers             | Map of name to peer (see below)                                                                                 |
+| merge-paths       | Enable merge paths on kernel export                                                                             |
+| pref-src4         | Preferred source IPv4 to export to kernel                                                                       |
+| pref-src6         | Preferred source IPv6 to export to kernel                                                                       |
+| filter-default    | Should default routes be denied?                                                                                |
+| enable-default    | Add static default routes                                                                                       |
+| communities       | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)           |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
-| kernel-inject4 | List of protocols to inject into the kernel table |
-| kernel-inject6 | List of protocols to inject into the kernel table |
+| kernel-inject4    | List of protocols to inject into the kernel table                                                               |
+| kernel-inject6    | List of protocols to inject into the kernel table                                                               |
 
 #### BGP Peer Configuration Options
 
-| Option         | Usage                                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------------ |
-| asn            | Neighbor ASN                                                                                                       |
-| type           | Type of peer (upstream, peer, downstream, import-valid)                                                            |
-| local-pref     | BGP LOCAL_PREF                                                                                                     |
-| disabled       | Should neighbor sessions be disabled?                                                                              |
-| passive        | Should neighbor sessions listen passively for BGP TCP connections?                                                 |
-| multihop       | Should neighbor sessions allow multihop?                                                                           |
-| password       | BGP MD5 Password                                                                                                   |
-| port           | BGP Port (default 179)                                                                                             |
-| listen         | BGP listen address                                                                                                 |
-| neighbors      | List of neighbor IP addresses                                                                                      |
-| as-set         | Manual override for peer's IRRDB as-set                                                                            |
-| pre-import     | List of BIRD expressions to execute after the prefilter and before the prefix filter                               |
-| pre-export     | List of BIRD expressions to execute before the export filter                                                       |
-| prepends       | Number of times to prepend local AS to                                                                             |
-| import-limit4  | Maximum number of IPv4 prefixes to allow before disabling the session                                              |
-| import-limit6  | Maximum number of IPv6 prefixes to allow before disabling the session                                              |
-| skip-filter    | Disable the universal bogon filter (Dangerous!)                                                                    |
-| rs-client      | Enable route server client                                                                                         |
-| rr-client      | Enable route reflector client                                                                                      |
-| bfd            | Enable BFD                                                                                                         |
-| session-global | String to add to session global config                                                                             |
-| enforce-first-as | Reject routes that don't have the peer ASN as the first ASN in path                                              |
-| enforce-peer-nexthop | Reject routes where the next hop doesn't match the neighbor address                                          |
-| export-default | Should a default route be sent over the session? (default false)                                                   |
-| no-specifics | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported)    |
-| allow-blackholes | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes                                                  |
-| communities | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)                 |
-| large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
-| description | Description string (just for human reference)                                                                         |
-| max-prefix-action | Max prefix violation action |
-| no-peeringdb | Don't query PeeringDB for peering information |
+| Option               | Usage                                                                                                             |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| asn                  | Neighbor ASN                                                                                                      |
+| type                 | Type of peer (upstream, peer, downstream, import-valid)                                                           |
+| local-pref           | BGP LOCAL_PREF                                                                                                    |
+| disabled             | Should neighbor sessions be disabled?                                                                             |
+| passive              | Should neighbor sessions listen passively for BGP TCP connections?                                                |
+| multihop             | Should neighbor sessions allow multihop?                                                                          |
+| password             | BGP MD5 Password                                                                                                  |
+| port                 | BGP Port (default 179)                                                                                            |
+| listen               | BGP listen address                                                                                                |
+| neighbors            | List of neighbor IP addresses                                                                                     |
+| as-set               | Manual override for peer's IRRDB as-set                                                                           |
+| pre-import           | BIRD expression to evaluate after the prefilter and before the prefix filter                                      |
+| pre-export           | BIRD expression to evaluate before the export filter                                                              |
+| pre-import-final     | BIRD expression to evaluate right before the static return condition on import (accept or reject)                 |
+| pre-export-final     | BIRD expression to evaluate right before the static return condition on export (accept or reject)                 |
+| prepends             | Number of times to prepend local AS to                                                                            |
+| import-limit4        | Maximum number of IPv4 prefixes to allow before disabling the session                                             |
+| import-limit6        | Maximum number of IPv6 prefixes to allow before disabling the session                                             |
+| skip-filter          | Disable the universal bogon filter (Dangerous!)                                                                   |
+| rs-client            | Enable route server client                                                                                        |
+| rr-client            | Enable route reflector client                                                                                     |
+| bfd                  | Enable BFD                                                                                                        |
+| session-global       | String to add to session global config                                                                            |
+| enforce-first-as     | Reject routes that don't have the peer ASN as the first ASN in path                                               |
+| enforce-peer-nexthop | Reject routes where the next hop doesn't match the neighbor address                                               |
+| export-default       | Should a default route be sent over the session? (default false)                                                  |
+| no-specifics         | Don't send specific routes (default false, make sure to enable export-default or else no routes will be exported) |
+| allow-blackholes     | Accept community (ASN,1,666) to blackhole /32 and /128 prefixes                                                   |
+| communities          | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)             |
+| large-communities    | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`)   |
+| description          | Description string (just for human reference)                                                                     |
+| max-prefix-action    | Max prefix violation action                                                                                       |
+| no-peeringdb         | Don't query PeeringDB for peering information                                                                     |
 
 #### VRRP instance config options
 

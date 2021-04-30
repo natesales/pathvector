@@ -36,6 +36,8 @@ type Peer struct {
 	Port               uint16   `yaml:"port" json:"port" toml:"Port"`
 	PreImport          string   `yaml:"pre-import" json:"pre-import" toml:"PreImport"`
 	PreExport          string   `yaml:"pre-export" json:"pre-export" toml:"PreExport"`
+	PreImportFinal     string   `yaml:"pre-import-final" json:"pre-import-final" toml:"PreImportFinal"`
+	PreExportFinal     string   `yaml:"pre-export-final" json:"pre-export-final" toml:"PreExportFinal"`
 	NeighborIPs        []string `yaml:"neighbors" json:"neighbors" toml:"Neighbors"`
 	AsSet              string   `yaml:"as-set" json:"as-set" toml:"ASSet"`
 	ImportLimit4       uint     `yaml:"import-limit4" json:"import-limit4" toml:"ImportLimit4"`

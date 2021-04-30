@@ -89,6 +89,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ if $peer.AllowBlackholes }}
             process_blackholes();
             {{ end }}
+            {{ $peer.PreImportFinal }}
             accept;
             {{- end }}
         };
@@ -135,6 +136,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             {{ if $peer.ExportDefault -}}
             if (proto = "default{{ $af }}") then accept; # Send default route
             {{ end }}
+            {{ $peer.PreExportFinal }}
             reject;
         };
     };

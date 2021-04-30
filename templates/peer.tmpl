@@ -44,7 +44,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         import keep filtered;
         {{ end -}}
         import limit AS{{ $peer.Asn }}_{{ $peer.Name }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPfxAction }};
-        {{ if eq $peer.Asn $global.Asn }}next hop self;{{ end }}
+        {{ if eq $peer.Asn $global.Asn || $peer.NextHopSelf == 1 }}next hop self;{{ end }}
         import filter {
             {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
             {{ if $peer.EnforceFirstAs }}enforce_first_as({{ $peer.Asn }});{{ end }}

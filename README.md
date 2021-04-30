@@ -109,9 +109,9 @@ bcg uses RFC 8092 BGP Large Communities
 | ASN,0,102 | Learned from peer                                  |
 | ASN,0,103 | Learned from downstream                            |
 | ASN,1,200 | Don't export to upstreams                          |
-| ASN,1,301 | Prepend once                                       |
-| ASN,1,302 | Prepend twice                                      |
-| ASN,1,303 | Prepend three times                                |
+| ASN,1,401 | Prepend once                                       |
+| ASN,1,402 | Prepend twice                                      |
+| ASN,1,403 | Prepend three times                                |
 | ASN,1,666 | Blackhole (must be enabled with `allow-blackholes` |
 
 #### Global Configuration Options

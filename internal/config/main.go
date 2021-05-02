@@ -60,7 +60,6 @@ type Peer struct {
 	NoPeeringDB        bool     `yaml:"no-peeringdb" json:"no-peeringdb" toml:"NoPeeringDB"`
 	NextHopSelf        bool     `yaml:"next-hop-self" json:"next-hop-self" toml:"NextHopSelf"`
 
-
 	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
 	Name       string   `yaml:"-" json:"-" toml:"-"`
 	PrefixSet4 []string `yaml:"-" json:"-" toml:"-"`
@@ -177,7 +176,7 @@ func Load(filename string) (*Config, error) {
 	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
 	case "yaml", "yml":
 		log.Info("Using YAML configuration format")
-		err := yaml.Unmarshal(configFile, &config)
+		err := yaml.UnmarshalStrict(configFile, &config)
 		if err != nil {
 			return nil, errorx.Decorate(err, "YAML unmarshal")
 		}

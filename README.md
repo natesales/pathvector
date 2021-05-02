@@ -133,8 +133,10 @@ bcg uses RFC 8092 BGP Large Communities
 | enable-default    | Add static default routes                                                                                       |
 | communities       | List of BGP communities to add on export (two comma-separated values per list element; example `0,0`)           |
 | large-communities | List of BGP large communities to add on export (three comma-separated values per list element; example `0,0,0`) |
-| kernel-inject4    | List of protocols to inject into the kernel table                                                               |
-| kernel-inject6    | List of protocols to inject into the kernel table                                                               |
+| kernel-accept4    | List of protocols to accept into the kernel table                                                               |
+| kernel-accept6    | List of protocols to accept into the kernel table                                                               |
+| kernel-reject4    | List of protocols to reject from the kernel table                                                               |
+| kernel-reject6    | List of protocols to reject from the kernel table                                                               |
 
 #### BGP Peer Configuration Options
 

@@ -70,8 +70,11 @@ protocol kernel {
   scan time 10;
   ipv4 {
     export filter {
-      {{- range $i, $rule := .KernelInject4 }}
+      {{- range $i, $rule := .KernelAccept4 }}
       if (proto = "{{ $rule }}") then accept;
+      {{- end }}
+      {{- range $i, $rule := .KernelReject4 }}
+      if (proto = "{{ $rule }}") then reject;
       {{- end }}
       if (proto = "explstatic4") then accept;
       {{ if .PrefSrc4 -}}
@@ -94,8 +97,11 @@ protocol kernel {
   scan time 10;
   ipv6 {
     export filter {
-      {{- range $i, $rule := .KernelInject6 }}
+      {{- range $i, $rule := .KernelAccept6 }}
       if (proto = "{{ $rule }}") then accept;
+      {{- end }}
+      {{- range $i, $rule := .KernelReject6 }}
+      if (proto = "{{ $rule }}") then reject;
       {{- end }}
       if (proto = "explstatic6") then accept;
       {{ if .PrefSrc6 -}}

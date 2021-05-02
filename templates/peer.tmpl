@@ -20,16 +20,12 @@ define AS{{ .Peer.Asn }}_{{ .Peer.Name }}_PFX_v6 = [
 {{ $peer := .Peer -}}
 {{- $global := .Config -}}
 {{- $af := "" -}}
-{{- range $i, $neighbor := .Peer.NeighborIPs -}}
-{{- if Contains $neighbor ":" -}}
-{{- $af = "6" }}
-{{- else -}}
-{{- $af = "4" }}
-{{- end -}}
-{{ if CheckProtocol $peer.PrefixSet4 $peer.PrefixSet6 $af $peer.Type }}
-protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
+{{- $neighbors := Neighbors .Peer -}}
+{{- range $i, $neighbor := $neighbors -}}
+{{ if CheckProtocol $peer.PrefixSet4 $peer.PrefixSet6 $neighbor.Protocols $peer.Type }}
+protocol bgp {{ $peer.Name }}v{{ $neighbor.Type }}_{{ $i }} {
     local {{ $peer.Listen }} as ASN;
-    neighbor {{ $neighbor }} as {{ $peer.Asn }}{{ if $peer.Port }} port {{ $peer.Port }}{{ end }};
+    neighbor {{ $neighbor.Address }} as {{ $peer.Asn }}{{ if $peer.Port }} port {{ $peer.Port }}{{ end }};
     description "{{ $peer.Description }}";
     {{ if $peer.Disabled }}disabled;{{ end }}
     {{- if $peer.Passive }}passive;{{ end }}
@@ -39,6 +35,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
     {{- if $peer.RrClient }}rr client;{{ end }}
     {{- if $peer.Bfd }}bfd on;{{ end }}
     {{ $peer.SessionGlobal }}
+    {{- range $i, $af := $neighbor.Protocols -}}
     ipv{{ $af }} {
         {{ if $global.KeepFiltered -}}
         import keep filtered;
@@ -141,6 +138,7 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
             reject;
         };
     };
+    {{ end }}
 }
 
 {{ end }}

@@ -150,6 +150,7 @@ bcg uses RFC 8092 BGP Large Communities
 | port                 | BGP Port (default 179)                                                                                            |
 | listen               | BGP listen address                                                                                                |
 | neighbors            | List of neighbor IP addresses                                                                                     |
+| mp46-neighbors         | List of multi-protocol neighbor IP addresses                                                                                     |
 | as-set               | Manual override for peer's IRRDB as-set                                                                           |
 | pre-import           | BIRD expression to evaluate after the prefilter and before the prefix filter                                      |
 | pre-export           | BIRD expression to evaluate before the export filter                                                              |

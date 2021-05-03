@@ -97,8 +97,10 @@ type Config struct {
 	DefaultEnabled   bool              `yaml:"enable-default" json:"enable-default" toml:"EnableDefault"`
 	Communities      []string          `yaml:"communities" json:"communities" toml:"Communities"`
 	LargeCommunities []string          `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
-	KernelInject4    []string          `yaml:"kernel-inject4" json:"kernel-inject4" toml:"KernelInject4"`
-	KernelInject6    []string          `yaml:"kernel-inject6" json:"kernel-inject6" toml:"KernelInject6"`
+	KernelAccept4    []string          `yaml:"kernel-accept4" json:"kernel-accept4" toml:"KernelAccept4"`
+	KernelAccept6    []string          `yaml:"kernel-accept6" json:"kernel-accept6" toml:"KernelAccept6"`
+	KernelReject4    []string          `yaml:"kernel-reject4" json:"kernel-reject4" toml:"KernelReject4"`
+	KernelReject6    []string          `yaml:"kernel-reject6" json:"kernel-reject6" toml:"KernelReject6"`
 
 	OriginSet4 []string          `yaml:"-" json:"-" toml:"-"`
 	OriginSet6 []string          `yaml:"-" json:"-" toml:"-"`

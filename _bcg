@@ -1,0 +1,25 @@
+#compdef _bcg bcg
+
+function _bcg {
+    _arguments -C \
+            "-h[Show help information]" \
+            "--help[Show help information]" \
+            "--version[Show version and exit]" \
+            "--no-configure[Don't configure BIRD]" \
+            "--d[Don't modify BIRD config]" \
+            "--dry-run[Don't modify BIRD config]" \
+            "-c[Configuration file in YAML, TOML, or JSON format (default: /etc/bcg/config.yml)]" \
+            "--config[Configuration file in YAML, TOML, or JSON format (default: /etc/bcg/config.yml)]" \
+            "-o[Directory to write output files to (default: /etc/bird/)]" \
+            "--output[Directory to write output files to (default: /etc/bird/)]" \
+            "-s[BIRD control socket (default: /run/bird/bird.ctl)]" \
+            "--socket[BIRD control socket (default: /run/bird/bird.ctl)]" \
+            "-k[Configuration file for keepalived (default: /etc/keepalived/keepalived.conf)]" \
+            "--keepalived-config[Configuration file for keepalived (default: /etc/keepalived/keepalived.conf)]" \
+            "-u[File to store web UI (default: /tmp/bcg-ui.html)]" \
+            "--ui-fil[File to store web UI (default: /tmp/bcg-ui.html)]" \
+            "-n[Don't generate web UI]" \
+            "--no-ui[Don't generate web UI]" \
+            "-v[Show verbose log messages]" \
+            "--verbose[Show verbose log messages]"
+}

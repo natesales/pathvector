@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -300,7 +301,8 @@ func main() {
 					}
 
 					if peeringDbData.AsSet == "" {
-						log.Fatalf("[%s] has no as-set in PeeringDB", peerName)
+						log.Warnf("[%s] has no as-set in PeeringDB, falling back to their ASN (%d)", peerName, peerData.Asn)
+						peerData.AsSet = fmt.Sprintf("AS%d", peerData.Asn)
 					} else {
 						log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
 					}

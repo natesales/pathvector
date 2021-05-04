@@ -7,8 +7,42 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/natesales/bcg/internal/config"
 	"github.com/joomcode/errorx"
 )
+
+type Neighbor struct {
+	Address string
+	Type string
+	Protocols []string
+}
+
+func neighborsToStruct(Neighbors []string, mp46 bool) []Neighbor {
+	neighbors := []Neighbor{}
+	for _, neighbor := range Neighbors {
+		// neighborType of neighbor, used when constructing session string PEER1vNEIGHBOR_TYPE
+		neighborType := "46"
+		if !mp46 {
+			if strings.Contains(neighbor, ":"){
+				neighborType = "6"
+			} else {
+				neighborType = "4"
+			}
+		}
+		// protocols to create sessions on, possible values ["4"] | ["6"] | ["4","6"]
+		protocols := []string{neighborType}
+		if neighborType == "46" {
+			protocols = []string{"4", "6"}
+		}
+		neighbors = append(neighbors, Neighbor{
+			Address:   neighbor,
+			Type:      neighborType,
+			Protocols: protocols,
+		})
+	}
+
+	return neighbors
+}
 
 // Template functions
 var funcMap = template.FuncMap{
@@ -25,6 +59,18 @@ var funcMap = template.FuncMap{
 			Items = append(Items, i)
 		}
 		return Items
+	},
+
+	"Neighbors": func(peer config.Peer) []Neighbor {
+		if peer.NeighborIPs != nil && peer.MP46NeighborIPs != nil {
+			return append(neighborsToStruct(peer.NeighborIPs, false), neighborsToStruct(peer.MP46NeighborIPs, true)...)
+		} else if peer.MP46NeighborIPs != nil {
+			return neighborsToStruct(peer.MP46NeighborIPs, true)
+		} else if peer.NeighborIPs != nil {
+			return neighborsToStruct(peer.NeighborIPs, false)
+		} else {
+			return []Neighbor{}
+		}
 	},
 
 	"BirdSet": func(filter []string) string {
@@ -45,9 +91,12 @@ var funcMap = template.FuncMap{
 		return len(arr) != 0
 	},
 
-	"CheckProtocol": func(v4set []string, v6set []string, family string, peerType string) bool {
+	"CheckProtocol": func(v4set []string, v6set []string, family []string, peerType string) bool {
 		if peerType == "downstream" || peerType == "peer" { // Only match IRR filtered peer types
-			if family == "4" {
+			if len(family) > 1 {
+				return true
+			}
+			if family[0] == "4" {
 				return len(v4set) != 0
 			} else {
 				return len(v6set) != 0

@@ -76,7 +76,7 @@ protocol kernel {
       {{- range $i, $rule := .KernelReject4 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
-      if (proto = "explstatic4") then accept;
+      if (proto = "static4") then accept;
       {{ if .PrefSrc4 -}}
       if source = RTS_STATIC {{ if .OriginSet4 -}}&& proto != "static4"{{ end }} then {
         accept;
@@ -103,7 +103,7 @@ protocol kernel {
       {{- range $i, $rule := .KernelReject6 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
-      if (proto = "explstatic6") then accept;
+      if (proto = "static6") then accept;
       {{ if .PrefSrc6 -}}
       if source = RTS_STATIC {{ if .OriginSet6 -}}&& proto != "static6"{{ end }} then {
         accept;

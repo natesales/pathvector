@@ -7,13 +7,12 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/natesales/bcg/internal/config"
 	"github.com/joomcode/errorx"
 )
 
 type Neighbor struct {
-	Address string
-	Type string
+	Address   string
+	Type      string
 	Protocols []string
 }
 
@@ -23,7 +22,7 @@ func neighborsToStruct(Neighbors []string, mp46 bool) []Neighbor {
 		// neighborType of neighbor, used when constructing session string PEER1vNEIGHBOR_TYPE
 		neighborType := "46"
 		if !mp46 {
-			if strings.Contains(neighbor, ":"){
+			if strings.Contains(neighbor, ":") {
 				neighborType = "6"
 			} else {
 				neighborType = "4"
@@ -61,7 +60,7 @@ var funcMap = template.FuncMap{
 		return Items
 	},
 
-	"Neighbors": func(peer config.Peer) []Neighbor {
+	"Neighbors": func(peer Peer) []Neighbor {
 		if peer.NeighborIPs != nil && peer.MP46NeighborIPs != nil {
 			return append(neighborsToStruct(peer.NeighborIPs, false), neighborsToStruct(peer.MP46NeighborIPs, true)...)
 		} else if peer.MP46NeighborIPs != nil {

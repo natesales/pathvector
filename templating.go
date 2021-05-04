@@ -10,17 +10,19 @@ import (
 	"github.com/joomcode/errorx"
 )
 
+// Neighbor stores a single peer address with supported protocols
 type Neighbor struct {
 	Address   string
 	Type      string
 	Protocols []string
 }
 
-func neighborsToStruct(Neighbors []string, mp46 bool) []Neighbor {
-	neighbors := []Neighbor{}
-	for _, neighbor := range Neighbors {
+// neighborsToStruct converts a list of neighbor addresses and IPv4/IPv6 multiprotocol status to a list of Neighbors
+func neighborsToStruct(neighbors []string, mp46 bool) []Neighbor {
+	var _neighbors []Neighbor
+	for _, neighbor := range neighbors {
 		// neighborType of neighbor, used when constructing session string PEER1vNEIGHBOR_TYPE
-		neighborType := "46"
+		neighborType := "46" // 46 for MP-BGP IPv4/IPv6 unicast
 		if !mp46 {
 			if strings.Contains(neighbor, ":") {
 				neighborType = "6"
@@ -33,14 +35,14 @@ func neighborsToStruct(Neighbors []string, mp46 bool) []Neighbor {
 		if neighborType == "46" {
 			protocols = []string{"4", "6"}
 		}
-		neighbors = append(neighbors, Neighbor{
+		_neighbors = append(_neighbors, Neighbor{
 			Address:   neighbor,
 			Type:      neighborType,
 			Protocols: protocols,
 		})
 	}
 
-	return neighbors
+	return _neighbors
 }
 
 // Template functions

@@ -46,47 +46,38 @@ protocol bgp {{ $peer.Name }}v{{ $af }}_{{ $i }} {
         import limit AS{{ $peer.Asn }}_{{ $peer.Name }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPfxAction }};
         {{ if or (eq $peer.Asn $global.Asn) ($peer.NextHopSelf) }}next hop self;{{ end }}
         import filter {
-            {{ if not $peer.SkipFilter }}reject_bogons();{{ end }}
+            {{ if not $peer.NoFilterBogon }}reject_bogons();{{ end }}
+            {{ if not $peer.NoFilterRPKI }}reject_rpki_invalids();{{ end }}
             {{ if $peer.EnforceFirstAs }}enforce_first_as({{ $peer.Asn }});{{ end }}
             {{ if $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
             strip_info_communities();
             bgp_local_pref = {{ $peer.LocalPref }};
             honor_graceful_shutdown();
             {{ $peer.PreImport }}
+
             {{- if eq $peer.Type "upstream" -}}
             bgp_large_community.add((ASN,0,101)); # Learned from upstream
-            {{ if $peer.AllowBlackholes }}
-            process_blackholes();
-            {{ end }}
-            accept;
             {{- else if eq $peer.Type "peer" -}}
             reject_transit_paths();
-            if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
-                bgp_large_community.add((ASN,0,102)); # Learned from peer
-                {{ if $peer.AllowBlackholes }}
-                process_blackholes();
-                {{ end }}
-                accept;
-            }
-            reject;
+            bgp_large_community.add((ASN,0,102)); # Learned from peer
             {{- else if eq $peer.Type "downstream" -}}
             reject_transit_paths();
-            if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
-                bgp_large_community.add((ASN,0,103)); # Learned from downstream
-                {{ if $peer.AllowBlackholes }}
-                process_blackholes();
-                {{ end }}
-                accept;
-            }
-            reject;
+            bgp_large_community.add((ASN,0,103)); # Learned from downstream
             {{- else if eq $peer.Type "import-valid" -}}
             bgp_large_community.add((ASN,0,102)); # Learned from peer
+            {{ end }}
+
+            {{- if and (not $peer.NoFilterIRR) (or (eq $peer.Type "peer") (eq $peer.Type "downstream")) }}
+            if (net !~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
+                reject;
+            }
+            {{- end }}
+
+            {{ $peer.PreImportFinal }}
             {{ if $peer.AllowBlackholes }}
             process_blackholes();
             {{ end }}
-            {{ $peer.PreImportFinal }}
             accept;
-            {{- end }}
         };
 
         export filter {

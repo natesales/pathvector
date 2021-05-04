@@ -43,6 +43,9 @@ type Peer struct {
 	ImportLimit4       uint     `yaml:"import-limit4" json:"import-limit4" toml:"ImportLimit4"`
 	ImportLimit6       uint     `yaml:"import-limit6" json:"import-limit6" toml:"ImportLimit6"`
 	SkipFilter         bool     `yaml:"skip-filter" json:"skip-filter" toml:"SkipFilter"`
+	NoFilterIRR        bool     `yaml:"no-filter-irr" json:"no-filter-irr" toml:"NoFilterIRR"`
+	NoFilterRPKI       bool     `yaml:"no-filter-rpki" json:"no-filter-rpki" toml:"NoFilterRPKI"`
+	NoFilterBogon      bool     `yaml:"no-filter-bogon" json:"no-filter-bogon" toml:"NoFilterBogon"`
 	RsClient           bool     `yaml:"rs-client" json:"rs-client" toml:"RSClient"`
 	RrClient           bool     `yaml:"rr-client" json:"rr-client" toml:"RRClient"`
 	Bfd                bool     `yaml:"bfd" json:"bfd" toml:"BFD"`

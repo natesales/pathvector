@@ -1,4 +1,4 @@
-package templating
+package main
 
 import (
 	"embed"
@@ -69,35 +69,36 @@ var funcMap = template.FuncMap{
 }
 
 // Templates
-var PeerTemplate *template.Template
-var GlobalTemplate *template.Template
-var UiTemplate *template.Template
-var VRRPTemplate *template.Template
 
-// Load loads the templates from the embedded filesystem
-func Load(fs embed.FS) error {
+var peerTemplate *template.Template
+var globalTemplate *template.Template
+var uiTemplate *template.Template
+var vrrpTemplate *template.Template
+
+// loadTemplates loads the templates from the embedded filesystem
+func loadTemplates(fs embed.FS) error {
 	var err error
 
 	// Generate peer template
-	PeerTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/peer.tmpl")
+	peerTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/peer.tmpl")
 	if err != nil {
 		return errorx.Decorate(err, "Reading peer template")
 	}
 
 	// Generate global template
-	GlobalTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/global.tmpl")
+	globalTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/global.tmpl")
 	if err != nil {
 		return errorx.Decorate(err, "Reading global template")
 	}
 
 	// Generate UI template
-	UiTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
+	uiTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
 	if err != nil {
 		return errorx.Decorate(err, "Reading ui template")
 	}
 
 	// Generate VRRP template
-	VRRPTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
+	vrrpTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
 	if err != nil {
 		return errorx.Decorate(err, "Reading VRRP template")
 	}

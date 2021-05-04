@@ -1,28 +1,15 @@
-package bird
+package main
 
 import (
 	"io"
 	"net"
 	"strings"
 
-	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 )
 
-// Nonbuffered io Reader
-func readNoBuffer(reader io.Reader) (string, error) {
-	buf := make([]byte, 1024)
-	n, err := reader.Read(buf[:])
-
-	if err != nil {
-		return "", errorx.Decorate(err, "BIRD read") // empty return string
-	}
-
-	return string(buf[:n]), nil // nil error
-}
-
-// RunCommand runs a bird command
-func RunCommand(command string, socket string) error {
+// runBirdCommand runs a bird command
+func runBirdCommand(command string, socket string) error {
 	log.Debug("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
@@ -32,7 +19,7 @@ func RunCommand(command string, socket string) error {
 	defer conn.Close()
 
 	log.Println("Connected to BIRD socket")
-	resp, err := readNoBuffer(conn)
+	resp, err := io.ReadAll(conn)
 	if err != nil {
 		return err
 	}
@@ -45,13 +32,13 @@ func RunCommand(command string, socket string) error {
 		log.Fatalf("BIRD write error: %s\n", err)
 	}
 
-	resp, err = readNoBuffer(conn)
+	resp, err = io.ReadAll(conn)
 	if err != nil {
 		return err
 	}
 
 	// Print bird output as multiple lines
-	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
+	for _, line := range strings.Split(strings.Trim(string(resp), "\n"), "\n") {
 		log.Printf("BIRD response (multiline): %s", line)
 	}
 

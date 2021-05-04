@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"encoding/json"
@@ -165,8 +165,8 @@ func setPeerDefaults(name string, peer *Peer) {
 	}
 }
 
-// Load loads a configuration file (YAML, JSON, or TOML)
-func Load(filename string) (*Config, error) {
+// loadConfig loads a configuration file from YAML, JSON, or TOML
+func loadConfig(filename string) (*Config, error) {
 	configFile, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, errorx.Decorate(err, "Reading config file")

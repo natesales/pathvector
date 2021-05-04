@@ -18,10 +18,6 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/kennygrant/sanitize"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/natesales/bcg/internal/bird"
-	"github.com/natesales/bcg/internal/config"
-	"github.com/natesales/bcg/internal/templating"
 )
 
 var version = "dev" // set by the build process
@@ -149,7 +145,7 @@ func normalize(input string) string {
 }
 
 // printPeerInfo prints a peer's configuration to the log
-func printPeerInfo(peerName string, peerData *config.Peer) {
+func printPeerInfo(peerName string, peerData *Peer) {
 	log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIPs, ", "))
 	log.Infof("[%s] type: %s", peerName, peerData.Type)
 	log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
@@ -200,9 +196,8 @@ func main() {
 
 	log.Infof("Starting bcg %s", version)
 
-	// Parse template files
-
-	err = templating.Load(embedFs)
+	// Load templates from embedded filesystem
+	err = loadTemplates(embedFs)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -211,7 +206,7 @@ func main() {
 
 	// Load the config file from configFilename flag
 	log.Debugf("Loading config from %s", opts.ConfigFile)
-	globalConfig, err := config.Load(opts.ConfigFile)
+	globalConfig, err := loadConfig(opts.ConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -227,7 +222,7 @@ func main() {
 
 		// Render the global template and write to disk
 		log.Debug("Writing global config file")
-		err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
+		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
 		if err != nil {
 			log.Fatalf("Execute global template: %v", err)
 		}
@@ -346,7 +341,7 @@ func main() {
 
 			// Render the template and write to disk
 			log.Infof("[%s] Writing config", peerName)
-			err = templating.PeerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &config.Wrapper{Peer: *peerData, Config: *globalConfig})
+			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &Wrapper{Peer: *peerData, Config: *globalConfig})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
 			}
@@ -366,7 +361,7 @@ func main() {
 		}
 
 		// Render the template and write to disk
-		err = templating.VRRPTemplate.ExecuteTemplate(peerSpecificFile, "vrrp.tmpl", globalConfig.VRRPInstances)
+		err = vrrpTemplate.ExecuteTemplate(peerSpecificFile, "vrrp.tmpl", globalConfig.VRRPInstances)
 		if err != nil {
 			log.Fatalf("Execute template: %v", err)
 		}
@@ -388,7 +383,7 @@ func main() {
 
 			// Render the UI template and write to disk
 			log.Debug("Writing ui file")
-			err = templating.UiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", globalConfig)
+			err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", globalConfig)
 			if err != nil {
 				log.Fatalf("Execute ui template: %v", err)
 			}
@@ -397,7 +392,7 @@ func main() {
 
 		if !opts.NoConfigure {
 			log.Infoln("Reconfiguring BIRD")
-			if err = bird.RunCommand("configure", opts.Socket); err != nil {
+			if err = runBirdCommand("configure", opts.Socket); err != nil {
 				log.Fatal(err)
 			}
 		} else {

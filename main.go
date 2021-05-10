@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -59,6 +60,16 @@ var opts struct {
 
 //go:embed templates/*
 var embedFs embed.FS
+
+// contains is a linear search on a string array
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
 
 // Query PeeringDB for an ASN
 func getPeeringDbData(asn uint) PeeringDbData {
@@ -146,30 +157,15 @@ func normalize(input string) string {
 
 // printPeerInfo prints a peer's configuration to the log
 func printPeerInfo(peerName string, peerData *Peer) {
-	log.Infof("[%s] neighbors: %s", peerName, strings.Join(peerData.NeighborIPs, ", "))
-	log.Infof("[%s] type: %s", peerName, peerData.Type)
-	log.Infof("[%s] local pref: %d", peerName, peerData.LocalPref)
-	log.Infof("[%s] max prefixes: IPv4 %d, IPv6 %d", peerName, peerData.ImportLimit4, peerData.ImportLimit6)
-	log.Infof("[%s] export-default: %v", peerName, peerData.ExportDefault)
-	log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
-	log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
-	log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
-	log.Infof("[%s] multihop: %v", peerName, peerData.Multihop)
-	log.Infof("[%s] passive: %v", peerName, peerData.Passive)
-	log.Infof("[%s] disabled: %v", peerName, peerData.Disabled)
-	log.Infof("[%s] enforce-first-as: %v", peerName, peerData.EnforceFirstAs)
-	log.Infof("[%s] enforce-peer-nexthop: %v", peerName, peerData.EnforcePeerNexthop)
-
-	if len(peerData.Communities) > 0 {
-		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))
-	}
-
-	if len(peerData.LargeCommunities) > 0 {
-		log.Infof("[%s] large-communities: %s", peerName, strings.Join(peerData.LargeCommunities, ", "))
-	}
-
-	if peerData.AsSet != "" {
-		log.Infof("[%s] as-set: %s", peerName, peerData.AsSet)
+	// Fields to exclude from print output
+	excludedFields := []string{"PrefixSet4", "PrefixSet6", "Name", "SessionGlobal", "PreImport", "PreExport", "PreImportFinal", "PreExportFinal", "QueryTime"}
+	s := reflect.ValueOf(peerData).Elem()
+	typeOf := s.Type()
+	for i := 0; i < s.NumField(); i++ {
+		attrName := typeOf.Field(i).Name
+		if !(contains(excludedFields, attrName)) {
+			log.Infof("[%s] attribute %s = %v\n", peerName, attrName, s.Field(i).Interface())
+		}
 	}
 }
 

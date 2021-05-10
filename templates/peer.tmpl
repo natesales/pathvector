@@ -56,7 +56,7 @@ protocol bgp {{ $peer.Name }}v{{ $neighbor.Type }}_{{ $i }} {
             process_blackholes();
             {{ end }}
             accept;
-            {{- else if eq $peer.Type "peer" -}}
+            {{- else if eq $peer.Type "peer" }}
             reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,102)); # Learned from peer
@@ -66,7 +66,7 @@ protocol bgp {{ $peer.Name }}v{{ $neighbor.Type }}_{{ $i }} {
                 accept;
             }
             reject;
-            {{- else if eq $peer.Type "downstream" -}}
+            {{- else if eq $peer.Type "downstream" }}
             reject_transit_paths();
             if (net ~ AS{{ $peer.Asn }}_{{ $peer.Name }}_PFX_v{{ $af }}) then {
                 bgp_large_community.add((ASN,0,103)); # Learned from downstream

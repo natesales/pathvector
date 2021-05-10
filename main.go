@@ -154,11 +154,11 @@ func printPeerInfo(peerName string, peerData *Peer) {
 	log.Infof("[%s] no-specifics: %v", peerName, peerData.NoSpecifics)
 	log.Infof("[%s] allow-blackholes: %v", peerName, peerData.AllowBlackholes)
 	log.Infof("[%s] prepends: %d", peerName, peerData.Prepends)
-	log.Infof("[%s] multihop", peerName)
-	log.Infof("[%s] passive", peerName)
-	log.Infof("[%s] disabled", peerName)
-	log.Infof("[%s] enforce-first-as", peerName)
-	log.Infof("[%s] enforce-peer-nexthop", peerName)
+	log.Infof("[%s] multihop: %v", peerName, peerData.Multihop)
+	log.Infof("[%s] passive: %v", peerName, peerData.Passive)
+	log.Infof("[%s] disabled: %v", peerName, peerData.Disabled)
+	log.Infof("[%s] enforce-first-as: %v", peerName, peerData.EnforceFirstAs)
+	log.Infof("[%s] enforce-peer-nexthop: %v", peerName, peerData.EnforcePeerNexthop)
 
 	if len(peerData.Communities) > 0 {
 		log.Infof("[%s] communities: %s", peerName, strings.Join(peerData.Communities, ", "))

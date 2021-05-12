@@ -53,11 +53,3 @@ peers:
       - "203.0.113.34"
       - "2001:db8::34"
 ```
-
-## Deployment Scenarios
-
-### Linux
-
-### Arista
-
-### VyOS

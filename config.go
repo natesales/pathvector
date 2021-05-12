@@ -102,6 +102,7 @@ type Config struct {
 	KernelAccept6    []string          `yaml:"kernel-accept6" json:"kernel-accept6" toml:"KernelAccept6"`
 	KernelReject4    []string          `yaml:"kernel-reject4" json:"kernel-reject4" toml:"KernelReject4"`
 	KernelReject6    []string          `yaml:"kernel-reject6" json:"kernel-reject6" toml:"KernelReject6"`
+	Interfaces       map[string]iface  `yaml:"interfaces" json:"interfaces" toml:"Interfaces"`
 
 	OriginSet4 []string          `yaml:"-" json:"-" toml:"-"`
 	OriginSet6 []string          `yaml:"-" json:"-" toml:"-"`

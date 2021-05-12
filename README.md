@@ -9,6 +9,6 @@ Wireframe is a declarative routing platform integrating BGP with robust filterin
 #### Documentation:
 https://natesales.github.io/wireframe/
 
-#### *Notice:* BCG is now Wireframe.
+#### *Notice:* BCG is now Wireframe
 
 Wireframe started out as "bcg" (BIRD Configuration Generator) but has since grown to be much more than just a templating utility for BIRD. Now with support for an XDP dataplane, VRRP, and interface configuration, it's being renamed to Wireframe to make it clear that it's no longer just for BIRD. It's the same codebase as always, just with a new name to reflect new features.

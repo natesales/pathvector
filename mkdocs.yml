@@ -1,0 +1,6 @@
+site_name: Wireframe
+repo_url: https://github.com/natesales/wireframe
+theme:
+  name: material
+  palette:
+    primary: black

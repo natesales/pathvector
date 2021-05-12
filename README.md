@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Release](https://img.shields.io/github/v/release/natesales/bcg?style=for-the-badge)](https://github.com/natesales/bcg/releases)
 
-The automatic router configuration generator for BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. In other words, Wireframe is a router automation system for Linux. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
+Wireframe is a declarative routing platform BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
 
 #### *Notice:* BCG is now Wireframe. See [Where did BCG go?](https://github.com/natesales/wireframe#installation) for more information. 
 

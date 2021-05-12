@@ -1,6 +1,6 @@
 # Welcome to Wireframe
 
-Wireframe is an open source router automation system for Linux. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
+Wireframe is a declarative routing platform BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
 
 ## Overview
 
@@ -42,3 +42,11 @@ peers:
       - "203.0.113.34"
       - "2001:db8::34"
 ```
+
+## Deployment Scenarios
+
+### Linux
+
+### Arista
+
+### VyOS

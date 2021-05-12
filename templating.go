@@ -99,9 +99,8 @@ var funcMap = template.FuncMap{
 			}
 			if family[0] == "4" {
 				return len(v4set) != 0
-			} else {
-				return len(v6set) != 0
 			}
+			return len(v6set) != 0
 		} else { // If the peer type isn't going to be IRR filtered, ignore it.
 			return true
 		}

@@ -111,6 +111,21 @@ type Config struct {
 	Hostname   string            `yaml:"-" json:"-" toml:"-"`
 }
 
+// addr represents an IP address and netmask for easy YAML validation
+type addr struct {
+	Address net.IP
+	Mask    uint8
+}
+
+// iface represents a network interface
+type iface struct {
+	Mtu       uint   `yaml:"mtu" json:"mtu" toml:"MTU"`
+	XDPRTR    bool   `yaml:"xdprtr" json:"xdprtr" toml:"XDPRTR"`
+	Addresses []addr `yaml:"addresses" json:"addresses" toml:"Addresses"`
+	Dummy     bool   `yaml:"dummy" json:"dummy" toml:"Dummy"`
+	Down      bool   `yaml:"down" json:"down" toml:"Down"`
+}
+
 // Wrapper stores a Peer and Config passed to the template
 type Wrapper struct {
 	Peer   Peer

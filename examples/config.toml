@@ -7,6 +7,13 @@ Prefixes = [
     "2001:db8::/48"
 ]
 
+[Interfaces."eth0"]
+XDPRTR = true
+Addresses = [
+    "192.0.2.1/24",
+    "2001:db8::1/48"
+]
+
 [[VRRP]]
 Interface = "eth0"
 State = "primary"

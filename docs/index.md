@@ -1,6 +1,6 @@
 # Welcome to Wireframe
 
-Wireframe is a declarative routing platform BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
+Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
 
 ## Overview
 

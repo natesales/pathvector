@@ -6,7 +6,7 @@
 
 Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
 
-#### *Notice:* BCG is now Wireframe. See [Where did BCG go?](https://github.com/natesales/wireframe#installation) for more information. 
+#### *Notice:* BCG is now Wireframe. See [Where did BCG go?](https://github.com/natesales/wireframe#where-did-bcg-go) for more information. 
 
 ### Installation
 

@@ -2,7 +2,7 @@
 
 ## How does filtering work?
 
-bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or manual prefix lists which rejects importing any route that...
+Wireframe applies a universal pre-filter to all BGP sessions before evaluating IRR or manual prefix lists which rejects importing any route that...
 
 - Is locally originated as defined in the global `prefixes` list
 - Has a bogon ASN in the AS path
@@ -12,7 +12,7 @@ bcg applies a universal pre-filter to all BGP sessions before evaluating IRR or 
 - Is IPv4 and 8 <= length >= 24
 - Is IPv6 and 12 <= length >= 48
 
-Bogon lists can be found in [global.tmpl](https://github.com/natesales/bcg/blob/main/templates/global.tmpl)
+Bogon lists can be found in [global.tmpl](https://github.com/natesales/wireframe/blob/main/templates/global.tmpl)
 
 All peers with a type of `peer` will apply further strict filtering by IRR using their as-set defined in PeeringDB. Max prefix limits are also enforced for every peer.
 
@@ -22,8 +22,7 @@ All sessions have a default BGP local pref of 100, except for routes tagged with
 
 ## Pre-import and Pre-export conditions
 
-There are many features of BIRD that aren't part of bcg. If you find such a feature, please [open an issue](https://github.com/natesales/bcg/issues/new). If it's something that is highly specific to your use case, you can supply a BIRD config snippet in `pre-import` or `pre-export` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively, or in `pre-import-final` or `pre-export-final` to include it immediately before the
-final `accept`/`reject` of the filter.
+There are many features of BIRD that aren't part of Wireframe. If you find such a feature, please [open an issue](https://github.com/natesales/wireframe/issues/new). If it's something that is highly specific to your use case, you can supply a BIRD config snippet in `pre-import` or `pre-export` in the peer block to include that snippet of BIRD code after the import prefilter or before the export filter respectively, or in `pre-import-final` or `pre-export-final` to include it immediately before the final `accept`/`reject` of the filter.
 
 ## iBGP
 
@@ -31,11 +30,11 @@ Next hop self will be enabled on BGP sessions where the neighbor ASN and local A
 
 ## Manual configuration
 
-If bcg doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and bcg will load the config before loading the rest of the config.
+If Wireframe doesn't have a feature you need (and you can't use pre-import/pre-export conditions) then you can supply pure BIRD config in `/etc/bird/manual*.conf` and Wireframe will load the config before loading the rest of the config.
 
 ## Single-stack (IPv4 only / IPv6 only) support
 
-bcg *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured.
+Wireframe *should* have reasonable single-stack peering support but is not fully tested. Peers that don't have any route{,6} objects will not have sessions of that address family configured.
 
 ## Peerlock Lite
 
@@ -43,7 +42,7 @@ Peers with type `peer` or `downstream` reject any route with a Tier 1 ASN in pat
 
 ## Communities
 
-bcg uses RFC 8092 BGP Large Communities
+Wireframe uses RFC 8092 BGP Large Communities
 
 | Large     | Meaning                                            |
 |-----------|--------------------------------------------------- |

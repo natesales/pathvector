@@ -1,6 +1,6 @@
 # VRRP (Virtual Router Redundancy Protocol)
 
-Wireframe can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config key containing a list of VRRP instances to your bcg config file.
+Wireframe can build [keepalived](https://github.com/acassen/keepalived) configs for VRRP. To enable VRRP, add a `vrrp` config key containing a list of VRRP instances to your config file.
 
 | Option      | Usage                                                                          |
 | ----------- | ------------------------------------------------------------------------------ |

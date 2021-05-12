@@ -50,8 +50,7 @@ var opts struct {
 	Output           string `short:"o" long:"output" description:"Directory to write output files to" default:"/etc/bird/"`
 	Socket           string `short:"s" long:"socket" description:"BIRD control socket" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig string `short:"k" long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived/keepalived.conf"`
-	UiFile           string `short:"u" long:"ui-file" description:"File to store web UI" default:"/tmp/bcg-ui.html"`
-	NoUi             bool   `short:"n" long:"no-ui" description:"Don't generate web UI"`
+	UiFile           string `short:"u" long:"ui-file" description:"File to store web UI"`
 	Verbose          bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
 	DryRun           bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
 	NoConfigure      bool   `long:"no-configure" description:"Don't configure BIRD"`
@@ -370,7 +369,7 @@ func main() {
 	}
 
 	if !opts.DryRun {
-		if !opts.NoUi {
+		if opts.UiFile != "" {
 			// Create the ui output file
 			log.Debug("Creating global config")
 			uiFileObj, err := os.Create(opts.UiFile)
@@ -386,6 +385,8 @@ func main() {
 				log.Fatalf("Execute ui template: %v", err)
 			}
 			log.Debug("Finished writing ui file")
+		} else {
+			log.Infof("--ui-file is not defined, not creating a UI file")
 		}
 
 		if !opts.NoConfigure {

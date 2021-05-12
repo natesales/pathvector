@@ -1,10 +1,12 @@
-# bcg
+# Wireframe
 
 [![Go Report](https://goreportcard.com/badge/github.com/natesales/bcg?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/bcg)
 [![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/)
 [![Release](https://img.shields.io/github/v/release/natesales/bcg?style=for-the-badge)](https://github.com/natesales/bcg/releases)
 
-The automatic router configuration generator for BGP with bogon, IRR, RPKI, and max prefix filtering support.
+The automatic router configuration generator for BGP with robust filtering support, a XDP dataplane, and VRRP for high availability. In other words, Wireframe is a router automation system for Linux. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
+
+#### *Notice:* BCG is now Wireframe. See [Where did BCG go?](https://github.com/natesales/wireframe#installation) for more information. 
 
 ### Installation
 
@@ -207,3 +209,6 @@ bcg uses RFC 8092 BGP Large Communities
 | addresses   | List of IP addresses                                                     |
 | dummy       | Should bcg will create a new dummy interface                             |
 | down        | Should the interface be to the down state? (true for up, false for down) |
+
+#### Where did BCG go?
+Wireframe started out as "bcg" (BIRD Configuration Generator) but has since grown to be much more than just a templating utility for BIRD. Now with support for an XDP dataplane, VRRP, and interface configuration, it's being renamed to Wireframe to make it clear that it's no longer just for BIRD. It's the same codebase as always, just with a new name to reflect new features.

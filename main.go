@@ -4,7 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"github.com/joomcode/errorx"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -18,6 +17,7 @@ import (
 	"unicode"
 
 	"github.com/jessevdk/go-flags"
+	"github.com/joomcode/errorx"
 	"github.com/kennygrant/sanitize"
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"

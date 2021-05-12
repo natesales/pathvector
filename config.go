@@ -79,7 +79,7 @@ type VRRPInstance struct {
 	VIPs6 []string `yaml:"-" json:"-" toml:"-"`
 }
 
-// Config contains global configuration about this router and BCG instance
+// Config contains global configuration about this router and Wireframe instance
 type Config struct {
 	Asn              uint              `yaml:"asn" json:"asn" toml:"ASN"`
 	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`

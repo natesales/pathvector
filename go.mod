@@ -1,4 +1,4 @@
-module github.com/natesales/bcg
+module github.com/natesales/wireframe
 
 go 1.16
 

@@ -46,7 +46,7 @@ const (
 
 // Flags
 var opts struct {
-	ConfigFile       string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/bcg/config.yml"`
+	ConfigFile       string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe/config.yml"`
 	Output           string `short:"o" long:"output" description:"Directory to write output files to" default:"/etc/bird/"`
 	Socket           string `short:"s" long:"socket" description:"BIRD control socket" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig string `short:"k" long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived/keepalived.conf"`
@@ -187,11 +187,11 @@ func main() {
 	}
 
 	if opts.ShowVersion {
-		log.Printf("bcg version %s (https://github.com/natesales/bcg)\n", version)
+		log.Printf("wireframe version %s (https://github.com/natesales/wireframe)\n", version)
 		os.Exit(0)
 	}
 
-	log.Infof("Starting bcg %s", version)
+	log.Infof("Starting  %s", version)
 
 	// Load templates from embedded filesystem
 	err = loadTemplates(embedFs)

@@ -11,7 +11,7 @@ builds:
       - amd64
       - arm64
 scoop:
-  name: bcg
+  name: wireframe
   commit_author:
     name: natesales
     email: nate@natesales.net
@@ -28,13 +28,13 @@ changelog:
       - '^test:'
 nfpms:
   - id: nfpm-default
-    package_name: bcg
+    package_name: wireframe
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
     vendor: Nate Sales
     homepage: https://natesales.net/
     maintainer: Nate Sales <nate@natesales.net>
-    description: The automatic BIRD configuration generator with bogon, IRR, RPKI, and max prefix filtering support.
+    description: Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability.
     license: GNU GPL-3.0
     section: utils
     priority: extra

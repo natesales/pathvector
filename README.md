@@ -1,8 +1,8 @@
 # Wireframe
 
-[![Go Report](https://goreportcard.com/badge/github.com/natesales/bcg?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/bcg)
-[![License](https://img.shields.io/github/license/natesales/bcg?style=for-the-badge)](https://choosealicense.com/licenses/gpl-3.0/)
-[![Release](https://img.shields.io/github/v/release/natesales/bcg?style=for-the-badge)](https://github.com/natesales/bcg/releases)
+[![Go Report](https://goreportcard.com/badge/github.com/natesales/wireframe?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/wireframe)
+[![License](https://img.shields.io/github/license/natesales/wireframe?style=for-the-badge)](https://github.com/natesales/wireframe/blob/main/LICENSE)
+[![Release](https://img.shields.io/github/v/release/natesales/wireframe?style=for-the-badge)](https://github.com/natesales/wireframe/releases)
 
 Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability. It's best used in the core and peering edge, but is flexible enough to adapt to a multitude of network architectures.
 

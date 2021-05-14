@@ -1,6 +1,7 @@
 before:
   hooks:
     - go mod download
+
 builds:
   - env:
       - CGO_ENABLED=0
@@ -11,27 +12,18 @@ builds:
       - amd64
       - arm64
       - 386
-scoop:
-  name: wireframe
-  commit_author:
-    name: natesales
-    email: nate@natesales.net
-  commit_msg_template: Scoop update for {{ .ProjectName }} version {{ .Tag }}
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
     exclude:
       - '^docs:'
       - '^test:'
+
 nfpms:
   - id: nfpm-default
     package_name: wireframe
     file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-
     vendor: Nate Sales
     homepage: https://natesales.net/
     maintainer: Nate Sales <nate@natesales.net>

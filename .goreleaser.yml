@@ -3,14 +3,21 @@ before:
     - go mod download
 
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - id: wireframe
     goos:
       - linux
       - freebsd
     goarch:
       - amd64
       - arm64
+      - 386
+  - id: arista
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
       - 386
 
 changelog:
@@ -21,9 +28,9 @@ changelog:
       - '^test:'
 
 nfpms:
-  - id: nfpm-default
+  - id: wireframe
     package_name: wireframe
-    file_name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     vendor: Nate Sales
     homepage: https://natesales.net/
     maintainer: Nate Sales <nate@natesales.net>
@@ -31,6 +38,8 @@ nfpms:
     license: GNU GPL-3.0
     section: utils
     priority: extra
+    builds:
+      - wireframe
 
     formats:
       - deb
@@ -41,9 +50,24 @@ nfpms:
       - bgpq4
       - bird2
 
+  - id: arista
+    package_name: wireframe
+    file_name_template: "{{ .ProjectName }}-arista-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    vendor: Nate Sales
+    homepage: https://natesales.net/
+    maintainer: Nate Sales <nate@natesales.net>
+    description: Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability.
+    license: GNU GPL-3.0
+    section: utils
+    priority: extra
+    builds:
+      - arista
+    formats:
+      - rpm
+
 publishers:
   - name: fury.io
     ids:
-      - nfpm-default
+      - wireframe
     dir: "{{ dir .ArtifactPath }}"
     cmd: curl -s -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/

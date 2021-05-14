@@ -10,6 +10,7 @@ builds:
     goarch:
       - amd64
       - arm64
+      - 386
 scoop:
   name: wireframe
   commit_author:

@@ -1,12 +1,8 @@
 # Arista
 
-## Installing BIRD
+## Preparing the directory structure
 
-In theory, it's possible to install BIRD through a yum repo, but with the extra complexity of EOS it's a lot easier to just build a statically linked binary for the switch and copy it over.
-
-### Create the switch init directory structure
-
-Normal EOS services use ProcMgr to control process lifecycle with a simple but neat heartbeat system. While we could create a ProcMgr service ourselves by adding it under `/etc/ProcMgr.d/`, BIRD doesn't support the file based heartbeat method, so it's easier to just create a rc script that EOS will run on startup. Additionally, EOS doesn't persist certain directories, so we'll have to copy over the binaries from flash on boot. 
+The easiest way to get started with Wireframe on Arista EOS is to create a simple directory structure and rc script on the mounted flash directory. It's also possible to create a ProcMgr service in `/etc/ProcMgr.d/` instead.  
 
 ```bash
 mkdir /mnt/flash/{bin,etc}
@@ -16,9 +12,13 @@ cat <<EOF > /mnt/flash/rc.eos
 touch /run/bird.ctl
 cp /mnt/drive/bin/* /bin/
 cp /mnt/drive/etc/* /etc/
-bird
+bird # BIRD will fork itself into the background by default
 EOF
 ```
+
+## Installing BIRD
+
+In theory, it's possible to install BIRD through a yum repo, but with the extra complexity of EOS it's a lot easier to just build a statically linked binary for the switch and copy it over.
 
 ### Compile statically linked BIRD binaries
 
@@ -27,3 +27,7 @@ To compile statically linked BIRD binaries, first clone the repo from `https://g
 ### Copy the binaries to the switch
 
 Using `scp` or a USB drive, copy the `bird` and `birdc` binaries to `/mnt/flash/bin/`
+
+## Installing Wireframe
+
+[Wireframe releases](https://github.com/natesales/wireframe/releases/) are already statically linked binaries, so it's as easy as downloading the latest binary release, extracting it, and copying the resulting `wireframe` binary to `/mnt/flash/bin/`

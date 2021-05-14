@@ -30,4 +30,4 @@ Using `scp` or a USB drive, copy the `bird` and `birdc` binaries to `/mnt/flash/
 
 ## Installing Wireframe
 
-[Wireframe releases](https://github.com/natesales/wireframe/releases/) are already statically linked binaries, so it's as easy as downloading the latest binary release, extracting it, and copying the resulting `wireframe` binary to `/mnt/flash/bin/`. Make sure to check your switch architecture to download the correct binary (`show version` and look for "Architecture").
+[Wireframe releases](https://github.com/natesales/wireframe/releases/) are already statically linked binaries, so it's as easy as downloading the latest binary release, extracting it, and copying the resulting `wireframe` binary to `/mnt/flash/bin/`. Make sure to check your switch architecture to download the correct binary (`bash uname -a` from the EOS CLI).

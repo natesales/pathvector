@@ -1,5 +1,7 @@
 # Arista
 
+In theory, it's possible to install RPM packages on EOS, but due to version differences and very old Fedora/CentOS releases, it's a lot easier to just build a statically linked binary for the switch and copy it over.
+
 ## Preparing the directory structure
 
 The easiest way to get started with Wireframe on Arista EOS is to create a simple directory structure and rc script on the mounted flash directory. It's also possible to create a ProcMgr service in `/etc/ProcMgr.d/` instead.  
@@ -18,16 +20,16 @@ EOF
 
 ## Installing BIRD
 
-In theory, it's possible to install BIRD through a yum repo, but with the extra complexity of EOS it's a lot easier to just build a statically linked binary for the switch and copy it over.
-
-### Compile statically linked BIRD binaries
-
 To compile statically linked BIRD binaries, first clone the repo from `https://gitlab.nic.cz/labs/bird` and follow their build instructions with one notable exception: before running `make`, add the `-static` flag to `LDFLAGS` in the `Makefile` (`sed -i '/^LDFLAGS=.*/a LDFLAGS := -static' Makefile`).
 
-### Copy the binaries to the switch
+## Installing GoRTR
 
-Using `scp` or a USB drive, copy the `bird` and `birdc` binaries to `/mnt/flash/bin/`
+GoRTR releases are currently dynamically linked, so we need to compile them with CGO disabled after cloning the [repo](https://github.com/cloudflare/gortr): `CGO_ENABLED=0 go build cmd/gortr/gortr.go`
 
 ## Installing Wireframe
 
 [Wireframe releases](https://github.com/natesales/wireframe/releases/) are already statically linked binaries, so it's as easy as downloading the latest binary release, extracting it, and copying the resulting `wireframe` binary to `/mnt/flash/bin/`. Make sure to check your switch architecture to download the correct binary (`bash uname -a` from the EOS CLI).
+
+## Copy the binaries
+
+Using `scp` or a USB drive, copy each required binary to `/mnt/flash/bin/` on the Arista.

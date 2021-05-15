@@ -33,9 +33,10 @@ wireframe:
 	nfpm package --packager rpm --target build/ --config wireframe-nfpm.yml
 
 manifest:
-	echo "format: 1" > build/manifest.txt
-	echo "primaryRpm: $(shell ls wireframe*.rpm)" >> build/manifest.txt
-	for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> build/manifest.txt
+	cd build && echo "format: 1" > manifest.txt
+	cd build && echo "primaryRpm: $$(ls wireframe*.rpm)" >> manifest.txt
+	cd build && for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> manifest.txt
 
 swix:
-	zip wireframe-bundle-$$(date +%m-%d-%Y).swix build/manifest.txt build/*.rpm
+	cd build && zip wireframe-bundle-$$(date +%m-%d-%Y).swix manifest.txt *.rpm
+	mv build/*.swix .

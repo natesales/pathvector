@@ -38,4 +38,4 @@ manifest:
 	for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> build/manifest.txt
 
 swix:
-	zip archive-$$(date +%m-%d-%Y).swix build/manifest.txt build/*.rpm
+	zip wireframe-bundle-$$(date +%m-%d-%Y).swix build/manifest.txt build/*.rpm

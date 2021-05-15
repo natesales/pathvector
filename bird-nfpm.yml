@@ -17,7 +17,7 @@ contents:
 - src: ./build/bird/birdc
   dst: /usr/bin/birdc
 - src: ./build/bird/bird.conf
-  dst: /etc/bird.conf
+  dst: /mnt/flash/bird.conf
   type: config
 - src: ./bird.service
   dst: /lib/systemd/system/bird.service

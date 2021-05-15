@@ -16,7 +16,5 @@ contents:
     dst: /usr/bin/gortr
   - src: ./build/gortr/cmd/gortr/cf.pub
     dst: /usr/share/gortr/cf.pub
-  - src: ./build/gortr/package/gortr.service
+  - src: ./gortr.service
     dst: /lib/systemd/system/gortr.service
-  - src: ./gortr.env
-    dst: /etc/default/gortr

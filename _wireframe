@@ -8,8 +8,8 @@ function _wireframe {
         "--no-configure[Don't configure BIRD]" \
         "--d[Don't modify BIRD config]" \
         "--dry-run[Don't modify BIRD config]" \
-        "-c[Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe/config.yml)]" \
-        "--config[Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe/config.yml)]" \
+        "-c[Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe.yml)]" \
+        "--config[Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe.yml)]" \
         "-o[Directory to write output files to (default: /etc/bird/)]" \
         "--output[Directory to write output files to (default: /etc/bird/)]" \
         "-s[BIRD control socket (default: /run/bird/bird.ctl)]" \

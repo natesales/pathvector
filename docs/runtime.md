@@ -7,7 +7,7 @@ Usage:
   wireframe [OPTIONS]
 
 Application Options:
-  -c, --config=            Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe/config.yml)
+  -c, --config=            Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe.yml)
   -o, --output=            Directory to write output files to (default: /etc/bird/)
   -s, --socket=            BIRD control socket (default: /run/bird/bird.ctl)
   -k, --keepalived-config= Configuration file for keepalived (default: /etc/keepalived/keepalived.conf)

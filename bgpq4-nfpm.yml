@@ -10,3 +10,5 @@ homepage: "https://github.com/bgp/bgpq4"
 contents:
   - src: ./build/bgpq4/bgpq4
     dst: /usr/bin/bgpq4
+  - src: ./commands/Bgpq4Cli.py
+    dst: /usr/lib/python2.7/site-packages/CliPlugin/Bgpq4Cli.py

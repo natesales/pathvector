@@ -1,8 +1,8 @@
-all: prepare bird gortr bgpq4 wireframe
+all: prepare bird gortr bgpq4 wireframe manifest swix
 
 clean:
 	rm -rf build
-	rm -rf *.rpm
+	rm -rf *.swix
 
 prepare:
 	mkdir -p build
@@ -31,3 +31,11 @@ wireframe:
 	if [ ! -d "build/wireframe/" ] ; then git clone https://github.com/natesales/wireframe build/wireframe/ ; fi
 	cd build/wireframe && CGO_ENABLED=0 go build
 	nfpm package --packager rpm --target . --config wireframe-nfpm.yml
+
+manifest:
+	echo "format: 1" > build/manifest.txt
+	echo "primaryRpm: $(shell ls wireframe*.rpm)" >> build/manifest.txt
+	for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> build/manifest.txt
+
+swix:
+	zip archive-$$(date +%m-%d-%Y).swix build/manifest.txt build/*.rpm

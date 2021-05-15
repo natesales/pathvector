@@ -1,4 +1,4 @@
-all: prepare bird gortr bgpq4
+all: prepare bird gortr bgpq4 wireframe
 
 clean:
 	rm -rf build
@@ -26,3 +26,8 @@ bgpq4:
 	cd build/bgpq4 && LDFLAGS=-static ./configure
 	cd build/bgpq4 && make
 	nfpm package --packager rpm --target . --config bgpq4-nfpm.yml
+
+wireframe:
+	if [ ! -d "build/wireframe/" ] ; then git clone https://github.com/natesales/wireframe build/wireframe/ ; fi
+	cd build/wireframe && CGO_ENABLED=0 go build
+	nfpm package --packager rpm --target . --config wireframe-nfpm.yml

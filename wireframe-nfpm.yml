@@ -1,0 +1,13 @@
+name: "wireframe"
+arch: "i386"
+platform: "linux"
+version: "v3.0.2"
+section: "default"
+priority: "extra"
+maintainer: "Nate Sales <nate@natesales.net>"
+description: "Declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability"
+vendor: "Nate Sales"
+homepage: "https://github.com/natesales/wireframe"
+contents:
+  - src: ./build/wireframe/wireframe
+    dst: /usr/bin/wireframe

@@ -17,11 +17,3 @@ contents:
 - src: ./build/bird/bird.conf
   dst: /etc/bird.conf
   type: config
-#- src: /usr/local/bin/foo
-#  dst: /sbin/foo
-#  type: symlink
-#overrides:
-#  rpm:
-#    scripts:
-#      preinstall: ./scripts/preinstall.sh
-#      postremove: ./scripts/postremove.sh

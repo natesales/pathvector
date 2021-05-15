@@ -16,9 +16,6 @@ contents:
   dst: /usr/bin/bird
 - src: ./build/bird/birdc
   dst: /usr/bin/birdc
-- src: ./build/bird/bird.conf
-  dst: /etc/bird.conf
-  type: config
 - src: ./bird.service
   dst: /lib/systemd/system/bird.service
 - src: ./commands/BirdCli.py

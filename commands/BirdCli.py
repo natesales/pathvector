@@ -8,7 +8,7 @@ import TerminalUtil
 class BirdcCmd(object):
     syntax = """birdc [ <arg> ]"""
     birdcArgsRule = CliParser.StringRule("ARG", "Executable arguments and/or switches", 'args')
-    data = {'birdc': 'enter bird shell', '<arg>': birdcArgsRule}
+    data = {'birdc': 'Enter birdc shell', '<arg>': birdcArgsRule}
 
     # noinspection PyMethodMayBeStatic
     def birdc(self, mode, args):

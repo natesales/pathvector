@@ -9,6 +9,8 @@ description: "Open-source implementation of RPKI to Router protocol"
 vendor: "Cloudflare"
 homepage: "https://github.com/cloudflare/gortr"
 license: "BSD"
+scripts:
+  postinstall: ./postinstall/gortr.sh
 contents:
   - src: ./build/gortr/gortr
     dst: /usr/bin/gortr
@@ -16,5 +18,5 @@ contents:
     dst: /usr/share/gortr/cf.pub
   - src: ./build/gortr/package/gortr.service
     dst: /lib/systemd/system/gortr.service
-  - src: ./build/gortr/package/gortr.env
+  - src: ./gortr.env
     dst: /etc/default/gortr

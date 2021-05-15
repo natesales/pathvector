@@ -9,6 +9,8 @@ description: "BIRD Internet Routing Daemon"
 vendor: "NIC.CZ"
 homepage: "https://bird.network.cz/"
 license: "GPL"
+scripts:
+  postinstall: ./postinstall/bird.sh
 contents:
 - src: ./build/bird/bird
   dst: /usr/bin/bird

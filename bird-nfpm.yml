@@ -19,3 +19,5 @@ contents:
   type: config
 - src: ./bird.service
   dst: /lib/systemd/system/bird.service
+- src: ./commands/BirdCli.py
+  dst: /usr/lib/python2.7/site-packages/CliPlugin/BirdCli.py

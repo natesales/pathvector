@@ -11,3 +11,5 @@ homepage: "https://github.com/natesales/wireframe"
 contents:
   - src: ./build/wireframe/wireframe
     dst: /usr/bin/wireframe
+  - src: ./commands/WireframeCli.py
+    dst: /usr/lib/python2.7/site-packages/CliPlugin/WireframeCli.py

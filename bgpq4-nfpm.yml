@@ -6,7 +6,6 @@ section: "default"
 priority: "extra"
 maintainer: "Nate Sales <nate@natesales.net>"
 description: "BGP filtering automation tool"
-vendor: "Cloudflare"
 homepage: "https://github.com/bgp/bgpq4"
 contents:
   - src: ./build/bgpq4/bgpq4

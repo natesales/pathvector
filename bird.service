@@ -5,7 +5,7 @@ After=network.target
 [Service]
 ExecStartPre=/usr/bin/bird -p
 ExecReload=/usr/bin/birdc configure
-ExecStart=/usr/bin/bird -f
+ExecStart=/usr/bin/bird -f -c /etc/bird.conf -s /run/bird.ctl
 Restart=on-abort
 
 [Install]

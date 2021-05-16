@@ -6,19 +6,11 @@ builds:
   - id: wireframe
     goos:
       - linux
-      - freebsd
+#      - freebsd
     goarch:
       - amd64
-      - arm64
-      - 386
-  - id: arista
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - linux
-    goarch:
-      - amd64
-      - 386
+#      - arm64
+#      - 386
 
 changelog:
   sort: asc

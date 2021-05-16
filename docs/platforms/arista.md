@@ -6,8 +6,8 @@ Wireframe can be run on Arista switches by installing a SWIX (Switch Extension) 
 
 To build the SWIX on your machine:
 
-1. Build the packages and extension by running `make`
-2. Copy the resulting SWIX bundle extension (wireframe-bundle.swix) to /mnt/flash/ on the switch
+1. Download the latest .swix file from [releases](https://github.com/natesales/wireframe/releases), or build it manually with `cd arista && make`
+2. Copy the resulting SWIX bundle extension to /mnt/flash/ on the switch
 
 On the switch from the EOS CLI:
 

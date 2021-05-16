@@ -1,6 +1,8 @@
 # Arista
 
-Wireframe can be run on Arista switches by installing a SWIX (Switch Extension) file. The [arista](https://github.com/natesales/wireframe/tree/main/arista) directory contains packaging configuration to build a SWIX bundle extension containing Wireframe, BIRD2, and GoRTR. 
+Wireframe can be run on Arista switches by installing a SWIX (Switch Extension) file. The [arista](https://github.com/natesales/wireframe/tree/main/arista) directory contains packaging configuration to build a SWIX bundle extension containing Wireframe, BIRD2, GoRTR, and bgpq4. 
+
+## Installation
 
 To build the SWIX on your machine:
 
@@ -19,3 +21,7 @@ On the switch from the EOS CLI:
 8. Restart bird: `bash sudo systemctl restart bird`
 9. Add Wireframe to scheduler: `schedule test interval 720 max-log-files 1 command wireframe -c /mnt/flash/wireframe.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
 10. Save changes: `wr mem`
+
+## Usage
+
+After installing the bundle extension, your switch will have a few new EOS CLI commands: `birdc`, `bgpq4`, and `wireframe`. These are just wrappers for the binaries installed on the underlying Linux system. 

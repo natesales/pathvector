@@ -9,3 +9,5 @@ output/*
 
 # Release
 dist/
+
+build/

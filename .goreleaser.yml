@@ -24,7 +24,7 @@ nfpms:
     package_name: wireframe
     file_name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     vendor: Nate Sales
-    homepage: https://natesales.net/
+    homepage: https://github.com/natesales/wireframe
     maintainer: Nate Sales <nate@natesales.net>
     description: Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability.
     license: GNU GPL-3.0
@@ -41,21 +41,6 @@ nfpms:
       - gortr
       - bgpq4
       - bird2
-
-  - id: arista
-    package_name: wireframe
-    file_name_template: "{{ .ProjectName }}-arista-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
-    vendor: Nate Sales
-    homepage: https://natesales.net/
-    maintainer: Nate Sales <nate@natesales.net>
-    description: Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability.
-    license: GNU GPL-3.0
-    section: utils
-    priority: extra
-    builds:
-      - arista
-    formats:
-      - rpm
 
 publishers:
   - name: fury.io

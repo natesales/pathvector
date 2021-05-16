@@ -52,4 +52,4 @@ publishers:
 
 release:
   extra_files:
-    - glob: arista/wireframe-bundle-*.swix
+    - glob: arista/wireframe-arista-bundle-*.swix

@@ -21,7 +21,7 @@ jobs:
         run: curl -sfL https://install.goreleaser.com/github.com/goreleaser/nfpm.sh | sh
 
       - name: Move nfpm to /usr/bin/
-        run: mv bin/nfpm /usr/bin/nfpm
+        run: sudo mv bin/nfpm /usr/bin/nfpm
 
       - name: make
         run: cd arista && make

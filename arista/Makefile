@@ -29,7 +29,7 @@ bgpq4:
 
 wireframe:
 	if [ ! -d "build/wireframe/" ] ; then git clone https://github.com/natesales/wireframe build/wireframe/ ; fi
-	cd build/wireframe && CGO_ENABLED=0 go build
+	cd build/wireframe && CGO_ENABLED=0 go build -ldflags="-X 'main.version=$$(git describe --tags `git rev-list --tags --max-count=1`)'"
 	nfpm package --packager rpm --target build/ --config wireframe-nfpm.yml
 
 manifest:

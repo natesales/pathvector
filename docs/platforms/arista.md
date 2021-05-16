@@ -1,35 +1,21 @@
 # Arista
 
-In theory, it's possible to install RPM packages on EOS, but due to version differences and very old Fedora/CentOS releases, it's a lot easier to just build a statically linked binary for the switch and copy it over.
+Wireframe can be run on Arista switches by installing a SWIX (Switch Extension) file. The [arista](https://github.com/natesales/wireframe/tree/main/arista) directory contains packaging configuration to build a SWIX bundle extension containing Wireframe, BIRD2, and GoRTR. 
 
-## Preparing the directory structure
+To build the SWIX on your machine:
 
-The easiest way to get started with Wireframe on Arista EOS is to create a simple directory structure and rc script on the mounted flash directory. It's also possible to create a ProcMgr service in `/etc/ProcMgr.d/` instead.  
+1. Build the packages and extension by running `make`
+2. Copy the resulting SWIX bundle extension (wireframe-bundle.swix) to /mnt/flash/ on the switch
 
-```bash
-mkdir /mnt/flash/{bin,etc}
-cat <<EOF > /mnt/flash/rc.eos
-#!/bin/bash
+On the switch from the EOS CLI:
 
-touch /run/bird.ctl
-cp /mnt/drive/bin/* /bin/
-cp /mnt/drive/etc/* /etc/
-bird # BIRD will fork itself into the background by default
-EOF
-```
-
-## Installing BIRD
-
-To compile statically linked BIRD binaries, first clone the repo from `https://gitlab.nic.cz/labs/bird` and follow their build instructions with one notable exception: before running `make`, add the `-static` flag to `LDFLAGS` in the `Makefile` (`sed -i '/^LDFLAGS=.*/a LDFLAGS := -static' Makefile`).
-
-## Installing GoRTR
-
-GoRTR releases are currently dynamically linked, so we need to compile them with CGO disabled after cloning the [repo](https://github.com/cloudflare/gortr): `CGO_ENABLED=0 go build cmd/gortr/gortr.go`
-
-## Installing Wireframe
-
-[Wireframe releases](https://github.com/natesales/wireframe/releases/) are already statically linked binaries, so it's as easy as downloading the latest binary release, extracting it, and copying the resulting `wireframe` binary to `/mnt/flash/bin/`. Make sure to check your switch architecture to download the correct binary (`bash uname -a` from the EOS CLI).
-
-## Copy the binaries
-
-Using `scp` or a USB drive, copy each required binary to `/mnt/flash/bin/` on the Arista.
+1. Copy the extension to extensions: `copy flash:wireframe-bundle.swix extensions:`
+2. Install the extension: `extension wireframe-bundle.swix`
+3. Mark the extension to be installed on boot: `copy installed-extensions boot-extensions`
+4. Restart the EOS CLI: `bash sudo pkill Cli` and log back into the switch
+5. Create the BIRD directory: `bash sudo mkdir /mnt/flash/bird/`
+6. Write your wireframe config: `bash sudo nano /mnt/flash/wireframe.yml`
+7. Run wireframe: `wireframe -c /mnt/flash/wireframe.yml -o /mnt/flash/bird/ --no-configure`
+8. Restart bird: `bash sudo systemctl restart bird`
+9. Add Wireframe to scheduler: `schedule test interval 720 max-log-files 1 command wireframe -c /mnt/flash/wireframe.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
+10. Save changes: `wr mem`

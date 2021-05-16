@@ -38,5 +38,5 @@ manifest:
 	cd build && for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> manifest.txt
 
 swix:
-	cd build && zip wireframe-bundle-$$(date +%m-%d-%Y).swix manifest.txt *.rpm
+	cd build && zip wireframe-bundle-$$(git describe --tags `git rev-list --tags --max-count=1`).swix manifest.txt *.rpm
 	mv build/*.swix .

@@ -1,16 +1,17 @@
 before:
   hooks:
     - go mod download
+    - arista/build-wrapper.sh
 
 builds:
   - id: wireframe
     goos:
       - linux
-#      - freebsd
+      - freebsd
     goarch:
       - amd64
-#      - arm64
-#      - 386
+      - arm64
+      - 386
 
 changelog:
   sort: asc
@@ -48,3 +49,7 @@ publishers:
       - wireframe
     dir: "{{ dir .ArtifactPath }}"
     cmd: curl -s -F package=@{{ .ArtifactName }} https://{{ .Env.FURY_TOKEN }}@push.fury.io/natesales/
+
+release:
+  extra_files:
+    - glob: arista/wireframe-bundle-*.swix

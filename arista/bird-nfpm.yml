@@ -1,0 +1,22 @@
+name: "bird"
+arch: "i386"
+platform: "linux"
+version: "v2.0.8"
+section: "default"
+priority: "extra"
+maintainer: "Nate Sales <nate@natesales.net>"
+description: "BIRD Internet Routing Daemon"
+vendor: "NIC.CZ"
+homepage: "https://bird.network.cz/"
+license: "GPL"
+scripts:
+  postinstall: ./postinstall/bird.sh
+contents:
+- src: ./build/bird/bird
+  dst: /usr/bin/bird
+- src: ./build/bird/birdc
+  dst: /usr/bin/birdc
+- src: ./bird.service
+  dst: /lib/systemd/system/bird.service
+- src: ./commands/BirdCli.py
+  dst: /usr/lib/python2.7/site-packages/CliPlugin/BirdCli.py

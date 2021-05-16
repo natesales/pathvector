@@ -1,0 +1,14 @@
+name: "bgpq4"
+arch: "i386"
+platform: "linux"
+version: "v0.0.7"
+section: "default"
+priority: "extra"
+maintainer: "Nate Sales <nate@natesales.net>"
+description: "BGP filtering automation tool"
+homepage: "https://github.com/bgp/bgpq4"
+contents:
+  - src: ./build/bgpq4/bgpq4
+    dst: /usr/bin/bgpq4
+  - src: ./commands/Bgpq4Cli.py
+    dst: /usr/lib/python2.7/site-packages/CliPlugin/Bgpq4Cli.py

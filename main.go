@@ -370,21 +370,7 @@ func main() {
 
 	if !opts.DryRun {
 		if opts.UiFile != "" {
-			// Create the ui output file
-			log.Debug("Creating global config")
-			uiFileObj, err := os.Create(opts.UiFile)
-			if err != nil {
-				log.Fatalf("Create UI output file: %v", err)
-			}
-			log.Debug("Finished creating UI file")
-
-			// Render the UI template and write to disk
-			log.Debug("Writing ui file")
-			err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", globalConfig)
-			if err != nil {
-				log.Fatalf("Execute ui template: %v", err)
-			}
-			log.Debug("Finished writing ui file")
+			writeUiFile(globalConfig)
 		} else {
 			log.Infof("--ui-file is not defined, not creating a UI file")
 		}

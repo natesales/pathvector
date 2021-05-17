@@ -104,9 +104,9 @@ var funcMap = template.FuncMap{
 				return len(v4set) != 0
 			}
 			return len(v6set) != 0
-		} else { // If the peer type isn't going to be IRR filtered, ignore it.
-			return true
 		}
+		// If the peer type isn't going to be IRR filtered, ignore it.
+		return true
 	},
 
 	"CurrentTime": func() string {

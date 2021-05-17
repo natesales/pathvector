@@ -2,12 +2,15 @@ package main
 
 import (
 	"embed"
+	"os"
+	"path"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
 	"github.com/joomcode/errorx"
+	log "github.com/sirupsen/logrus"
 )
 
 // Neighbor stores a single peer address with supported protocols
@@ -153,4 +156,43 @@ func loadTemplates(fs embed.FS) error {
 	}
 
 	return nil // nil error
+}
+
+// writeVrrpConfig writes the VRRP config to a keepalived config file
+func writeVrrpConfig(config *Config) {
+	if len(config.VRRPInstances) < 1 {
+		log.Infof("no VRRP instances defined, not writing config")
+		return
+	}
+
+	// Create the VRRP config file
+	keepalivedFile, err := os.Create(path.Join(opts.KeepalivedConfig))
+	if err != nil {
+		log.Fatalf("Create peer specific output file: %v", err)
+	}
+
+	// Render the template and write to disk
+	err = vrrpTemplate.ExecuteTemplate(keepalivedFile, "vrrp.tmpl", config.VRRPInstances)
+	if err != nil {
+		log.Fatalf("Execute template: %v", err)
+	}
+}
+
+// writeUiFile renders and writes the web UI file
+func writeUiFile(config *Config) {
+	// Create the ui output file
+	log.Debug("Creating UI output file")
+	uiFileObj, err := os.Create(opts.UiFile)
+	if err != nil {
+		log.Fatalf("Create UI output file: %v", err)
+	}
+	log.Debug("Finished creating UI file")
+
+	// Render the UI template and write to disk
+	log.Debug("Writing UI file")
+	err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+	if err != nil {
+		log.Fatalf("Execute UI template: %v", err)
+	}
+	log.Debug("Finished writing UI file")
 }

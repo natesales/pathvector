@@ -351,26 +351,10 @@ func main() {
 		}
 	}
 
-	// Write VRRP config
-	if opts.DryRun {
-		log.Infof("Dry run is enabled, not writing VRRP config")
-	}
-	if !opts.DryRun && len(globalConfig.VRRPInstances) > 0 {
-		log.Infof("no VRRP instances defined, not writing config")
-		// Create the peer specific file
-		peerSpecificFile, err := os.Create(path.Join(opts.KeepalivedConfig))
-		if err != nil {
-			log.Fatalf("Create peer specific output file: %v", err)
-		}
-
-		// Render the template and write to disk
-		err = vrrpTemplate.ExecuteTemplate(peerSpecificFile, "vrrp.tmpl", globalConfig.VRRPInstances)
-		if err != nil {
-			log.Fatalf("Execute template: %v", err)
-		}
-	}
-
 	if !opts.DryRun {
+		// Write VRRP config
+		writeVrrpConfig(globalConfig)
+
 		if opts.UiFile != "" {
 			writeUiFile(globalConfig)
 		} else {

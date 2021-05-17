@@ -154,6 +154,16 @@ func normalize(input string) string {
 	return input
 }
 
+// normalizeName returns a protocol name that is safe for BIRD
+func normalizeName(peerName string) string {
+	// Add peer prefix if the first character of peerName is a number
+	_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
+	if unicode.IsDigit(rune(_peerName[0])) {
+		_peerName = "PEER_" + _peerName
+	}
+	return _peerName
+}
+
 // printPeerInfo prints a peer's configuration to the log
 func printPeerInfo(peerName string, peerData *Peer) {
 	// Fields to exclude from print output
@@ -239,14 +249,8 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
-		// Add peer prefix if the first character of peerName is a number
-		_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
-		if unicode.IsDigit(rune(_peerName[0])) {
-			_peerName = "PEER_" + _peerName
-		}
-
 		// Set normalized peer name
-		peerData.Name = _peerName
+		peerData.Name = normalizeName(peerData.Name)
 
 		// Set default query time
 		peerData.QueryTime = "[No operations performed]"

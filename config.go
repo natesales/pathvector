@@ -23,48 +23,48 @@ const (
 	DefaultIRRServer = "rr.ntt.net"
 )
 
-// Peer contains all information specific to a single peer network
-type Peer struct {
-	Asn                uint     `yaml:"asn" json:"asn" toml:"ASN"`
-	Type               string   `yaml:"type" json:"type" toml:"Type"`
-	Prepends           uint     `yaml:"prepends" json:"prepends" toml:"Prepends"`
-	LocalPref          uint     `yaml:"local-pref" json:"local-pref" toml:"LocalPref"`
-	Multihop           bool     `yaml:"multihop" json:"multihop" toml:"Multihop"`
-	Passive            bool     `yaml:"passive" json:"passive" toml:"Passive"`
-	Disabled           bool     `yaml:"disabled" json:"disabled" toml:"Disabled"`
-	Password           string   `yaml:"password" json:"password" toml:"Password"`
-	Port               uint16   `yaml:"port" json:"port" toml:"Port"`
-	PreImport          string   `yaml:"pre-import" json:"pre-import" toml:"PreImport"`
-	PreExport          string   `yaml:"pre-export" json:"pre-export" toml:"PreExport"`
-	PreImportFinal     string   `yaml:"pre-import-final" json:"pre-import-final" toml:"PreImportFinal"`
-	PreExportFinal     string   `yaml:"pre-export-final" json:"pre-export-final" toml:"PreExportFinal"`
-	NeighborIPs        []string `yaml:"neighbors" json:"neighbors" toml:"Neighbors"`
-	MP46NeighborIPs    []string `yaml:"mp46-neighbors" json:"mp46-neighbors" toml:"MP46Neighbors"`
-	AsSet              string   `yaml:"as-set" json:"as-set" toml:"ASSet"`
-	ImportLimit4       uint     `yaml:"import-limit4" json:"import-limit4" toml:"ImportLimit4"`
-	ImportLimit6       uint     `yaml:"import-limit6" json:"import-limit6" toml:"ImportLimit6"`
-	SkipFilter         bool     `yaml:"skip-filter" json:"skip-filter" toml:"SkipFilter"`
-	RsClient           bool     `yaml:"rs-client" json:"rs-client" toml:"RSClient"`
-	RrClient           bool     `yaml:"rr-client" json:"rr-client" toml:"RRClient"`
-	Bfd                bool     `yaml:"bfd" json:"bfd" toml:"BFD"`
-	EnforceFirstAs     bool     `yaml:"enforce-first-as" json:"enforce-first-as" toml:"EnforceFirstAS"`
-	EnforcePeerNexthop bool     `yaml:"enforce-peer-nexthop" json:"enforce-peer-nexthop" toml:"EnforcePeerNexthop"`
-	SessionGlobal      string   `yaml:"session-global" json:"session-global" toml:"SessionGlobal"`
-	ExportDefault      bool     `yaml:"export-default" json:"export-default" toml:"ExportDefault"`
-	NoSpecifics        bool     `yaml:"no-specifics" json:"no-specifics" toml:"NoSpecifics"`
-	AllowBlackholes    bool     `yaml:"allow-blackholes" json:"allow-blackholes" toml:"AllowBlackholes"`
-	Communities        []string `yaml:"communities" json:"communities" toml:"Communities"`
-	LargeCommunities   []string `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
-	Description        string   `yaml:"description" json:"description" toml:"Description"`
-	Listen             string   `yaml:"listen" json:"listen" toml:"Listen"`
-	MaxPfxAction       string   `yaml:"max-prefix-action" json:"max-prefix-action" toml:"MaxPrefixAction"`
-	NoPeeringDB        bool     `yaml:"no-peeringdb" json:"no-peeringdb" toml:"NoPeeringDB"`
-	NextHopSelf        bool     `yaml:"next-hop-self" json:"next-hop-self" toml:"NextHopSelf"`
+// peer contains all information specific to a single peer network
+type peer struct {
+	Description string `tag:"description" description:"Peer description"`
+	Disabled    bool   `tag:"disabled" description:"Should the sessions be disabled?"`
 
-	QueryTime  string   `yaml:"-" json:"-" toml:"-"`
-	Name       string   `yaml:"-" json:"-" toml:"-"`
-	PrefixSet4 []string `yaml:"-" json:"-" toml:"-"`
-	PrefixSet6 []string `yaml:"-" json:"-" toml:"-"`
+	// BGP Attributes
+	Asn              uint     `yaml:"asn" description:":Local ASN"`
+	NeighborIPs      []string `yaml:"neighbors" description:"List of neighbor IPs"`
+	Prepends         uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
+	LocalPref        uint     `yaml:"local-pref" description:"BGP local preference"`
+	Multihop         bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
+	Listen           string   `yaml:"listen" description:"BGP listen port"`
+	NeighborPort     uint16   `yaml:"port" description:"Neighbor TCP port (default 179)"`
+	Passive          bool     `yaml:"passive" description:"Should we listen passively?"`
+	NextHopSelf      bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?"`
+	Bfd              bool     `yaml:"bfd" description:"Should BFD be enabled?"`
+	Communities      []string `yaml:"communities" description:"List of communities to add on export"`
+	LargeCommunities []string `yaml:"large-communities" description:"List of large communities to add on export"`
+	Password         string   `yaml:"password" description:"BGP MD5 password"`
+	RsClient         bool     `yaml:"rs-client" description:"Should this peer be a route server client?"`
+	RrClient         bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?"`
+
+	// Filtering
+	Template           string `yaml:"template" description:"Template to inherit configuration from"`
+	AsSet              string `yaml:"as-set" description:"Peer's as-set for filtering"`
+	ImportLimit4       uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import"`
+	ImportLimit6       uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import"`
+	EnforceFirstAs     bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?"`
+	EnforcePeerNexthop bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?"`
+	MaxPfxAction       string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?"`
+	AllowBlackholes    bool   `yaml:"allow-blackholes" description:"Should this peer be allowed to send routes with the blackhole community?"`
+
+	// Export options
+	ExportDefault bool `yaml:"export-default" description:"Should a default route be exported to this peer?"`
+	NoSpecifics   bool `yaml:"no-specifics" description:"Should more specific routes be exported to this peer?"`
+
+	// Custom daemon configuration
+	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`
+	PreImport      string `yaml:"pre-import" description:"Configuration to add before importing routes"`
+	PreExport      string `yaml:"pre-export" description:"Configuration to add before exporting routes"`
+	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
+	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
 }
 
 // VRRPInstance stores a VRRP instance
@@ -89,7 +89,6 @@ type Config struct {
 	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`
 	Prefixes         []string          `yaml:"prefixes" json:"prefixes" toml:"Prefixes"`
 	Statics          map[string]string `yaml:"statics" json:"statics" toml:"Statics"`
-	Peers            map[string]*Peer  `yaml:"peers" json:"peers" toml:"Peers"`
 	VRRPInstances    []*VRRPInstance   `yaml:"vrrp" json:"vrrp" toml:"VRRP"`
 	IrrDb            string            `yaml:"irrdb" json:"irrdb" toml:"IRRDB"`
 	RtrServer        string            `yaml:"rtr-server" json:"rtr-server" toml:"RTR-Server"`
@@ -106,7 +105,10 @@ type Config struct {
 	KernelAccept6    []string          `yaml:"kernel-accept6" json:"kernel-accept6" toml:"KernelAccept6"`
 	KernelReject4    []string          `yaml:"kernel-reject4" json:"kernel-reject4" toml:"KernelReject4"`
 	KernelReject6    []string          `yaml:"kernel-reject6" json:"kernel-reject6" toml:"KernelReject6"`
-	Interfaces       map[string]iface  `yaml:"interfaces" json:"interfaces" toml:"Interfaces"`
+
+	Templates  map[string]*peer  `yaml:"templates" json:"templates" toml:"Templates"`
+	Peers      map[string]*peer  `yaml:"peers" json:"peers" toml:"Peers"`
+	Interfaces map[string]*iface `yaml:"interfaces" json:"interfaces" toml:"Interfaces"`
 
 	OriginSet4 []string          `yaml:"-" json:"-" toml:"-"`
 	OriginSet6 []string          `yaml:"-" json:"-" toml:"-"`
@@ -132,7 +134,7 @@ type iface struct {
 
 // Wrapper stores a Peer and Config passed to the template
 type Wrapper struct {
-	Peer   Peer
+	Peer   peer
 	Config Config
 }
 
@@ -168,8 +170,8 @@ func setConfigDefaults(config *Config) error {
 	return nil // nil error
 }
 
-// setPeerDefaults sets the default values of a Peer struct
-func setPeerDefaults(name string, peer *Peer) {
+// setPeerDefaults sets the default values of a peer
+func setPeerDefaults(name string, peer *peer) {
 	// Set default local pref
 	if peer.LocalPref == 0 {
 		peer.LocalPref = 100

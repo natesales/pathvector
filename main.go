@@ -161,7 +161,7 @@ func normalizeName(peerName string) string {
 }
 
 // printPeerInfo prints a peer's configuration to the log
-func printPeerInfo(peerName string, peerData *Peer) {
+func printPeerInfo(peerName string, peerData *peer) {
 	// Fields to exclude from print output
 	excludedFields := []string{"PrefixSet4", "PrefixSet6", "Name", "SessionGlobal", "PreImport", "PreExport", "PreImportFinal", "PreExportFinal", "QueryTime"}
 	s := reflect.ValueOf(peerData).Elem()

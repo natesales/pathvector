@@ -81,6 +81,10 @@ type VRRPInstance struct {
 
 // Config contains global configuration about this router and Wireframe instance
 type Config struct {
+	BirdDirectory    string            `yaml:"bird-directory" json:"bird-directory" toml:"BIRDDirectory"`
+	BirdSocket       string            `yaml:"bird-socket" json:"bird-socket" toml:"BIRDSocket"`
+	KeepalivedConfig string            `yaml:"keepalived-config" json:"keepalived-config" toml:"KeepalivedConfig"`
+	WebUiFile        string            `yaml:"web-ui-file" json:"web-ui-file" toml:"WebUIFile"`
 	Asn              uint              `yaml:"asn" json:"asn" toml:"ASN"`
 	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`
 	Prefixes         []string          `yaml:"prefixes" json:"prefixes" toml:"Prefixes"`

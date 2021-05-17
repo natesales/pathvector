@@ -6,6 +6,10 @@ Wireframe is configured by a single file in YAML, JSON, or TOML. All config file
 
 | Option            | Usage                                                                                                           |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| bird-directory    | Directory to write BIRD configs to                                                                              |
+| bird-socket       | BIRD control socket                                                                                             |
+| keepalived-config | Keepalived config file to write to                                                                              |
+| web-ui-file       | Path of web UI                                                                                                  |
 | asn               | ASN of this router                                                                                              |
 | router-id         | Router ID of this router                                                                                        |
 | prefixes          | List of prefixes to originate                                                                                   |

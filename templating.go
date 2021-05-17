@@ -166,7 +166,7 @@ func writeVrrpConfig(config *Config) {
 	}
 
 	// Create the VRRP config file
-	keepalivedFile, err := os.Create(path.Join(opts.KeepalivedConfig))
+	keepalivedFile, err := os.Create(path.Join(config.KeepalivedConfig))
 	if err != nil {
 		log.Fatalf("Create peer specific output file: %v", err)
 	}
@@ -182,7 +182,7 @@ func writeVrrpConfig(config *Config) {
 func writeUiFile(config *Config) {
 	// Create the ui output file
 	log.Debug("Creating UI output file")
-	uiFileObj, err := os.Create(opts.UiFile)
+	uiFileObj, err := os.Create(config.WebUiFile)
 	if err != nil {
 		log.Fatalf("Create UI output file: %v", err)
 	}

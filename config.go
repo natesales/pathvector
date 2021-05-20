@@ -92,17 +92,17 @@ type config struct {
 	Runtime *runtimeConfig `yaml:"runtime" description:"Runtime configuration"`
 	Bgp     *bgpConfig     `yaml:"bgp" description:"BGP configuration"`
 
-	RouterId     string            `yaml:"router-id" description:"Router ID (dotted quad notation)"`
-	Statics      map[string]string `yaml:"statics" description:""`
-	IrrServer    string            `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RtrServer    string            `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RtrPort      int               `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
-	KeepFiltered bool              `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?"`
-	MergePaths   bool              `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?"`
+	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)"`
+	IrrServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RtrServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
+	RtrPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?"`
+	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?"`
 
 	Source4 string `yaml:"source4" description:"Source IPv4 address"`
 	Source6 string `yaml:"source6" description:"Source IPv6 address"`
 
+	//Statics       map[string]string `yaml:"statics" description:"Map of static routes"`
 	Templates     map[string]*peer  `yaml:"templates" description:"BGP peer template configuration"`
 	Peers         map[string]*peer  `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]*iface `yaml:"interfaces" description:"Network interface configuration"`
@@ -160,26 +160,26 @@ func loadConfig(filename string) (*config, error) {
 		}
 	}
 
-	// Initialize static maps
-	config.Static4 = map[string]string{}
-	config.Static6 = map[string]string{}
-
-	// Parse static routes
-	for prefix, nexthop := range config.Statics {
-		pfx, _, err := net.ParseCIDR(prefix)
-		if err != nil {
-			return nil, errorx.Decorate(err, "Invalid static prefix: "+prefix)
-		}
-		if net.ParseIP(nexthop) == nil {
-			return nil, errorx.Decorate(err, "Invalid static next hop: "+nexthop)
-		}
-
-		if pfx.To4() == nil { // If IPv6
-			config.Static6[prefix] = nexthop
-		} else { // If IPv4
-			config.Static4[prefix] = nexthop
-		}
-	}
+	//// Initialize static maps
+	//config.Static4 = map[string]string{}
+	//config.Static6 = map[string]string{}
+	//
+	//// Parse static routes
+	//for prefix, nexthop := range config.Statics {
+	//	pfx, _, err := net.ParseCIDR(prefix)
+	//	if err != nil {
+	//		return nil, errorx.Decorate(err, "Invalid static prefix: "+prefix)
+	//	}
+	//	if net.ParseIP(nexthop) == nil {
+	//		return nil, errorx.Decorate(err, "Invalid static next hop: "+nexthop)
+	//	}
+	//
+	//	if pfx.To4() == nil { // If IPv6
+	//		config.Static6[prefix] = nexthop
+	//	} else { // If IPv4
+	//		config.Static4[prefix] = nexthop
+	//	}
+	//}
 
 	// Parse VRRP configs
 	for _, vrrpInstance := range config.VRRPInstances {

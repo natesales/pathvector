@@ -76,6 +76,9 @@ type bgpConfig struct {
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
+
+	Prefixes4 []string `yaml:"-" description:"-"`
+	Prefixes6 []string `yaml:"-" description:"-"`
 }
 
 type kernelAugments struct {
@@ -143,28 +146,19 @@ func loadConfig(filename string) (*config, error) {
 		log.Fatalf("defaults: %+v", err)
 	}
 
-	// Get hostname
-	config.Hostname, err = os.Hostname()
-	if err != nil {
-		return nil, errorx.Decorate(err, "Getting hostname")
-	}
-
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
-	for _, prefix := range config.Prefixes {
+	for _, prefix := range config.Bgp.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
-			return nil, errorx.Decorate(err, "Invalid origin prefix: "+prefix)
+			return nil, errors.New("invalid origin prefix: " + prefix)
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			config.OriginSet6 = append(config.OriginSet6, prefix)
+			config.Bgp.Prefixes4 = append(config.Bgp.Prefixes4, prefix)
 		} else { // If IPv4
-			config.OriginSet4 = append(config.OriginSet4, prefix)
+			config.Bgp.Prefixes6 = append(config.Bgp.Prefixes6, prefix)
 		}
 	}
-
-	log.Info("Origin IPv4: ", config.OriginSet4)
-	log.Info("Origin IPv6: ", config.OriginSet6)
 
 	// Initialize static maps
 	config.Static4 = map[string]string{}

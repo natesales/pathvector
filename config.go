@@ -74,17 +74,21 @@ type vrrpInstance struct {
 	VIPs      []string `yaml:"vips" description:"List of virtual IPs"`
 }
 
+type runtimeConfig struct {
+	BirdDirectory    string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
+	BirdSocket       string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
+	KeepalivedConfig string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
+	WebUiFile        string `yaml:"web-ui-file" description:"File to write web UI to"`
+}
+
 // Config contains global configuration about this router and Wireframe instance
 type Config struct {
-	BirdDirectory    string            `yaml:"bird-directory" json:"bird-directory" toml:"BIRDDirectory"`
-	BirdSocket       string            `yaml:"bird-socket" json:"bird-socket" toml:"BIRDSocket"`
-	KeepalivedConfig string            `yaml:"keepalived-config" json:"keepalived-config" toml:"KeepalivedConfig"`
-	WebUiFile        string            `yaml:"web-ui-file" json:"web-ui-file" toml:"WebUIFile"`
+	Runtime          *runtimeConfig    `yaml:"runtime" description:"Runtime configuration"`
 	Asn              uint              `yaml:"asn" json:"asn" toml:"ASN"`
 	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`
 	Prefixes         []string          `yaml:"prefixes" json:"prefixes" toml:"Prefixes"`
 	Statics          map[string]string `yaml:"statics" json:"statics" toml:"Statics"`
-	VRRPInstances    []*VRRPInstance   `yaml:"vrrp" json:"vrrp" toml:"VRRP"`
+	VRRPInstances    []*vrrpInstance   `yaml:"vrrp" json:"vrrp" toml:"VRRP"`
 	IrrDb            string            `yaml:"irrdb" json:"irrdb" toml:"IRRDB"`
 	RtrServer        string            `yaml:"rtr-server" json:"rtr-server" toml:"RTR-Server"`
 	RtrPort          int               `yaml:"rtr-port" json:"rtr-port" toml:"RTR-Port"`

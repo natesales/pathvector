@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"net"
-	"os"
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
@@ -57,11 +56,14 @@ type peer struct {
 }
 
 type vrrpInstance struct {
-	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')"`
-	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on"`
-	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)"`
-	Priority  uint8    `yaml:"priority" description:"RFC3768 VRRP Priority"`
-	VIPs      []string `yaml:"vips" description:"List of virtual IPs"`
+	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')" validate:"required"`
+	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on" validate:"required"`
+	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)" validate:"required"`
+	Priority  uint8    `yaml:"priority" description:"RFC3768 VRRP Priority" validate:"required"`
+	VIPs      []string `yaml:"vips" description:"List of virtual IPs" validate:"required,cidr"`
+
+	VIPs4 []string `yaml:"-" description:"-"`
+	VIPs6 []string `yaml:"-" description:"-"`
 }
 
 type runtimeConfig struct {
@@ -73,7 +75,7 @@ type runtimeConfig struct {
 
 type bgpConfig struct {
 	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
-	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
+	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce" validate:"cidr"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
@@ -168,10 +170,10 @@ func loadConfig(filename string) (*config, error) {
 	//for prefix, nexthop := range config.Statics {
 	//	pfx, _, err := net.ParseCIDR(prefix)
 	//	if err != nil {
-	//		return nil, errorx.Decorate(err, "Invalid static prefix: "+prefix)
+	//		return nil, errors.New("invalid static prefix: " + prefix)
 	//	}
 	//	if net.ParseIP(nexthop) == nil {
-	//		return nil, errorx.Decorate(err, "Invalid static next hop: "+nexthop)
+	//		return nil, errors.New("invalid static nexthop: " + nexthop)
 	//	}
 	//
 	//	if pfx.To4() == nil { // If IPv6
@@ -187,7 +189,7 @@ func loadConfig(filename string) (*config, error) {
 		for _, vip := range vrrpInstance.VIPs {
 			ip, _, err := net.ParseCIDR(vip)
 			if err != nil {
-				return nil, errorx.Decorate(err, "Invalid VIP")
+				return nil, errors.New("invalid VIP: " + vip)
 			}
 
 			if ip.To4() == nil { // If IPv6
@@ -204,14 +206,6 @@ func loadConfig(filename string) (*config, error) {
 			vrrpInstance.State = "BACKUP"
 		} else {
 			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
-		}
-
-		if vrrpInstance.Interface == "" {
-			return nil, errors.New("VRRP interface is not defined")
-		}
-
-		if len(vrrpInstance.VIPs) < 1 {
-			return nil, errors.New("VRRP instance must have at least one VIP defined")
 		}
 	}
 

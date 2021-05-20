@@ -1,26 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net"
 	"os"
-	"strconv"
-	"strings"
 
+	"github.com/creasty/defaults"
+	"github.com/go-playground/validator"
 	"github.com/joomcode/errorx"
-	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-)
-
-// Default constants
-const (
-	DefaultRtrServer = "127.0.0.1"
-	DefaultRtrPort   = 8282
-
-	DefaultIRRServer = "rr.ntt.net"
 )
 
 type peer struct {
@@ -28,21 +18,21 @@ type peer struct {
 	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
 
 	// BGP Attributes
-	Asn              uint     `yaml:"asn" description:":Local ASN"`
+	Asn              uint     `yaml:"asn" description:"Local ASN"`
 	NeighborIPs      []string `yaml:"neighbors" description:"List of neighbor IPs"`
 	Prepends         uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
 	LocalPref        uint     `yaml:"local-pref" description:"BGP local preference"`
 	Multihop         bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
-	Listen           string   `yaml:"listen" description:"BGP listen port"`
-	NeighborPort     uint16   `yaml:"port" description:"Neighbor TCP port (default 179)"`
-	Passive          bool     `yaml:"passive" description:"Should we listen passively?"`
-	NextHopSelf      bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?"`
-	Bfd              bool     `yaml:"bfd" description:"Should BFD be enabled?"`
+	Listen           string   `yaml:"listen" description:"BGP listen port" default:"179"`
+	NeighborPort     uint16   `yaml:"port" description:"Neighbor TCP port" default:"179"`
+	Passive          bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
+	NextHopSelf      bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
+	Bfd              bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
 	Communities      []string `yaml:"communities" description:"List of communities to add on export"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of large communities to add on export"`
 	Password         string   `yaml:"password" description:"BGP MD5 password"`
-	RsClient         bool     `yaml:"rs-client" description:"Should this peer be a route server client?"`
-	RrClient         bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?"`
+	RsClient         bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
+	RrClient         bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 
 	// Filtering
 	Template           string `yaml:"template" description:"Template to inherit configuration from"`
@@ -81,39 +71,40 @@ type runtimeConfig struct {
 	WebUiFile        string `yaml:"web-ui-file" description:"File to write web UI to"`
 }
 
-// Config contains global configuration about this router and Wireframe instance
-type Config struct {
-	Runtime          *runtimeConfig    `yaml:"runtime" description:"Runtime configuration"`
-	Asn              uint              `yaml:"asn" json:"asn" toml:"ASN"`
-	RouterId         string            `yaml:"router-id" json:"router-id" toml:"Router-ID"`
-	Prefixes         []string          `yaml:"prefixes" json:"prefixes" toml:"Prefixes"`
-	Statics          map[string]string `yaml:"statics" json:"statics" toml:"Statics"`
-	VRRPInstances    []*vrrpInstance   `yaml:"vrrp" json:"vrrp" toml:"VRRP"`
-	IrrDb            string            `yaml:"irrdb" json:"irrdb" toml:"IRRDB"`
-	RtrServer        string            `yaml:"rtr-server" json:"rtr-server" toml:"RTR-Server"`
-	RtrPort          int               `yaml:"rtr-port" json:"rtr-port" toml:"RTR-Port"`
-	KeepFiltered     bool              `yaml:"keep-filtered" json:"keep-filtered" toml:"KeepFiltered"`
-	MergePaths       bool              `yaml:"merge-paths" json:"merge-paths" toml:"MergePaths"`
-	PrefSrc4         string            `yaml:"pref-src4" json:"pref-src4" toml:"PrefSrc4"`
-	PrefSrc6         string            `yaml:"pref-src6" json:"pref-src6" toml:"PrefSrc6"`
-	FilterDefault    bool              `yaml:"filter-default" json:"filter-default" toml:"FilterDefault"`
-	DefaultEnabled   bool              `yaml:"enable-default" json:"enable-default" toml:"EnableDefault"`
-	Communities      []string          `yaml:"communities" json:"communities" toml:"Communities"`
-	LargeCommunities []string          `yaml:"large-communities" json:"large-communities" toml:"LargeCommunities"`
-	KernelAccept4    []string          `yaml:"kernel-accept4" json:"kernel-accept4" toml:"KernelAccept4"`
-	KernelAccept6    []string          `yaml:"kernel-accept6" json:"kernel-accept6" toml:"KernelAccept6"`
-	KernelReject4    []string          `yaml:"kernel-reject4" json:"kernel-reject4" toml:"KernelReject4"`
-	KernelReject6    []string          `yaml:"kernel-reject6" json:"kernel-reject6" toml:"KernelReject6"`
+type bgpConfig struct {
+	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
+	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
+	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
+	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
+}
 
-	Templates  map[string]*peer  `yaml:"templates" json:"templates" toml:"Templates"`
-	Peers      map[string]*peer  `yaml:"peers" json:"peers" toml:"Peers"`
-	Interfaces map[string]*iface `yaml:"interfaces" json:"interfaces" toml:"Interfaces"`
+type kernelAugments struct {
+	Accept4 []string `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
+	Accept6 []string `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
+	Reject4 []string `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
+	Reject6 []string `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
+}
 
-	OriginSet4 []string          `yaml:"-" json:"-" toml:"-"`
-	OriginSet6 []string          `yaml:"-" json:"-" toml:"-"`
-	Static4    map[string]string `yaml:"-" json:"-" toml:"-"`
-	Static6    map[string]string `yaml:"-" json:"-" toml:"-"`
-	Hostname   string            `yaml:"-" json:"-" toml:"-"`
+type config struct {
+	Runtime *runtimeConfig `yaml:"runtime" description:"Runtime configuration"`
+	Bgp     *bgpConfig     `yaml:"bgp" description:"BGP configuration"`
+
+	RouterId     string            `yaml:"router-id" description:"Router ID (dotted quad notation)"`
+	Statics      map[string]string `yaml:"statics" description:""`
+	IrrServer    string            `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RtrServer    string            `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
+	RtrPort      int               `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	KeepFiltered bool              `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?"`
+	MergePaths   bool              `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?"`
+
+	Source4 string `yaml:"source4" description:"Source IPv4 address"`
+	Source6 string `yaml:"source6" description:"Source IPv6 address"`
+
+	Templates     map[string]*peer  `yaml:"templates" description:"BGP peer template configuration"`
+	Peers         map[string]*peer  `yaml:"peers" description:"BGP peer configuration"`
+	Interfaces    map[string]*iface `yaml:"interfaces" description:"Network interface configuration"`
+	VRRPInstances []*vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
+	Augments      *kernelAugments   `yaml:"augments" description:"Kernel augments"`
 }
 
 // addr represents an IP address and netmask for easy YAML validation
@@ -131,110 +122,26 @@ type iface struct {
 	Down      bool   `yaml:"down" json:"down" toml:"Down"`
 }
 
-// Wrapper stores a Peer and Config passed to the template
-type Wrapper struct {
-	Peer   peer
-	Config Config
-}
-
-// setConfigDefaults sets the default values of a Config struct
-func setConfigDefaults(config *Config) error {
-	// Set default IRRDB
-	if config.IrrDb == "" {
-		config.IrrDb = DefaultIRRServer
-	}
-
-	// Set default RTR server
-	if config.RtrServer == "" {
-		config.RtrServer = DefaultRtrServer
-	}
-
-	// Set default RTR port
-	if config.RtrPort == 0 {
-		config.RtrPort = DefaultRtrPort
-	}
-
-	// Validate Router ID in dotted quad format
-	if config.RouterId != "" && net.ParseIP(config.RouterId).To4() == nil {
-		return errors.New("Router ID " + config.RouterId + " is not in valid dotted quad notation")
-	}
-
-	// Validate CIDR notation of originated prefixes
-	for _, addr := range config.Prefixes {
-		if _, _, err := net.ParseCIDR(addr); err != nil {
-			return errors.New("Address " + addr + " is not a valid IPv4 or IPv6 prefix in CIDR notation")
-		}
-	}
-
-	return nil // nil error
-}
-
-// setPeerDefaults sets the default values of a peer
-func setPeerDefaults(name string, peer *peer) {
-	// Set default local pref
-	if peer.LocalPref == 0 {
-		peer.LocalPref = 100
-	}
-
-	// Set default description
-	if peer.Description == "" {
-		peer.Description = "AS" + strconv.Itoa(int(peer.Asn)) + " " + name
-	}
-
-	// Set default max prefix violation action
-	if peer.MaxPfxAction == "" {
-		peer.MaxPfxAction = "disable"
-	}
-}
-
 // loadConfig loads a configuration file from YAML, JSON, or TOML
-func loadConfig(filename string) (*Config, error) {
+func loadConfig(filename string) (*config, error) {
 	configFile, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, errorx.Decorate(err, "Reading config file")
 	}
 
-	var config Config
+	var config config
+	if err := yaml.UnmarshalStrict(configFile, &config); err != nil {
+		log.Fatalf("yaml unmarshal: %v", err)
+	}
 
-	_splitFilename := strings.Split(filename, ".")
-	switch extension := _splitFilename[len(_splitFilename)-1]; extension {
-	case "yaml", "yml":
-		log.Info("Using YAML configuration format")
-		err := yaml.UnmarshalStrict(configFile, &config)
-		if err != nil {
-			return nil, errorx.Decorate(err, "YAML unmarshal")
-		}
-	case "toml":
-		log.Info("Using TOML configuration format")
-		err := toml.Unmarshal(configFile, &config)
-		if err != nil {
-			return nil, errorx.Decorate(err, "TOML unmarshal")
-		}
-	case "json":
-		log.Info("Using JSON configuration format")
-		err := json.Unmarshal(configFile, &config)
-		if err != nil {
-			return nil, errorx.Decorate(err, "JSON unmarshal")
-		}
-	default:
-		return nil, errors.New("Files with extension " + extension + " are not supported. Acceptable values are yaml, toml, json")
+	if err := validate.Struct(&config); err != nil {
+		log.Fatalf("validation: %+v", err)
 	}
 
 	// Get hostname
 	config.Hostname, err = os.Hostname()
 	if err != nil {
 		return nil, errorx.Decorate(err, "Getting hostname")
-	}
-
-	// Set global config defaults
-	err = setConfigDefaults(&config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set individual peer defaults
-	for name, peer := range config.Peers {
-		setPeerDefaults(name, peer)
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
@@ -273,14 +180,6 @@ func loadConfig(filename string) (*Config, error) {
 		} else { // If IPv4
 			config.Static4[prefix] = nexthop
 		}
-	}
-
-	// Print static routes
-	if len(config.Static4) > 0 {
-		log.Infof("IPv4 statics: %+v", config.Static4)
-	}
-	if len(config.Static6) > 0 {
-		log.Infof("IPv6 statics: %+v", config.Static6)
 	}
 
 	// Parse VRRP configs

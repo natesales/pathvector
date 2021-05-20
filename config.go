@@ -23,10 +23,9 @@ const (
 	DefaultIRRServer = "rr.ntt.net"
 )
 
-// peer contains all information specific to a single peer network
 type peer struct {
-	Description string `tag:"description" description:"Peer description"`
-	Disabled    bool   `tag:"disabled" description:"Should the sessions be disabled?"`
+	Description string `yaml:"description" description:"Peer description"`
+	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
 
 	// BGP Attributes
 	Asn              uint     `yaml:"asn" description:":Local ASN"`
@@ -67,16 +66,12 @@ type peer struct {
 	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
 }
 
-// VRRPInstance stores a VRRP instance
-type VRRPInstance struct {
-	State     string   `yaml:"state" json:"state" toml:"State"`
-	Interface string   `yaml:"interface" json:"interface" toml:"Interface"`
-	VRRID     uint     `yaml:"vrrid" json:"vrrid" toml:"VRRID"`
-	Priority  uint8    `yaml:"priority" json:"priority" toml:"Priority"`
-	VIPs      []string `yaml:"vips" json:"vips" toml:"VIPs"`
-
-	VIPs4 []string `yaml:"-" json:"-" toml:"-"`
-	VIPs6 []string `yaml:"-" json:"-" toml:"-"`
+type vrrpInstance struct {
+	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')"`
+	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on"`
+	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)"`
+	Priority  uint8    `yaml:"priority" description:"RFC3768 VRRP Priority"`
+	VIPs      []string `yaml:"vips" description:"List of virtual IPs"`
 }
 
 // Config contains global configuration about this router and Wireframe instance

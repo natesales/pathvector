@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/creasty/defaults"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -134,8 +134,13 @@ func loadConfig(filename string) (*config, error) {
 		log.Fatalf("yaml unmarshal: %v", err)
 	}
 
+	validate := validator.New()
 	if err := validate.Struct(&config); err != nil {
 		log.Fatalf("validation: %+v", err)
+	}
+
+	if err := defaults.Set(&config); err != nil {
+		log.Fatalf("defaults: %+v", err)
 	}
 
 	// Get hostname

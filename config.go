@@ -79,6 +79,9 @@ type bgpConfig struct {
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
+	Templates map[string]peer `yaml:"templates" description:"BGP peer template configuration"`
+	Peers     map[string]peer `yaml:"peers" description:"BGP peer configuration"`
+
 	Prefixes4 []string `yaml:"-" description:"-"`
 	Prefixes6 []string `yaml:"-" description:"-"`
 }
@@ -95,25 +98,21 @@ type augments struct {
 }
 
 type config struct {
-	Runtime *runtimeConfig `yaml:"runtime" description:"Runtime configuration"`
-	Bgp     *bgpConfig     `yaml:"bgp" description:"BGP configuration"`
-
 	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)"`
 	IrrServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RtrServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
 	RtrPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
 	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?"`
 	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?"`
+	Source4      string `yaml:"source4" description:"Source IPv4 address"`
+	Source6      string `yaml:"source6" description:"Source IPv6 address"`
 
-	Source4 string `yaml:"source4" description:"Source IPv4 address"`
-	Source6 string `yaml:"source6" description:"Source IPv6 address"`
+	Runtime runtimeConfig `yaml:"runtime" description:"Runtime configuration"`
+	Bgp     bgpConfig     `yaml:"bgp" description:"BGP configuration"`
 
-	//Statics       map[string]string `yaml:"statics" description:"Map of static routes"`
-	Templates     map[string]*peer  `yaml:"templates" description:"BGP peer template configuration"`
-	Peers         map[string]*peer  `yaml:"peers" description:"BGP peer configuration"`
-	Interfaces    map[string]*iface `yaml:"interfaces" description:"Network interface configuration"`
-	VRRPInstances []*vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      *augments         `yaml:"augments" description:"Augments"`
+	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
+	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
+	Augments      augments         `yaml:"augments" description:"Augments"`
 }
 
 // addr represents an IP address and netmask for easy YAML validation

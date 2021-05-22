@@ -75,7 +75,7 @@ type runtimeConfig struct {
 
 type bgpConfig struct {
 	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
-	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce" validate:"cidr"`
+	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 

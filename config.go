@@ -7,7 +7,6 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
-	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -83,11 +82,15 @@ type bgpConfig struct {
 	Prefixes6 []string `yaml:"-" description:"-"`
 }
 
-type kernelAugments struct {
-	Accept4 []string `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
-	Accept6 []string `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
-	Reject4 []string `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
-	Reject6 []string `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
+type augments struct {
+	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
+	Accept6 []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
+	Reject4 []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
+	Reject6 []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
+	Statics map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+
+	Statics4 map[string]string `yaml:"-" description:"-"`
+	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
 type config struct {
@@ -109,7 +112,7 @@ type config struct {
 	Peers         map[string]*peer  `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]*iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []*vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      *kernelAugments   `yaml:"augments" description:"Kernel augments"`
+	Augments      *augments         `yaml:"augments" description:"Augments"`
 }
 
 // addr represents an IP address and netmask for easy YAML validation
@@ -131,7 +134,7 @@ type iface struct {
 func loadConfig(filename string) (*config, error) {
 	configFile, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, errorx.Decorate(err, "Reading config file")
+		return nil, errors.New("reading config file: " + err.Error())
 	}
 
 	var config config
@@ -162,26 +165,26 @@ func loadConfig(filename string) (*config, error) {
 		}
 	}
 
-	//// Initialize static maps
-	//config.Static4 = map[string]string{}
-	//config.Static6 = map[string]string{}
-	//
-	//// Parse static routes
-	//for prefix, nexthop := range config.Statics {
-	//	pfx, _, err := net.ParseCIDR(prefix)
-	//	if err != nil {
-	//		return nil, errors.New("invalid static prefix: " + prefix)
-	//	}
-	//	if net.ParseIP(nexthop) == nil {
-	//		return nil, errors.New("invalid static nexthop: " + nexthop)
-	//	}
-	//
-	//	if pfx.To4() == nil { // If IPv6
-	//		config.Static6[prefix] = nexthop
-	//	} else { // If IPv4
-	//		config.Static4[prefix] = nexthop
-	//	}
-	//}
+	// Initialize static maps
+	config.Augments.Statics4 = map[string]string{}
+	config.Augments.Statics6 = map[string]string{}
+
+	// Parse static routes
+	for prefix, nexthop := range config.Augments.Statics {
+		pfx, _, err := net.ParseCIDR(prefix)
+		if err != nil {
+			return nil, errors.New("invalid static prefix: " + prefix)
+		}
+		if net.ParseIP(nexthop) == nil {
+			return nil, errors.New("invalid static nexthop: " + nexthop)
+		}
+
+		if pfx.To4() == nil { // If IPv6
+			config.Augments.Statics6[prefix] = nexthop
+		} else { // If IPv4
+			config.Augments.Statics4[prefix] = nexthop
+		}
+	}
 
 	// Parse VRRP configs
 	for _, vrrpInstance := range config.VRRPInstances {

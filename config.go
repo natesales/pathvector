@@ -21,8 +21,9 @@ type peer struct {
 	Prepends         uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
 	LocalPref        uint     `yaml:"local-pref" description:"BGP local preference"`
 	Multihop         bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
-	Listen           string   `yaml:"listen" description:"BGP listen port" default:"179"`
-	NeighborPort     uint16   `yaml:"port" description:"Neighbor TCP port" default:"179"`
+	Listen           string   `yaml:"listen" description:"BGP listen address"`
+	LocalPort        uint16   `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort     uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive          bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	NextHopSelf      bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
 	Bfd              bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`

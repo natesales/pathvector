@@ -34,7 +34,6 @@ type peer struct {
 	RrClient         bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 
 	// Filtering
-	Template           string `yaml:"template" description:"Template to inherit configuration from"`
 	AsSet              string `yaml:"as-set" description:"Peer's as-set for filtering"`
 	ImportLimit4       uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import"`
 	ImportLimit6       uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import"`
@@ -79,8 +78,7 @@ type bgpConfig struct {
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
-	Templates map[string]peer `yaml:"templates" description:"BGP peer template configuration"`
-	Peers     map[string]peer `yaml:"peers" description:"BGP peer configuration"`
+	Peers map[string]peer `yaml:"peers" description:"BGP peer configuration"`
 
 	Prefixes4 []string `yaml:"-" description:"-"`
 	Prefixes6 []string `yaml:"-" description:"-"`
@@ -112,25 +110,19 @@ type config struct {
 
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      augments         `yaml:"augments" description:"Augments"`
-}
-
-// addr represents an IP address and netmask for easy YAML validation
-type addr struct {
-	Address net.IP
-	Mask    uint8
+	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
 }
 
 // iface represents a network interface
 type iface struct {
-	Mtu       uint   `yaml:"mtu" json:"mtu" toml:"MTU"`
-	XDPRTR    bool   `yaml:"xdprtr" json:"xdprtr" toml:"XDPRTR"`
-	Addresses []addr `yaml:"addresses" json:"addresses" toml:"Addresses"`
-	Dummy     bool   `yaml:"dummy" json:"dummy" toml:"Dummy"`
-	Down      bool   `yaml:"down" json:"down" toml:"Down"`
+	Mtu       uint     `yaml:"mtu" json:"mtu" toml:"MTU"`
+	XDPRTR    bool     `yaml:"xdprtr" json:"xdprtr" toml:"XDPRTR"`
+	Addresses []string `yaml:"addresses" json:"addresses" toml:"Addresses" validate:"cidr"`
+	Dummy     bool     `yaml:"dummy" json:"dummy" toml:"Dummy"`
+	Down      bool     `yaml:"down" json:"down" toml:"Down"`
 }
 
-// loadConfig loads a configuration file from YAML, JSON, or TOML
+// loadConfig loads a configuration file from a YAML file
 func loadConfig(filename string) (*config, error) {
 	configFile, err := ioutil.ReadFile(filename)
 	if err != nil {

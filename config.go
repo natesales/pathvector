@@ -220,7 +220,7 @@ func loadConfig(filename string) (*config, error) {
 	return &config, nil // nil error
 }
 
-func documentTypes(t reflect.Type) {
+func documentConfigTypes(t reflect.Type) {
 	var childTypes []reflect.Type
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
 	fmt.Println("| Option | Type | Description |")
@@ -245,15 +245,35 @@ func documentTypes(t reflect.Type) {
 	}
 	fmt.Println()
 	for _, childType := range childTypes {
-		documentTypes(childType)
+		documentConfigTypes(childType)
+	}
+}
+
+func documentConfig() {
+	documentConfigTypes(reflect.TypeOf(config{}))
+}
+
+func documentCliFlags() {
+	fmt.Println("## CLI Flags")
+	fmt.Println("| Option | Type | Description |")
+	fmt.Println("|--------|------|-------------|")
+	t := reflect.TypeOf(cliFlags)
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		short := field.Tag.Get("short")
+		long := field.Tag.Get("long")
+		description := field.Tag.Get("description")
+
+		fmt.Printf("| `-%s`, `--%s` | `%s` | %s |\n", short, long, field.Type.String(), description)
 	}
 }
 
 //func main() {
-//	//config, err := loadConfig("config.yml")
-//	//if err != nil {
-//	//	log.Println(err)
-//	//}
-//
-//	documentTypes(reflect.TypeOf(config{}))
+//config, err := loadConfig("config.yml")
+//if err != nil {
+//	log.Println(err)
+//}
+
+//documentConfig()
+//documentCliFlags()
 //}

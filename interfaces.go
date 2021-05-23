@@ -1,43 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"os/exec"
+
 	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
-	"net"
-	"os/exec"
 )
 
-// UnmarshalYAML implements the interface from go-yaml to marshal an IP address or prefix in CIDR notation
-func (a *addr) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var raw string
-	err := unmarshal(&raw)
-	if err != nil {
-		return err
-	}
-
-	ip, ipNet, err := net.ParseCIDR(raw)
-	if err != nil {
-		return err
-	}
-
-	netMask, _ := ipNet.Mask.Size()
-	*a = addr{
-		Address: ip,
-		Mask:    uint8(netMask),
-	}
-
-	return nil
-}
-
-// String converts an Addr to a CIDR string
-func (a addr) String() string {
-	return fmt.Sprintf("%s/%d", a.Address.String(), a.Mask)
-}
-
 // configureInterfaces applies interface configs
-func configureInterfaces(config *Config) {
+func configureInterfaces(config *config) {
 	for ifaceName, ifaceOpts := range config.Interfaces {
 		if ifaceOpts.Dummy {
 			log.Infof("Creating new dummy interface: %s", ifaceName)
@@ -65,7 +37,7 @@ func configureInterfaces(config *Config) {
 
 		// Add addresses
 		for _, addr := range ifaceOpts.Addresses {
-			nlAddr, err := netlink.ParseAddr(addr.String())
+			nlAddr, err := netlink.ParseAddr(addr)
 			if err != nil {
 				log.Fatal(err) // This should never happen
 			}

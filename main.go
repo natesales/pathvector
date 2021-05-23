@@ -23,19 +23,6 @@ import (
 
 var version = "dev" // set by the build process
 
-// PeeringDbResponse contains the response from a PeeringDB query
-type PeeringDbResponse struct {
-	Data []PeeringDbData `json:"data"`
-}
-
-// PeeringDbData contains the actual data from PeeringDB response
-type PeeringDbData struct {
-	Name    string `json:"name"`
-	AsSet   string `json:"irr_as_set"`
-	MaxPfx4 uint   `json:"info_prefixes4"`
-	MaxPfx6 uint   `json:"info_prefixes6"`
-}
-
 // Config constants
 const (
 	DefaultIPv4TableSize = 1000000
@@ -64,41 +51,6 @@ func contains(a []string, x string) bool {
 		}
 	}
 	return false
-}
-
-// Query PeeringDB for an ASN
-func getPeeringDbData(asn uint) PeeringDbData {
-	httpClient := http.Client{Timeout: time.Second * 5}
-	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
-	if err != nil {
-		log.Fatalf("PeeringDB GET (This peer might not have a PeeringDB page): %v", err)
-	}
-
-	res, err := httpClient.Do(req)
-	if err != nil {
-		log.Fatalf("PeeringDB GET Request: %v", err)
-	}
-
-	if res.Body != nil {
-		//noinspection GoUnhandledErrorResult
-		defer res.Body.Close()
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatalf("PeeringDB Read: %v", err)
-	}
-
-	var peeringDbResponse PeeringDbResponse
-	if err := json.Unmarshal(body, &peeringDbResponse); err != nil {
-		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
-	}
-
-	if len(peeringDbResponse.Data) < 1 {
-		log.Fatalf("Peer %d doesn't have a valid PeeringDB entry. Try import-valid or ask the network to update their account.", asn)
-	}
-
-	return peeringDbResponse.Data[0]
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines

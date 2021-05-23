@@ -2,8 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net"
+	"reflect"
+	"strings"
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
@@ -109,11 +112,11 @@ type config struct {
 
 // iface represents a network interface
 type iface struct {
-	Mtu       uint     `yaml:"mtu" json:"mtu" toml:"MTU"`
-	XDPRTR    bool     `yaml:"xdprtr" json:"xdprtr" toml:"XDPRTR"`
-	Addresses []string `yaml:"addresses" json:"addresses" toml:"Addresses" validate:"cidr"`
-	Dummy     bool     `yaml:"dummy" json:"dummy" toml:"Dummy"`
-	Down      bool     `yaml:"down" json:"down" toml:"Down"`
+	Mtu       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)"`
+	XDPRTR    bool     `yaml:"xdprtr" description:"Should XDPRTR be loaded on this interface?"`
+	Addresses []string `yaml:"addresses" description:"List of addresses to add to this interface"`
+	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?"`
+	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?"`
 }
 
 // loadConfig loads a configuration file from a YAML file
@@ -199,6 +202,35 @@ func loadConfig(filename string) (*config, error) {
 	}
 
 	return &config, nil // nil error
+}
+
+func documentTypes(t reflect.Type) {
+	var childTypes []reflect.Type
+	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
+	fmt.Println("| Option | Type | Description |")
+	fmt.Println("|--------|------|-------------|")
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		description := field.Tag.Get("description")
+		key := field.Tag.Get("yaml")
+
+		if description == "" {
+			log.Fatalf("code error: %s doesn't have a description", field.Name)
+		} else if description != "-" { // Ignore descriptions that are -
+			if strings.Contains(field.Type.String(), "main.") { // If the type is a config struct
+				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice
+					childTypes = append(childTypes, field.Type.Elem())
+				} else {
+					childTypes = append(childTypes, field.Type)
+				}
+			}
+			fmt.Printf("| %s | `%s` | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), description)
+		}
+	}
+	fmt.Println()
+	for _, childType := range childTypes {
+		documentTypes(childType)
+	}
 }
 
 func main() {

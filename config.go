@@ -40,8 +40,8 @@ type peer struct {
 
 	// Filtering
 	AsSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
-	ImportLimit4            uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import"`
-	ImportLimit6            uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import"`
+	ImportLimit4            uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
+	ImportLimit6            uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
 	EnforceFirstAs          bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
 	EnforcePeerNexthop      bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
 	MaxPfxAction            string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`

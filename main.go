@@ -2,10 +2,7 @@ package main
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -21,22 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var version = "dev" // set by the build process
-
-// Config constants
-const (
-	DefaultIPv4TableSize = 1000000
-	DefaultIPv6TableSize = 150000
-)
-
-// Flags
-var opts struct {
-	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
-	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
-	NoConfigure bool   `long:"no-configure" description:"Don't configure BIRD"`
-	ShowVersion bool   `long:"version" description:"Show version and exit"`
-}
+var version = "devel" // set by the build process
 
 // Embedded filesystem
 
@@ -128,7 +110,7 @@ func printPeerInfo(peerName string, peerData *peer) {
 
 func main() {
 	// Parse cli flags
-	_, err := flags.ParseArgs(&opts, os.Args)
+	_, err := flags.ParseArgs(&cliFlags, os.Args)
 	if err != nil {
 		if !strings.Contains(err.Error(), "Usage") {
 			log.Fatal(err)
@@ -138,11 +120,11 @@ func main() {
 
 	// Enable debug logging in development releases
 	if //noinspection GoBoolExpressions
-	version == "devel" || opts.Verbose {
+	version == "devel" || cliFlags.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	if opts.ShowVersion {
+	if cliFlags.ShowVersion {
 		log.Printf("wireframe version %s (https://github.com/natesales/wireframe)\n", version)
 		os.Exit(0)
 	}
@@ -158,13 +140,13 @@ func main() {
 	log.Debug("Finished loading templates")
 
 	// Load the config file from configFilename flag
-	log.Debugf("Loading config from %s", opts.ConfigFile)
-	globalConfig, err := loadConfig(opts.ConfigFile)
+	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
+	globalConfig, err := loadConfig(cliFlags.ConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if !opts.DryRun {
+	if !cliFlags.DryRun {
 		// Create the global output file
 		log.Debug("Creating global config")
 		globalFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "bird.conf"))
@@ -279,7 +261,7 @@ func main() {
 		// Print peer info
 		printPeerInfo(peerName, peerData)
 
-		if !opts.DryRun {
+		if !cliFlags.DryRun {
 			// Create the peer specific file
 			peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
 			if err != nil {
@@ -299,7 +281,7 @@ func main() {
 		}
 	}
 
-	if !opts.DryRun {
+	if !cliFlags.DryRun {
 		// Write VRRP config
 		writeVrrpConfig(globalConfig)
 
@@ -309,7 +291,7 @@ func main() {
 			log.Infof("--ui-file is not defined, not creating a UI file")
 		}
 
-		if !opts.NoConfigure {
+		if !cliFlags.NoConfigure {
 			log.Infoln("Reconfiguring BIRD")
 			if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
 				log.Fatal(err)

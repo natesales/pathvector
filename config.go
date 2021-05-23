@@ -21,9 +21,9 @@ type peer struct {
 	// BGP Attributes
 	Asn               uint     `yaml:"asn" description:"Local ASN"`
 	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs"`
-	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
-	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference"`
-	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
+	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen            string   `yaml:"listen" description:"BGP listen address"`
 	LocalPort         uint16   `yaml:"local-port" description:"Local TCP port" default:"179"`
 	NeighborPort      uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
@@ -38,22 +38,22 @@ type peer struct {
 	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 
 	// Filtering
-	AsSet              string `yaml:"as-set" description:"Peer's as-set for filtering"`
-	ImportLimit4       uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import"`
-	ImportLimit6       uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import"`
-	EnforceFirstAs     bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?"`
-	EnforcePeerNexthop bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?"`
-	MaxPfxAction       string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?"`
-	AllowBlackholes    bool   `yaml:"allow-blackholes" description:"Should this peer be allowed to send routes with the blackhole community?"`
-	FilterIRR          bool   `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
-	FilterRPKI         bool   `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	FilterMaxPrefix    bool   `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogons       bool   `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?"`
-	FilterTier1ASNs    bool   `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'"`
+	AsSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
+	ImportLimit4            uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import"`
+	ImportLimit6            uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import"`
+	EnforceFirstAs          bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
+	EnforcePeerNexthop      bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
+	MaxPfxAction            string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
+	AllowBlackholeCommunity bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
+	FilterIRR               bool   `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterRPKI              bool   `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix         bool   `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogons            bool   `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterTier1ASNs         bool   `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
 
 	// Export options
-	ExportDefault bool `yaml:"export-default" description:"Should a default route be exported to this peer?"`
-	NoSpecifics   bool `yaml:"no-specifics" description:"Should more specific routes be exported to this peer?"`
+	ExportDefault   bool `yaml:"export-default" description:"Should a default route be exported to this peer?" default:"false"`
+	ExportSpecifics bool `yaml:"export-specifics" description:"Should more specific routes be exported to this peer?" default:"true"`
 
 	// Custom daemon configuration
 	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`

@@ -36,6 +36,7 @@ type peer struct {
 	RsClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
 	RrClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
+	MPUnicast46       bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 
 	// Filtering
 	AsSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
@@ -238,11 +239,11 @@ func documentTypes(t reflect.Type) {
 	}
 }
 
-func main() {
-	config, err := loadConfig("config.yml")
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Printf("%+v", config)
-}
+//func main() {
+//	//config, err := loadConfig("config.yml")
+//	//if err != nil {
+//	//	log.Println(err)
+//	//}
+//
+//	documentTypes(reflect.TypeOf(config{}))
+//}

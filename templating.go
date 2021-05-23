@@ -13,41 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Neighbor stores a single peer address with supported protocols
-type Neighbor struct {
-	Address   string
-	Type      string
-	Protocols []string
-}
-
-// neighborsToStruct converts a list of neighbor addresses and IPv4/IPv6 multiprotocol status to a list of Neighbors
-func neighborsToStruct(neighbors []string, mp46 bool) []Neighbor {
-	var _neighbors []Neighbor
-	for _, neighbor := range neighbors {
-		// neighborType of neighbor, used when constructing session string PEER1vNEIGHBOR_TYPE
-		neighborType := "46" // 46 for MP-BGP IPv4/IPv6 unicast
-		if !mp46 {
-			if strings.Contains(neighbor, ":") {
-				neighborType = "6"
-			} else {
-				neighborType = "4"
-			}
-		}
-		// protocols to create sessions on, possible values ["4"] | ["6"] | ["4","6"]
-		protocols := []string{neighborType}
-		if neighborType == "46" {
-			protocols = []string{"4", "6"}
-		}
-		_neighbors = append(_neighbors, Neighbor{
-			Address:   neighbor,
-			Type:      neighborType,
-			Protocols: protocols,
-		})
-	}
-
-	return _neighbors
-}
-
 // Template functions
 var funcMap = template.FuncMap{
 	"Contains": func(s, substr string) bool {
@@ -58,23 +23,11 @@ var funcMap = template.FuncMap{
 	"Iterate": func(count *uint) []uint {
 		// Create array with `count` entries
 		var i uint
-		var Items []uint
+		var items []uint
 		for i = 0; i < (*count); i++ {
-			Items = append(Items, i)
+			items = append(items, i)
 		}
-		return Items
-	},
-
-	"Neighbors": func(peer Peer) []Neighbor {
-		if peer.NeighborIPs != nil && peer.MP46NeighborIPs != nil {
-			return append(neighborsToStruct(peer.NeighborIPs, false), neighborsToStruct(peer.MP46NeighborIPs, true)...)
-		} else if peer.MP46NeighborIPs != nil {
-			return neighborsToStruct(peer.MP46NeighborIPs, true)
-		} else if peer.NeighborIPs != nil {
-			return neighborsToStruct(peer.NeighborIPs, false)
-		} else {
-			return []Neighbor{}
-		}
+		return items
 	},
 
 	"BirdSet": func(filter []string) string {
@@ -95,27 +48,8 @@ var funcMap = template.FuncMap{
 		return len(arr) != 0
 	},
 
-	"CheckProtocol": func(v4set []string, v6set []string, family []string, peerType string) bool {
-		if peerType == "downstream" || peerType == "peer" { // Only match IRR filtered peer types
-			if len(family) > 1 {
-				return true
-			}
-			if family[0] == "4" {
-				return len(v4set) != 0
-			}
-			return len(v6set) != 0
-		}
-		// If the peer type isn't going to be IRR filtered, ignore it.
-		return true
-	},
-
-	"CurrentTime": func() string {
-		// get current timestamp
-		return time.Now().Format(time.RFC1123)
-	},
-
 	"UnixTimestamp": func() string {
-		// get current timestamp in UNIX format
+		// Get current UNIX timestamp
 		return strconv.Itoa(int(time.Now().Unix()))
 	},
 }
@@ -159,7 +93,7 @@ func loadTemplates(fs embed.FS) error {
 }
 
 // writeVrrpConfig writes the VRRP config to a keepalived config file
-func writeVrrpConfig(config *Config) {
+func writeVrrpConfig(config *config) {
 	if len(config.VRRPInstances) < 1 {
 		log.Infof("no VRRP instances defined, not writing config")
 		return
@@ -179,7 +113,7 @@ func writeVrrpConfig(config *Config) {
 }
 
 // writeUiFile renders and writes the web UI file
-func writeUiFile(config *Config) {
+func writeUiFile(config *config) {
 	// Create the ui output file
 	log.Debug("Creating UI output file")
 	uiFileObj, err := os.Create(config.WebUiFile)

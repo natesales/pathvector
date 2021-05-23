@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -33,38 +32,6 @@ func contains(a []string, x string) bool {
 		}
 	}
 	return false
-}
-
-// Use bgpq4 to generate a prefix filter and return only the filter lines
-func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
-	// Run bgpq4 for BIRD format with aggregation enabled
-	log.Infof("Running bgpq4 -h %s -Ab%d %s", irrdb, family, asSet)
-	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), asSet)
-	stdout, err := cmd.Output()
-	if err != nil {
-		log.Fatalf("bgpq4 error: %v", err.Error())
-	}
-
-	// Remove whitespace and commas from output
-	output := strings.ReplaceAll(string(stdout), ",\n    ", "\n")
-
-	// Remove array prefix
-	output = strings.ReplaceAll(output, "NN = [\n    ", "")
-
-	// Remove array suffix
-	output = strings.ReplaceAll(output, "];", "")
-
-	// Check for empty IRR
-	if output == "" {
-		log.Warnf("Peer with as-set %s has no IPv%d prefixes. Disabled IPv%d connectivity.", asSet, family, family)
-		return []string{}
-	}
-
-	// Remove whitespace (in this case there should only be trailing whitespace)
-	output = strings.TrimSpace(output)
-
-	// Split output by newline
-	return strings.Split(output, "\n")
 }
 
 // Normalize a string to be filename-safe

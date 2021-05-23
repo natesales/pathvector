@@ -16,22 +16,23 @@ type peer struct {
 	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
 
 	// BGP Attributes
-	Asn              uint     `yaml:"asn" description:"Local ASN"`
-	NeighborIPs      []string `yaml:"neighbors" description:"List of neighbor IPs"`
-	Prepends         uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
-	LocalPref        uint     `yaml:"local-pref" description:"BGP local preference"`
-	Multihop         bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
-	Listen           string   `yaml:"listen" description:"BGP listen address"`
-	LocalPort        uint16   `yaml:"local-port" description:"Local TCP port" default:"179"`
-	NeighborPort     uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
-	Passive          bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
-	NextHopSelf      bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
-	Bfd              bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
-	Communities      []string `yaml:"communities" description:"List of communities to add on export"`
-	LargeCommunities []string `yaml:"large-communities" description:"List of large communities to add on export"`
-	Password         string   `yaml:"password" description:"BGP MD5 password"`
-	RsClient         bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
-	RrClient         bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
+	Asn               uint     `yaml:"asn" description:"Local ASN"`
+	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs"`
+	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export"`
+	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference"`
+	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)"`
+	Listen            string   `yaml:"listen" description:"BGP listen address"`
+	LocalPort         uint16   `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort      uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
+	Passive           bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
+	NextHopSelf       bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
+	Bfd               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
+	Communities       []string `yaml:"communities" description:"List of communities to add on export"`
+	LargeCommunities  []string `yaml:"large-communities" description:"List of large communities to add on export"`
+	Password          string   `yaml:"password" description:"BGP MD5 password"`
+	RsClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
+	RrClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
+	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 
 	// Filtering
 	AsSet              string `yaml:"as-set" description:"Peer's as-set for filtering"`
@@ -205,4 +206,13 @@ func loadConfig(filename string) (*config, error) {
 	}
 
 	return &config, nil // nil error
+}
+
+func main() {
+	config, err := loadConfig("config.yml")
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Printf("%+v", config)
 }

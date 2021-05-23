@@ -19,8 +19,8 @@ type peer struct {
 	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
 
 	// BGP Attributes
-	Asn               uint     `yaml:"asn" description:"Local ASN"`
-	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs"`
+	Asn               uint     `yaml:"asn" description:"Local ASN" validate:"required"`
+	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip"`
 	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
 	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
@@ -87,25 +87,25 @@ type augments struct {
 }
 
 type config struct {
-	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
+	Asn              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
-	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)"`
+	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IrrServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RtrServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
 	RtrPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
-	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?"`
-	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?"`
+	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?" default:"false"`
 	Source4      string `yaml:"source4" description:"Source IPv4 address"`
 	Source6      string `yaml:"source6" description:"Source IPv6 address"`
 
 	// Runtime configuration
-	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
-	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
-	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
-	WebUiFile             string `yaml:"web-ui-file" description:"File to write web UI to"`
+	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUiFile             string `yaml:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
 	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
@@ -120,11 +120,11 @@ type config struct {
 
 // iface represents a network interface
 type iface struct {
-	Mtu       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)"`
-	XDPRTR    bool     `yaml:"xdprtr" description:"Should XDPRTR be loaded on this interface?"`
+	Mtu       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)" default:"1500"`
+	XDPRTR    bool     `yaml:"xdprtr" description:"Should XDPRTR be loaded on this interface?" default:"false"`
 	Addresses []string `yaml:"addresses" description:"List of addresses to add to this interface"`
-	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?"`
-	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?"`
+	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?" default:"false"`
+	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?" default:"false"`
 }
 
 // loadConfig loads a configuration file from a YAML file

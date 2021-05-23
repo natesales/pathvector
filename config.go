@@ -66,25 +66,6 @@ type vrrpInstance struct {
 	VIPs6 []string `yaml:"-" description:"-"`
 }
 
-type runtimeConfig struct {
-	BirdDirectory    string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
-	BirdSocket       string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
-	KeepalivedConfig string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
-	WebUiFile        string `yaml:"web-ui-file" description:"File to write web UI to"`
-}
-
-type bgpConfig struct {
-	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
-	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
-	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
-	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
-
-	Peers map[string]peer `yaml:"peers" description:"BGP peer configuration"`
-
-	Prefixes4 []string `yaml:"-" description:"-"`
-	Prefixes6 []string `yaml:"-" description:"-"`
-}
-
 type augments struct {
 	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
 	Accept6 []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
@@ -97,6 +78,11 @@ type augments struct {
 }
 
 type config struct {
+	Asn              uint     `yaml:"asn" description:"Autonomous System Number"`
+	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
+	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
+	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
+
 	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)"`
 	IrrServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RtrServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
@@ -106,12 +92,19 @@ type config struct {
 	Source4      string `yaml:"source4" description:"Source IPv4 address"`
 	Source6      string `yaml:"source6" description:"Source IPv6 address"`
 
-	Runtime runtimeConfig `yaml:"runtime" description:"Runtime configuration"`
-	Bgp     bgpConfig     `yaml:"bgp" description:"BGP configuration"`
+	// Runtime configuration
+	BirdDirectory    string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
+	BirdSocket       string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
+	KeepalivedConfig string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
+	WebUiFile        string `yaml:"web-ui-file" description:"File to write web UI to"`
 
+	Peers         map[string]peer  `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
+
+	Prefixes4 []string `yaml:"-" description:"-"`
+	Prefixes6 []string `yaml:"-" description:"-"`
 }
 
 // iface represents a network interface
@@ -145,16 +138,16 @@ func loadConfig(filename string) (*config, error) {
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
-	for _, prefix := range config.Bgp.Prefixes {
+	for _, prefix := range config.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("invalid origin prefix: " + prefix)
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			config.Bgp.Prefixes4 = append(config.Bgp.Prefixes4, prefix)
+			config.Prefixes4 = append(config.Prefixes4, prefix)
 		} else { // If IPv4
-			config.Bgp.Prefixes6 = append(config.Bgp.Prefixes6, prefix)
+			config.Prefixes6 = append(config.Prefixes6, prefix)
 		}
 	}
 

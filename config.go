@@ -45,6 +45,11 @@ type peer struct {
 	EnforcePeerNexthop bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?"`
 	MaxPfxAction       string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?"`
 	AllowBlackholes    bool   `yaml:"allow-blackholes" description:"Should this peer be allowed to send routes with the blackhole community?"`
+	FilterIRR          bool   `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterRPKI         bool   `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix    bool   `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogons       bool   `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?"`
+	FilterTier1ASNs    bool   `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'"`
 
 	// Export options
 	ExportDefault bool `yaml:"export-default" description:"Should a default route be exported to this peer?"`

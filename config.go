@@ -102,10 +102,12 @@ type config struct {
 	Source6      string `yaml:"source6" description:"Source IPv6 address"`
 
 	// Runtime configuration
-	BirdDirectory    string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
-	BirdSocket       string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
-	KeepalivedConfig string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
-	WebUiFile        string `yaml:"web-ui-file" description:"File to write web UI to"`
+	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs"`
+	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD"`
+	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived"`
+	WebUiFile             string `yaml:"web-ui-file" description:"File to write web UI to"`
+	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
 	Peers         map[string]peer  `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`

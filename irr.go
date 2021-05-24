@@ -20,13 +20,13 @@ func asSetToFilterName(asSet string, family uint8) string {
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines
-func getIRRPrefixSet(asSet string, family uint8, irrdb string, c *config) (string, error) {
+func getIRRPrefixSet(asSet string, family uint8, c *config) (string, error) {
 	if !(family == 4 || family == 6) {
 		log.Fatal("code error: getIRRPrefixSet family must be 4 or 6")
 	}
 
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s -l %s", irrdb, family, asSet, asSetToFilterName(asSet, family))
+	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s -l %s", c.IRRServer, family, asSet, asSetToFilterName(asSet, family))
 	log.Infof("Running bgpq4 %s", cmdArgs)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.IRRQueryTimeout))
 	defer cancel()

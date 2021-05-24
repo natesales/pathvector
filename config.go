@@ -103,9 +103,9 @@ type config struct {
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
 	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IrrServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RtrServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RtrPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	IRRServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
+	RTRPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
 	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?" default:"false"`
 	Source4      string `yaml:"source4" description:"Source IPv4 address"`

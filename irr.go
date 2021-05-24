@@ -11,23 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var alphabet = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
-
 // asSetToFilterName converts an as-set into a BIRD-safe filter name
 func asSetToFilterName(asSet string, family uint8) string {
 	if !(family == 4 || family == 6) {
 		log.Fatal("code error: getIRRPrefixSet family must be 4 or 6")
 	}
-
-	// Limit the filter name to only uppercase letters
-	filterName := ""
-	for _, chr := range []rune(strings.ToUpper(asSet)) {
-		if contains(alphabet, string(chr)) {
-			filterName += string(chr)
-		}
-	}
-
-	return fmt.Sprintf("PFXSET_%s_IP%d", filterName, family)
+	return fmt.Sprintf("PFXSET_%s_IP%d", sanitize(asSet), family)
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines

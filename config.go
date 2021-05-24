@@ -70,6 +70,8 @@ type peer struct {
 	PreExport      string `yaml:"pre-export" description:"Configuration to add before exporting routes"`
 	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
 	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
+
+	ProtocolName string `yaml:"-" description:"-"`
 }
 
 type vrrpInstance struct {

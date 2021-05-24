@@ -13,7 +13,6 @@ import (
 	"unicode"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/kennygrant/sanitize"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -23,43 +22,6 @@ var version = "devel" // set by the build process
 
 //go:embed templates/*
 var embedFs embed.FS
-
-// contains is a linear search on a string array
-func contains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
-// Normalize a string to be filename-safe
-func normalize(input string) string {
-	// Remove non-alphanumeric characters
-	input = sanitize.Path(input)
-
-	// Make uppercase
-	input = strings.ToUpper(input)
-
-	// Replace spaces with underscores
-	input = strings.ReplaceAll(input, " ", "_")
-
-	// Replace slashes with dashes
-	input = strings.ReplaceAll(input, "/", "-")
-
-	return input
-}
-
-// normalizeName returns a protocol name that is safe for BIRD
-func normalizeName(peerName string) string {
-	// Add peer prefix if the first character of peerName is a number
-	_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
-	if unicode.IsDigit(rune(_peerName[0])) {
-		_peerName = "PEER_" + _peerName
-	}
-	return _peerName
-}
 
 // printPeerInfo prints a peer's configuration to the log
 func printPeerInfo(peerName string, peerData *peer) {
@@ -146,18 +108,15 @@ func main() {
 
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
-		// Set normalized peer name
-		peerData.Name = normalizeName(peerData.Name)
-
-		// Set default query time
-		peerData.QueryTime = "[No operations performed]"
+		// Set sanitized peer name
+		if unicode.IsDigit(rune(peerName[0])) {
+			// Add peer prefix if the first character of peerName is a number
+			peerData.ProtocolName = "PEER_" + sanitize(peerName)
+		} else {
+			peerData.ProtocolName = sanitize(peerName)
+		}
 
 		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
-
-		// Validate peer type
-		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream" || peerData.Type == "import-valid") {
-			log.Fatalf("[%s] type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
-		}
 
 		if !peerData.NoPeeringDB {
 			// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"net"
 	"os"
 	"testing"
@@ -36,7 +35,7 @@ func TestBirdConn(t *testing.T) {
 		}
 		defer conn.Close()
 
-		if _, err := conn.Write([]byte("0001 Hello World")); err != nil {
+		if _, err := conn.Write([]byte("0001 Fake BIRD response 1")); err != nil {
 			t.Error(err)
 		}
 
@@ -49,7 +48,7 @@ func TestBirdConn(t *testing.T) {
 			t.Errorf("expected 'bird command test' got %s", string(buf[:n]))
 		}
 
-		if _, err := conn.Write(bytes.Repeat([]byte("A"), 2048)); err != nil {
+		if _, err := conn.Write([]byte("0001 Fake BIRD response 2")); err != nil {
 			t.Error(err)
 		}
 

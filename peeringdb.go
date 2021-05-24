@@ -2,12 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // peeringDbResponse contains the response from a PeeringDB query
@@ -17,23 +17,23 @@ type peeringDbResponse struct {
 
 // peeringDbData contains the actual data from PeeringDB response
 type peeringDbData struct {
-	Name    string `json:"name"`
-	AsSet   string `json:"irr_as_set"`
-	MaxPfx4 uint   `json:"info_prefixes4"`
-	MaxPfx6 uint   `json:"info_prefixes6"`
+	Name         string `json:"name"`
+	AsSet        string `json:"irr_as_set"`
+	ImportLimit4 uint   `json:"info_prefixes4"`
+	ImportLimit6 uint   `json:"info_prefixes6"`
 }
 
 // Query PeeringDB for an ASN
-func getPeeringDbData(asn uint, c *config) peeringDbData {
+func getPeeringDbData(asn uint, c *config) (*peeringDbData, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(c.PeeringDbQueryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
 	if err != nil {
-		log.Fatalf("PeeringDB GET (This peer might not have a PeeringDB page): %v", err)
+		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
 	}
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		log.Fatalf("PeeringDB GET Request: %v", err)
+		return nil, errors.New("PeeringDB GET request: " + err.Error())
 	}
 
 	if res.Body != nil {
@@ -43,17 +43,17 @@ func getPeeringDbData(asn uint, c *config) peeringDbData {
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Fatalf("PeeringDB Read: %v", err)
+		return nil, errors.New("PeeringDB read: " + err.Error())
 	}
 
 	var pDbResponse peeringDbResponse
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
+		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
 	}
 
 	if len(pDbResponse.Data) < 1 {
-		log.Fatalf("Peer %d doesn't have a PeeringDB entry.", asn)
+		return nil, errors.New(fmt.Sprintf("peer %d doesn't have a PeeringDB page", asn))
 	}
 
-	return pDbResponse.Data[0]
+	return &pDbResponse.Data[0], nil // nil error
 }

@@ -2,47 +2,29 @@ package main
 
 import (
 	"bytes"
-	log "github.com/sirupsen/logrus"
 	"net"
+	"os"
 	"testing"
+	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-//func init() {
-//	log.Infof("Starting listener")
-//	l, err := net.Listen("unix", "/tmp/wireframe-bird-test.sock")
-//	if err != nil {
-//		panic(err)
-//	}
-//	defer l.Close()
-//
-//	for {
-//		conn, err := l.Accept()
-//		if err != nil {
-//			panic(err)
-//		}
-//
-//		go func(c net.Conn) {
-//			io.Copy(c, c)
-//			c.Close()
-//		}(conn)
-//	}
-//}
-//
-//func TestBirdConfig(t *testing.T) {
-//	if err := runBirdCommand("foo", "/tmp/wireframe-bird-test.sock"); err != nil {
-//		t.Error(err)
-//	}
-//}
+func TestBirdConn(t *testing.T) {
+	unixSocket := "test.sock"
 
-func TestConn(t *testing.T) {
+	// Delete socket
+	_ = os.Remove(unixSocket)
+
 	go func() {
-		if err := runBirdCommand("bird command test\n", "test.sock"); err != nil {
+		time.Sleep(time.Millisecond * 10) // Wait for the server to start
+		if err := runBirdCommand("bird command test\n", unixSocket); err != nil {
 			t.Error(err)
 		}
 	}()
 
 	log.Println("Starting fake BIRD socket server")
-	l, err := net.Listen("unix", "test.sock")
+	l, err := net.Listen("unix", unixSocket)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -118,7 +118,7 @@ type config struct {
 	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
-	Peers         map[string]peer  `yaml:"peers" description:"BGP peer configuration"`
+	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
@@ -221,6 +221,10 @@ func documentConfigTypes(t reflect.Type) {
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
 	fmt.Println("| Option | Type | Description |")
 	fmt.Println("|--------|------|-------------|")
+	// Handle pointer types
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		description := field.Tag.Get("description")

@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -67,7 +68,12 @@ func main() {
 
 	// Load the config file from config file
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
-	globalConfig, err := loadConfig(cliFlags.ConfigFile)
+	configFile, err := ioutil.ReadFile(cliFlags.ConfigFile)
+	if err != nil {
+		log.Fatal("reading config file: " + err.Error())
+	}
+
+	globalConfig, err := loadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}

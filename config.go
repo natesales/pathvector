@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"reflect"
 	"strings"
@@ -138,24 +137,19 @@ type iface struct {
 }
 
 // loadConfig loads a configuration file from a YAML file
-func loadConfig(filename string) (*config, error) {
-	configFile, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return nil, errors.New("reading config file: " + err.Error())
-	}
-
+func loadConfig(configBlob []byte) (*config, error) {
 	var config config
-	if err := yaml.UnmarshalStrict(configFile, &config); err != nil {
-		log.Fatalf("yaml unmarshal: %v", err)
+	if err := yaml.UnmarshalStrict(configBlob, &config); err != nil {
+		return nil, errors.New("yaml unmarshal: " + err.Error())
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(&config); err != nil {
-		log.Fatalf("validation: %+v", err)
+		return nil, errors.New("validation: " + err.Error())
 	}
 
 	if err := defaults.Set(&config); err != nil {
-		log.Fatalf("defaults: %+v", err)
+		return nil, errors.New("defaults: " + err.Error())
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
@@ -269,13 +263,3 @@ func documentCliFlags() {
 		fmt.Printf("| `-%s`, `--%s` | `%s` | %s |\n", short, long, field.Type.String(), description)
 	}
 }
-
-//func main() {
-//config, err := loadConfig("config.yml")
-//if err != nil {
-//	log.Println(err)
-//}
-
-//documentConfig()
-//documentCliFlags()
-//}

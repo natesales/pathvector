@@ -219,8 +219,8 @@ func loadConfig(configBlob []byte) (*config, error) {
 func documentConfigTypes(t reflect.Type) {
 	var childTypes []reflect.Type
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
-	fmt.Println("| Option | Type | Description |")
-	fmt.Println("|--------|------|-------------|")
+	fmt.Println("| Option | Type | Default | Validation | Description |")
+	fmt.Println("|--------|------|---------|------------|-------------|")
 	// Handle pointer types
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -229,6 +229,11 @@ func documentConfigTypes(t reflect.Type) {
 		field := t.Field(i)
 		description := field.Tag.Get("description")
 		key := field.Tag.Get("yaml")
+		validation := field.Tag.Get("validate")
+		fDefault := field.Tag.Get("default")
+		if fDefault != "" {
+			fDefault = "`" + fDefault + "`"
+		}
 
 		if description == "" {
 			log.Fatalf("code error: %s doesn't have a description", field.Name)
@@ -240,7 +245,7 @@ func documentConfigTypes(t reflect.Type) {
 					childTypes = append(childTypes, field.Type)
 				}
 			}
-			fmt.Printf("| %s | `%s` | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), description)
+			fmt.Printf("| `%s` | `%s` | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
 		}
 	}
 	fmt.Println()

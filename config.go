@@ -59,6 +59,9 @@ type peer struct {
 	FilterBogons            bool   `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
 	FilterTier1ASNs         bool   `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
 
+	AutoImportLimits bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
+	AutoAsSet        bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
+
 	// Export options
 	ExportDefault   bool `yaml:"export-default" description:"Should a default route be exported to this peer?" default:"false"`
 	ExportSpecifics bool `yaml:"export-specifics" description:"Should more specific routes be exported to this peer?" default:"true"`

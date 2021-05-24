@@ -2,14 +2,11 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/jessevdk/go-flags"
@@ -68,7 +65,7 @@ func main() {
 
 	log.Debug("Finished loading templates")
 
-	// Load the config file from configFilename flag
+	// Load the config file from config file
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
 	globalConfig, err := loadConfig(cliFlags.ConfigFile)
 	if err != nil {
@@ -95,7 +92,7 @@ func main() {
 		// Remove old peer-specific configs
 		files, err := filepath.Glob(path.Join(globalConfig.BirdSocket, "AS*.conf"))
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 		for _, f := range files {
 			if err := os.Remove(f); err != nil {
@@ -118,115 +115,103 @@ func main() {
 
 		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
 
-		if !peerData.NoPeeringDB {
-			// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
-			if peerData.Type == "peer" || peerData.Type == "downstream" {
-				peerData.QueryTime = time.Now().Format(time.RFC1123)
-				peeringDbData := getPeeringDbData(peerData.Asn)
-
-				if peerData.ImportLimit4 == 0 {
-					peerData.ImportLimit4 = peeringDbData.MaxPfx4
-					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
-				}
-
-				if peerData.ImportLimit6 == 0 {
-					peerData.ImportLimit6 = peeringDbData.MaxPfx6
-					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
-				}
-
-				// Only set AS-SET from PeeringDB if it isn't configure manually
-				if peerData.AsSet == "" {
-					// If the as-set has a space in it, split and pick the first element
-					if strings.Contains(peeringDbData.AsSet, " ") {
-						peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
-						log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
-					}
-
-					// Trim IRRDB prefix
-					if strings.Contains(peeringDbData.AsSet, "::") {
-						peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
-						log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
-					} else {
-						peerData.AsSet = peeringDbData.AsSet
-					}
-
-					if peeringDbData.AsSet == "" {
-						log.Warnf("[%s] has no as-set in PeeringDB, falling back to their ASN (%d)", peerName, peerData.Asn)
-						peerData.AsSet = fmt.Sprintf("AS%d", peerData.Asn)
-					} else {
-						log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
-					}
-				} else {
-					log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
-				}
-
-				peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
-				peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
-
-				// Update the "latest operation" timestamp
-				peerData.QueryTime = time.Now().Format(time.RFC1123)
-			} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-				// Check for a zero prefix import limit
-				if peerData.ImportLimit4 == 0 {
-					peerData.ImportLimit4 = DefaultIPv4TableSize
-					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d", peerName, DefaultIPv4TableSize)
-				}
-
-				if peerData.ImportLimit6 == 0 {
-					peerData.ImportLimit6 = DefaultIPv6TableSize
-					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d", peerName, DefaultIPv6TableSize)
-				}
-			}
-		}
-
-		// If as-set is empty and the peer type requires it
-		if peerData.AsSet == "" && (peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatalf("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
-		}
-
-		// Print peer info
-		printPeerInfo(peerName, peerData)
-
-		if !cliFlags.DryRun {
-			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
-			if err != nil {
-				log.Fatalf("Create peer specific output file: %v", err)
-			}
-
-			// Render the template and write to disk
-			log.Infof("[%s] Writing config", peerName)
-			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &Wrapper{Peer: *peerData, Config: *globalConfig})
-			if err != nil {
-				log.Fatalf("Execute template: %v", err)
-			}
-
-			log.Infof("[%s] Wrote config", peerName)
-		} else {
-			log.Infof("Dry run is enabled, skipped writing peer config(s)")
-		}
-	}
-
-	if !cliFlags.DryRun {
-		// Write VRRP config
-		writeVrrpConfig(globalConfig)
-
-		if globalConfig.BirdSocket != "" {
-			writeUiFile(globalConfig)
-		} else {
-			log.Infof("--ui-file is not defined, not creating a UI file")
-		}
-
-		if !cliFlags.NoConfigure {
-			log.Infoln("Reconfiguring BIRD")
-			if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
-		}
-
-		// Configure interfaces
-		configureInterfaces(globalConfig)
+		//	if !peerData.NoPeeringDB {
+		//		// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
+		//		peerData.QueryTime = time.Now().Format(time.RFC1123)
+		//		peeringDbData := getPeeringDbData(peerData.Asn)
+		//
+		//		if peerData.ImportLimit4 == 0 {
+		//			peerData.ImportLimit4 = peeringDbData.MaxPfx4
+		//			log.Infof("[%s] has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
+		//		}
+		//
+		//		if peerData.ImportLimit6 == 0 {
+		//			peerData.ImportLimit6 = peeringDbData.MaxPfx6
+		//			log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
+		//		}
+		//
+		//		// Only set AS-SET from PeeringDB if it isn't configure manually
+		//		if peerData.AsSet == "" {
+		//			// If the as-set has a space in it, split and pick the first element
+		//			if strings.Contains(peeringDbData.AsSet, " ") {
+		//				peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
+		//				log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
+		//			}
+		//
+		//			// Trim IRRDB prefix
+		//			if strings.Contains(peeringDbData.AsSet, "::") {
+		//				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
+		//				log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+		//			} else {
+		//				peerData.AsSet = peeringDbData.AsSet
+		//			}
+		//
+		//			if peeringDbData.AsSet == "" {
+		//				log.Warnf("[%s] has no as-set in PeeringDB, falling back to their ASN (%d)", peerName, peerData.Asn)
+		//				peerData.AsSet = fmt.Sprintf("AS%d", peerData.Asn)
+		//			} else {
+		//				log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
+		//			}
+		//		} else {
+		//			log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
+		//		}
+		//
+		//		//peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
+		//		//peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
+		//
+		//		// Update the "latest operation" timestamp
+		//		//peerData.QueryTime = time.Now().Format(time.RFC1123)
+		//	}
+		//
+		//	// If as-set is empty and the peer type requires it
+		//	if peerData.AsSet == "" && (peerData.Type == "peer" || peerData.Type == "downstream") {
+		//		log.Fatalf("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
+		//	}
+		//
+		//	// Print peer info
+		//	printPeerInfo(peerName, peerData)
+		//
+		//	if !cliFlags.DryRun {
+		//		// Create the peer specific file
+		//		peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
+		//		if err != nil {
+		//			log.Fatalf("Create peer specific output file: %v", err)
+		//		}
+		//
+		//		// Render the template and write to disk
+		//		log.Infof("[%s] Writing config", peerName)
+		//		err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &Wrapper{Peer: *peerData, Config: *globalConfig})
+		//		if err != nil {
+		//			log.Fatalf("Execute template: %v", err)
+		//		}
+		//
+		//		log.Infof("[%s] Wrote config", peerName)
+		//	} else {
+		//		log.Infof("Dry run is enabled, skipped writing peer config(s)")
+		//	}
+		//}
+		//
+		//if !cliFlags.DryRun {
+		//	// Write VRRP config
+		//	writeVrrpConfig(globalConfig)
+		//
+		//	if globalConfig.BirdSocket != "" {
+		//		writeUiFile(globalConfig)
+		//	} else {
+		//		log.Infof("--ui-file is not defined, not creating a UI file")
+		//	}
+		//
+		//	if !cliFlags.NoConfigure {
+		//		log.Infoln("Reconfiguring BIRD")
+		//		if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
+		//			log.Fatal(err)
+		//		}
+		//	} else {
+		//		log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
+		//	}
+		//
+		//	// Configure interfaces
+		//	configureInterfaces(globalConfig)
+		//}
 	}
 }

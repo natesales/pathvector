@@ -12,21 +12,21 @@ import (
 )
 
 // asSetToFilterName converts an as-set into a BIRD-safe filter name
-func asSetToFilterName(asSet string, family uint8) string {
+func asSetToFilterName(asSet string, family uint8) (string, error) {
 	if !(family == 4 || family == 6) {
-		log.Fatal("code error: getIRRPrefixSet family must be 4 or 6")
+		return "", errors.New("code error: getIRRPrefixSet family must be 4 or 6")
 	}
-	return fmt.Sprintf("PFXSET_%s_IP%d", sanitize(asSet), family)
+	return fmt.Sprintf("PFXSET_%s_IP%d", sanitize(asSet), family), nil
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines
 func getIRRPrefixSet(asSet string, family uint8, c *config) (string, error) {
-	if !(family == 4 || family == 6) {
-		log.Fatal("code error: getIRRPrefixSet family must be 4 or 6")
-	}
-
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s -l %s", c.IRRServer, family, asSet, asSetToFilterName(asSet, family))
+	filterName, err := asSetToFilterName(asSet, family)
+	if err != nil {
+		return "", err
+	}
+	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s -l %s", c.IRRServer, family, asSet, filterName)
 	log.Infof("Running bgpq4 %s", cmdArgs)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.IRRQueryTimeout))
 	defer cancel()

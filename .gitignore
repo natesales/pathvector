@@ -11,3 +11,5 @@ output/*
 dist/
 
 build/
+
+cover.*

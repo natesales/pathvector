@@ -19,3 +19,21 @@ func TestContains(t *testing.T) {
 		}
 	}
 }
+
+func TestSanitize(t *testing.T) {
+	testCases := []struct {
+		input          string
+		expectedOutput string
+	}{
+		{"foo", "FOO"},
+		{"fooBAR", "FOOBAR"},
+		{"fooBAR---", "FOOBAR"},
+		{"fooBAR-*-", "FOOBAR"},
+		{"FOOBAR", "FOOBAR"},
+	}
+	for _, tc := range testCases {
+		if out := sanitize(tc.input); out != tc.expectedOutput {
+			t.Errorf("sanitize %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, out)
+		}
+	}
+}

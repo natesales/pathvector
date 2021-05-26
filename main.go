@@ -22,7 +22,7 @@ var embedFs embed.FS
 // printPeerInfo prints a peer's configuration to the log
 func printPeerInfo(peerName string, peerData *peer) {
 	// Fields to exclude from print output
-	excludedFields := []string{"Augments"}
+	excludedFields := []string{""}
 	s := reflect.ValueOf(peerData).Elem()
 	typeOf := s.Type()
 	for i := 0; i < s.NumField(); i++ {
@@ -63,12 +63,12 @@ func main() {
 	log.Debugf("Starting wireframe %s", version)
 
 	// Load templates from embedded filesystem
-	log.Debugln("Loading templates from embedded filesystem")
-	err = loadTemplates(embedFs)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Debugln("Finished loading templates")
+	//log.Debugln("Loading templates from embedded filesystem")
+	//err = loadTemplates(embedFs)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Debugln("Finished loading templates")
 
 	// Load the config file from config file
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
@@ -165,11 +165,25 @@ func main() {
 					peerData.AsSet = pDbData.AsSet
 				}
 			}
-		}
-	}
+		} // end peeringdb query enabled
 
-	//  peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
-	//  peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
+		// Build IRR prefix sets
+		if peerData.FilterIRR {
+			prefixesFromIRR4, err := getIRRPrefixSet(peerData.AsSet, 4, globalConfig)
+			if err != nil {
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+			}
+			peerData.PrefixSet4 = append(peerData.PrefixSet4, prefixesFromIRR4)
+			prefixesFromIRR6, err := getIRRPrefixSet(peerData.AsSet, 6, globalConfig)
+			if err != nil {
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+			}
+			peerData.PrefixSet6 = append(peerData.PrefixSet6, prefixesFromIRR6)
+		}
+
+		printPeerInfo(peerName, peerData)
+	} // end peer loop
+
 	//
 	//	// Print peer info
 	//	printPeerInfo(peerName, peerData)

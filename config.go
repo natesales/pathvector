@@ -53,14 +53,17 @@ type peer struct {
 	EnforcePeerNexthop      bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
 	MaxPfxAction            string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
-	FilterIRR               bool   `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
-	FilterRPKI              bool   `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	FilterMaxPrefix         bool   `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogons            bool   `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
-	FilterTier1ASNs         bool   `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
+
+	FilterIRR       bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterRPKI      bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogons    bool `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterTier1ASNs bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
 
 	AutoImportLimits bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoAsSet        bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
+
+	Prefixes []string `yaml:"prefixes" description:"Prefixes to accept"`
 
 	// Export options
 	ExportDefault   bool `yaml:"export-default" description:"Should a default route be exported to this peer?" default:"false"`
@@ -73,7 +76,9 @@ type peer struct {
 	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
 	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
 
-	ProtocolName string `yaml:"-" description:"-"`
+	ProtocolName string   `yaml:"-" description:"-"`
+	PrefixSet4   []string `yaml:"-" description:"-"`
+	PrefixSet6   []string `yaml:"-" description:"-"`
 }
 
 type vrrpInstance struct {
@@ -213,6 +218,22 @@ func loadConfig(configBlob []byte) (*config, error) {
 			vrrpInstance.State = "BACKUP"
 		} else {
 			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
+		}
+	}
+
+	// Build static prefix filters
+	for _, peerData := range config.Peers {
+		for _, prefix := range peerData.Prefixes {
+			pfx, _, err := net.ParseCIDR(prefix)
+			if err != nil {
+				return nil, errors.New("invalid prefix: " + prefix)
+			}
+
+			if pfx.To4() == nil { // If IPv6
+				peerData.PrefixSet4 = append(peerData.PrefixSet4, prefix)
+			} else { // If IPv4
+				peerData.PrefixSet6 = append(peerData.PrefixSet6, prefix)
+			}
 		}
 	}
 

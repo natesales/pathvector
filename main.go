@@ -112,8 +112,8 @@ func main() {
 	//} else {
 	//	log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
 	//}
-	//
-	//// Iterate over peers
+
+	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
 		// Set sanitized peer name
 		if unicode.IsDigit(rune(peerName[0])) {
@@ -168,45 +168,8 @@ func main() {
 		}
 	}
 
-	//		peerData.QueryTime = time.Now().Format(time.RFC1123)
-	//		peeringDbData := getPeeringDbData(peerData.Asn)
-	//		// Only set AS-SET from PeeringDB if it isn't configure manually
-	//		if peerData.AsSet == "" {
-	//			// If the as-set has a space in it, split and pick the first element
-	//			if strings.Contains(peeringDbData.AsSet, " ") {
-	//				peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
-	//				log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
-	//			}
-	//
-	//			// Trim IRRDB prefix
-	//			if strings.Contains(peeringDbData.AsSet, "::") {
-	//				peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
-	//				log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
-	//			} else {
-	//				peerData.AsSet = peeringDbData.AsSet
-	//			}
-	//
-	//			if peeringDbData.AsSet == "" {
-	//				log.Warnf("[%s] has no as-set in PeeringDB, falling back to their ASN (%d)", peerName, peerData.Asn)
-	//				peerData.AsSet = fmt.Sprintf("AS%d", peerData.Asn)
-	//			} else {
-	//				log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
-	//			}
-	//		} else {
-	//			log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
-	//		}
-	//
-	//		//peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
-	//		//peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
-	//
-	//		// Update the "latest operation" timestamp
-	//		//peerData.QueryTime = time.Now().Format(time.RFC1123)
-	//	}
-	//
-	//	// If as-set is empty and the peer type requires it
-	//	if peerData.AsSet == "" && (peerData.Type == "peer" || peerData.Type == "downstream") {
-	//		log.Fatalf("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
-	//	}
+	//  peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
+	//  peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
 	//
 	//	// Print peer info
 	//	printPeerInfo(peerName, peerData)

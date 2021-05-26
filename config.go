@@ -159,6 +159,12 @@ func loadConfig(configBlob []byte) (*config, error) {
 	if err := defaults.Set(&config); err != nil {
 		return nil, errors.New("defaults: " + err.Error())
 	}
+	// Set peer defaults
+	for _, peerData := range config.Peers {
+		if err := defaults.Set(peerData); err != nil {
+			return nil, errors.New("peer defaults: " + err.Error())
+		}
+	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
 	for _, prefix := range config.Prefixes {

@@ -16,7 +16,7 @@ import (
 var cliFlags struct {
 	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
 	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
+	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
 	NoConfigure bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
 	ShowVersion bool   `short:"V" long:"version" description:"Show version and exit"`
 }

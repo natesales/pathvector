@@ -52,6 +52,10 @@ var funcMap = template.FuncMap{
 		// Get current UNIX timestamp
 		return strconv.Itoa(int(time.Now().Unix()))
 	},
+
+	"MakeSlice": func(args ...interface{}) []interface{} {
+		return args
+	},
 }
 
 // Templates
@@ -116,7 +120,7 @@ func writeVrrpConfig(config *config) {
 func writeUiFile(config *config) {
 	// Create the ui output file
 	log.Debug("Creating UI output file")
-	uiFileObj, err := os.Create(config.WebUiFile)
+	uiFileObj, err := os.Create(config.WebUIFile)
 	if err != nil {
 		log.Fatalf("Create UI output file: %v", err)
 	}

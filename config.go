@@ -26,7 +26,7 @@ type peer struct {
 	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
 
 	// BGP Attributes
-	Asn               uint     `yaml:"asn" description:"Local ASN" validate:"required"`
+	ASN               uint     `yaml:"asn" description:"Local ASN" validate:"required"`
 	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip"`
 	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
 	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
@@ -36,22 +36,22 @@ type peer struct {
 	NeighborPort      uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive           bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	NextHopSelf       bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
-	Bfd               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
+	BFD               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
 	Communities       []string `yaml:"communities" description:"List of communities to add on export"`
 	LargeCommunities  []string `yaml:"large-communities" description:"List of large communities to add on export"`
 	Password          string   `yaml:"password" description:"BGP MD5 password"`
-	RsClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
-	RrClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
+	RSClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
+	RRClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 	MPUnicast46       bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 
 	// Filtering
-	AsSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
+	ASSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
 	ImportLimit4            uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
 	ImportLimit6            uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
-	EnforceFirstAs          bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
+	EnforceFirstAS          bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
 	EnforcePeerNexthop      bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
-	MaxPfxAction            string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
+	MaxPrefixTripAction     string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 
 	FilterIRR       bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
@@ -61,22 +61,23 @@ type peer struct {
 	FilterTier1ASNs bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
 
 	AutoImportLimits bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
-	AutoAsSet        bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
+	AutoASSet        bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
 
 	Prefixes []string `yaml:"prefixes" description:"Prefixes to accept"`
 
 	// Export options
-	ExportDefault   bool `yaml:"export-default" description:"Should a default route be exported to this peer?" default:"false"`
-	ExportSpecifics bool `yaml:"export-specifics" description:"Should more specific routes be exported to this peer?" default:"true"`
+	AnnounceDefault   bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
+	AnnounceSpecifics bool `yaml:"announce-specifics" description:"Should more specific routes be exported to this peer?" default:"true"`
 
 	// Custom daemon configuration
 	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`
-	PreImport      string `yaml:"pre-import" description:"Configuration to add before importing routes"`
-	PreExport      string `yaml:"pre-export" description:"Configuration to add before exporting routes"`
+	PreImport      string `yaml:"pre-import" description:"Configuration to add at the beginning of the import filter"`
+	PreExport      string `yaml:"pre-export" description:"Configuration to add at the beginning of the export filter"`
 	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
 	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
 
 	ProtocolName string   `yaml:"-" description:"-"`
+	Protocols    []string `yaml:"-" description:"-"`
 	PrefixSet4   []string `yaml:"-" description:"-"`
 	PrefixSet6   []string `yaml:"-" description:"-"`
 }
@@ -104,25 +105,26 @@ type augments struct {
 }
 
 type config struct {
-	Asn              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required"`
+	ASN              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
-	RouterId     string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer    string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer    string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RTRPort      int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
-	KeepFiltered bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	MergePaths   bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?" default:"false"`
-	Source4      string `yaml:"source4" description:"Source IPv4 address"`
-	Source6      string `yaml:"source6" description:"Source IPv6 address"`
+	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
+	RTRPort       int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported for ECMP?" default:"false"`
+	Source4       string `yaml:"source4" description:"Source IPv4 address"`
+	Source6       string `yaml:"source6" description:"Source IPv6 address"`
+	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 
 	// Runtime configuration
 	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
 	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUiFile             string `yaml:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
+	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
 	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
@@ -142,6 +144,12 @@ type iface struct {
 	Addresses []string `yaml:"addresses" description:"List of addresses to add to this interface"`
 	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?" default:"false"`
 	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?" default:"false"`
+}
+
+type wrapper struct {
+	Name   string
+	Peer   peer
+	Config config
 }
 
 // loadConfig loads a configuration file from a YAML file

@@ -2,8 +2,10 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 	"reflect"
 	"strings"
 	"unicode"
@@ -62,13 +64,13 @@ func main() {
 
 	log.Debugf("Starting wireframe %s", version)
 
-	// Load templates from embedded filesystem
-	//log.Debugln("Loading templates from embedded filesystem")
-	//err = loadTemplates(embedFs)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//log.Debugln("Finished loading templates")
+	//Load templates from embedded filesystem
+	log.Debugln("Loading templates from embedded filesystem")
+	err = loadTemplates(embedFs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugln("Finished loading templates")
 
 	// Load the config file from config file
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
@@ -82,36 +84,36 @@ func main() {
 	}
 	log.Debugln("Finished loading config")
 
-	//if !cliFlags.DryRun {
-	//	// Create the global output file
-	//	log.Debug("Creating global config")
-	//	globalFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "bird.conf"))
-	//	if err != nil {
-	//		log.Fatalf("Create global BIRD output file: %v", err)
-	//	}
-	//	log.Debug("Finished creating global config file")
-	//
-	//	// Render the global template and write to disk
-	//	log.Debug("Writing global config file")
-	//	err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
-	//	if err != nil {
-	//		log.Fatalf("Execute global template: %v", err)
-	//	}
-	//	log.Debug("Finished writing global config file")
-	//
-	//	// Remove old peer-specific configs
-	//	files, err := filepath.Glob(path.Join(globalConfig.BirdSocket, "AS*.conf"))
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//	for _, f := range files {
-	//		if err := os.Remove(f); err != nil {
-	//			log.Fatalf("Removing old config files: %v", err)
-	//		}
-	//	}
-	//} else {
-	//	log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
-	//}
+	if !cliFlags.DryRun {
+		// Create the global output file
+		log.Debug("Creating global config")
+		globalFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "bird.conf"))
+		if err != nil {
+			log.Fatalf("Create global BIRD output file: %v", err)
+		}
+		log.Debug("Finished creating global config file")
+
+		// Render the global template and write to disk
+		log.Debug("Writing global config file")
+		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
+		if err != nil {
+			log.Fatalf("Execute global template: %v", err)
+		}
+		log.Debug("Finished writing global config file")
+
+		//// Remove old peer-specific configs
+		//files, err := filepath.Glob(path.Join(globalConfig.BirdSocket, "AS*.conf"))
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//for _, f := range files {
+		//	if err := os.Remove(f); err != nil {
+		//		log.Fatalf("Removing old config files: %v", err)
+		//	}
+		//}
+	} else {
+		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
+	}
 
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
@@ -124,8 +126,8 @@ func main() {
 		}
 
 		// If a PeeringDB query is required
-		if peerData.AutoImportLimits || peerData.AutoAsSet {
-			pDbData, err := getPeeringDbData(peerData.Asn, globalConfig)
+		if peerData.AutoImportLimits || peerData.AutoASSet {
+			pDbData, err := getPeeringDbData(peerData.ASN, globalConfig)
 			if err != nil {
 				log.Warnf("[%s] unable to get PeeringDB data: %+v", peerName, err)
 				// TODO: Exit or skip this peer?
@@ -145,69 +147,65 @@ func main() {
 			}
 
 			// Set as-set
-			if peerData.AutoAsSet {
-				if pDbData.AsSet == "" {
+			if peerData.AutoASSet {
+				if pDbData.ASSet == "" {
 					log.Infof("[%s] doesn't have an as-set in PeeringDB", peerName)
 					// TODO: Exit or skip this peer?
 				}
 
 				// If the as-set has a space in it, split and pick the first one
-				if strings.Contains(pDbData.AsSet, " ") {
-					pDbData.AsSet = strings.Split(pDbData.AsSet, " ")[0]
-					log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.AsSet)
+				if strings.Contains(pDbData.ASSet, " ") {
+					pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
+					log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.ASSet)
 				}
 
 				// Trim IRRDB prefix
-				if strings.Contains(pDbData.AsSet, "::") {
-					peerData.AsSet = strings.Split(pDbData.AsSet, "::")[1]
-					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+				if strings.Contains(pDbData.ASSet, "::") {
+					peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
 				} else {
-					peerData.AsSet = pDbData.AsSet
+					peerData.ASSet = pDbData.ASSet
 				}
 			}
 		} // end peeringdb query enabled
 
 		// Build IRR prefix sets
 		if peerData.FilterIRR {
-			prefixesFromIRR4, err := getIRRPrefixSet(peerData.AsSet, 4, globalConfig)
+			prefixesFromIRR4, err := getIRRPrefixSet(peerData.ASSet, 4, globalConfig)
 			if err != nil {
-				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
 			}
 			peerData.PrefixSet4 = append(peerData.PrefixSet4, prefixesFromIRR4)
-			prefixesFromIRR6, err := getIRRPrefixSet(peerData.AsSet, 6, globalConfig)
+			prefixesFromIRR6, err := getIRRPrefixSet(peerData.ASSet, 6, globalConfig)
 			if err != nil {
-				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
 			}
 			peerData.PrefixSet6 = append(peerData.PrefixSet6, prefixesFromIRR6)
 		}
 
 		printPeerInfo(peerName, peerData)
+
+		// Write peer file
+		if !cliFlags.DryRun {
+			// Create the peer specific file
+			peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", peerData.ASN, sanitize(peerName))))
+			if err != nil {
+				log.Fatalf("Create peer specific output file: %v", err)
+			}
+
+			// Render the template and write to disk
+			log.Infof("[%s] Writing config", peerName)
+			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
+			if err != nil {
+				log.Fatalf("Execute template: %v", err)
+			}
+
+			log.Infof("[%s] Wrote config", peerName)
+		} else {
+			log.Infof("Dry run is enabled, skipped writing peer config(s)")
+		}
 	} // end peer loop
 
-	//
-	//	// Print peer info
-	//	printPeerInfo(peerName, peerData)
-	//
-	//	if !cliFlags.DryRun {
-	//		// Create the peer specific file
-	//		peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
-	//		if err != nil {
-	//			log.Fatalf("Create peer specific output file: %v", err)
-	//		}
-	//
-	//		// Render the template and write to disk
-	//		log.Infof("[%s] Writing config", peerName)
-	//		err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &Wrapper{Peer: *peerData, Config: *globalConfig})
-	//		if err != nil {
-	//			log.Fatalf("Execute template: %v", err)
-	//		}
-	//
-	//		log.Infof("[%s] Wrote config", peerName)
-	//	} else {
-	//		log.Infof("Dry run is enabled, skipped writing peer config(s)")
-	//	}
-	//}
-	//
 	//if !cliFlags.DryRun {
 	//	// Write VRRP config
 	//	writeVrrpConfig(globalConfig)

@@ -18,7 +18,7 @@ type peeringDbResponse struct {
 // peeringDbData contains the actual data from PeeringDB response
 type peeringDbData struct {
 	Name         string `json:"name"`
-	AsSet        string `json:"irr_as_set"`
+	ASSet        string `json:"irr_as_set"`
 	ImportLimit4 uint   `json:"info_prefixes4"`
 	ImportLimit6 uint   `json:"info_prefixes6"`
 }

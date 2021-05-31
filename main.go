@@ -171,6 +171,11 @@ func main() {
 
 		// Build IRR prefix sets
 		if peerData.FilterIRR {
+			// Check for empty as-set
+			if peerData.ASSet == "" {
+				log.Fatalf("[%s] Has filter-irr enabled and no as-set defined", peerName)
+			}
+
 			prefixesFromIRR4, err := getIRRPrefixSet(peerData.ASSet, 4, globalConfig)
 			if err != nil {
 				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)

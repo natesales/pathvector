@@ -211,27 +211,26 @@ func main() {
 		}
 	} // end peer loop
 
-	//if !cliFlags.DryRun {
-	//	// Write VRRP config
-	//	writeVrrpConfig(globalConfig)
-	//
-	//	if globalConfig.BirdSocket != "" {
-	//		writeUiFile(globalConfig)
-	//	} else {
-	//		log.Infof("--ui-file is not defined, not creating a UI file")
-	//	}
-	//
-	//	if !cliFlags.NoConfigure {
-	//		log.Infoln("Reconfiguring BIRD")
-	//		if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
-	//			log.Fatal(err)
-	//		}
-	//	} else {
-	//		log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
-	//	}
-	//
-	//	// Configure interfaces
-	//	configureInterfaces(globalConfig)
-	//}
-	//}
+	if !cliFlags.DryRun {
+		// Write VRRP config
+		writeVrrpConfig(globalConfig)
+
+		if globalConfig.BirdSocket != "" {
+			writeUiFile(globalConfig)
+		} else {
+			log.Infof("--ui-file is not defined, not creating a UI file")
+		}
+
+		if !cliFlags.NoConfigure {
+			log.Infoln("Reconfiguring BIRD")
+			if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
+		}
+
+		// Configure interfaces
+		configureInterfaces(globalConfig)
+	} // end dry run check
 }

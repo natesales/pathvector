@@ -213,7 +213,7 @@ func main() {
 
 	if !cliFlags.DryRun {
 		// Write VRRP config
-		writeVrrpConfig(globalConfig)
+		writeVRRPConfig(globalConfig)
 
 		if globalConfig.BirdSocket != "" {
 			writeUiFile(globalConfig)

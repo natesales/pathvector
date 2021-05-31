@@ -19,11 +19,11 @@ func TestWriteUIFile(t *testing.T) {
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {
-	writeVrrpConfig(&config{KeepalivedConfig: "/tmp/wireframe-keepalived.conf"})
+	writeVRRPConfig(&config{KeepalivedConfig: "/tmp/wireframe-keepalived.conf"})
 }
 
 func TestWriteVRRPConfig(t *testing.T) {
-	writeVrrpConfig(&config{
+	writeVRRPConfig(&config{
 		KeepalivedConfig: "/tmp/wireframe-keepalived.conf",
 		VRRPInstances: []vrrpInstance{{
 			State: "primary",

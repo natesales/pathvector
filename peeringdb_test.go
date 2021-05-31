@@ -10,8 +10,8 @@ func TestPeeringDbQuery(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if pDbData.AsSet != "AS112" {
-		t.Errorf("expected as-set AS112 got %s", pDbData.AsSet)
+	if pDbData.ASSet != "AS112" {
+		t.Errorf("expected as-set AS112 got %s", pDbData.ASSet)
 	}
 	if pDbData.Name != "DNS-OARC-112" {
 		t.Errorf("expected name DNS-OARC-112 got %s", pDbData.Name)

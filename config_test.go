@@ -43,17 +43,17 @@ peers:
 		t.Error(err)
 	}
 
-	if globalConfig.Asn != 34553 {
-		t.Errorf("expected asn 34553 got %d", globalConfig.Asn)
+	if globalConfig.ASN != 34553 {
+		t.Errorf("expected ASN 34553 got %d", globalConfig.ASN)
 	}
-	if globalConfig.RouterId != "192.0.2.1" {
-		t.Errorf("expected router-id 192.0.2.1 got %s", globalConfig.RouterId)
+	if globalConfig.RouterID != "192.0.2.1" {
+		t.Errorf("expected router-id 192.0.2.1 got %s", globalConfig.RouterID)
 	}
 	if len(globalConfig.Peers) != 1 {
 		t.Errorf("expected 1 peer, got %d", len(globalConfig.Peers))
 	}
-	if globalConfig.Peers["Example"].Asn != 65530 {
-		t.Errorf("expected peer asn 34553 got %d", globalConfig.Peers["Example"].Asn)
+	if globalConfig.Peers["Example"].ASN != 65530 {
+		t.Errorf("expected peer ASN 34553 got %d", globalConfig.Peers["Example"].ASN)
 	}
 	if !reflect.DeepEqual(globalConfig.Peers["Example"].NeighborIPs, []string{"203.0.113.25", "2001:db8:2::25"}) {
 		t.Errorf("expected neighbor ips [203.0.113.25 2001:db8:2::25] got %v", globalConfig.Peers["Example"].NeighborIPs)

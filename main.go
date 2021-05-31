@@ -173,7 +173,7 @@ func main() {
 		if peerData.FilterIRR {
 			// Check for empty as-set
 			if peerData.ASSet == "" {
-				log.Fatalf("[%s] Has filter-irr enabled and no as-set defined", peerName)
+				log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
 			}
 
 			prefixesFromIRR4, err := getIRRPrefixSet(peerData.ASSet, 4, globalConfig)
@@ -199,13 +199,13 @@ func main() {
 			}
 
 			// Render the template and write to disk
-			log.Infof("[%s] Writing config", peerName)
+			log.Debugf("[%s] Writing config", peerName)
 			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
 			}
 
-			log.Infof("[%s] Wrote config", peerName)
+			log.Debugf("[%s] Wrote config", peerName)
 		} else {
 			log.Infof("Dry run is enabled, skipped writing peer config(s)")
 		}

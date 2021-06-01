@@ -16,12 +16,6 @@
 | `source4` | `string` |  |  | Source IPv4 address |
 | `source6` | `string` |  |  | Source IPv6 address |
 | `accept-default` | `bool` | `false` |  | Should default routes be added to the bogon list? |
-| `bird-directory` | `string` | `/etc/bird/` |  | Directory to store BIRD configs |
-| `bird-socket` | `string` | `/run/bird/bird.ctl` |  | UNIX control socket for BIRD |
-| `keepalived-config` | `string` | `/etc/keepalived.conf` |  | Configuration file for keepalived |
-| `web-ui-file` | `string` | `/run/wireframe.html` |  | File to write web UI to |
-| `peeringdb-query-timeout` | `uint` | `10` |  | PeeringDB query timeout in seconds |
-| `irr-query-timeout` | `uint` | `30` |  | IRR query timeout in seconds |
 | `peers` | `map[string]*peer` |  |  | BGP peer configuration |
 | `interfaces` | `map[string]iface` |  |  | Network interface configuration |
 | `vrrp` | `[]vrrpInstance` |  |  | List of VRRP instances |

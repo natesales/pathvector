@@ -89,7 +89,7 @@ func main() {
 	if !cliFlags.DryRun {
 		// Create the global output file
 		log.Debug("Creating global config")
-		globalFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "bird.conf"))
+		globalFile, err := os.Create(path.Join(cliFlags.BirdDirectory, "bird.conf"))
 		if err != nil {
 			log.Fatalf("Create global BIRD output file: %v", err)
 		}
@@ -195,7 +195,7 @@ func main() {
 		// Write peer file
 		if !cliFlags.DryRun {
 			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", peerData.ASN, sanitize(peerName))))
+			peerSpecificFile, err := os.Create(path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", peerData.ASN, sanitize(peerName))))
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}
@@ -217,7 +217,7 @@ func main() {
 		// Write VRRP config
 		writeVRRPConfig(globalConfig)
 
-		if globalConfig.BirdSocket != "" {
+		if cliFlags.BirdSocket != "" {
 			writeUIFile(globalConfig)
 		} else {
 			log.Infof("--ui-file is not defined, not creating a UI file")
@@ -225,7 +225,7 @@ func main() {
 
 		if !cliFlags.NoConfigure {
 			log.Infoln("Reconfiguring BIRD")
-			if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
+			if err = runBirdCommand("configure", cliFlags.BirdSocket); err != nil {
 				log.Fatal(err)
 			}
 		} else {

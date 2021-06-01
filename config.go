@@ -15,11 +15,17 @@ import (
 //go:generate ./generate.sh
 
 var cliFlags struct {
-	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
-	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
-	NoConfigure bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
-	ShowVersion bool   `short:"V" long:"version" description:"Show version and exit"`
+	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
+	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
+	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
+	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
+	ShowVersion           bool   `short:"V" long:"version" description:"Show version and exit"`
+	BirdDirectory         string `long:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
+	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 }
 
 type peer struct {
@@ -127,14 +133,6 @@ type config struct {
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
-
-	// Runtime configuration
-	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
-	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
 	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`

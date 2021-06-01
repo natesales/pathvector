@@ -28,7 +28,7 @@ func getIRRPrefixSet(asSet string, family uint8, c *config) (string, error) {
 	}
 	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s -l %s", c.IRRServer, family, asSet, filterName)
 	log.Infof("Running bgpq4 %s", cmdArgs)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(c.IRRQueryTimeout))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(cliFlags.IRRQueryTimeout))
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
 	stdout, err := cmd.Output()

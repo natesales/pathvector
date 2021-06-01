@@ -13,6 +13,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// wrapper is passed to the peer template
+type wrapper struct {
+	Name   string
+	Peer   peer
+	Config config
+}
+
 // Template functions
 var funcMap = template.FuncMap{
 	"Contains": func(s, substr string) bool {

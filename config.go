@@ -154,12 +154,6 @@ type iface struct {
 	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?" default:"false"`
 }
 
-type wrapper struct {
-	Name   string
-	Peer   peer
-	Config config
-}
-
 // loadConfig loads a configuration file from a YAML file
 func loadConfig(configBlob []byte) (*config, error) {
 	var config config

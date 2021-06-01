@@ -12,7 +12,7 @@
 | `rtr-server` | `string` | `rtr.rpki.cloudflare.com` |  | RPKI-to-router server |
 | `rtr-port` | `int` | `8282` |  | RPKI-to-router port |
 | `keep-filtered` | `bool` | `false` |  | Should filtered routes be kept in memory? |
-| `merge-paths` | `bool` | `false` |  | Should best and equivalent non-best routes be imported for ECMP? |
+| `merge-paths` | `bool` | `false` |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | `source4` | `string` |  |  | Source IPv4 address |
 | `source6` | `string` |  |  | Source IPv6 address |
 | `accept-default` | `bool` | `false` |  | Should default routes be added to the bogon list? |

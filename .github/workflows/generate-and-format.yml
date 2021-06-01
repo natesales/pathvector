@@ -1,11 +1,11 @@
-name: go generate
+name: Generate and format
 
 on:
   push:
 
 jobs:
-  generate:
-    name: Generate
+  generate-and-format:
+    name: Generate and format
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.16
@@ -13,11 +13,8 @@ jobs:
         with:
           go-version: 1.16
 
-      - name: Check out code into the Go module directory
+      - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Get dependencies
-        run: go get -v -t -d ./...
 
       - name: go generate
         run: go generate -x
@@ -26,5 +23,15 @@ jobs:
         uses: EndBug/add-and-commit@v7
         with:
           message: "ci: go generate"
+          author_name: "github-actions[bot]"
+          author_email: "github-actions[bot]@users.noreply.github.com"
+
+      - name: go fmt
+        run: go fmt
+
+      - name: Commit formatted code
+        uses: EndBug/add-and-commit@v7
+        with:
+          message: "ci: go fmt"
           author_name: "github-actions[bot]"
           author_email: "github-actions[bot]@users.noreply.github.com"

@@ -39,3 +39,26 @@ func TestSanitize(t *testing.T) {
 		}
 	}
 }
+
+func TestCategorizeCommunity(t *testing.T) {
+	testCases := []struct {
+		input          string
+		expectedOutput string
+		shouldError    bool
+	}{
+		{"34553,0", "standard", false},
+		{"4242424242:4242424242:0", "large", false},
+		{":", "", true},
+		{"4242424242,0", "", true},
+	}
+	for _, tc := range testCases {
+		cType := categorizeCommunity(tc.input)
+		if cType != "" && tc.shouldError {
+			t.Errorf("categorizeCommunity should have errored on '%s' but didn't. expected error, got '%s'", tc.input, cType)
+		} else if cType == "" && !tc.shouldError {
+			t.Errorf("categorizeCommunity shouldn't have errored on '%s' but did. expected '%s'", tc.input, tc.expectedOutput)
+		} else if cType != tc.expectedOutput {
+			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
+		}
+	}
+}

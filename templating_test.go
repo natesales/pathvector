@@ -15,16 +15,17 @@ func TestLoadTemplates(t *testing.T) {
 }
 
 func TestWriteUIFile(t *testing.T) {
-	writeUIFile(&config{WebUIFile: "/tmp/wireframe-ui.html"})
+	cliFlags.WebUIFile = "/tmp/wireframe-go-test-ui.html"
+	writeUIFile(&config{})
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {
-	writeVRRPConfig(&config{KeepalivedConfig: "/tmp/wireframe-keepalived.conf"})
+	cliFlags.KeepalivedConfig = "/tmp/wireframe-go-test-keepalived.conf"
+	writeVRRPConfig(&config{})
 }
 
 func TestWriteVRRPConfig(t *testing.T) {
 	writeVRRPConfig(&config{
-		KeepalivedConfig: "/tmp/wireframe-keepalived.conf",
 		VRRPInstances: []vrrpInstance{{
 			State: "primary",
 		}},

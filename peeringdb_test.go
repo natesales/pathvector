@@ -6,7 +6,7 @@ import (
 )
 
 func TestPeeringDbQuery(t *testing.T) {
-	pDbData, err := getPeeringDbData(112, &config{PeeringDbQueryTimeout: 10})
+	pDbData, err := getPeeringDbData(112)
 	if err != nil {
 		t.Error(err)
 	}
@@ -25,7 +25,7 @@ func TestPeeringDbQuery(t *testing.T) {
 }
 
 func TestPeeringDbNoPage(t *testing.T) {
-	_, err := getPeeringDbData(65530, &config{PeeringDbQueryTimeout: 10})
+	_, err := getPeeringDbData(65530)
 	if err == nil || !strings.Contains(err.Error(), "doesn't have a PeeringDB page") {
 		t.Errorf("expected PeeringDB page not exist error, got %v", err)
 	}

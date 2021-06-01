@@ -41,7 +41,8 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		{"AS112", 9, "define PFXSET_AS112_IP6 = [2001:4:112::/48,2620:4f:8000::/48];", true}, // Invalid address family
 	}
 	for _, tc := range testCases {
-		out, err := getIRRPrefixSet(tc.asSet, tc.family, &config{IRRServer: "rr.ntt.net", IRRQueryTimeout: 10})
+		cliFlags.IRRQueryTimeout = 10
+		out, err := getIRRPrefixSet(tc.asSet, tc.family, &config{IRRServer: "rr.ntt.net"})
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		} else if err == nil && tc.shouldError {

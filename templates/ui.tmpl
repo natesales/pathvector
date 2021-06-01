@@ -91,39 +91,38 @@
 <div class="table-wrapper">
     <h2>Peers</h2>
 
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>ASN</th>
-        <th>AS-SET</th>
-        <th>Type</th>
-        <th>Local Pref</th>
-        <th>Prepends</th>
-        <th>Import Limit</th>
-        <th>Neighbor IPs</th>
-        <th>Options</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    {{- range $i, $peer := .Peers }}
+    <table>
+        <thead>
         <tr>
-            <td>{{ $peer.Name }}</td>
-            <td>{{ $peer.Asn }}</td>
-            <td>{{ $peer.AsSet }}</td>
-            <td>{{ $peer.Type }}</td>
-            <td>{{ $peer.LocalPref }}</td>
-            <td>{{ $peer.Prepends }}</td>
-            <td>{{ $peer.ImportLimit4 }} IPv4<br>{{ $peer.ImportLimit6 }} IPv6</td>
-            <td>
-                {{- range $j, $ip := $peer.NeighborIPs }}
-                    {{ $ip }}<br>
-                {{ end }}
-            </td>
-            <td>{{ if $peer.Multihop }}multihop{{ end }} {{ if $peer.Disabled }}disabled{{ end }} {{ if $peer.Passive }}passive{{ end }}</td>
+            <th>Name</th>
+            <th>ASN</th>
+            <th>AS-SET</th>
+            <th>Local Pref</th>
+            <th>Prepends</th>
+            <th>Import Limit</th>
+            <th>Neighbor IPs</th>
+            <th>Options</th>
         </tr>
-    {{- end }}
-    </tbody>
+        </thead>
+
+        <tbody>
+        {{- range $peerName, $peer := .Peers }}
+            <tr>
+                <td>{{ $peerName }}</td>
+                <td>{{ $peer.ASN }}</td>
+                <td>{{ $peer.ASSet }}</td>
+                <td>{{ $peer.LocalPref }}</td>
+                <td>{{ $peer.Prepends }}</td>
+                <td>{{ $peer.ImportLimit4 }} IPv4<br>{{ $peer.ImportLimit6 }} IPv6</td>
+                <td>
+                    {{- range $j, $ip := $peer.NeighborIPs }}
+                        {{ $ip }}<br>
+                    {{ end }}
+                </td>
+                <td>{{ if $peer.Multihop }}multihop{{ end }} {{ if $peer.Disabled }}disabled{{ end }} {{ if $peer.Passive }}passive{{ end }}</td>
+            </tr>
+        {{- end }}
+        </tbody>
     </table>
 </div>
 

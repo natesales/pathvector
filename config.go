@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-//go:generate ./generate-defaults.sh
+//go:generate ./generate.sh
 
 var cliFlags struct {
 	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
@@ -280,6 +280,8 @@ func loadConfig(configBlob []byte) (*config, error) {
 }
 
 func documentConfigTypes(t reflect.Type) {
+	fmt.Println("<!-- Code generated DO NOT EDIT -->")
+	fmt.Println("# Configuration")
 	var childTypes []reflect.Type
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
 	fmt.Println("| Option | Type | Default | Validation | Description |")
@@ -322,6 +324,7 @@ func documentConfig() {
 }
 
 func documentCliFlags() {
+	fmt.Println("<!-- Code generated DO NOT EDIT -->")
 	fmt.Println("## CLI Flags")
 	fmt.Println("| Option | Type | Description |")
 	fmt.Println("|--------|------|-------------|")

@@ -1,5 +1,7 @@
 #!/bin/bash
-# This script automates the process of setting default values of complex
+# This script generates YAML unmarshalers and generated documentation.
+#
+# It first automates the process of setting default values of complex
 # nested YAML types. The idea is that each type needs to implement the
 # Unmarshaler interface (https://pkg.go.dev/gopkg.in/yaml.v2#Unmarshaler),
 # which turns out to result in a lot of duplicated code.
@@ -36,4 +38,11 @@ func (c *$type) UnmarshalYAML(unmarshal func(interface{}) error) error {
 EOF
 done
 
+echo "done"
+
+echo -n "Generating documentation..."
+go build -o /tmp/
+/tmp/wireframe generate-config-docs > docs/configuration.md
+/tmp/wireframe generate-cli-docs > docs/runtime.md
+rm /tmp/wireframe
 echo "done"

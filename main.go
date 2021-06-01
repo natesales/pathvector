@@ -36,8 +36,10 @@ func printPeerInfo(peerName string, peerData *peer) {
 }
 
 func main() {
-	if len(os.Args) == 2 && os.Args[1] == "generate-docs" {
+	if len(os.Args) == 2 && os.Args[1] == "generate-config-docs" {
 		documentConfig()
+		os.Exit(1)
+	} else if len(os.Args) == 2 && os.Args[1] == "generate-cli-docs" {
 		documentCliFlags()
 		os.Exit(1)
 	}

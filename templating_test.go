@@ -15,7 +15,7 @@ func TestLoadTemplates(t *testing.T) {
 }
 
 func TestWriteUIFile(t *testing.T) {
-	writeUiFile(&config{WebUIFile: "/tmp/wireframe-ui.html"})
+	writeUIFile(&config{WebUIFile: "/tmp/wireframe-ui.html"})
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {

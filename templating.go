@@ -116,9 +116,9 @@ func writeVRRPConfig(config *config) {
 	}
 }
 
-// writeUiFile renders and writes the web UI file
-func writeUiFile(config *config) {
-	// Create the ui output file
+// writeUIFile renders and writes the web UI file
+func writeUIFile(config *config) {
+	// Create the UI output file
 	log.Debug("Creating UI output file")
 	uiFileObj, err := os.Create(config.WebUIFile)
 	if err != nil {

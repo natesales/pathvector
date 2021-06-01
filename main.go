@@ -216,7 +216,7 @@ func main() {
 		writeVRRPConfig(globalConfig)
 
 		if globalConfig.BirdSocket != "" {
-			writeUiFile(globalConfig)
+			writeUIFile(globalConfig)
 		} else {
 			log.Infof("--ui-file is not defined, not creating a UI file")
 		}

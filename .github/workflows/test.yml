@@ -1,12 +1,12 @@
-name: Go Test
+name: Test
 
 on:
   push:
   pull_request:
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: test
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.16

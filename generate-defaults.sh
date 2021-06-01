@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script serves as a  way to automate setting default values of complex
+# This script automates the process of setting default values of complex
 # nested YAML types. The idea is that each type needs to implement the
 # Unmarshaler interface (https://pkg.go.dev/gopkg.in/yaml.v2#Unmarshaler),
 # which turns out to result in a lot of duplicated code.

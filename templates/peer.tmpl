@@ -57,6 +57,14 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
             honor_graceful_shutdown();
             {{- if $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
             {{- if $peer.FilterTier1ASNs }}reject_transit_paths();{{ end }}
+
+            {{- range $i, $community := $global.ImportCommunities }}
+            bgp_community.add(({{ $community }}));
+            {{ end -}}
+            {{- range $i, $community := $global.ImportLargeCommunities }}
+            bgp_large_community.add(({{ $community }}));
+            {{ end -}}
+
             {{- if $peer.FilterIRR }}
             if (net ~ AS{{ $peer.ASN }}_{{ $peerName }}_PFX_v{{ $af }}) then {
                 accept;
@@ -72,19 +80,10 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
 
             {{- $peer.PreExport }}
 
-            {{- range $i, $community := $global.LargeCommunities }}
-            bgp_large_community.add(({{ $community }}));
-            {{ end -}}
-
-            {{- range $i, $community := $global.Communities -}}
+            {{- range $i, $community := $global.ExportCommunities }}
             bgp_community.add(({{ $community }}));
             {{ end -}}
-
-            {{- range $i, $community := $peer.Communities -}}
-            bgp_community.add(({{ $community }}));
-            {{ end -}}
-
-            {{- range $i, $community := $peer.LargeCommunities -}}
+            {{- range $i, $community := $global.ExportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
             {{ end -}}
 
@@ -93,17 +92,17 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
             {{- range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end -}}
-            
+
             {{- if or $global.Prefixes4 $global.Prefixes6 }}
             process_prepends();
             accept_local(); # Originated
             {{ end -}}
 
-            {{- if not $peer.AnnounceSpecifics }}
-            if ((ASN,1,200) ~ bgp_large_community) then reject; # Don't export to upstreams
-            if ((ASN,0,103) ~ bgp_large_community) then accept; # Downstream
-            if ((ASN,0,102) ~ bgp_large_community) then accept; # Peer
-            if ((ASN,0,101) ~ bgp_large_community) then accept; # Upstream
+            {{- range $i, $community := $global.AnnounceCommunities }}
+            if (({{ $community }}) ~ bgp_community) then accept;
+            {{ end -}}
+            {{- range $i, $community := $global.AnnounceLargeCommunities }}
+            if (({{ $community }}) ~ bgp_large_community) then accept;
             {{ end -}}
 
             {{- if $peer.AnnounceDefault }}if (proto = "default{{ $af }}") then accept; # Send default route{{ end -}}

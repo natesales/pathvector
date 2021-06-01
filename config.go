@@ -43,12 +43,9 @@ type peer struct {
 	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 	MPUnicast46       bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 
-	ImportCommunities        []string `yaml:"import-communities" description:"List of communities to add to all imported routes"`
-	ImportLargeCommunities   []string `yaml:"import-large-communities" description:"List of large communities to add to all imported routes"`
-	ExportCommunities        []string `yaml:"export-communities" description:"List of communities to add to all exported routes"`
-	ExportLargeCommunities   []string `yaml:"export-large-communities" description:"List of large communities to add to all exported routes"`
-	AnnounceCommunities      []string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer"`
-	AnnounceLargeCommunities []string `yaml:"announce-large-communities" description:"Announce all routes matching these large communities to the peer"`
+	ImportCommunities   []string `yaml:"import-communities" description:"List of communities to add to all imported routes"`
+	ExportCommunities   []string `yaml:"export-communities" description:"List of communities to add to all exported routes"`
+	AnnounceCommunities []string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer"`
 
 	// Filtering
 	ASSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
@@ -71,8 +68,7 @@ type peer struct {
 	Prefixes []string `yaml:"prefixes" description:"Prefixes to accept"`
 
 	// Export options
-	AnnounceDefault   bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
-	AnnounceSpecifics bool `yaml:"announce-specifics" description:"Should more specific routes be exported to this peer?" default:"true"`
+	AnnounceDefault bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
 
 	// Custom daemon configuration
 	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`
@@ -81,10 +77,16 @@ type peer struct {
 	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
 	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
 
-	ProtocolName string   `yaml:"-" description:"-"`
-	Protocols    []string `yaml:"-" description:"-"`
-	PrefixSet4   []string `yaml:"-" description:"-"`
-	PrefixSet6   []string `yaml:"-" description:"-"`
+	ProtocolName                string   `yaml:"-" description:"-"`
+	Protocols                   []string `yaml:"-" description:"-"`
+	PrefixSet4                  []string `yaml:"-" description:"-"`
+	PrefixSet6                  []string `yaml:"-" description:"-"`
+	ImportStandardCommunities   []string `yaml:"-" description:"-"`
+	ImportLargeCommunities      []string `yaml:"-" description:"-"`
+	ExportStandardCommunities   []string `yaml:"-" description:"-"`
+	ExportLargeCommunities      []string `yaml:"-" description:"-"`
+	AnnounceStandardCommunities []string `yaml:"-" description:"-"`
+	AnnounceLargeCommunities    []string `yaml:"-" description:"-"`
 }
 
 type vrrpInstance struct {
@@ -240,8 +242,8 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 	}
 
-	// Build static prefix filters
 	for _, peerData := range config.Peers {
+		// Build static prefix filters
 		for _, prefix := range peerData.Prefixes {
 			pfx, _, err := net.ParseCIDR(prefix)
 			if err != nil {
@@ -254,7 +256,40 @@ func loadConfig(configBlob []byte) (*config, error) {
 				peerData.PrefixSet6 = append(peerData.PrefixSet6, prefix)
 			}
 		}
-	}
+
+		// Categorize communities
+		for _, community := range peerData.ImportCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				peerData.ImportStandardCommunities = append(peerData.ImportStandardCommunities, community)
+			} else if communityType == "large" {
+				peerData.ImportLargeCommunities = append(peerData.ImportLargeCommunities, community)
+			} else {
+				return nil, errors.New("invalid import community: " + community)
+			}
+		}
+		for _, community := range peerData.ExportCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				peerData.ExportStandardCommunities = append(peerData.ExportStandardCommunities, community)
+			} else if communityType == "large" {
+				peerData.ExportLargeCommunities = append(peerData.ExportLargeCommunities, community)
+			} else {
+				return nil, errors.New("invalid export community: " + community)
+			}
+		}
+		for _, community := range peerData.AnnounceCommunities {
+			communityType := categorizeCommunity(community)
+
+			if communityType == "standard" {
+				peerData.AnnounceStandardCommunities = append(peerData.AnnounceStandardCommunities, community)
+			} else if communityType == "large" {
+				peerData.AnnounceLargeCommunities = append(peerData.AnnounceLargeCommunities, community)
+			} else {
+				return nil, errors.New("invalid announce community: " + community)
+			}
+		}
+	} // end peer loop
 
 	return &config, nil // nil error
 }

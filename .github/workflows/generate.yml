@@ -2,8 +2,6 @@ name: go generate
 
 on:
   push:
-    branches:
-      - *
 
 jobs:
   generate:

@@ -37,13 +37,18 @@ type peer struct {
 	Passive           bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	NextHopSelf       bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
 	BFD               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
-	Communities       []string `yaml:"communities" description:"List of communities to add on export"`
-	LargeCommunities  []string `yaml:"large-communities" description:"List of large communities to add on export"`
 	Password          string   `yaml:"password" description:"BGP MD5 password"`
 	RSClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
 	RRClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 	MPUnicast46       bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
+
+	ImportCommunities        []string `yaml:"import-communities" description:"List of communities to add to all imported routes"`
+	ImportLargeCommunities   []string `yaml:"import-large-communities" description:"List of large communities to add to all imported routes"`
+	ExportCommunities        []string `yaml:"export-communities" description:"List of communities to add to all exported routes"`
+	ExportLargeCommunities   []string `yaml:"export-large-communities" description:"List of large communities to add to all exported routes"`
+	AnnounceCommunities      []string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer"`
+	AnnounceLargeCommunities []string `yaml:"announce-large-communities" description:"Announce all routes matching these large communities to the peer"`
 
 	// Filtering
 	ASSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`

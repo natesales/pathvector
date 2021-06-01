@@ -7,11 +7,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
+
+//go:generate ./generate-defaults.sh
 
 var cliFlags struct {
 	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
@@ -169,16 +170,6 @@ func loadConfig(configBlob []byte) (*config, error) {
 	validate := validator.New()
 	if err := validate.Struct(&config); err != nil {
 		return nil, errors.New("validation: " + err.Error())
-	}
-
-	if err := defaults.Set(&config); err != nil {
-		return nil, errors.New("defaults: " + err.Error())
-	}
-	// Set peer defaults
-	for _, peerData := range config.Peers {
-		if err := defaults.Set(peerData); err != nil {
-			return nil, errors.New("peer defaults: " + err.Error())
-		}
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family

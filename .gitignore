@@ -9,7 +9,10 @@ output/*
 
 # Release
 dist/
-
 build/
 
+# Coverage
 cover.*
+
+# Generated default functions
+defaults.go

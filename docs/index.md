@@ -14,7 +14,7 @@ Wireframe is a declarative routing platform integrating BGP with robust filterin
 
 ## Installation
 
-Wireframe depends on [bird2](https://gitlab.nic.cz/labs/bird/). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running Wireframe. Releases can be downloaded from GitHub and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go build`. It's recommended to run Wireframe every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/wireframe` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
+Wireframe depends on [bird2](https://gitlab.nic.cz/labs/bird/). Make sure the `bird` and `gortr` daemons are running and `bgpq4` is in path before running Wireframe. Releases can be downloaded from GitHub and from my public code repositories - see https://github.com/natesales/repo for more info. You can also build from source by cloning the repo and running `go generate && go build`. It's recommended to run Wireframe every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * /usr/local/bin/wireframe` to your crontab will update the filters at 12 AM and PM. If you're using ZSH you might also be interested in my [birdc completion](https://github.com/natesales/zsh-bird-completions).
 
 Some features require additional dependencies:
 

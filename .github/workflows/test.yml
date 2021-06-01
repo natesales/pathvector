@@ -22,5 +22,8 @@ jobs:
       - name: Get dependencies
         run: go get -v -t -d ./...
 
-      - name: Build
+      - name: go generate
+        run: go generate -x
+
+      - name: go build
         run: go build -v .

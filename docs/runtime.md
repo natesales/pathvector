@@ -13,3 +13,31 @@
 | `-`, `--web-ui-file` | `string` | File to write web UI to |
 | `-`, `--peeringdb-query-timeout` | `uint` | PeeringDB query timeout in seconds |
 | `-`, `--irr-query-timeout` | `uint` | IRR query timeout in seconds |
+# Usage
+```
+Usage:
+  wireframe [OPTIONS]
+
+Application Options:
+  -c, --config=                  Configuration file in YAML, TOML, or JSON
+                                 format (default: /etc/wireframe.yml)
+  -v, --verbose                  Show verbose log messages
+  -d, --dry-run                  Don't modify configuration
+  -n, --no-configure             Don't configure BIRD
+  -V, --version                  Show version and exit
+      --bird-directory=          Directory to store BIRD configs (default:
+                                 /etc/bird/)
+      --bird-socket=             UNIX control socket for BIRD (default:
+                                 /run/bird/bird.ctl)
+      --keepalived-config=       Configuration file for keepalived (default:
+                                 /etc/keepalived.conf)
+      --web-ui-file=             File to write web UI to (default:
+                                 /run/wireframe.html)
+      --peeringdb-query-timeout= PeeringDB query timeout in seconds (default:
+                                 10)
+      --irr-query-timeout=       IRR query timeout in seconds (default: 30)
+
+Help Options:
+  -h, --help                     Show this help message
+
+```

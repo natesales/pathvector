@@ -129,7 +129,7 @@ func main() {
 
 		// If a PeeringDB query is required
 		if peerData.AutoImportLimits || peerData.AutoASSet {
-			pDbData, err := getPeeringDbData(peerData.ASN, globalConfig)
+			pDbData, err := getPeeringDbData(peerData.ASN)
 			if err != nil {
 				log.Warnf("[%s] unable to get PeeringDB data: %+v", peerName, err)
 				// TODO: Exit or skip this peer?

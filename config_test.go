@@ -33,6 +33,7 @@ vrrp:
 peers:
   Example:
     asn: 65530
+    announce-originated: false
     neighbors:
       - 203.0.113.25
       - 2001:db8:2::25

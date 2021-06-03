@@ -146,7 +146,7 @@ type config struct {
 
 // iface represents a network interface
 type iface struct {
-	Mtu       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)" default:"1500"`
+	MTU       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)" default:"1500"`
 	XDPRTR    bool     `yaml:"xdprtr" description:"Should XDPRTR be loaded on this interface?" default:"false"`
 	Addresses []string `yaml:"addresses" description:"List of addresses to add to this interface"`
 	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?" default:"false"`

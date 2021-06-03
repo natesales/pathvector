@@ -29,8 +29,8 @@ func configureInterfaces(config *config) {
 		log.Debugf("found interface %s index %d", ifaceName, link.Attrs().Index)
 
 		// Set MTU
-		if ifaceOpts.Mtu != 0 {
-			if err := netlink.LinkSetMTU(link, int(ifaceOpts.Mtu)); err != nil {
+		if ifaceOpts.MTU != 0 {
+			if err := netlink.LinkSetMTU(link, int(ifaceOpts.MTU)); err != nil {
 				log.Warn(errorx.Decorate(err, "set MTU on "+ifaceName))
 			}
 		}

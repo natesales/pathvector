@@ -75,7 +75,8 @@ type peer struct {
 	Prefixes []string `yaml:"prefixes" description:"Prefixes to accept"`
 
 	// Export options
-	AnnounceDefault bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
+	AnnounceDefault    bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
+	AnnounceOriginated bool `yaml:"announce-originated" description:"Should locally originated routes be announced to this peer?" default:"true"`
 
 	// Custom daemon configuration
 	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`
@@ -225,7 +226,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 	}
 
-	for _, peerData := range config.Peers {
+	for peerName, peerData := range config.Peers {
 		// Build static prefix filters
 		for _, prefix := range peerData.Prefixes {
 			pfx, _, err := net.ParseCIDR(prefix)
@@ -271,6 +272,11 @@ func loadConfig(configBlob []byte) (*config, error) {
 			} else {
 				return nil, errors.New("invalid announce community: " + community)
 			}
+		}
+
+		// Check for empty
+		if len(peerData.Prefixes) < 1 && peerData.AnnounceOriginated {
+			return nil, errors.New(fmt.Sprintf("no locally originated prefixes are defined but %s has announce-originated enabled", peerName))
 		}
 	} // end peer loop
 

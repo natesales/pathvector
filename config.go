@@ -275,7 +275,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 
 		// Check for empty
-		if len(peerData.Prefixes) < 1 && peerData.AnnounceOriginated {
+		if len(config.Prefixes) < 1 && peerData.AnnounceOriginated {
 			return nil, errors.New(fmt.Sprintf("no locally originated prefixes are defined but %s has announce-originated enabled", peerName))
 		}
 	} // end peer loop

@@ -29,18 +29,20 @@ var cliFlags struct {
 }
 
 type peer struct {
+	Template string `yaml:"template" description:"Configuration template"`
+
 	Description string `yaml:"description" description:"Peer description"`
-	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?"`
+	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
 	// BGP Attributes
-	ASN               uint     `yaml:"asn" description:"Local ASN" validate:"required"`
+	ASN               uint     `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
 	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip"`
 	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
 	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen            string   `yaml:"listen" description:"BGP listen address"`
-	LocalPort         uint16   `yaml:"local-port" description:"Local TCP port" default:"179"`
-	NeighborPort      uint16   `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
+	LocalPort         uint     `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort      uint     `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive           bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	NextHopSelf       bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
 	BFD               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
@@ -101,7 +103,7 @@ type vrrpInstance struct {
 	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')" validate:"required"`
 	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on" validate:"required"`
 	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)" validate:"required"`
-	Priority  uint8    `yaml:"priority" description:"RFC3768 VRRP Priority" validate:"required"`
+	Priority  uint     `yaml:"priority" description:"RFC3768 VRRP Priority" validate:"required"`
 	VIPs      []string `yaml:"vips" description:"List of virtual IPs" validate:"required,cidr"`
 
 	VIPs4 []string `yaml:"-" description:"-"`
@@ -120,7 +122,7 @@ type augments struct {
 }
 
 type config struct {
-	ASN              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required"`
+	ASN              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
@@ -128,7 +130,7 @@ type config struct {
 	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RTRPort       int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	RTRPort       uint   `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
@@ -136,6 +138,7 @@ type config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 
 	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
+	Templates     map[string]peer  `yaml:"templates" description:"BGP peer templates"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
@@ -165,6 +168,29 @@ func loadConfig(configBlob []byte) (*config, error) {
 		return nil, errors.New("validation: " + err.Error())
 	}
 
+	// Assign values from template
+	for peerName, peerData := range config.Peers { // For each peer
+		if peerData.Template != "" {
+			template := config.Templates[peerData.Template]
+
+			av := reflect.ValueOf(template)
+			bv := reflect.ValueOf(config.Peers[peerName]).Elem()
+
+			at := av.Type()
+			for i := 0; i < at.NumField(); i++ {
+				name := at.Field(i).Name
+				bf := bv.FieldByName(name)
+				if bf.IsValid() {
+					if av.Field(i) == bf {
+						log.Printf("setting %s, %+v -> %+v", name, bf, av.Field(i))
+						bf.Set(av.Field(i))
+					}
+				} else {
+					log.Fatal("invalid field %s", name)
+				}
+			}
+		}
+	}
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
 	for _, prefix := range config.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
@@ -226,7 +252,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 	}
 
-	for peerName, peerData := range config.Peers {
+	for _, peerData := range config.Peers {
 		// Build static prefix filters
 		for _, prefix := range peerData.Prefixes {
 			pfx, _, err := net.ParseCIDR(prefix)
@@ -276,7 +302,8 @@ func loadConfig(configBlob []byte) (*config, error) {
 
 		// Check for empty
 		if len(config.Prefixes) < 1 && peerData.AnnounceOriginated {
-			return nil, errors.New(fmt.Sprintf("no locally originated prefixes are defined but %s has announce-originated enabled", peerName))
+			// No locally originated prefixes are defined, so there's nothing to originate
+			peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
 

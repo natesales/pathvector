@@ -1,0 +1,19 @@
+asn: 34553
+templates:
+  upstream:
+    local-pref: 90
+    filter-irr: false
+
+peers:
+  HE:
+    asn: 6939
+    template: upstream
+    neighbors:
+      - 192.0.2.2
+  Cogent:
+    asn: 179
+    local-pref: 2
+    template: upstream
+    filter-irr: true
+    neighbors:
+      - 192.0.2.3

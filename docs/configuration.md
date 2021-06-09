@@ -62,6 +62,7 @@
 | `filter-max-prefix` | `bool` | `true` |  | Should max prefix filtering be applied? |
 | `filter-bogons` | `bool` | `true` |  | Should bogon prefixes be rejected? |
 | `filter-tier1-asns` | `bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
+| `filter-small-prefixes` | `bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
 | `auto-import-limits` | `bool` | `false` |  | Get import limits automatically from PeeringDB? |
 | `auto-as-set` | `bool` | `false` |  | Get as-set automatically from PeeringDB? |
 | `prefixes` | `[]string` |  |  | Prefixes to accept |
@@ -113,6 +114,7 @@
 | `filter-max-prefix` | `bool` | `true` |  | Should max prefix filtering be applied? |
 | `filter-bogons` | `bool` | `true` |  | Should bogon prefixes be rejected? |
 | `filter-tier1-asns` | `bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
+| `filter-small-prefixes` | `bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
 | `auto-import-limits` | `bool` | `false` |  | Get import limits automatically from PeeringDB? |
 | `auto-as-set` | `bool` | `false` |  | Get as-set automatically from PeeringDB? |
 | `prefixes` | `[]string` |  |  | Prefixes to accept |

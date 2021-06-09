@@ -46,6 +46,7 @@
 | `rr-client` | `bool` | `false` |  | Should this peer be a route reflector client? |
 | `remove-private-as` | `bool` | `true` |  | Should private ASNs be removed from path before exporting? |
 | `mp-unicast-46` | `bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
+| `allow-local-as` | `bool` | `false` |  | Should routes originated by the local ASN be accepted? |
 | `import-communities` | `[]string` |  |  | List of communities to add to all imported routes |
 | `export-communities` | `[]string` |  |  | List of communities to add to all exported routes |
 | `announce-communities` | `[]string` |  |  | Announce all routes matching these communities to the peer |
@@ -96,6 +97,7 @@
 | `rr-client` | `bool` | `false` |  | Should this peer be a route reflector client? |
 | `remove-private-as` | `bool` | `true` |  | Should private ASNs be removed from path before exporting? |
 | `mp-unicast-46` | `bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
+| `allow-local-as` | `bool` | `false` |  | Should routes originated by the local ASN be accepted? |
 | `import-communities` | `[]string` |  |  | List of communities to add to all imported routes |
 | `export-communities` | `[]string` |  |  | List of communities to add to all exported routes |
 | `announce-communities` | `[]string` |  |  | Announce all routes matching these communities to the peer |

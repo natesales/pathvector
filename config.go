@@ -167,7 +167,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 	}
 
 	validate := validator.New()
-	if err := validate.Struct(&config); err != nil {
+	if err := validate.Struct(&c); err != nil {
 		return nil, errors.New("validation: " + err.Error())
 	}
 

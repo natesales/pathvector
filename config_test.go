@@ -158,7 +158,6 @@ peers:
 
   Upstream 2:
     asn: 65520
-    local-pref: 2
     template: upstream
     filter-irr: true
     neighbors:
@@ -194,7 +193,7 @@ peers:
 			if *peerData.ASN != 65520 {
 				t.Errorf("peer %s expected ASN 65520 got %d", peerName, *peerData.ASN)
 			}
-			if *peerData.LocalPref != 2 {
+			if *peerData.LocalPref != 90 {
 				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
 			}
 			if *peerData.FilterIRR != true {
@@ -208,7 +207,7 @@ peers:
 				t.Errorf("peer %s expected ASN 65530 got %d", peerName, *peerData.ASN)
 			}
 			if *peerData.LocalPref != 2 {
-				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
+				t.Errorf("peer %s expected local-pref 2 got %d", peerName, *peerData.LocalPref)
 			}
 			if *peerData.FilterIRR != false {
 				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)

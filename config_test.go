@@ -53,10 +53,10 @@ peers:
 	if len(globalConfig.Peers) != 1 {
 		t.Errorf("expected 1 peer, got %d", len(globalConfig.Peers))
 	}
-	if globalConfig.Peers["Example"].ASN != 65530 {
+	if *globalConfig.Peers["Example"].ASN != 65530 {
 		t.Errorf("expected peer ASN 34553 got %d", globalConfig.Peers["Example"].ASN)
 	}
-	if !reflect.DeepEqual(globalConfig.Peers["Example"].NeighborIPs, []string{"203.0.113.25", "2001:db8:2::25"}) {
+	if !reflect.DeepEqual(*globalConfig.Peers["Example"].NeighborIPs, []string{"203.0.113.25", "2001:db8:2::25"}) {
 		t.Errorf("expected neighbor ips [203.0.113.25 2001:db8:2::25] got %v", globalConfig.Peers["Example"].NeighborIPs)
 	}
 }

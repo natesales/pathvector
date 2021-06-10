@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -29,76 +30,76 @@ var cliFlags struct {
 }
 
 type peer struct {
-	Template string `yaml:"template" description:"Configuration template"`
+	Template *string `yaml:"template" description:"Configuration template" default:"-"`
 
-	Description string `yaml:"description" description:"Peer description"`
-	Disabled    bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
+	Description *string `yaml:"description" description:"Peer description" default:"-"`
+	Disabled    *bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
 	// BGP Attributes
-	ASN               uint     `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
-	NeighborIPs       []string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip"`
-	Prepends          uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
-	LocalPref         uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
-	Multihop          bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
-	Listen            string   `yaml:"listen" description:"BGP listen address"`
-	LocalPort         uint     `yaml:"local-port" description:"Local TCP port" default:"179"`
-	NeighborPort      uint     `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
-	Passive           bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
-	NextHopSelf       bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
-	BFD               bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
-	Password          string   `yaml:"password" description:"BGP MD5 password"`
-	RSClient          bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
-	RRClient          bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
-	RemovePrivateASNs bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
-	MPUnicast46       bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
-	AllowLocalAS      bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
+	ASN               *uint     `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
+	NeighborIPs       *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
+	Prepends          *uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	LocalPref         *uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	Multihop          *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
+	Listen            *string   `yaml:"listen" description:"BGP listen address" default:"-"`
+	LocalPort         *uint     `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort      *uint     `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
+	Passive           *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
+	NextHopSelf       *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
+	BFD               *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
+	Password          *string   `yaml:"password" description:"BGP MD5 password" default:"-"`
+	RSClient          *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
+	RRClient          *bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
+	RemovePrivateASNs *bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
+	MPUnicast46       *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
+	AllowLocalAS      *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
 
-	ImportCommunities   []string `yaml:"import-communities" description:"List of communities to add to all imported routes"`
-	ExportCommunities   []string `yaml:"export-communities" description:"List of communities to add to all exported routes"`
-	AnnounceCommunities []string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer"`
+	ImportCommunities   *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
+	ExportCommunities   *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
+	AnnounceCommunities *[]string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer" default:"-"`
 
 	// Filtering
-	ASSet                   string `yaml:"as-set" description:"Peer's as-set for filtering"`
-	ImportLimit4            uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
-	ImportLimit6            uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
-	EnforceFirstAS          bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
-	EnforcePeerNexthop      bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
-	MaxPrefixTripAction     string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
-	AllowBlackholeCommunity bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
+	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
+	ImportLimit4            *uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
+	ImportLimit6            *uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
+	EnforceFirstAS          *bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
+	EnforcePeerNexthop      *bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
+	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
+	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 
-	FilterIRR           bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
-	FilterRPKI          bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	FilterMaxPrefix     bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogons        bool `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
-	FilterTier1ASNs     bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
-	FilterSmallPrefixes bool `yaml:"filter-small-prefixes" description:"Should small prefixes (ge 24, ge 48) be rejected?" default:"true"`
+	FilterIRR           *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterRPKI          *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix     *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogons        *bool `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterTier1ASNs     *bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
+	FilterSmallPrefixes *bool `yaml:"filter-small-prefixes" description:"Should small prefixes (ge 24, ge 48) be rejected?" default:"true"`
 
-	AutoImportLimits bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
-	AutoASSet        bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
+	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
+	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
 
-	Prefixes []string `yaml:"prefixes" description:"Prefixes to accept"`
+	Prefixes *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
 
 	// Export options
-	AnnounceDefault    bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
-	AnnounceOriginated bool `yaml:"announce-originated" description:"Should locally originated routes be announced to this peer?" default:"true"`
+	AnnounceDefault    *bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
+	AnnounceOriginated *bool `yaml:"announce-originated" description:"Should locally originated routes be announced to this peer?" default:"true"`
 
 	// Custom daemon configuration
-	SessionGlobal  string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols"`
-	PreImport      string `yaml:"pre-import" description:"Configuration to add at the beginning of the import filter"`
-	PreExport      string `yaml:"pre-export" description:"Configuration to add at the beginning of the export filter"`
-	PreImportFinal string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import"`
-	PreExportFinal string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export"`
+	SessionGlobal  *string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols" default:"-"`
+	PreImport      *string `yaml:"pre-import" description:"Configuration to add at the beginning of the import filter" default:"-"`
+	PreExport      *string `yaml:"pre-export" description:"Configuration to add at the beginning of the export filter" default:"-"`
+	PreImportFinal *string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import" default:"-"`
+	PreExportFinal *string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export" default:"-"`
 
-	ProtocolName                string   `yaml:"-" description:"-"`
-	Protocols                   []string `yaml:"-" description:"-"`
-	PrefixSet4                  []string `yaml:"-" description:"-"`
-	PrefixSet6                  []string `yaml:"-" description:"-"`
-	ImportStandardCommunities   []string `yaml:"-" description:"-"`
-	ImportLargeCommunities      []string `yaml:"-" description:"-"`
-	ExportStandardCommunities   []string `yaml:"-" description:"-"`
-	ExportLargeCommunities      []string `yaml:"-" description:"-"`
-	AnnounceStandardCommunities []string `yaml:"-" description:"-"`
-	AnnounceLargeCommunities    []string `yaml:"-" description:"-"`
+	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
+	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
+	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
+	PrefixSet6                  *[]string `yaml:"-" description:"-" default:"-"`
+	ImportStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
+	ImportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
+	ExportStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
+	ExportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
+	AnnounceStandardCommunities *[]string `yaml:"-" description:"-" default:"-"`
+	AnnounceLargeCommunities    *[]string `yaml:"-" description:"-" default:"-"`
 }
 
 type vrrpInstance struct {
@@ -140,7 +141,7 @@ type config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 
 	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
-	Templates     map[string]peer  `yaml:"templates" description:"BGP peer templates"`
+	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
 	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
@@ -172,27 +173,74 @@ func loadConfig(configBlob []byte) (*config, error) {
 
 	// Assign values from template
 	for peerName, peerData := range config.Peers { // For each peer
-		if peerData.Template != "" {
-			template := config.Templates[peerData.Template]
+		if peerData.Template != nil && *peerData.Template != "" {
+			template := config.Templates[*peerData.Template]
+			if template == nil {
+				log.Fatalf("template %s not found", *peerData.Template)
+			}
+			templateValue := reflect.ValueOf(*template)
+			peerValue := reflect.ValueOf(config.Peers[peerName]).Elem()
 
-			av := reflect.ValueOf(template)
-			bv := reflect.ValueOf(config.Peers[peerName]).Elem()
+			templateValueType := templateValue.Type()
+			for i := 0; i < templateValueType.NumField(); i++ {
+				fieldName := templateValueType.Field(i).Name
+				peerFieldValue := peerValue.FieldByName(fieldName)
+				if fieldName != "Template" { // Ignore the template attribute
+					pVal := reflect.Indirect(peerFieldValue)
+					peerHasValueConfigured := pVal.IsValid()
+					tValue := templateValue.Field(i)
+					templateHasValueConfigured := !tValue.IsNil()
 
-			at := av.Type()
-			for i := 0; i < at.NumField(); i++ {
-				name := at.Field(i).Name
-				bf := bv.FieldByName(name)
-				if bf.IsValid() {
-					if av.Field(i) == bf {
-						log.Printf("setting %s, %+v -> %+v", name, bf, av.Field(i))
-						bf.Set(av.Field(i))
+					if peerHasValueConfigured {
+						// Dont do anything
+					} else if templateHasValueConfigured && !peerHasValueConfigured {
+						// Use the templates value
+						peerFieldValue.Set(templateValue.Field(i))
 					}
-				} else {
-					log.Fatal("invalid field %s", name)
+
+					//log.Printf("[%s] %s val: %+v type: %T hasConfigured: %v", peerName, fieldName, tValue, tValue, templateHasValueConfigured)
+				}
+			}
+		} // end peer template processor
+
+		// Set default values
+		peerValue := reflect.ValueOf(config.Peers[peerName]).Elem()
+		templateValueType := peerValue.Type()
+		for i := 0; i < templateValueType.NumField(); i++ {
+			fieldName := templateValueType.Field(i).Name
+			fieldValue := peerValue.FieldByName(fieldName)
+			defaultString := templateValueType.Field(i).Tag.Get("default")
+			if defaultString == "" {
+				log.Fatalf("code error: field %s has no default value", fieldName)
+			}
+			//log.Printf("peer %s field %s value %+v", peerName, fieldName, fieldValue)
+			if fieldValue.IsNil() {
+				elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
+				switch elemToSwitch {
+				case reflect.String:
+					fieldValue.Set(reflect.ValueOf(&defaultString))
+				case reflect.Int:
+					defaultValueInt, err := strconv.Atoi(defaultString)
+					if err != nil {
+						log.Fatalf("cant convert '%s' to uint", defaultString)
+					}
+					fieldValue.Set(reflect.ValueOf(&defaultValueInt))
+				case reflect.Bool:
+					var err error // explicit declaration used to avoid scope issues of defaultValue
+					defaultBool, err := strconv.ParseBool(defaultString)
+					if err != nil {
+						log.Fatalf("can't parse bool %s", defaultString)
+					}
+					fieldValue.Set(reflect.ValueOf(&defaultBool))
+				case reflect.Struct, reflect.Slice:
+					// Ignore structs and slices
+				default:
+					log.Fatalf("unknown kind %+v for field %s", elemToSwitch, fieldName)
 				}
 			}
 		}
 	}
+
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
 	for _, prefix := range config.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
@@ -256,56 +304,65 @@ func loadConfig(configBlob []byte) (*config, error) {
 
 	for _, peerData := range config.Peers {
 		// Build static prefix filters
-		for _, prefix := range peerData.Prefixes {
-			pfx, _, err := net.ParseCIDR(prefix)
-			if err != nil {
-				return nil, errors.New("invalid prefix: " + prefix)
-			}
+		if peerData.Prefixes != nil {
+			for _, prefix := range *peerData.Prefixes {
+				pfx, _, err := net.ParseCIDR(prefix)
+				if err != nil {
+					return nil, errors.New("invalid prefix: " + prefix)
+				}
 
-			if pfx.To4() == nil { // If IPv6
-				peerData.PrefixSet4 = append(peerData.PrefixSet4, prefix)
-			} else { // If IPv4
-				peerData.PrefixSet6 = append(peerData.PrefixSet6, prefix)
+				if pfx.To4() == nil { // If IPv6
+					*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefix)
+				} else { // If IPv4
+					*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefix)
+				}
 			}
 		}
 
 		// Categorize communities
-		for _, community := range peerData.ImportCommunities {
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				peerData.ImportStandardCommunities = append(peerData.ImportStandardCommunities, community)
-			} else if communityType == "large" {
-				peerData.ImportLargeCommunities = append(peerData.ImportLargeCommunities, community)
-			} else {
-				return nil, errors.New("invalid import community: " + community)
+		if peerData.ImportCommunities != nil {
+			for _, community := range *peerData.ImportCommunities {
+				communityType := categorizeCommunity(community)
+				if communityType == "standard" {
+					*peerData.ImportStandardCommunities = append(*peerData.ImportStandardCommunities, community)
+				} else if communityType == "large" {
+					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, community)
+				} else {
+					return nil, errors.New("invalid import community: " + community)
+				}
 			}
 		}
-		for _, community := range peerData.ExportCommunities {
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				peerData.ExportStandardCommunities = append(peerData.ExportStandardCommunities, community)
-			} else if communityType == "large" {
-				peerData.ExportLargeCommunities = append(peerData.ExportLargeCommunities, community)
-			} else {
-				return nil, errors.New("invalid export community: " + community)
-			}
-		}
-		for _, community := range peerData.AnnounceCommunities {
-			communityType := categorizeCommunity(community)
 
-			if communityType == "standard" {
-				peerData.AnnounceStandardCommunities = append(peerData.AnnounceStandardCommunities, community)
-			} else if communityType == "large" {
-				peerData.AnnounceLargeCommunities = append(peerData.AnnounceLargeCommunities, community)
-			} else {
-				return nil, errors.New("invalid announce community: " + community)
+		if peerData.ExportCommunities != nil {
+			for _, community := range *peerData.ExportCommunities {
+				communityType := categorizeCommunity(community)
+				if communityType == "standard" {
+					*peerData.ExportStandardCommunities = append(*peerData.ExportStandardCommunities, community)
+				} else if communityType == "large" {
+					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
+				} else {
+					return nil, errors.New("invalid export community: " + community)
+				}
+			}
+		}
+		if peerData.AnnounceCommunities != nil {
+			for _, community := range *peerData.AnnounceCommunities {
+				communityType := categorizeCommunity(community)
+
+				if communityType == "standard" {
+					*peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
+				} else if communityType == "large" {
+					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
+				} else {
+					return nil, errors.New("invalid announce community: " + community)
+				}
 			}
 		}
 
 		// Check for empty
-		if len(config.Prefixes) < 1 && peerData.AnnounceOriginated {
+		if len(config.Prefixes) < 1 && *peerData.AnnounceOriginated {
 			// No locally originated prefixes are defined, so there's nothing to originate
-			peerData.AnnounceOriginated = false
+			*peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
 

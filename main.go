@@ -122,24 +122,24 @@ func main() {
 		// Set sanitized peer name
 		if unicode.IsDigit(rune(peerName[0])) {
 			// Add peer prefix if the first character of peerName is a number
-			peerData.ProtocolName = "PEER_" + sanitize(peerName)
+			*peerData.ProtocolName = "PEER_" + sanitize(peerName)
 		} else {
-			peerData.ProtocolName = sanitize(peerName)
+			*peerData.ProtocolName = sanitize(peerName)
 		}
 
 		// If a PeeringDB query is required
-		if peerData.AutoImportLimits || peerData.AutoASSet {
+		if *peerData.AutoImportLimits || *peerData.AutoASSet {
 			log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-			pDbData, err := getPeeringDbData(peerData.ASN)
+			pDbData, err := getPeeringDbData(*peerData.ASN)
 			if err != nil {
 				log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
 			}
 
 			// Set import limits
-			if peerData.AutoImportLimits {
-				peerData.ImportLimit6 = pDbData.ImportLimit4
-				peerData.ImportLimit6 = pDbData.ImportLimit6
+			if *peerData.AutoImportLimits {
+				*peerData.ImportLimit6 = pDbData.ImportLimit4
+				*peerData.ImportLimit6 = pDbData.ImportLimit6
 
 				if pDbData.ImportLimit4 == 0 {
 					log.Warnf("[%s] has an IPv4 import limit of zero from PeeringDB", peerName)
@@ -150,7 +150,7 @@ func main() {
 			}
 
 			// Set as-set
-			if peerData.AutoASSet {
+			if *peerData.AutoASSet {
 				if pDbData.ASSet == "" {
 					log.Infof("[%s] doesn't have an as-set in PeeringDB", peerName)
 					// TODO: Exit or skip this peer?
@@ -164,31 +164,31 @@ func main() {
 
 				// Trim IRRDB prefix
 				if strings.Contains(pDbData.ASSet, "::") {
-					peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
-					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
+					*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 				} else {
-					peerData.ASSet = pDbData.ASSet
+					*peerData.ASSet = pDbData.ASSet
 				}
 			}
 		} // end peeringdb query enabled
 
 		// Build IRR prefix sets
-		if peerData.FilterIRR {
+		if *peerData.FilterIRR {
 			// Check for empty as-set
-			if peerData.ASSet == "" {
+			if *peerData.ASSet == "" {
 				log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
 			}
 
-			prefixesFromIRR4, err := getIRRPrefixSet(peerData.ASSet, 4, globalConfig)
+			prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig)
 			if err != nil {
-				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-			peerData.PrefixSet4 = append(peerData.PrefixSet4, prefixesFromIRR4)
-			prefixesFromIRR6, err := getIRRPrefixSet(peerData.ASSet, 6, globalConfig)
+			*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefixesFromIRR4)
+			prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig)
 			if err != nil {
-				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.ASSet)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-			peerData.PrefixSet6 = append(peerData.PrefixSet6, prefixesFromIRR6)
+			*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
 		}
 
 		printPeerInfo(peerName, peerData)

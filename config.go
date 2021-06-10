@@ -161,8 +161,8 @@ type iface struct {
 
 // loadConfig loads a configuration file from a YAML file
 func loadConfig(configBlob []byte) (*config, error) {
-	var config config
-	if err := yaml.UnmarshalStrict(configBlob, &config); err != nil {
+	var c config
+	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
 		return nil, errors.New("yaml unmarshal: " + err.Error())
 	}
 
@@ -172,14 +172,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 	}
 
 	// Assign values from template
-	for peerName, peerData := range config.Peers { // For each peer
+	for peerName, peerData := range c.Peers { // For each peer
 		if peerData.Template != nil && *peerData.Template != "" {
-			template := config.Templates[*peerData.Template]
+			template := c.Templates[*peerData.Template]
 			if template == nil {
 				log.Fatalf("template %s not found", *peerData.Template)
 			}
 			templateValue := reflect.ValueOf(*template)
-			peerValue := reflect.ValueOf(config.Peers[peerName]).Elem()
+			peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
 
 			templateValueType := templateValue.Type()
 			for i := 0; i < templateValueType.NumField(); i++ {
@@ -204,7 +204,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		} // end peer template processor
 
 		// Set default values
-		peerValue := reflect.ValueOf(config.Peers[peerName]).Elem()
+		peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
 		templateValueType := peerValue.Type()
 		for i := 0; i < templateValueType.NumField(); i++ {
 			fieldName := templateValueType.Field(i).Name
@@ -242,25 +242,25 @@ func loadConfig(configBlob []byte) (*config, error) {
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
-	for _, prefix := range config.Prefixes {
+	for _, prefix := range c.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("invalid origin prefix: " + prefix)
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			config.Prefixes4 = append(config.Prefixes4, prefix)
+			c.Prefixes4 = append(c.Prefixes4, prefix)
 		} else { // If IPv4
-			config.Prefixes6 = append(config.Prefixes6, prefix)
+			c.Prefixes6 = append(c.Prefixes6, prefix)
 		}
 	}
 
 	// Initialize static maps
-	config.Augments.Statics4 = map[string]string{}
-	config.Augments.Statics6 = map[string]string{}
+	c.Augments.Statics4 = map[string]string{}
+	c.Augments.Statics6 = map[string]string{}
 
 	// Parse static routes
-	for prefix, nexthop := range config.Augments.Statics {
+	for prefix, nexthop := range c.Augments.Statics {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("invalid static prefix: " + prefix)
@@ -270,14 +270,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			config.Augments.Statics6[prefix] = nexthop
+			c.Augments.Statics6[prefix] = nexthop
 		} else { // If IPv4
-			config.Augments.Statics4[prefix] = nexthop
+			c.Augments.Statics4[prefix] = nexthop
 		}
 	}
 
 	// Parse VRRP configs
-	for _, vrrpInstance := range config.VRRPInstances {
+	for _, vrrpInstance := range c.VRRPInstances {
 		// Sort VIPs by address family
 		for _, vip := range vrrpInstance.VIPs {
 			ip, _, err := net.ParseCIDR(vip)
@@ -302,7 +302,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 	}
 
-	for _, peerData := range config.Peers {
+	for _, peerData := range c.Peers {
 		// Build static prefix filters
 		if peerData.Prefixes != nil {
 			for _, prefix := range *peerData.Prefixes {
@@ -359,14 +359,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 			}
 		}
 
-		// Check for empty
-		if len(config.Prefixes) < 1 && *peerData.AnnounceOriginated {
+		// Check for no originated prefixes but announce-originated enabled
+		if len(c.Prefixes) < 1 && *peerData.AnnounceOriginated {
 			// No locally originated prefixes are defined, so there's nothing to originate
 			*peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
 
-	return &config, nil // nil error
+	return &c, nil // nil error
 }
 
 func documentConfigTypes(t reflect.Type) {

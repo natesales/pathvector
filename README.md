@@ -12,3 +12,13 @@ https://natesales.github.io/wireframe/
 #### *Notice:* BCG is now Wireframe
 
 Wireframe started out as "bcg" (BIRD Configuration Generator) but has since grown to be much more than just a templating utility for BIRD. Now with support for an XDP dataplane, VRRP, and interface configuration, it's being renamed to Wireframe to make it clear that it's no longer just for BIRD. It's the same codebase as always, just with a new name to reflect new features.
+
+1. Read in YAML file
+2. Apply default values
+3.
+    for peer in peers:
+        if peer.template != "":
+
+Templating pipeline:
+1. Apply default values
+2. if (template.value != default.value) && (peer.value == default.value)

@@ -101,13 +101,18 @@ func main() {
 						if bf.IsValid() {
 							log.Printf("[%s] template: %+v peer: %+v", peerName, av.Field(i), bf)
 							// if (template.value != default.value) && (peer.value == default.value)
-							_templateValue := av.Field(i).Interface()
-							_peer_value := bf.Interface()
+							templateValue := av.Field(i).Interface()
+							peerValue := bf.Interface()
 
 							//           template_value != peer_value
 							//if (av.Field(i).Interface() != bf.Interface()) && () {
-							log.Printf("_templateValue %+v defaultValue %+v, (_templateValue != defaultValue): %+v and (_peer_value == defaultValue): %+v", _templateValue, defaultValue, _templateValue != defaultValue, (_peer_value == defaultValue))
-							if (_templateValue != defaultValue) && (_peer_value == defaultValue) {
+							log.Printf("templateValue %+v defaultValue %+v, (templateValue != defaultValue): %+v and (peerValue == defaultValue): %+v",
+								templateValue,
+								defaultValue,
+								templateValue != defaultValue,
+								peerValue == defaultValue,
+							)
+							if (templateValue != defaultValue) && (peerValue == defaultValue) {
 								log.Printf("[%s] setting %s, %+v -> %+v", peerName, name, bf, av.Field(i))
 								bf.Set(av.Field(i))
 							}

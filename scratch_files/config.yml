@@ -11,9 +11,16 @@ peers:
     neighbors:
       - 192.0.2.2
   Cogent:
-    asn: 179
+    asn: 174
     local-pref: 2
     template: upstream
     filter-irr: true
+    neighbors:
+      - 192.0.2.3
+
+  Cogent2:
+    asn: 174
+    local-pref: 2
+    filter-irr: false
     neighbors:
       - 192.0.2.3

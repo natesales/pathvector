@@ -171,6 +171,13 @@ func loadConfig(configBlob []byte) (*config, error) {
 		return nil, errors.New("validation: " + err.Error())
 	}
 
+	// Check for invalid templates
+	for templateName, templateData := range c.Templates {
+		if templateData.Template != nil && *templateData.Template != "" {
+			log.Fatalf("templates must not have a template attribute set, but %s does", templateName)
+		}
+	}
+
 	// Assign values from template
 	for peerName, peerData := range c.Peers { // For each peer
 		if peerData.Template != nil && *peerData.Template != "" {

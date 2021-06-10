@@ -140,6 +140,89 @@ vrrp:
 	}
 }
 
+func TestTemplateInheritance(t *testing.T) {
+	configFile := `
+asn: 34553
+router-id: 192.0.2.1
+templates:
+  upstream:
+    local-pref: 90
+    filter-irr: false
+
+peers:
+  Upstream 1:
+    asn: 65510
+    template: upstream
+    neighbors:
+      - 192.0.2.2
+
+  Upstream 2:
+    asn: 65520
+    local-pref: 2
+    template: upstream
+    filter-irr: true
+    neighbors:
+      - 192.0.2.3
+
+  Upstream 3:
+    asn: 65530
+    local-pref: 2
+    filter-irr: false
+    neighbors:
+      - 192.0.2.4
+`
+	globalConfig, err := loadConfig([]byte(configFile))
+	if err != nil {
+		t.Error(err)
+	}
+
+	for peerName, peerData := range globalConfig.Peers {
+		if peerName == "Upstream 1" {
+			if *peerData.ASN != 65510 {
+				t.Errorf("peer %s expected ASN 65510 got %d", peerName, *peerData.ASN)
+			}
+			if *peerData.LocalPref != 90 {
+				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
+			}
+			if *peerData.FilterIRR != false {
+				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
+			}
+			if *peerData.FilterRPKI != true {
+				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
+			}
+		} else if peerName == "Upstream 2" {
+			if *peerData.ASN != 65520 {
+				t.Errorf("peer %s expected ASN 65520 got %d", peerName, *peerData.ASN)
+			}
+			if *peerData.LocalPref != 2 {
+				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
+			}
+			if *peerData.FilterIRR != true {
+				t.Errorf("peer %s expected filter-irr true got %v", peerName, *peerData.FilterIRR)
+			}
+			if *peerData.FilterRPKI != true {
+				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
+			}
+		} else if peerName == "Upstream 3" {
+			if *peerData.ASN != 65530 {
+				t.Errorf("peer %s expected ASN 65530 got %d", peerName, *peerData.ASN)
+			}
+			if *peerData.LocalPref != 2 {
+				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
+			}
+			if *peerData.FilterIRR != false {
+				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
+			}
+			if *peerData.FilterRPKI != true {
+				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
+			}
+		} else {
+			t.Errorf("")
+		}
+	}
+}
+
+// TODO: lint the resulting markdown files
 func TestDocumentCLIFlags(t *testing.T) {
 	documentCliFlags()
 }

@@ -88,6 +88,13 @@ var funcMap = template.FuncMap{
 		}
 		return false
 	},
+
+	"IntDeref": func(i *int) int {
+		if i != nil {
+			return *i
+		}
+		return 0
+	},
 }
 
 // Templates

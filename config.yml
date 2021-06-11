@@ -1,48 +1,33 @@
-#router-id: 192.0.2.1
-#irr-server: rr.ntt.net
-#rtr-server: rtr.rpki.cloudflare.com
-#rtr-port: 8282
-#keep-filtered: true
-#merge-paths: true
-#source4: 192.0.2.1
-#source6: 2001:db8::1
-#asn: 34553
-#prefixes:
-#  - 192.0.2.0/24
-#  - 2001:db8::/48
-#templates:
-#  upstream:
-#    local-pref: 90
-#    filter-irr: false
-#    import-communities:
-#      - 34553,1
-#
-#peers:
-#  Example:
-#    asn: 6939
-#    template: upstream
-#    neighbors:
-#      - 203.0.113.25
-#      - 2001:db8:2::25
-#  Example 2:
-#    asn: 6939
-#    template: upstream
-#    local-pref: 102
-#    neighbors:
-#      - 203.0.113.25
-#      - 2001:db8:2::25
-asn: 34553
 router-id: 192.0.2.1
+irr-server: rr.ntt.net
+rtr-server: rtr.rpki.cloudflare.com
+rtr-port: 8282
+keep-filtered: true
+merge-paths: true
+source4: 192.0.2.1
+source6: 2001:db8::1
+asn: 34553
+prefixes:
+  - 192.0.2.0/24
+  - 2001:db8::/48
 templates:
   upstream:
     local-pref: 90
     filter-irr: false
+    import-communities:
+      - 34553,1
 
 peers:
-  HE:
+  Example:
     asn: 6939
     template: upstream
-  Cogent:
+    neighbors:
+      - 203.0.113.25
+      - 2001:db8:2::25
+  Example 2:
     asn: 6939
-    local-pref: 2
     template: upstream
+    local-pref: 102
+    neighbors:
+      - 203.0.113.25
+      - 2001:db8:2::25

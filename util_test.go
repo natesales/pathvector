@@ -34,7 +34,7 @@ func TestSanitize(t *testing.T) {
 		{"65530", "65530"},
 	}
 	for _, tc := range testCases {
-		if out := sanitize(tc.input); out != tc.expectedOutput {
+		if out := *sanitize(tc.input); out != tc.expectedOutput {
 			t.Errorf("sanitize %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, out)
 		}
 	}

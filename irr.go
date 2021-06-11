@@ -16,7 +16,7 @@ func asSetToFilterName(asSet string, family uint8) (string, error) {
 	if !(family == 4 || family == 6) {
 		return "", errors.New("code error: getIRRPrefixSet family must be 4 or 6")
 	}
-	return fmt.Sprintf("PFXSET_%s_IP%d", sanitize(asSet), family), nil
+	return fmt.Sprintf("PFXSET_%s_IP%d", *sanitize(asSet), family), nil
 }
 
 // Use bgpq4 to generate a prefix filter and return only the filter lines

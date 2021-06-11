@@ -182,7 +182,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 	for peerName, peerData := range c.Peers { // For each peer
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
-			if template == nil {
+			if template == nil || &template == nil {
 				log.Fatalf("template %s not found", *peerData.Template)
 			}
 			templateValue := reflect.ValueOf(*template)

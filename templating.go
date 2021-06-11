@@ -74,6 +74,20 @@ var funcMap = template.FuncMap{
 		}
 		return []string{}
 	},
+
+	"StrDeref": func(i *string) string {
+		if i != nil {
+			return *i
+		}
+		return ""
+	},
+
+	"BoolDeref": func(i *bool) bool {
+		if i != nil {
+			return *i
+		}
+		return false
+	},
 }
 
 // Templates

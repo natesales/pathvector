@@ -178,8 +178,12 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 	}
 
-	// Assign values from template
-	for peerName, peerData := range c.Peers { // For each peer
+	for peerName, peerData := range c.Peers {
+		if peerData.NeighborIPs == nil || len(*peerData.NeighborIPs) < 1 {
+			log.Fatalf("[%s] has no neighbors defined", peerName)
+		}
+
+		// Assign values from template
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
 			if template == nil || &template == nil {

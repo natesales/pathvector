@@ -339,8 +339,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 			for _, community := range *peerData.ImportCommunities {
 				communityType := categorizeCommunity(community)
 				if communityType == "standard" {
+					if peerData.ImportStandardCommunities == nil {
+						peerData.ImportStandardCommunities = &[]string{}
+					}
 					*peerData.ImportStandardCommunities = append(*peerData.ImportStandardCommunities, community)
 				} else if communityType == "large" {
+					if peerData.ImportLargeCommunities == nil {
+						peerData.ImportLargeCommunities = &[]string{}
+					}
 					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, community)
 				} else {
 					return nil, errors.New("invalid import community: " + community)

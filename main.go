@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"fmt"
 	"io/ioutil"
@@ -190,16 +191,43 @@ func main() {
 		// Write peer file
 		if !cliFlags.DryRun {
 			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName))))
+			peerFileName := path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
+			peerSpecificFile, err := os.Create(peerFileName)
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}
 
-			// Render the template and write to disk
+			// Render the template and write to buffer
+			var b bytes.Buffer
 			log.Debugf("[%s] Writing config", peerName)
-			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
+			err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
 			if err != nil {
 				log.Fatalf("Execute template: %v", err)
+			}
+
+			// Reformat file from buffer
+			formatted := ""
+			contents := b.String()
+			for _, line := range strings.Split(contents, "\n") {
+				if strings.HasSuffix(line, "{") {
+					formatted += "\n"
+				}
+
+				if !func(input string) bool {
+					for _, chr := range []rune(input) {
+						if string(chr) != " " {
+							return false
+						}
+					}
+					return true
+				}(line) {
+					formatted += line + "\n"
+				}
+			}
+
+			// Write template to file
+			if _, err := peerSpecificFile.Write([]byte(formatted)); err != nil {
+				log.Fatalf("write template to file: %v", err)
 			}
 
 			log.Debugf("[%s] Wrote config", peerName)

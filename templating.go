@@ -27,10 +27,10 @@ var funcMap = template.FuncMap{
 		return strings.Contains(s, substr)
 	},
 
-	"Iterate": func(count *uint) []uint {
+	"Iterate": func(count *int) []int {
 		// Create array with `count` entries
-		var i uint
-		var items []uint
+		var i int
+		var items []int
 		for i = 0; i < (*count); i++ {
 			items = append(items, i)
 		}

@@ -1,34 +1,34 @@
-{{- $peer := .Peer }}{{ $peerName := .Name }}{{ $global := .Config -}}
+{{ $peer := .Peer }}{{ $peerName := .Name }}{{ $global := .Config -}}
 
 # {{ .Name }} AS{{ .Peer.ASN }}
 
-define AS{{ .Peer.ASN }}_{{ .Name }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
-define AS{{ .Peer.ASN }}_{{ .Name }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
+define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
+define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
 
 {{ if .Peer.FilterIRR -}}
-{{ if NotEmpty .Peer.PrefixSet4 }}
-define AS{{ .Peer.ASN }}_{{ .Name }}_PFX_v4 = [
-{{ BirdSet .Peer.PrefixSet4 }}
-];
+    {{ if NotEmpty .Peer.PrefixSet4 }}
+        define AS{{ .Peer.ASN }}_{{ $peer.Protocol.Name }}_PFX_v4 = [
+        {{ BirdSet .Peer.PrefixSet4 }}
+        ];
+    {{ end }}
+
+    {{ if NotEmpty .Peer.PrefixSet6 }}
+        define AS{{ .Peer.ASN }}_{{ $peer.Protocol.Name }}_PFX_v6 = [
+        {{ BirdSet .Peer.PrefixSet6 }}
+        ];
+    {{ end }}
 {{ end }}
 
-{{ if NotEmpty .Peer.PrefixSet6 }}
-define AS{{ .Peer.ASN }}_{{ .Name }}_PFX_v6 = [
-{{ BirdSet .Peer.PrefixSet6 }}
-];
-{{ end }}
-{{ end -}}
-
-{{- range $i, $neighbor := $peer.NeighborIPs -}}
+{{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{- if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
 protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
     local{{ if $peer.Listen }} {{ $peer.Listen }}{{ end }} as ASN{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
-    {{ if BoolDeref $peer.Description }}description "{{ $peer.Description }}";{{ end }}
+    {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}
     {{ if BoolDeref $peer.Disabled }}disabled;{{ end }}
     {{ if BoolDeref $peer.Passive }}passive;{{ end }}
     {{ if BoolDeref $peer.Multihop }}multihop 255;{{ end }}
-    {{ if BoolDeref $peer.Password }}password "{{ $peer.Password }}";{{ end }}
+    {{ if StrDeref $peer.Password }}password "{{ StrDeref $peer.Password }}";{{ end }}
     {{ if BoolDeref $peer.RSClient }}rs client;{{ end }}
     {{ if BoolDeref $peer.RRClient }}rr client;{{ end }}
     {{ if BoolDeref $peer.BFD }}bfd on;{{ end }}
@@ -41,12 +41,11 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
     {{ end }}
     {{- range $i, $af := $protocols -}}
     ipv{{ $af }} {
-        {{ if BoolDeref $global.KeepFiltered -}}import keep filtered;{{ end -}}
+        {{ if BoolDeref $global.KeepFiltered -}}import keep filtered;{{ end }}
         import limit AS{{ $peer.ASN }}_{{ $peerName }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPrefixTripAction }};
-        {{ if or (IntCmp $peer.ASN $global.ASN) (BoolDeref $peer.NextHopSelf) }}next hop self;{{ end }}
+        {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         import filter {
-
-            {{- $peer.PreImport }}
+            {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogons }}reject_bogons();{{ end }}
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
@@ -58,10 +57,10 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
 
             {{- range $i, $community := StringSliceIter $peer.ImportStandardCommunities }}
             bgp_community.add(({{ $community }}));
-            {{ end -}}
+            {{ end }}
             {{- range $i, $community := StringSliceIter $peer.ImportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
-            {{ end -}}
+            {{ end }}
 
             {{- if BoolDeref $peer.FilterIRR }}
             if (net ~ AS{{ $peer.ASN }}_{{ $peerName }}_PFX_v{{ $af }}) then {
@@ -75,37 +74,47 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
         };
 
         export filter {
-
-            {{- StrDeref $peer.PreExport }}
+            {{ StrDeref $peer.PreExport }}
 
             {{- range $i, $community := StringSliceIter $peer.ExportStandardCommunities }}
             bgp_community.add(({{ $community }}));
             {{ end }}
+
             {{- range $i, $community := StringSliceIter $peer.ExportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
             {{ end }}
 
-            {{ if BoolDeref $peer.RemovePrivateASNs }}bgp_path.delete([64512..65534, 4200000000..4294967294]); # Strip private ASNs{{ end }}
+            {{ if BoolDeref $peer.RemovePrivateASNs }}
+            # Strip private ASNs
+            bgp_path.delete([64512..65534, 4200000000..4294967294]);
+            {{ end }}
 
-            {{- range $i := Iterate $peer.Prepends }}
+            {{ range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}
 
-            {{- if BoolDeref $global.AnnounceOriginated }}accept_local(); # Originated{{ end }}
+            {{ if BoolDeref $peer.AnnounceOriginated }}
+            accept_local();
+            {{ end }}
 
             {{- range $i, $community := StringSliceIter $peer.AnnounceStandardCommunities }}
             if (({{ $community }}) ~ bgp_community) then accept;
             {{ end }}
+
             {{- range $i, $community := StringSliceIter $peer.AnnounceLargeCommunities }}
             if (({{ $community }}) ~ bgp_large_community) then accept;
             {{ end }}
 
-            {{- if BoolDeref $peer.AnnounceDefault }}if (proto = "default{{ $af }}") then accept; # Send default route{{ end -}}
+            {{- if BoolDeref $peer.AnnounceDefault }}
+            # Send default route
+            if (proto = "default{{ $af }}") then accept;
+            {{ end -}}
+
             {{ StrDeref $peer.PreExportFinal }}
 
             reject;
         };
     };
-    {{- end }}
+    {{ end }}
 }
 {{ end }}

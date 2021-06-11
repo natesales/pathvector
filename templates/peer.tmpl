@@ -58,10 +58,10 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
             {{- if $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
             {{- if $peer.FilterTier1ASNs }}reject_transit_paths();{{ end }}
 
-            {{- range $i, $community := $peer.ImportStandardCommunities }}
+            {{- range $i, $community := StringSliceIter $peer.ImportStandardCommunities }}
             bgp_community.add(({{ $community }}));
             {{ end -}}
-            {{- range $i, $community := $peer.ImportLargeCommunities }}
+            {{- range $i, $community := StringSliceIter $peer.ImportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
             {{ end -}}
 
@@ -80,10 +80,10 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
 
             {{- $peer.PreExport }}
 
-            {{- range $i, $community := $peer.ExportStandardCommunities }}
+            {{- range $i, $community := StringSliceIter $peer.ExportStandardCommunities }}
             bgp_community.add(({{ $community }}));
             {{ end }}
-            {{- range $i, $community := $peer.ExportLargeCommunities }}
+            {{- range $i, $community := StringSliceIter $peer.ExportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
             {{ end }}
 

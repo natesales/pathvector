@@ -67,6 +67,13 @@ var funcMap = template.FuncMap{
 	"IntCmp": func(i *int, j int) bool {
 		return *i == j
 	},
+
+	"StringSliceIter": func(slice *[]string) []string {
+		if slice != nil {
+			return *slice
+		}
+		return []string{}
+	},
 }
 
 // Templates

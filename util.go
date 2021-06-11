@@ -3,6 +3,7 @@ package main
 import (
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
@@ -18,14 +19,20 @@ func contains(a []string, x string) bool {
 }
 
 // sanitize limits an input string to only uppercase letters and numbers
-func sanitize(input string) string {
+func sanitize(input string) *string {
 	output := ""
 	for _, chr := range []rune(strings.ToUpper(input)) {
 		if contains(alphabet, string(chr)) {
 			output += string(chr)
 		}
 	}
-	return output
+
+	// Add peer prefix if the first character of peerName is a number
+	if unicode.IsDigit(rune(output[0])) {
+		output = "PEER_" + output
+	}
+
+	return &output
 }
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid

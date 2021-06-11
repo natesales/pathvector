@@ -8,7 +8,6 @@ import (
 	"path"
 	"reflect"
 	"strings"
-	"unicode"
 
 	"github.com/jessevdk/go-flags"
 	log "github.com/sirupsen/logrus"
@@ -120,12 +119,7 @@ func main() {
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
 		// Set sanitized peer name
-		if unicode.IsDigit(rune(peerName[0])) {
-			// Add peer prefix if the first character of peerName is a number
-			*peerData.ProtocolName = "PEER_" + sanitize(peerName)
-		} else {
-			*peerData.ProtocolName = sanitize(peerName)
-		}
+		peerData.ProtocolName = sanitize(peerName)
 
 		// If a PeeringDB query is required
 		if *peerData.AutoImportLimits || *peerData.AutoASSet {

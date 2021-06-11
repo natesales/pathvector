@@ -50,9 +50,9 @@ var funcMap = template.FuncMap{
 		return output
 	},
 
-	"NotEmpty": func(arr []string) bool {
+	"NotEmpty": func(arr *[]string) bool {
 		// Is `arr` empty?
-		return len(arr) != 0
+		return arr != nil && len(*arr) != 0
 	},
 
 	"UnixTimestamp": func() string {

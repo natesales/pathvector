@@ -174,7 +174,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 	// Check for invalid templates
 	for templateName, templateData := range c.Templates {
 		if templateData.Template != nil && *templateData.Template != "" {
-			log.Fatalf("templates must not have a template attribute set, but %s does", templateName)
+			log.Fatalf("templates must not have a template field set, but %s does", templateName)
 		}
 	}
 
@@ -196,7 +196,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 			for i := 0; i < templateValueType.NumField(); i++ {
 				fieldName := templateValueType.Field(i).Name
 				peerFieldValue := peerValue.FieldByName(fieldName)
-				if fieldName != "Template" { // Ignore the template attribute
+				if fieldName != "Template" { // Ignore the template field
 					pVal := reflect.Indirect(peerFieldValue)
 					peerHasValueConfigured := pVal.IsValid()
 					tValue := templateValue.Field(i)

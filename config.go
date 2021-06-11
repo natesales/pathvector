@@ -36,14 +36,14 @@ type peer struct {
 	Disabled    *bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
 	// BGP Attributes
-	ASN               *uint     `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
+	ASN               *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
 	NeighborIPs       *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
-	Prepends          *uint     `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
-	LocalPref         *uint     `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	Prepends          *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	LocalPref         *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	Multihop          *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen            *string   `yaml:"listen" description:"BGP listen address" default:"-"`
-	LocalPort         *uint     `yaml:"local-port" description:"Local TCP port" default:"179"`
-	NeighborPort      *uint     `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
+	LocalPort         *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort      *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive           *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	NextHopSelf       *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
 	BFD               *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
@@ -60,8 +60,8 @@ type peer struct {
 
 	// Filtering
 	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
-	ImportLimit4            *uint   `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
-	ImportLimit6            *uint   `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
+	ImportLimit4            *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
+	ImportLimit6            *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"100000"`
 	EnforceFirstAS          *bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
 	EnforcePeerNexthop      *bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
 	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
@@ -198,14 +198,12 @@ func loadConfig(configBlob []byte) (*config, error) {
 					tValue := templateValue.Field(i)
 					templateHasValueConfigured := !tValue.IsNil()
 
-					if peerHasValueConfigured {
-						// Dont do anything
-					} else if templateHasValueConfigured && !peerHasValueConfigured {
-						// Use the templates value
+					if templateHasValueConfigured && !peerHasValueConfigured {
+						// Use the template's value
 						peerFieldValue.Set(templateValue.Field(i))
 					}
 
-					//log.Printf("[%s] %s val: %+v type: %T hasConfigured: %v", peerName, fieldName, tValue, tValue, templateHasValueConfigured)
+					log.Debugf("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
 				}
 			}
 		} // end peer template processor
@@ -219,31 +217,37 @@ func loadConfig(configBlob []byte) (*config, error) {
 			defaultString := templateValueType.Field(i).Tag.Get("default")
 			if defaultString == "" {
 				log.Fatalf("code error: field %s has no default value", fieldName)
-			}
-			//log.Printf("peer %s field %s value %+v", peerName, fieldName, fieldValue)
-			if fieldValue.IsNil() {
-				elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
-				switch elemToSwitch {
-				case reflect.String:
-					fieldValue.Set(reflect.ValueOf(&defaultString))
-				case reflect.Int:
-					defaultValueInt, err := strconv.Atoi(defaultString)
-					if err != nil {
-						log.Fatalf("cant convert '%s' to uint", defaultString)
+			} else if defaultString != "-" {
+				log.Debugf("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
+				if fieldValue.IsNil() {
+					elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
+					switch elemToSwitch {
+					case reflect.String:
+						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultString)
+						fieldValue.Set(reflect.ValueOf(&defaultString))
+					case reflect.Int:
+						defaultValueInt, err := strconv.Atoi(defaultString)
+						if err != nil {
+							log.Fatalf("cant convert '%s' to uint", defaultString)
+						}
+						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultValueInt)
+						fieldValue.Set(reflect.ValueOf(&defaultValueInt))
+					case reflect.Bool:
+						var err error // explicit declaration used to avoid scope issues of defaultValue
+						defaultBool, err := strconv.ParseBool(defaultString)
+						if err != nil {
+							log.Fatalf("can't parse bool %s", defaultString)
+						}
+						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultBool)
+						fieldValue.Set(reflect.ValueOf(&defaultBool))
+					case reflect.Struct, reflect.Slice:
+						// Ignore structs and slices
+					default:
+						log.Fatalf("unknown kind %+v for field %s", elemToSwitch, fieldName)
 					}
-					fieldValue.Set(reflect.ValueOf(&defaultValueInt))
-				case reflect.Bool:
-					var err error // explicit declaration used to avoid scope issues of defaultValue
-					defaultBool, err := strconv.ParseBool(defaultString)
-					if err != nil {
-						log.Fatalf("can't parse bool %s", defaultString)
-					}
-					fieldValue.Set(reflect.ValueOf(&defaultBool))
-				case reflect.Struct, reflect.Slice:
-					// Ignore structs and slices
-				default:
-					log.Fatalf("unknown kind %+v for field %s", elemToSwitch, fieldName)
 				}
+			} else {
+				log.Debugf("[%s] skipping field %s with ingored default (-)", peerName, fieldName)
 			}
 		}
 	}
@@ -393,7 +397,7 @@ func documentConfigTypes(t reflect.Type) {
 		key := field.Tag.Get("yaml")
 		validation := field.Tag.Get("validate")
 		fDefault := field.Tag.Get("default")
-		if fDefault != "" {
+		if fDefault != "-" {
 			fDefault = "`" + fDefault + "`"
 		}
 

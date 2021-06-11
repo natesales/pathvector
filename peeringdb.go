@@ -19,12 +19,12 @@ type peeringDbResponse struct {
 type peeringDbData struct {
 	Name         string `json:"name"`
 	ASSet        string `json:"irr_as_set"`
-	ImportLimit4 uint   `json:"info_prefixes4"`
-	ImportLimit6 uint   `json:"info_prefixes6"`
+	ImportLimit4 int    `json:"info_prefixes4"`
+	ImportLimit6 int    `json:"info_prefixes6"`
 }
 
 // Query PeeringDB for an ASN
-func getPeeringDbData(asn uint) (*peeringDbData, error) {
+func getPeeringDbData(asn int) (*peeringDbData, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(cliFlags.PeeringDbQueryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
 	if err != nil {

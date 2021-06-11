@@ -7,11 +7,11 @@ import (
 
 func TestPeeringDbQuery(t *testing.T) {
 	testCases := []struct {
-		asn          uint
+		asn          int
 		asSet        string
 		name         string
-		importLimit4 uint
-		importLimit6 uint
+		importLimit4 int
+		importLimit6 int
 		shouldError  bool
 	}{
 		{112, "AS112", "DNS-OARC-112", 2, 2, false},

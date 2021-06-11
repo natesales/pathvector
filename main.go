@@ -190,7 +190,7 @@ func main() {
 		// Write peer file
 		if !cliFlags.DryRun {
 			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", peerData.ASN, sanitize(peerName))))
+			peerSpecificFile, err := os.Create(path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName))))
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
 			}

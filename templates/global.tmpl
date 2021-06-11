@@ -273,6 +273,26 @@ function strip_info_communities() {
   bgp_large_community.delete([(ASN, 0, *)]);
 }
 
+function process_prepends() {
+  if ((ASN,1,401) ~ bgp_large_community) then {
+    print "Adding single prepend for ", net;
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,1,402) ~ bgp_large_community) then {
+    print "Adding double prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,1,403) ~ bgp_large_community) then {
+    print "Adding triple prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+}
+
 function accept_local() {
   {{ if .Prefixes4 -}}
   if (net ~ LOCALv4 ) then {
@@ -287,28 +307,6 @@ function accept_local() {
     accept;
   }
   {{- end }}
-}
-
-function process_prepends() {
-  if ((ASN,0,103) ~ bgp_large_community) then { # Learned from downstream
-    if ((ASN,1,401) ~ bgp_large_community) then {
-      print "Adding single prepend for ", net;
-      bgp_path.prepend(ASN);
-    }
-
-    if ((ASN,1,402) ~ bgp_large_community) then {
-      print "Adding double prepend for ", net;
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-    }
-
-    if ((ASN,1,403) ~ bgp_large_community) then {
-      print "Adding triple prepend for ", net;
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-    }
-  }
 }
 
 function reject_bogons() {

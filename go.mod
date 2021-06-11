@@ -3,7 +3,6 @@ module github.com/natesales/wireframe
 go 1.16
 
 require (
-	github.com/creasty/defaults v1.5.1
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/joomcode/errorx v1.0.3

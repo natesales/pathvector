@@ -125,7 +125,7 @@ type augments struct {
 }
 
 type config struct {
-	ASN              uint     `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
+	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
@@ -133,7 +133,7 @@ type config struct {
 	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RTRPort       uint   `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	RTRPort       int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`

@@ -63,6 +63,10 @@ var funcMap = template.FuncMap{
 	"MakeSlice": func(args ...interface{}) []interface{} {
 		return args
 	},
+
+	"IntCmp": func(i *int, j int) bool {
+		return *i == j
+	},
 }
 
 // Templates

@@ -45,7 +45,7 @@ protocol bgp {{ $peer.ProtocolName }}v{{ $af }}_{{ $i }} {
         import keep filtered;
         {{ end -}}
         import limit AS{{ $peer.ASN }}_{{ $peerName }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPrefixTripAction }};
-        {{ if or (eq $peer.ASN $global.ASN) ($peer.NextHopSelf) }}next hop self;{{ end }}
+        {{ if or (IntCmp $peer.ASN $global.ASN) ($peer.NextHopSelf) }}next hop self;{{ end }}
         import filter {
 
             {{- $peer.PreImport }}

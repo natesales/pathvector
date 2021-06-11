@@ -17,7 +17,7 @@
 | `source6` | `string` |  |  | Source IPv6 address |
 | `accept-default` | `bool` | `false` |  | Should default routes be added to the bogon list? |
 | `peers` | `map[string]*peer` |  |  | BGP peer configuration |
-| `templates` | `map[string]peer` |  |  | BGP peer templates |
+| `templates` | `map[string]*peer` |  |  | BGP peer templates |
 | `interfaces` | `map[string]iface` |  |  | Network interface configuration |
 | `vrrp` | `[]vrrpInstance` |  |  | List of VRRP instances |
 | `augments` | `augments` |  |  | Custom configuration options |
@@ -27,104 +27,104 @@
 ## *peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
-| `template` | `string` |  |  | Configuration template |
-| `description` | `string` |  |  | Peer description |
-| `disabled` | `bool` | `false` |  | Should the sessions be disabled? |
-| `asn` | `uint` | `0` | required | Local ASN |
-| `neighbors` | `[]string` |  | required,ip | List of neighbor IPs |
-| `prepends` | `uint` | `0` |  | Number of times to prepend local AS on export |
-| `local-pref` | `uint` | `100` |  | BGP local preference |
-| `multihop` | `bool` | `false` |  | Should BGP multihop be enabled? (255 max hops) |
-| `listen` | `string` |  |  | BGP listen address |
-| `local-port` | `uint` | `179` |  | Local TCP port |
-| `neighbor-port` | `uint` | `179` |  | Neighbor TCP port |
-| `passive` | `bool` | `false` |  | Should we listen passively? |
-| `next-hop-self` | `bool` | `false` |  | Should BGP next-hop-self be enabled? |
-| `bfd` | `bool` | `false` |  | Should BFD be enabled? |
-| `password` | `string` |  |  | BGP MD5 password |
-| `rs-client` | `bool` | `false` |  | Should this peer be a route server client? |
-| `rr-client` | `bool` | `false` |  | Should this peer be a route reflector client? |
-| `remove-private-as` | `bool` | `true` |  | Should private ASNs be removed from path before exporting? |
-| `mp-unicast-46` | `bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
-| `allow-local-as` | `bool` | `false` |  | Should routes originated by the local ASN be accepted? |
-| `import-communities` | `[]string` |  |  | List of communities to add to all imported routes |
-| `export-communities` | `[]string` |  |  | List of communities to add to all exported routes |
-| `announce-communities` | `[]string` |  |  | Announce all routes matching these communities to the peer |
-| `as-set` | `string` |  |  | Peer's as-set for filtering |
-| `import-limit4` | `uint` | `1000000` |  | Maximum number of IPv4 prefixes to import |
-| `import-limit6` | `uint` | `100000` |  | Maximum number of IPv6 prefixes to import |
-| `enforce-first-as` | `bool` | `true` |  | Should we only accept routes who's first AS is equal to the configured peer address? |
-| `enforce-peer-nexthop` | `bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
-| `max-prefix-action` | `string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
-| `allow-blackhole-community` | `bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
-| `filter-irr` | `bool` | `true` |  | Should IRR filtering be applied? |
-| `filter-rpki` | `bool` | `true` |  | Should RPKI invalids be rejected? |
-| `filter-max-prefix` | `bool` | `true` |  | Should max prefix filtering be applied? |
-| `filter-bogons` | `bool` | `true` |  | Should bogon prefixes be rejected? |
-| `filter-tier1-asns` | `bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
-| `filter-small-prefixes` | `bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
-| `auto-import-limits` | `bool` | `false` |  | Get import limits automatically from PeeringDB? |
-| `auto-as-set` | `bool` | `false` |  | Get as-set automatically from PeeringDB? |
-| `prefixes` | `[]string` |  |  | Prefixes to accept |
-| `announce-default` | `bool` | `false` |  | Should a default route be exported to this peer? |
-| `announce-originated` | `bool` | `true` |  | Should locally originated routes be announced to this peer? |
-| `session-global` | `string` |  |  | Configuration to add to each session before any defined BGP protocols |
-| `pre-import` | `string` |  |  | Configuration to add at the beginning of the import filter |
-| `pre-export` | `string` |  |  | Configuration to add at the beginning of the export filter |
-| `pre-import-final` | `string` |  |  | Configuration to add immediately before the final accept/reject on import |
-| `pre-export-final` | `string` |  |  | Configuration to add immediately before the final accept/reject on export |
+| `template` | `*string` | `-` |  | Configuration template |
+| `description` | `*string` | `-` |  | Peer description |
+| `disabled` | `*bool` | `false` |  | Should the sessions be disabled? |
+| `asn` | `*uint` | `0` | required | Local ASN |
+| `neighbors` | `*[]string` | `-` | required,ip | List of neighbor IPs |
+| `prepends` | `*uint` | `0` |  | Number of times to prepend local AS on export |
+| `local-pref` | `*uint` | `100` |  | BGP local preference |
+| `multihop` | `*bool` | `false` |  | Should BGP multihop be enabled? (255 max hops) |
+| `listen` | `*string` | `-` |  | BGP listen address |
+| `local-port` | `*uint` | `179` |  | Local TCP port |
+| `neighbor-port` | `*uint` | `179` |  | Neighbor TCP port |
+| `passive` | `*bool` | `false` |  | Should we listen passively? |
+| `next-hop-self` | `*bool` | `false` |  | Should BGP next-hop-self be enabled? |
+| `bfd` | `*bool` | `false` |  | Should BFD be enabled? |
+| `password` | `*string` | `-` |  | BGP MD5 password |
+| `rs-client` | `*bool` | `false` |  | Should this peer be a route server client? |
+| `rr-client` | `*bool` | `false` |  | Should this peer be a route reflector client? |
+| `remove-private-as` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
+| `mp-unicast-46` | `*bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
+| `allow-local-as` | `*bool` | `false` |  | Should routes originated by the local ASN be accepted? |
+| `import-communities` | `*[]string` | `-` |  | List of communities to add to all imported routes |
+| `export-communities` | `*[]string` | `-` |  | List of communities to add to all exported routes |
+| `announce-communities` | `*[]string` | `-` |  | Announce all routes matching these communities to the peer |
+| `as-set` | `*string` | `-` |  | Peer's as-set for filtering |
+| `import-limit4` | `*uint` | `1000000` |  | Maximum number of IPv4 prefixes to import |
+| `import-limit6` | `*uint` | `100000` |  | Maximum number of IPv6 prefixes to import |
+| `enforce-first-as` | `*bool` | `true` |  | Should we only accept routes who's first AS is equal to the configured peer address? |
+| `enforce-peer-nexthop` | `*bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
+| `max-prefix-action` | `*string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
+| `allow-blackhole-community` | `*bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
+| `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
+| `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
+| `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
+| `filter-bogons` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-tier1-asns` | `*bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
+| `filter-small-prefixes` | `*bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
+| `auto-import-limits` | `*bool` | `false` |  | Get import limits automatically from PeeringDB? |
+| `auto-as-set` | `*bool` | `false` |  | Get as-set automatically from PeeringDB? |
+| `prefixes` | `*[]string` | `-` |  | Prefixes to accept |
+| `announce-default` | `*bool` | `false` |  | Should a default route be exported to this peer? |
+| `announce-originated` | `*bool` | `true` |  | Should locally originated routes be announced to this peer? |
+| `session-global` | `*string` | `-` |  | Configuration to add to each session before any defined BGP protocols |
+| `pre-import` | `*string` | `-` |  | Configuration to add at the beginning of the import filter |
+| `pre-export` | `*string` | `-` |  | Configuration to add at the beginning of the export filter |
+| `pre-import-final` | `*string` | `-` |  | Configuration to add immediately before the final accept/reject on import |
+| `pre-export-final` | `*string` | `-` |  | Configuration to add immediately before the final accept/reject on export |
 
 <!-- Code generated DO NOT EDIT -->
 # Configuration
-## peer
+## *peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
-| `template` | `string` |  |  | Configuration template |
-| `description` | `string` |  |  | Peer description |
-| `disabled` | `bool` | `false` |  | Should the sessions be disabled? |
-| `asn` | `uint` | `0` | required | Local ASN |
-| `neighbors` | `[]string` |  | required,ip | List of neighbor IPs |
-| `prepends` | `uint` | `0` |  | Number of times to prepend local AS on export |
-| `local-pref` | `uint` | `100` |  | BGP local preference |
-| `multihop` | `bool` | `false` |  | Should BGP multihop be enabled? (255 max hops) |
-| `listen` | `string` |  |  | BGP listen address |
-| `local-port` | `uint` | `179` |  | Local TCP port |
-| `neighbor-port` | `uint` | `179` |  | Neighbor TCP port |
-| `passive` | `bool` | `false` |  | Should we listen passively? |
-| `next-hop-self` | `bool` | `false` |  | Should BGP next-hop-self be enabled? |
-| `bfd` | `bool` | `false` |  | Should BFD be enabled? |
-| `password` | `string` |  |  | BGP MD5 password |
-| `rs-client` | `bool` | `false` |  | Should this peer be a route server client? |
-| `rr-client` | `bool` | `false` |  | Should this peer be a route reflector client? |
-| `remove-private-as` | `bool` | `true` |  | Should private ASNs be removed from path before exporting? |
-| `mp-unicast-46` | `bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
-| `allow-local-as` | `bool` | `false` |  | Should routes originated by the local ASN be accepted? |
-| `import-communities` | `[]string` |  |  | List of communities to add to all imported routes |
-| `export-communities` | `[]string` |  |  | List of communities to add to all exported routes |
-| `announce-communities` | `[]string` |  |  | Announce all routes matching these communities to the peer |
-| `as-set` | `string` |  |  | Peer's as-set for filtering |
-| `import-limit4` | `uint` | `1000000` |  | Maximum number of IPv4 prefixes to import |
-| `import-limit6` | `uint` | `100000` |  | Maximum number of IPv6 prefixes to import |
-| `enforce-first-as` | `bool` | `true` |  | Should we only accept routes who's first AS is equal to the configured peer address? |
-| `enforce-peer-nexthop` | `bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
-| `max-prefix-action` | `string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
-| `allow-blackhole-community` | `bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
-| `filter-irr` | `bool` | `true` |  | Should IRR filtering be applied? |
-| `filter-rpki` | `bool` | `true` |  | Should RPKI invalids be rejected? |
-| `filter-max-prefix` | `bool` | `true` |  | Should max prefix filtering be applied? |
-| `filter-bogons` | `bool` | `true` |  | Should bogon prefixes be rejected? |
-| `filter-tier1-asns` | `bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
-| `filter-small-prefixes` | `bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
-| `auto-import-limits` | `bool` | `false` |  | Get import limits automatically from PeeringDB? |
-| `auto-as-set` | `bool` | `false` |  | Get as-set automatically from PeeringDB? |
-| `prefixes` | `[]string` |  |  | Prefixes to accept |
-| `announce-default` | `bool` | `false` |  | Should a default route be exported to this peer? |
-| `announce-originated` | `bool` | `true` |  | Should locally originated routes be announced to this peer? |
-| `session-global` | `string` |  |  | Configuration to add to each session before any defined BGP protocols |
-| `pre-import` | `string` |  |  | Configuration to add at the beginning of the import filter |
-| `pre-export` | `string` |  |  | Configuration to add at the beginning of the export filter |
-| `pre-import-final` | `string` |  |  | Configuration to add immediately before the final accept/reject on import |
-| `pre-export-final` | `string` |  |  | Configuration to add immediately before the final accept/reject on export |
+| `template` | `*string` | `-` |  | Configuration template |
+| `description` | `*string` | `-` |  | Peer description |
+| `disabled` | `*bool` | `false` |  | Should the sessions be disabled? |
+| `asn` | `*uint` | `0` | required | Local ASN |
+| `neighbors` | `*[]string` | `-` | required,ip | List of neighbor IPs |
+| `prepends` | `*uint` | `0` |  | Number of times to prepend local AS on export |
+| `local-pref` | `*uint` | `100` |  | BGP local preference |
+| `multihop` | `*bool` | `false` |  | Should BGP multihop be enabled? (255 max hops) |
+| `listen` | `*string` | `-` |  | BGP listen address |
+| `local-port` | `*uint` | `179` |  | Local TCP port |
+| `neighbor-port` | `*uint` | `179` |  | Neighbor TCP port |
+| `passive` | `*bool` | `false` |  | Should we listen passively? |
+| `next-hop-self` | `*bool` | `false` |  | Should BGP next-hop-self be enabled? |
+| `bfd` | `*bool` | `false` |  | Should BFD be enabled? |
+| `password` | `*string` | `-` |  | BGP MD5 password |
+| `rs-client` | `*bool` | `false` |  | Should this peer be a route server client? |
+| `rr-client` | `*bool` | `false` |  | Should this peer be a route reflector client? |
+| `remove-private-as` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
+| `mp-unicast-46` | `*bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
+| `allow-local-as` | `*bool` | `false` |  | Should routes originated by the local ASN be accepted? |
+| `import-communities` | `*[]string` | `-` |  | List of communities to add to all imported routes |
+| `export-communities` | `*[]string` | `-` |  | List of communities to add to all exported routes |
+| `announce-communities` | `*[]string` | `-` |  | Announce all routes matching these communities to the peer |
+| `as-set` | `*string` | `-` |  | Peer's as-set for filtering |
+| `import-limit4` | `*uint` | `1000000` |  | Maximum number of IPv4 prefixes to import |
+| `import-limit6` | `*uint` | `100000` |  | Maximum number of IPv6 prefixes to import |
+| `enforce-first-as` | `*bool` | `true` |  | Should we only accept routes who's first AS is equal to the configured peer address? |
+| `enforce-peer-nexthop` | `*bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
+| `max-prefix-action` | `*string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
+| `allow-blackhole-community` | `*bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
+| `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
+| `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
+| `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
+| `filter-bogons` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-tier1-asns` | `*bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
+| `filter-small-prefixes` | `*bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
+| `auto-import-limits` | `*bool` | `false` |  | Get import limits automatically from PeeringDB? |
+| `auto-as-set` | `*bool` | `false` |  | Get as-set automatically from PeeringDB? |
+| `prefixes` | `*[]string` | `-` |  | Prefixes to accept |
+| `announce-default` | `*bool` | `false` |  | Should a default route be exported to this peer? |
+| `announce-originated` | `*bool` | `true` |  | Should locally originated routes be announced to this peer? |
+| `session-global` | `*string` | `-` |  | Configuration to add to each session before any defined BGP protocols |
+| `pre-import` | `*string` | `-` |  | Configuration to add at the beginning of the import filter |
+| `pre-export` | `*string` | `-` |  | Configuration to add at the beginning of the export filter |
+| `pre-import-final` | `*string` | `-` |  | Configuration to add immediately before the final accept/reject on import |
+| `pre-export-final` | `*string` | `-` |  | Configuration to add immediately before the final accept/reject on export |
 
 <!-- Code generated DO NOT EDIT -->
 # Configuration

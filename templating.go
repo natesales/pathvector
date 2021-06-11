@@ -173,3 +173,24 @@ func writeUIFile(config *config) {
 	}
 	log.Debug("Finished writing UI file")
 }
+
+func reformatBirdConfig(input string) string {
+	formatted := ""
+	for _, line := range strings.Split(input, "\n") {
+		if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") {
+			formatted += "\n"
+		}
+
+		if !func(input string) bool {
+			for _, chr := range []rune(input) {
+				if string(chr) != " " {
+					return false
+				}
+			}
+			return true
+		}(line) {
+			formatted += line + "\n"
+		}
+	}
+	return formatted
+}

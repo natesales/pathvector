@@ -95,7 +95,7 @@ func main() {
 		}
 		log.Debug("Finished creating global config file")
 
-		// Render the global template and write to disk
+		// Render the global template and write to buffer
 		log.Debug("Writing global config file")
 		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
 		if err != nil {
@@ -202,31 +202,11 @@ func main() {
 			log.Debugf("[%s] Writing config", peerName)
 			err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
 			if err != nil {
-				log.Fatalf("Execute template: %v", err)
+				log.Fatalf("execute template: %v", err)
 			}
 
-			// Reformat file from buffer
-			formatted := ""
-			contents := b.String()
-			for _, line := range strings.Split(contents, "\n") {
-				if strings.HasSuffix(line, "{") {
-					formatted += "\n"
-				}
-
-				if !func(input string) bool {
-					for _, chr := range []rune(input) {
-						if string(chr) != " " {
-							return false
-						}
-					}
-					return true
-				}(line) {
-					formatted += line + "\n"
-				}
-			}
-
-			// Write template to file
-			if _, err := peerSpecificFile.Write([]byte(formatted)); err != nil {
+			// Reformat config and write template to file
+			if _, err := peerSpecificFile.Write([]byte(reformatBirdConfig(b.String()))); err != nil {
 				log.Fatalf("write template to file: %v", err)
 			}
 

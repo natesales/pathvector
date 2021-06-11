@@ -29,7 +29,7 @@ func printPeerInfo(peerName string, peerData *peer) {
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
 		if !(contains(excludedFields, attrName)) {
-			log.Infof("[%s] attribute %s = %v\n", peerName, attrName, s.Field(i).Interface())
+			log.Infof("[%s] field %s = %v\n", peerName, attrName, reflect.Indirect(s.Field(i)))
 		}
 	}
 }

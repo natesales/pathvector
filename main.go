@@ -149,7 +149,7 @@ func main() {
 			// Set as-set
 			if *peerData.AutoASSet {
 				if pDbData.ASSet == "" {
-					log.Infof("[%s] doesn't have an as-set in PeeringDB", peerName)
+					log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
 					// TODO: Exit or skip this peer?
 				}
 

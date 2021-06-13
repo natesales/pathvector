@@ -2,9 +2,7 @@
 # bird.conf
 
 define ASN = {{ .ASN }};
-{{ if .RouterID }}
 router id {{ .RouterID }};
-{{- end }}
 
 {{ if .Prefixes4 -}}
 define LOCALv4 = [
@@ -255,22 +253,85 @@ define BOGON_ASNS = [
   4294967295              # Reserved. RFC7300
 ];
 
-# ---- Functions ----
+# Helper Functions
 
 function _reject(string reason) {
   reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+}
+
+# Filtering Functions
+
+function reject_transit_paths() {
+  if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
 }
 
 function honor_graceful_shutdown() {
   if (65535, 0) ~ bgp_community then bgp_local_pref = 0;
 }
 
-function reject_transit_paths() {
-  if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
+function reject_local() {
+  {{ if .Prefixes4 -}}
+  if (net ~ LOCALv4) then _reject("own prefix");
+  {{- end }}
+  {{ if .Prefixes6 -}}
+  if (net ~ LOCALv6) then _reject("own prefix");
+  {{- end }}
 }
 
-function strip_info_communities() {
+function reject_bogon_asns() {
+  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
+}
+
+function reject_long_as_paths() {
+  if (bgp_path.len > 100) then _reject("long AS path");
+}
+
+function reject_rpki_invalid() {
+  if (net.type = NET_IP4) then {
+    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+  }
+}
+
+function reject_out_of_bounds_routes() {
+  if (net.type = NET_IP4) then {
+    if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
+  }
+}
+
+function reject_bogon_routes() {
+  if (net.type = NET_IP4) then {
+    if (net ~ BOGONS_v4) then _reject("bogon route");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (net ~ BOGONS_v6) then _reject("bogon route");
+  }
+}
+
+function enforce_first_as(int peer_asn) {
+  if (bgp_path.first != peer_asn) then _reject("invalid first AS");
+}
+
+function enforce_peer_nexthop(ip addr) {
+  if (bgp_next_hop != addr) then _reject("nexhop doesn't match neighbor address");
+}
+
+# Processing Functions
+
+function remove_info_communities() {
   bgp_large_community.delete([(ASN, 0, *)]);
+}
+
+function remove_private_asns() {
+  bgp_path.delete([64512..65534, 4200000000..4294967294]);
 }
 
 function process_prepends() {
@@ -295,49 +356,18 @@ function process_prepends() {
 
 function accept_local() {
   {{ if .Prefixes4 -}}
-  if (net ~ LOCALv4 ) then {
+  if (net ~ LOCALv4) then {
     bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }
   {{- end }}
 
   {{ if .Prefixes6 -}}
-  if (net ~ LOCALv6 ) then {
+  if (net ~ LOCALv6) then {
     bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }
   {{- end }}
-}
-
-function reject_bogons() {
-  {{ if .Prefixes4 -}}
-  if (net ~ LOCALv4) then _reject("own prefix");
-  {{- end }}
-  {{ if .Prefixes6 -}}
-  if (net ~ LOCALv6) then _reject("own prefix");
-  {{- end }}
-  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
-  if (bgp_path.len > 100) then _reject("long AS_PATH");
-
-  if (net.type = NET_IP4) then {
-    if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
-    if (net ~ BOGONS_v4) then _reject("bogon prefix");
-    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
-  }
-
-  if (net.type = NET_IP6) then {
-    if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
-    if (net ~ BOGONS_v6) then _reject("bogon prefix");
-    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
-  }
-}
-
-function enforce_first_as(int peer_asn) {
-  if (bgp_path.first != peer_asn) then _reject("invalid first AS");
-}
-
-function enforce_peer_nexthop(ip addr) {
-  if (bgp_next_hop != addr) then _reject("nexhop doesn't match neighbor address");
 }
 
 # ---- Peers ----

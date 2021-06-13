@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -103,16 +104,17 @@ func main() {
 		}
 		log.Debug("Finished writing global config file")
 
-		//// Remove old peer-specific configs
-		//files, err := filepath.Glob(path.Join(globalConfig.BirdSocket, "AS*.conf"))
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//for _, f := range files {
-		//	if err := os.Remove(f); err != nil {
-		//		log.Fatalf("Removing old config files: %v", err)
-		//	}
-		//}
+		// Remove old peer-specific configs
+		// TODO: Store last known-good config
+		files, err := filepath.Glob(path.Join(cliFlags.BirdDirectory, "AS*.conf"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, f := range files {
+			if err := os.Remove(f); err != nil {
+				log.Fatalf("Removing old config files: %v", err)
+			}
+		}
 	} else {
 		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
 	}

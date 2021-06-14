@@ -56,7 +56,7 @@
 | `enforce-peer-nexthop` | `*bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
 | `max-prefix-action` | `*string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
 | `allow-blackhole-community` | `*bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
-| `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
+| `filter-irr` | `*bool` | `false` |  | Should IRR filtering be applied? |
 | `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
 | `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
 | `filter-bogon-routes` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
@@ -110,7 +110,7 @@
 | `enforce-peer-nexthop` | `*bool` | `true` |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
 | `max-prefix-action` | `*string` | `disable` |  | What action should be taken when the max prefix limit is tripped? |
 | `allow-blackhole-community` | `*bool` | `false` |  | Should this peer be allowed to send routes with the blackhole community? |
-| `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
+| `filter-irr` | `*bool` | `false` |  | Should IRR filtering be applied? |
 | `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
 | `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
 | `filter-bogon-routes` | `*bool` | `true` |  | Should bogon prefixes be rejected? |

@@ -67,7 +67,7 @@ type peer struct {
 	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 
-	FilterIRR          *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterIRR          *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
 	FilterRPKI         *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
 	FilterMaxPrefix    *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
 	FilterBogonRoutes  *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`

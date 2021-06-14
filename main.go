@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
@@ -133,7 +134,7 @@ func main() {
 	if !cliFlags.DryRun {
 		// Create the global output file
 		log.Debug("Creating global config")
-		globalFile, err := os.Create(path.Join(cliFlags.BirdDirectory, "bird.conf"))
+		globalFile, err := os.Create(path.Join(cliFlags.CacheDirectory, "bird.conf"))
 		if err != nil {
 			log.Fatalf("Create global BIRD output file: %v", err)
 		}
@@ -148,8 +149,7 @@ func main() {
 		log.Debug("Finished writing global config file")
 
 		// Remove old peer-specific configs
-		// TODO: Store last known-good config
-		files, err := filepath.Glob(path.Join(cliFlags.BirdDirectory, "AS*.conf"))
+		files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "AS*.conf"))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -201,7 +201,7 @@ func main() {
 		// Write peer file
 		if !cliFlags.DryRun {
 			// Create the peer specific file
-			peerFileName := path.Join(cliFlags.BirdDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
+			peerFileName := path.Join(cliFlags.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
 			peerSpecificFile, err := os.Create(peerFileName)
 			if err != nil {
 				log.Fatalf("Create peer specific output file: %v", err)
@@ -226,6 +226,17 @@ func main() {
 		}
 	} // end peer loop
 
+	// Run BIRD config validation
+	cmd := exec.Command(cliFlags.BirdBinary, "-c", "bird.conf", "-p")
+	cmd.Dir = cliFlags.CacheDirectory
+	stdout, err := cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if string(stdout) == "" {
+		log.Infof("BIRD config validation passed")
+	}
+
 	if !cliFlags.DryRun {
 		// Write VRRP config
 		writeVRRPConfig(globalConfig)
@@ -234,6 +245,33 @@ func main() {
 			writeUIFile(globalConfig)
 		} else {
 			log.Infof("web UI is not defined, NOT writing UI")
+		}
+
+		// Remove old configs
+		birdConfigFiles, err := filepath.Glob(path.Join(cliFlags.BirdDirectory, "AS*.conf"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, f := range birdConfigFiles {
+			log.Debugf("removing old BIRD config file %s", f)
+			if err := os.Remove(f); err != nil {
+				log.Fatalf("removing old BIRD config files: %v", err)
+			}
+		}
+
+		// Copy from cache to bird config
+		files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "*.conf"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, f := range files {
+			fileNameParts := strings.Split(f, "/")
+			fileNameTail := fileNameParts[len(fileNameParts)-1]
+			newFileLoc := path.Join(cliFlags.BirdDirectory, fileNameTail)
+			log.Debugf("moving %s to %s", f, newFileLoc)
+			if err := MoveFile(f, newFileLoc); err != nil {
+				log.Fatalf("moving cache file to bird directory: %v", err)
+			}
 		}
 
 		if !cliFlags.NoConfigure {

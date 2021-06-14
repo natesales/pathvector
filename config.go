@@ -22,6 +22,8 @@ var cliFlags struct {
 	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
 	ShowVersion           bool   `short:"V" long:"version" description:"Show version and exit"`
 	BirdDirectory         string `long:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BirdBinary            string `long:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
+	CacheDirectory        string `long:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/wireframe/cache/"`
 	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
 	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`

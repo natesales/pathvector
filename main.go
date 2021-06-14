@@ -225,10 +225,10 @@ func main() {
 		// Write VRRP config
 		writeVRRPConfig(globalConfig)
 
-		if cliFlags.BirdSocket != "" {
+		if cliFlags.WebUIFile != "" {
 			writeUIFile(globalConfig)
 		} else {
-			log.Infof("--ui-file is not defined, not creating a UI file")
+			log.Infof("web UI is not defined, NOT writing UI")
 		}
 
 		if !cliFlags.NoConfigure {

@@ -77,11 +77,11 @@
             <td>{{ .RouterID }}</td>
             <td>{{ len .Peers }}</td>
             <td>{{ .IRRServer }}</td>
-            <td>{{ .RTRServer }}:{{ .RTRPort }}</td>
+            <td>{{ .RTRServer }}</td>
             <td>
-                {{- range $k, $prefix := .Prefixes }}
-                    {{ $prefix }}<br>
-                {{ end }}
+            {{- range $k, $prefix := .Prefixes }}
+                {{ $prefix }}<br>
+            {{ end }}
             </td>
         </tr>
         </tbody>

@@ -27,7 +27,7 @@ nfpms:
     vendor: Nate Sales
     homepage: https://github.com/natesales/wireframe
     maintainer: Nate Sales <nate@natesales.net>
-    description: Wireframe is a declarative routing platform integrating BGP with robust filtering support, an XDP dataplane, and VRRP for high availability.
+    description: Wireframe is a declarative routing platform with robust BGP filtering support for the core and peering edge
     license: GNU GPL-3.0
     section: utils
     priority: extra

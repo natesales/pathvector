@@ -1,6 +1,6 @@
 # Wireframe
 
-Wireframe is a declarative routing platform for [BIRD](https://bird.network.cz) with robust filtering support for the core and peering edge.
+Wireframe is a declarative routing platform with robust BGP filtering support for the core and peering edge.
 
 [![Go Report](https://goreportcard.com/badge/github.com/natesales/wireframe?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/wireframe)
 [![License](https://img.shields.io/github/license/natesales/wireframe?style=for-the-badge)](https://github.com/natesales/wireframe/blob/main/LICENSE)

@@ -64,7 +64,7 @@ peers:
 func TestLoadConfigInvalidYAML(t *testing.T) {
 	configFile := "INVALID YAML"
 	_, err := loadConfig([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "yaml unmarshal") {
+	if err == nil || !strings.Contains(err.Error(), "YAML unmarshal") {
 		t.Errorf("expected yaml unmarshal error, got %+v", err)
 	}
 }
@@ -85,7 +85,7 @@ prefixes:
   - foo/24
   - 2001:db8::/48`
 	_, err := loadConfig([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "invalid origin prefix") {
+	if err == nil || !strings.Contains(err.Error(), "Invalid origin prefix") {
 		t.Errorf("expected invalid origin prefix error, got %+v", err)
 	}
 }
@@ -117,7 +117,7 @@ augments:
     "2001:db8:2::/64" : "2001:db8::1"
 `
 	_, err := loadConfig([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "invalid static prefix") {
+	if err == nil || !strings.Contains(err.Error(), "Invalid static prefix") {
 		t.Errorf("expected invalid static prefix error, got %+v", err)
 	}
 }
@@ -135,7 +135,7 @@ vrrp:
       - 2001:db8::2/64`
 
 	_, err := loadConfig([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "invalid VIP") {
+	if err == nil || !strings.Contains(err.Error(), "Invalid VIP") {
 		t.Errorf("expected invalid VIP error, got %+v", err)
 	}
 }

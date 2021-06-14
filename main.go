@@ -36,6 +36,49 @@ func printStructInfo(label string, instance interface{}) {
 	}
 }
 
+// runPeeringDbQuery updates peer values from PeeringDB
+func runPeeringDbQuery(peerName string, peerData *peer) {
+	pDbData, err := getPeeringDbData(*peerData.ASN)
+	if err != nil {
+		log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
+	}
+
+	// Set import limits
+	if *peerData.AutoImportLimits {
+		*peerData.ImportLimit6 = pDbData.ImportLimit4
+		*peerData.ImportLimit6 = pDbData.ImportLimit6
+
+		if pDbData.ImportLimit4 == 0 {
+			log.Warnf("[%s] has an IPv4 import limit of zero from PeeringDB", peerName)
+		}
+		if pDbData.ImportLimit6 == 0 {
+			log.Warnf("[%s] has an IPv6 import limit of zero from PeeringDB", peerName)
+		}
+	}
+
+	// Set as-set
+	if *peerData.AutoASSet {
+		if pDbData.ASSet == "" {
+			log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
+			// TODO: Exit or skip this peer?
+		}
+
+		// If the as-set has a space in it, split and pick the first one
+		if strings.Contains(pDbData.ASSet, " ") {
+			pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
+			log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.ASSet)
+		}
+
+		// Trim IRRDB prefix
+		if strings.Contains(pDbData.ASSet, "::") {
+			*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+			log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
+		} else {
+			*peerData.ASSet = pDbData.ASSet
+		}
+	}
+}
+
 func main() {
 	if len(os.Args) == 2 && os.Args[1] == "generate-config-docs" {
 		documentConfig()
@@ -131,45 +174,7 @@ func main() {
 		if *peerData.AutoImportLimits || *peerData.AutoASSet {
 			log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-			pDbData, err := getPeeringDbData(*peerData.ASN)
-			if err != nil {
-				log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
-			}
-
-			// Set import limits
-			if *peerData.AutoImportLimits {
-				*peerData.ImportLimit6 = pDbData.ImportLimit4
-				*peerData.ImportLimit6 = pDbData.ImportLimit6
-
-				if pDbData.ImportLimit4 == 0 {
-					log.Warnf("[%s] has an IPv4 import limit of zero from PeeringDB", peerName)
-				}
-				if pDbData.ImportLimit6 == 0 {
-					log.Warnf("[%s] has an IPv6 import limit of zero from PeeringDB", peerName)
-				}
-			}
-
-			// Set as-set
-			if *peerData.AutoASSet {
-				if pDbData.ASSet == "" {
-					log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
-					// TODO: Exit or skip this peer?
-				}
-
-				// If the as-set has a space in it, split and pick the first one
-				if strings.Contains(pDbData.ASSet, " ") {
-					pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
-					log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.ASSet)
-				}
-
-				// Trim IRRDB prefix
-				if strings.Contains(pDbData.ASSet, "::") {
-					*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
-					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
-				} else {
-					*peerData.ASSet = pDbData.ASSet
-				}
-			}
+			runPeeringDbQuery(peerName, peerData)
 		} // end peeringdb query enabled
 
 		// Build IRR prefix sets

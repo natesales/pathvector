@@ -148,35 +148,31 @@ func run(args []string) {
 	}
 	log.Debugln("Finished loading config")
 
-	if !cliFlags.DryRun {
-		// Create the global output file
-		log.Debug("Creating global config")
-		globalFile, err := os.Create(path.Join(cliFlags.CacheDirectory, "bird.conf"))
-		if err != nil {
-			log.Fatalf("Create global BIRD output file: %v", err)
-		}
-		log.Debug("Finished creating global config file")
+	// Create the global output file
+	log.Debug("Creating global config")
+	globalFile, err := os.Create(path.Join(cliFlags.CacheDirectory, "bird.conf"))
+	if err != nil {
+		log.Fatalf("Create global BIRD output file: %v", err)
+	}
+	log.Debug("Finished creating global config file")
 
-		// Render the global template and write to buffer
-		log.Debug("Writing global config file")
-		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
-		if err != nil {
-			log.Fatalf("Execute global template: %v", err)
-		}
-		log.Debug("Finished writing global config file")
+	// Render the global template and write to buffer
+	log.Debug("Writing global config file")
+	err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
+	if err != nil {
+		log.Fatalf("Execute global template: %v", err)
+	}
+	log.Debug("Finished writing global config file")
 
-		// Remove old peer-specific configs
-		files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "AS*.conf"))
-		if err != nil {
-			log.Fatal(err)
+	// Remove old peer-specific configs
+	files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "AS*.conf"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if err := os.Remove(f); err != nil {
+			log.Fatalf("Removing old config files: %v", err)
 		}
-		for _, f := range files {
-			if err := os.Remove(f); err != nil {
-				log.Fatalf("Removing old config files: %v", err)
-			}
-		}
-	} else {
-		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
 	}
 
 	// Print global config
@@ -215,32 +211,28 @@ func run(args []string) {
 
 		printStructInfo(peerName, peerData)
 
-		// Write peer file
-		if !cliFlags.DryRun {
-			// Create the peer specific file
-			peerFileName := path.Join(cliFlags.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
-			peerSpecificFile, err := os.Create(peerFileName)
-			if err != nil {
-				log.Fatalf("Create peer specific output file: %v", err)
-			}
-
-			// Render the template and write to buffer
-			var b bytes.Buffer
-			log.Debugf("[%s] Writing config", peerName)
-			err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
-			if err != nil {
-				log.Fatalf("Execute template: %v", err)
-			}
-
-			// Reformat config and write template to file
-			if _, err := peerSpecificFile.Write([]byte(reformatBirdConfig(b.String()))); err != nil {
-				log.Fatalf("Write template to file: %v", err)
-			}
-
-			log.Debugf("[%s] Wrote config", peerName)
-		} else {
-			log.Infof("Dry run is enabled, skipped writing peer config(s)")
+		// Create peer file
+		peerFileName := path.Join(cliFlags.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
+		peerSpecificFile, err := os.Create(peerFileName)
+		if err != nil {
+			log.Fatalf("Create peer specific output file: %v", err)
 		}
+
+		// Render the template and write to buffer
+		var b bytes.Buffer
+		log.Debugf("[%s] Writing config", peerName)
+		err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
+		if err != nil {
+			log.Fatalf("Execute template: %v", err)
+		}
+
+		// Reformat config and write template to file
+		if _, err := peerSpecificFile.Write([]byte(reformatBirdConfig(b.String()))); err != nil {
+			log.Fatalf("Write template to file: %v", err)
+		}
+
+		log.Debugf("[%s] Wrote config", peerName)
+
 	} // end peer loop
 
 	// Run BIRD config validation

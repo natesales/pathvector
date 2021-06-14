@@ -22,26 +22,6 @@
 | augments | augments |  |  | Custom configuration options |
 
 <!-- Code generated DO NOT EDIT -->
-## vrrpInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
-
-<!-- Code generated DO NOT EDIT -->
-## augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-
-<!-- Code generated DO NOT EDIT -->
 ## *peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -70,7 +50,7 @@
 | announce-communities | *[]string |  |  | Announce all routes matching these communities to the peer |
 | as-set | *string |  |  | Peer's as-set for filtering |
 | import-limit4 | *int | 1000000 |  | Maximum number of IPv4 prefixes to import |
-| import-limit6 | *int | 100000 |  | Maximum number of IPv6 prefixes to import |
+| import-limit6 | *int | 200000 |  | Maximum number of IPv6 prefixes to import |
 | enforce-first-as | *bool | true |  | Should we only accept routes who's first AS is equal to the configured peer address? |
 | enforce-peer-nexthop | *bool | true |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
 | max-prefix-action | *string | disable |  | What action should be taken when the max prefix limit is tripped? |
@@ -93,4 +73,24 @@
 | pre-export | *string |  |  | Configuration to add at the beginning of the export filter |
 | pre-import-final | *string |  |  | Configuration to add immediately before the final accept/reject on import |
 | pre-export-final | *string |  |  | Configuration to add immediately before the final accept/reject on export |
+
+<!-- Code generated DO NOT EDIT -->
+## vrrpInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+
+<!-- Code generated DO NOT EDIT -->
+## augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
 

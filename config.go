@@ -145,6 +145,7 @@ type config struct {
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
+	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 
 	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`

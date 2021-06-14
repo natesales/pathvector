@@ -16,6 +16,7 @@
 | source4 | string |  |  | Source IPv4 address |
 | source6 | string |  |  | Source IPv6 address |
 | accept-default | bool | false |  | Should default routes be added to the bogon list? |
+| kernel-table | int |  |  | Kernel table |
 | peers | map[string]*peer |  |  | BGP peer configuration |
 | templates | map[string]*peer |  |  | BGP peer templates |
 | vrrp | []vrrpInstance |  |  | List of VRRP instances |

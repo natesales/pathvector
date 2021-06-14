@@ -22,16 +22,16 @@ var version = "devel" // set by the build process
 //go:embed templates/*
 var embedFs embed.FS
 
-// printPeerInfo prints a peer's configuration to the log
-func printPeerInfo(peerName string, peerData *peer) {
+// printStructInfo prints a configuration struct values
+func printStructInfo(label string, instance interface{}) {
 	// Fields to exclude from print output
 	excludedFields := []string{""}
-	s := reflect.ValueOf(peerData).Elem()
+	s := reflect.ValueOf(instance).Elem()
 	typeOf := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
 		if !(contains(excludedFields, attrName)) {
-			log.Infof("[%s] field %s = %v\n", peerName, attrName, reflect.Indirect(s.Field(i)))
+			log.Infof("[%s] field %s = %v\n", label, attrName, reflect.Indirect(s.Field(i)))
 		}
 	}
 }
@@ -119,6 +119,9 @@ func main() {
 		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
 	}
 
+	// Print global config
+	printStructInfo("wireframe.global", globalConfig)
+
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
 		// Set sanitized peer name
@@ -188,7 +191,7 @@ func main() {
 			*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
 		}
 
-		printPeerInfo(peerName, peerData)
+		printStructInfo(peerName, peerData)
 
 		// Write peer file
 		if !cliFlags.DryRun {

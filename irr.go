@@ -33,7 +33,7 @@ func getIRRPrefixSet(asSet string, family uint8, c *config) (string, error) {
 	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
 	stdout, err := cmd.Output()
 	if err != nil {
-		return "", errors.New(fmt.Sprintf("bgpq4 error: %v, %s", err.Error(), stdout))
+		return "", fmt.Errorf("bgpq4 error: %v, %s", err.Error(), stdout)
 	}
 	return "define " + string(stdout), nil // nil error
 }

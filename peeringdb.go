@@ -52,7 +52,7 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 	}
 
 	if len(pDbResponse.Data) < 1 {
-		return nil, errors.New(fmt.Sprintf("peer %d doesn't have a PeeringDB page", asn))
+		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page", asn)
 	}
 
 	return &pDbResponse.Data[0], nil // nil error

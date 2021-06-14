@@ -96,6 +96,12 @@ type peer struct {
 	PreImportFinal *string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import" default:"-"`
 	PreExportFinal *string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export" default:"-"`
 
+	// Optimizer
+	OptimizerProbeSource *string `yaml:"probe-source" description:"Optimizer probe source address" default:"-"`
+	OptimizerEnabled     *bool   `yaml:"optimize" description:"Should the optimizer be enabled for this peer?" default:"false"`
+	OptimizeInbound      *bool   `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
+	OptimizeOutbound     *bool   `yaml:"optimize-outbound" description:"Should the optimizer modify outbound policy?" default:"false"`
+
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
@@ -130,6 +136,13 @@ type augments struct {
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
+type optimizer struct {
+	PingCount   int `yaml:"probe-count" description:"Number of pings to send in each run"`
+	PingTimeout int `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered"`
+	Interval    int `yaml:"probe-interval" description:"Time to wait between each optimizer run"`
+	CacheSize   int `yaml:"cache-size" description:"Number of probe results to store per peer"` // There will be a total of probeCacheSize*len(sources)*len(targets) results stored
+}
+
 type config struct {
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
@@ -150,6 +163,7 @@ type config struct {
 	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     optimizer        `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`

@@ -21,7 +21,7 @@ define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ .Peer.ImportLim
 
 {{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{ if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
-protocol bgp {{ $peer.ProtocolName }}v{{ $af }}{{ if not (eq $i 0) }}_{{ $i }}{{ end }} {
+protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     local{{ if $peer.Listen }} {{ $peer.Listen }}{{ end }} as ASN{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
     {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}

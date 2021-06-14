@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -12,6 +13,8 @@ import (
 	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 )
+
+var protocolNames []string
 
 // wrapper is passed to the peer template
 type wrapper struct {
@@ -94,6 +97,20 @@ var funcMap = template.FuncMap{
 			return *i
 		}
 		return 0
+	},
+
+	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
+	"UniqueProtocolName": func(s *string, af string) string {
+		protoName := fmt.Sprintf("%sv%s", *s, af)
+		i := 1
+		for {
+			if !contains(protocolNames, protoName) {
+				protocolNames = append(protocolNames, protoName)
+				return protoName
+			}
+			protoName = fmt.Sprintf("%sv%s_%d", *s, af, i)
+			i++
+		}
 	},
 }
 

@@ -37,6 +37,12 @@ func printStructInfo(label string, instance interface{}) {
 	}
 }
 
+func deleteLockfile() {
+	if err := os.Remove(cliFlags.LockFile); err != nil {
+		log.Fatalf("removing lockfile: %v", err)
+	}
+}
+
 // runPeeringDbQuery updates peer values from PeeringDB
 func runPeeringDbQuery(peerName string, peerData *peer) {
 	pDbData, err := getPeeringDbData(*peerData.ASN)
@@ -110,6 +116,21 @@ func main() {
 	}
 
 	log.Debugf("Starting wireframe %s", version)
+
+	// Check for lockfile
+	if cliFlags.LockFile != "" {
+		if _, err := os.Stat(cliFlags.LockFile); err == nil {
+			log.Fatal("wireframe lockfile exists, exiting")
+		} else if os.IsNotExist(err) {
+			// If the lockfile doesn't exist, create it
+			log.Debugln("lockfile doesn't exist, creating one")
+			if err := ioutil.WriteFile(cliFlags.LockFile, []byte(""), 0755); err != nil {
+				log.Fatalf("writing lockfile: %v", err)
+			}
+		} else {
+			log.Fatalf("accessing lockfile: %v", err)
+		}
+	}
 
 	//Load templates from embedded filesystem
 	log.Debugln("Loading templates from embedded filesystem")
@@ -283,4 +304,6 @@ func main() {
 			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
 		}
 	} // end dry run check
+
+	deleteLockfile()
 }

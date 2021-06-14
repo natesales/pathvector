@@ -17,6 +17,7 @@ import (
 
 var cliFlags struct {
 	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
+	LockFile              string `long:"lock-file" description:"Lock file (check disabled if empty)" default:""`
 	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
 	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
 	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
@@ -26,7 +27,7 @@ var cliFlags struct {
 	CacheDirectory        string `long:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/wireframe/cache/"`
 	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to" default:"/run/wireframe.html"`
+	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:"/run/wireframe.html"`
 	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 }

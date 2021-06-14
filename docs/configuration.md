@@ -43,7 +43,7 @@
 | `password` | `*string` | - |  | BGP MD5 password |
 | `rs-client` | `*bool` | `false` |  | Should this peer be a route server client? |
 | `rr-client` | `*bool` | `false` |  | Should this peer be a route reflector client? |
-| `remove-private-as` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
+| `remove-private-asns` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
 | `mp-unicast-46` | `*bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
 | `allow-local-as` | `*bool` | `false` |  | Should routes originated by the local ASN be accepted? |
 | `import-communities` | `*[]string` | - |  | List of communities to add to all imported routes |
@@ -97,7 +97,7 @@
 | `password` | `*string` | - |  | BGP MD5 password |
 | `rs-client` | `*bool` | `false` |  | Should this peer be a route server client? |
 | `rr-client` | `*bool` | `false` |  | Should this peer be a route reflector client? |
-| `remove-private-as` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
+| `remove-private-asns` | `*bool` | `true` |  | Should private ASNs be removed from path before exporting? |
 | `mp-unicast-46` | `*bool` | `false` |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
 | `allow-local-as` | `*bool` | `false` |  | Should routes originated by the local ASN be accepted? |
 | `import-communities` | `*[]string` | - |  | List of communities to add to all imported routes |

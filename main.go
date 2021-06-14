@@ -175,7 +175,7 @@ func main() {
 		// Build IRR prefix sets
 		if *peerData.FilterIRR {
 			// Check for empty as-set
-			if *peerData.ASSet == "" {
+			if peerData.ASSet == nil || *peerData.ASSet == "" {
 				log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
 			}
 

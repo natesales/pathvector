@@ -133,6 +133,19 @@ func run(args []string) {
 
 	log.Debugf("Starting wireframe %s mode: %s", version, cliFlags.Mode)
 
+	// Load the config file from config file
+	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
+	configFile, err := ioutil.ReadFile(cliFlags.ConfigFile)
+	if err != nil {
+		log.Fatal("Reading config file: " + err.Error())
+	}
+	globalConfig, err := loadConfig(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debugln("Finished loading config")
+
+	// Mode conditional
 	if cliFlags.Mode == "generate" {
 		// Load templates from embedded filesystem
 		log.Debugln("Loading templates from embedded filesystem")
@@ -141,18 +154,6 @@ func run(args []string) {
 			log.Fatal(err)
 		}
 		log.Debugln("Finished loading templates")
-
-		// Load the config file from config file
-		log.Debugf("Loading config from %s", cliFlags.ConfigFile)
-		configFile, err := ioutil.ReadFile(cliFlags.ConfigFile)
-		if err != nil {
-			log.Fatal("Reading config file: " + err.Error())
-		}
-		globalConfig, err := loadConfig(configFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Debugln("Finished loading config")
 
 		// Create the global output file
 		log.Debug("Creating global config")
@@ -299,7 +300,23 @@ func run(args []string) {
 			}
 		} // end dry run check
 	} else if cliFlags.Mode == "daemon" {
-		// TODO
+		log.Infof("Starting optimizer")
+
+		sourceMap := map[string][]string{} // Peer name to list of source addresses
+		for peerName, peerData := range globalConfig.Peers {
+			if peerData.OptimizerEnabled != nil && *peerData.OptimizerEnabled {
+				if peerData.OptimizerProbeSources == nil || len(*peerData.OptimizerProbeSources) < 1 {
+					log.Fatalf("[%s] has optimize enabled but no probe sources", peerName)
+				}
+				sourceMap[peerName] = *peerData.OptimizerProbeSources
+			}
+		}
+
+		if len(sourceMap) == 0 {
+			log.Fatal("No peers have optimization enabled, exiting now")
+		}
+
+		log.Fatal(startProbe(globalConfig.Optimizer, sourceMap))
 	}
 
 	// Delete lockfile

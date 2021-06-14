@@ -8,7 +8,7 @@ import (
 
 func TestIntegrations(t *testing.T) {
 	// Make temporary cache directory
-	if err := os.Mkdir("test-cache", 0755); !os.IsExist(err) {
+	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
 	}
 

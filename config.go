@@ -402,8 +402,8 @@ func documentConfigTypes(t reflect.Type) {
 		key := field.Tag.Get("yaml")
 		validation := field.Tag.Get("validate")
 		fDefault := field.Tag.Get("default")
-		if fDefault != "-" {
-			fDefault = "`" + fDefault + "`"
+		if fDefault == "-" {
+			fDefault = ""
 		}
 
 		if description == "" {
@@ -416,7 +416,7 @@ func documentConfigTypes(t reflect.Type) {
 					childTypesSet[field.Type] = true
 				}
 			}
-			fmt.Printf("| `%s` | `%s` | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
+			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
 		}
 	}
 	fmt.Println()
@@ -441,11 +441,11 @@ func documentCliFlags() {
 		short := field.Tag.Get("short")
 		long := field.Tag.Get("long")
 		description := field.Tag.Get("description")
-		// Add dash and formatting only if short is defined
+		// Add dash and comma only if short is defined
 		if short != "" {
-			short = "`-" + short + "`, "
+			short = "-" + short + ", "
 		}
 
-		fmt.Printf("| %s `--%s` | `%s` | %s |\n", short, long, field.Type.String(), description)
+		fmt.Printf("| %s --%s | %s | %s |\n", short, long, field.Type.String(), description)
 	}
 }

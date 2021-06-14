@@ -22,6 +22,7 @@ jobs:
       - name: Commit generated code
         uses: EndBug/add-and-commit@v7
         with:
+          branch: main
           message: "ci: go generate"
           author_name: "github-actions[bot]"
           author_email: "github-actions[bot]@users.noreply.github.com"

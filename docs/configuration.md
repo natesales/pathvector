@@ -23,6 +23,26 @@
 | augments | augments |  |  | Custom configuration options |
 
 <!-- Code generated DO NOT EDIT -->
+## vrrpInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+
+<!-- Code generated DO NOT EDIT -->
+## augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+
+<!-- Code generated DO NOT EDIT -->
 ## *peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -74,24 +94,4 @@
 | pre-export | *string |  |  | Configuration to add at the beginning of the export filter |
 | pre-import-final | *string |  |  | Configuration to add immediately before the final accept/reject on import |
 | pre-export-final | *string |  |  | Configuration to add immediately before the final accept/reject on export |
-
-<!-- Code generated DO NOT EDIT -->
-## vrrpInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
-
-<!-- Code generated DO NOT EDIT -->
-## augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
 

@@ -248,15 +248,15 @@ func main() {
 	} // end peer loop
 
 	// Run BIRD config validation
+	log.Debugln("Validating BIRD config")
 	cmd := exec.Command(cliFlags.BirdBinary, "-c", "bird.conf", "-p")
 	cmd.Dir = cliFlags.CacheDirectory
-	stdout, err := cmd.Output()
-	if err != nil {
-		log.Fatal(err)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("BIRD config validation: %v", err)
 	}
-	if string(stdout) == "" {
-		log.Infof("BIRD config validation passed")
-	}
+	log.Infof("BIRD config validation passed")
 
 	if !cliFlags.DryRun {
 		// Write VRRP config

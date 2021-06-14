@@ -100,6 +100,11 @@ func run(args []string) {
 		os.Exit(1)
 	}
 
+	// Validate mode flag
+	if !(cliFlags.Mode == "generate" || cliFlags.Mode == "daemon") {
+		log.Fatalf("Invalid mode '%s', expected 'generate' or 'daemon'", cliFlags.Mode)
+	}
+
 	// Enable debug logging in development releases
 	if //noinspection GoBoolExpressions
 	version == "devel" || cliFlags.Verbose {

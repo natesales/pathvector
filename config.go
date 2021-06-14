@@ -30,6 +30,7 @@ var cliFlags struct {
 	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
 	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	Mode                  string `short:"m" long:"mode" description:"Should this run generate a config or start the optimization daemon? (generate or daemon)" default:"generate"`
 }
 
 type peer struct {

@@ -18,7 +18,6 @@
 | `accept-default` | `bool` | `false` |  | Should default routes be added to the bogon list? |
 | `peers` | `map[string]*peer` | `` |  | BGP peer configuration |
 | `templates` | `map[string]*peer` | `` |  | BGP peer templates |
-| `interfaces` | `map[string]iface` | `` |  | Network interface configuration |
 | `vrrp` | `[]vrrpInstance` | `` |  | List of VRRP instances |
 | `augments` | `augments` | `` |  | Custom configuration options |
 
@@ -129,17 +128,6 @@
 | `pre-export` | `*string` | - |  | Configuration to add at the beginning of the export filter |
 | `pre-import-final` | `*string` | - |  | Configuration to add immediately before the final accept/reject on import |
 | `pre-export-final` | `*string` | - |  | Configuration to add immediately before the final accept/reject on export |
-
-<!-- Code generated DO NOT EDIT -->
-# Configuration
-## iface
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| `mtu` | `uint` | `1500` |  | Interface MTU (Maximum Transmission Unit) |
-| `xdprtr` | `bool` | `false` |  | Should XDPRTR be loaded on this interface? |
-| `addresses` | `[]string` | `` |  | List of addresses to add to this interface |
-| `dummy` | `bool` | `false` |  | Should a new dummy interface be created with this configuration? |
-| `down` | `bool` | `false` |  | Should the interface be set to a down state? |
 
 <!-- Code generated DO NOT EDIT -->
 # Configuration

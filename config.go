@@ -50,7 +50,7 @@ type peer struct {
 	Password          *string   `yaml:"password" description:"BGP MD5 password" default:"-"`
 	RSClient          *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
 	RRClient          *bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
-	RemovePrivateASNs *bool     `yaml:"remove-private-as" description:"Should private ASNs be removed from path before exporting?" default:"true"`
+	RemovePrivateASNs *bool     `yaml:"remove-private-asns" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 	MPUnicast46       *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 	AllowLocalAS      *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
 

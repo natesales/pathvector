@@ -11,6 +11,7 @@ jobs:
     steps:
       - name: Install bgpq4 and bird2
         run: |
+          sudo add-apt-repository universe --yes
           sudo apt update
           sudo apt install -y bird2 bgpq4
 

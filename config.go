@@ -388,8 +388,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 
 func documentConfigTypes(t reflect.Type) {
 	fmt.Println("<!-- Code generated DO NOT EDIT -->")
-	fmt.Println("# Configuration")
-	var childTypes []reflect.Type
+	childTypesSet := map[reflect.Type]bool{}
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
 	fmt.Println("| Option | Type | Default | Validation | Description |")
 	fmt.Println("|--------|------|---------|------------|-------------|")
@@ -411,22 +410,23 @@ func documentConfigTypes(t reflect.Type) {
 			log.Fatalf("code error: %s doesn't have a description", field.Name)
 		} else if description != "-" { // Ignore descriptions that are -
 			if strings.Contains(field.Type.String(), "main.") { // If the type is a config struct
-				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice
-					childTypes = append(childTypes, field.Type.Elem())
+				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice and add to set (reflect.Type to bool map)
+					childTypesSet[field.Type.Elem()] = true
 				} else {
-					childTypes = append(childTypes, field.Type)
+					childTypesSet[field.Type] = true
 				}
 			}
 			fmt.Printf("| `%s` | `%s` | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
 		}
 	}
 	fmt.Println()
-	for _, childType := range childTypes {
+	for childType := range childTypesSet {
 		documentConfigTypes(childType)
 	}
 }
 
 func documentConfig() {
+	fmt.Println("# Configuration")
 	documentConfigTypes(reflect.TypeOf(config{}))
 }
 
@@ -441,7 +441,11 @@ func documentCliFlags() {
 		short := field.Tag.Get("short")
 		long := field.Tag.Get("long")
 		description := field.Tag.Get("description")
+		// Add dash and formatting only if short is defined
+		if short != "" {
+			short = "`-" + short + "`, "
+		}
 
-		fmt.Printf("| `-%s`, `--%s` | `%s` | %s |\n", short, long, field.Type.String(), description)
+		fmt.Printf("| %s `--%s` | `%s` | %s |\n", short, long, field.Type.String(), description)
 	}
 }

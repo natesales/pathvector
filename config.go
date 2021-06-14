@@ -67,15 +67,18 @@ type peer struct {
 	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 
-	FilterIRR           *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
-	FilterRPKI          *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	FilterMaxPrefix     *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogons        *bool `yaml:"filter-bogons" description:"Should bogon prefixes be rejected?" default:"true"`
-	FilterTier1ASNs     *bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
-	FilterSmallPrefixes *bool `yaml:"filter-small-prefixes" description:"Should small prefixes (ge 24, ge 48) be rejected?" default:"true"`
+	FilterIRR          *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"true"`
+	FilterRPKI         *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix    *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogonRoutes  *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterBogonASNs    *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
+	FilterTier1ASNs    *bool `yaml:"filter-tier1-asns" description:"Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?'" default:"false"`
+	FilterPrefixLength *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4: len > 24 || len < 8; IPv6: len > 48 || len < 12) be rejected?" default:"true"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB?" default:"false"`
+
+	HonorGracefulShutdown *bool `yaml:"honor-graceful-shutdown" description:"Should RFC8326 graceful shutdown be enabled?" default:"true"`
 
 	Prefixes *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
 

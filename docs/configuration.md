@@ -60,11 +60,13 @@
 | `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
 | `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
 | `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
-| `filter-bogons` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-bogon-routes` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-bogon-asns` | `*bool` | `true` |  | Should paths containing a bogon ASN be rejected? |
 | `filter-tier1-asns` | `*bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
-| `filter-small-prefixes` | `*bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
+| `filter-prefix-length` | `*bool` | `true` |  | Should too large/small prefixes (IPv4: len > 24 || len < 8; IPv6: len > 48 || len < 12) be rejected? |
 | `auto-import-limits` | `*bool` | `false` |  | Get import limits automatically from PeeringDB? |
 | `auto-as-set` | `*bool` | `false` |  | Get as-set automatically from PeeringDB? |
+| `honor-graceful-shutdown` | `*bool` | `true` |  | Should RFC8326 graceful shutdown be enabled? |
 | `prefixes` | `*[]string` | - |  | Prefixes to accept |
 | `announce-default` | `*bool` | `false` |  | Should a default route be exported to this peer? |
 | `announce-originated` | `*bool` | `true` |  | Should locally originated routes be announced to this peer? |
@@ -112,11 +114,13 @@
 | `filter-irr` | `*bool` | `true` |  | Should IRR filtering be applied? |
 | `filter-rpki` | `*bool` | `true` |  | Should RPKI invalids be rejected? |
 | `filter-max-prefix` | `*bool` | `true` |  | Should max prefix filtering be applied? |
-| `filter-bogons` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-bogon-routes` | `*bool` | `true` |  | Should bogon prefixes be rejected? |
+| `filter-bogon-asns` | `*bool` | `true` |  | Should paths containing a bogon ASN be rejected? |
 | `filter-tier1-asns` | `*bool` | `false` |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
-| `filter-small-prefixes` | `*bool` | `true` |  | Should small prefixes (ge 24, ge 48) be rejected? |
+| `filter-prefix-length` | `*bool` | `true` |  | Should too large/small prefixes (IPv4: len > 24 || len < 8; IPv6: len > 48 || len < 12) be rejected? |
 | `auto-import-limits` | `*bool` | `false` |  | Get import limits automatically from PeeringDB? |
 | `auto-as-set` | `*bool` | `false` |  | Get as-set automatically from PeeringDB? |
+| `honor-graceful-shutdown` | `*bool` | `true` |  | Should RFC8326 graceful shutdown be enabled? |
 | `prefixes` | `*[]string` | - |  | Prefixes to accept |
 | `announce-default` | `*bool` | `false` |  | Should a default route be exported to this peer? |
 | `announce-originated` | `*bool` | `true` |  | Should locally originated routes be announced to this peer? |

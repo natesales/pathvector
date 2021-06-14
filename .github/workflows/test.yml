@@ -1,16 +1,20 @@
-name: Go Test
+name: Test
 
 on:
   push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
 
 jobs:
-  build:
-    name: Build
+  test:
+    name: test
     runs-on: ubuntu-latest
     steps:
+      - name: Install bgpq4 and bird2
+        run: |
+          wget https://mirrors.kernel.org/ubuntu/pool/universe/b/bgpq4/bgpq4_0.0.6-2_amd64.deb
+          sudo dpkg -i bgpq4*.deb
+          sudo apt install -y bird2
+
       - name: Set up Go 1.16
         uses: actions/setup-go@v2
         with:
@@ -22,5 +26,11 @@ jobs:
       - name: Get dependencies
         run: go get -v -t -d ./...
 
-      - name: Build
+      - name: go generate
+        run: go generate -x
+
+      - name: go build
         run: go build -v .
+
+      - name: go test
+        run: go test

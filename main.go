@@ -1,182 +1,98 @@
 package main
 
 import (
+	"bytes"
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
-	"unicode"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/kennygrant/sanitize"
 	log "github.com/sirupsen/logrus"
 )
 
-var version = "dev" // set by the build process
-
-// PeeringDbResponse contains the response from a PeeringDB query
-type PeeringDbResponse struct {
-	Data []PeeringDbData `json:"data"`
-}
-
-// PeeringDbData contains the actual data from PeeringDB response
-type PeeringDbData struct {
-	Name    string `json:"name"`
-	AsSet   string `json:"irr_as_set"`
-	MaxPfx4 uint   `json:"info_prefixes4"`
-	MaxPfx6 uint   `json:"info_prefixes6"`
-}
-
-// Config constants
-const (
-	DefaultIPv4TableSize = 1000000
-	DefaultIPv6TableSize = 150000
-)
-
-// Flags
-var opts struct {
-	ConfigFile  string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
-	Verbose     bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun      bool   `short:"d" long:"dry-run" description:"Don't modify BIRD config"`
-	NoConfigure bool   `long:"no-configure" description:"Don't configure BIRD"`
-	ShowVersion bool   `long:"version" description:"Show version and exit"`
-}
+var version = "devel" // set by the build process
 
 // Embedded filesystem
 
 //go:embed templates/*
 var embedFs embed.FS
 
-// contains is a linear search on a string array
-func contains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
-// Query PeeringDB for an ASN
-func getPeeringDbData(asn uint) PeeringDbData {
-	httpClient := http.Client{Timeout: time.Second * 5}
-	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
-	if err != nil {
-		log.Fatalf("PeeringDB GET (This peer might not have a PeeringDB page): %v", err)
-	}
-
-	res, err := httpClient.Do(req)
-	if err != nil {
-		log.Fatalf("PeeringDB GET Request: %v", err)
-	}
-
-	if res.Body != nil {
-		//noinspection GoUnhandledErrorResult
-		defer res.Body.Close()
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatalf("PeeringDB Read: %v", err)
-	}
-
-	var peeringDbResponse PeeringDbResponse
-	if err := json.Unmarshal(body, &peeringDbResponse); err != nil {
-		log.Fatalf("PeeringDB JSON Unmarshal: %v", err)
-	}
-
-	if len(peeringDbResponse.Data) < 1 {
-		log.Fatalf("Peer %d doesn't have a valid PeeringDB entry. Try import-valid or ask the network to update their account.", asn)
-	}
-
-	return peeringDbResponse.Data[0]
-}
-
-// Use bgpq4 to generate a prefix filter and return only the filter lines
-func getPrefixFilter(asSet string, family uint8, irrdb string) []string {
-	// Run bgpq4 for BIRD format with aggregation enabled
-	log.Infof("Running bgpq4 -h %s -Ab%d %s", irrdb, family, asSet)
-	cmd := exec.Command("bgpq4", "-h", irrdb, "-Ab"+strconv.Itoa(int(family)), asSet)
-	stdout, err := cmd.Output()
-	if err != nil {
-		log.Fatalf("bgpq4 error: %v", err.Error())
-	}
-
-	// Remove whitespace and commas from output
-	output := strings.ReplaceAll(string(stdout), ",\n    ", "\n")
-
-	// Remove array prefix
-	output = strings.ReplaceAll(output, "NN = [\n    ", "")
-
-	// Remove array suffix
-	output = strings.ReplaceAll(output, "];", "")
-
-	// Check for empty IRR
-	if output == "" {
-		log.Warnf("Peer with as-set %s has no IPv%d prefixes. Disabled IPv%d connectivity.", asSet, family, family)
-		return []string{}
-	}
-
-	// Remove whitespace (in this case there should only be trailing whitespace)
-	output = strings.TrimSpace(output)
-
-	// Split output by newline
-	return strings.Split(output, "\n")
-}
-
-// Normalize a string to be filename-safe
-func normalize(input string) string {
-	// Remove non-alphanumeric characters
-	input = sanitize.Path(input)
-
-	// Make uppercase
-	input = strings.ToUpper(input)
-
-	// Replace spaces with underscores
-	input = strings.ReplaceAll(input, " ", "_")
-
-	// Replace slashes with dashes
-	input = strings.ReplaceAll(input, "/", "-")
-
-	return input
-}
-
-// normalizeName returns a protocol name that is safe for BIRD
-func normalizeName(peerName string) string {
-	// Add peer prefix if the first character of peerName is a number
-	_peerName := strings.ReplaceAll(normalize(peerName), "-", "_")
-	if unicode.IsDigit(rune(_peerName[0])) {
-		_peerName = "PEER_" + _peerName
-	}
-	return _peerName
-}
-
-// printPeerInfo prints a peer's configuration to the log
-func printPeerInfo(peerName string, peerData *Peer) {
+// printStructInfo prints a configuration struct values
+func printStructInfo(label string, instance interface{}) {
 	// Fields to exclude from print output
-	excludedFields := []string{"PrefixSet4", "PrefixSet6", "Name", "SessionGlobal", "PreImport", "PreExport", "PreImportFinal", "PreExportFinal", "QueryTime"}
-	s := reflect.ValueOf(peerData).Elem()
+	excludedFields := []string{""}
+	s := reflect.ValueOf(instance).Elem()
 	typeOf := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
 		if !(contains(excludedFields, attrName)) {
-			log.Infof("[%s] attribute %s = %v\n", peerName, attrName, s.Field(i).Interface())
+			log.Infof("[%s] field %s = %v\n", label, attrName, reflect.Indirect(s.Field(i)))
 		}
 	}
 }
 
-func main() {
+// runPeeringDbQuery updates peer values from PeeringDB
+func runPeeringDbQuery(peerName string, peerData *peer) {
+	pDbData, err := getPeeringDbData(*peerData.ASN)
+	if err != nil {
+		log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
+	}
+
+	// Set import limits
+	if *peerData.AutoImportLimits {
+		*peerData.ImportLimit6 = pDbData.ImportLimit4
+		*peerData.ImportLimit6 = pDbData.ImportLimit6
+
+		if pDbData.ImportLimit4 == 0 {
+			log.Warnf("[%s] has an IPv4 import limit of zero from PeeringDB", peerName)
+		}
+		if pDbData.ImportLimit6 == 0 {
+			log.Warnf("[%s] has an IPv6 import limit of zero from PeeringDB", peerName)
+		}
+	}
+
+	// Set as-set
+	if *peerData.AutoASSet {
+		if pDbData.ASSet == "" {
+			log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
+			// TODO: Exit or skip this peer?
+		}
+
+		// If the as-set has a space in it, split and pick the first one
+		if strings.Contains(pDbData.ASSet, " ") {
+			pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
+			log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.ASSet)
+		}
+
+		// Trim IRRDB prefix
+		if strings.Contains(pDbData.ASSet, "::") {
+			*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+			log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
+		} else {
+			*peerData.ASSet = pDbData.ASSet
+		}
+	}
+}
+
+// run allows integration testing with an arbitrary slice of arguments. During normal runtime,
+// the main function will pass os.Args as the argument.
+func run(args []string) {
+	if len(args) == 2 && args[1] == "generate-config-docs" {
+		documentConfig()
+		os.Exit(1)
+	} else if len(os.Args) == 2 && args[1] == "generate-cli-docs" {
+		documentCliFlags()
+		os.Exit(1)
+	}
+
 	// Parse cli flags
-	_, err := flags.ParseArgs(&opts, os.Args)
+	_, err := flags.ParseArgs(&cliFlags, args)
 	if err != nil {
 		if !strings.Contains(err.Error(), "Usage") {
 			log.Fatal(err)
@@ -186,187 +102,205 @@ func main() {
 
 	// Enable debug logging in development releases
 	if //noinspection GoBoolExpressions
-	version == "devel" || opts.Verbose {
+	version == "devel" || cliFlags.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	if opts.ShowVersion {
-		log.Printf("wireframe version %s (https://github.com/natesales/wireframe)\n", version)
+	if cliFlags.ShowVersion {
+		log.Printf("Wireframe version %s (https://github.com/natesales/wireframe)\n", version)
 		os.Exit(0)
 	}
 
-	log.Infof("Starting  %s", version)
+	log.Debugf("Starting wireframe %s", version)
+
+	// Check for lockfile
+	if cliFlags.LockFile != "" {
+		if _, err := os.Stat(cliFlags.LockFile); err == nil {
+			log.Fatal("Wireframe lockfile exists, exiting")
+		} else if os.IsNotExist(err) {
+			// If the lockfile doesn't exist, create it
+			log.Debugln("Lockfile doesn't exist, creating one")
+			if err := ioutil.WriteFile(cliFlags.LockFile, []byte(""), 0755); err != nil {
+				log.Fatalf("Writing lockfile: %v", err)
+			}
+		} else {
+			log.Fatalf("Accessing lockfile: %v", err)
+		}
+	}
 
 	// Load templates from embedded filesystem
+	log.Debugln("Loading templates from embedded filesystem")
 	err = loadTemplates(embedFs)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Debugln("Finished loading templates")
 
-	log.Debug("Finished loading templates")
-
-	// Load the config file from configFilename flag
-	log.Debugf("Loading config from %s", opts.ConfigFile)
-	globalConfig, err := loadConfig(opts.ConfigFile)
+	// Load the config file from config file
+	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
+	configFile, err := ioutil.ReadFile(cliFlags.ConfigFile)
+	if err != nil {
+		log.Fatal("Reading config file: " + err.Error())
+	}
+	globalConfig, err := loadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Debugln("Finished loading config")
 
-	if !opts.DryRun {
-		// Create the global output file
-		log.Debug("Creating global config")
-		globalFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "bird.conf"))
-		if err != nil {
-			log.Fatalf("Create global BIRD output file: %v", err)
-		}
-		log.Debug("Finished creating global config file")
-
-		// Render the global template and write to disk
-		log.Debug("Writing global config file")
-		err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
-		if err != nil {
-			log.Fatalf("Execute global template: %v", err)
-		}
-		log.Debug("Finished writing global config file")
-
-		// Remove old peer-specific configs
-		files, err := filepath.Glob(path.Join(globalConfig.BirdSocket, "AS*.conf"))
-		if err != nil {
-			panic(err)
-		}
-		for _, f := range files {
-			if err := os.Remove(f); err != nil {
-				log.Fatalf("Removing old config files: %v", err)
-			}
-		}
-	} else {
-		log.Info("Dry run is enabled, skipped writing global config and removing old peer configs")
+	// Create the global output file
+	log.Debug("Creating global config")
+	globalFile, err := os.Create(path.Join(cliFlags.CacheDirectory, "bird.conf"))
+	if err != nil {
+		log.Fatalf("Create global BIRD output file: %v", err)
 	}
+	log.Debug("Finished creating global config file")
+
+	// Render the global template and write to buffer
+	log.Debug("Writing global config file")
+	err = globalTemplate.ExecuteTemplate(globalFile, "global.tmpl", globalConfig)
+	if err != nil {
+		log.Fatalf("Execute global template: %v", err)
+	}
+	log.Debug("Finished writing global config file")
+
+	// Remove old peer-specific configs
+	files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "AS*.conf"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if err := os.Remove(f); err != nil {
+			log.Fatalf("Removing old config files: %v", err)
+		}
+	}
+
+	// Print global config
+	printStructInfo("wireframe.global", globalConfig)
 
 	// Iterate over peers
 	for peerName, peerData := range globalConfig.Peers {
-		// Set normalized peer name
-		peerData.Name = normalizeName(peerData.Name)
+		// Set sanitized peer name
+		peerData.ProtocolName = sanitize(peerName)
 
-		// Set default query time
-		peerData.QueryTime = "[No operations performed]"
+		// If a PeeringDB query is required
+		if *peerData.AutoImportLimits || *peerData.AutoASSet {
+			log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-		log.Infof("Checking config for %s AS%d", peerName, peerData.Asn)
+			runPeeringDbQuery(peerName, peerData)
+		} // end peeringdb query enabled
 
-		// Validate peer type
-		if !(peerData.Type == "upstream" || peerData.Type == "peer" || peerData.Type == "downstream" || peerData.Type == "import-valid") {
-			log.Fatalf("[%s] type attribute is invalid. Must be upstream, peer, downstream, or import-valid", peerName)
-		}
-
-		if !peerData.NoPeeringDB {
-			// Only query PeeringDB and IRRDB for peers and downstreams, TODO: This should validate upstreams too
-			if peerData.Type == "peer" || peerData.Type == "downstream" {
-				peerData.QueryTime = time.Now().Format(time.RFC1123)
-				peeringDbData := getPeeringDbData(peerData.Asn)
-
-				if peerData.ImportLimit4 == 0 {
-					peerData.ImportLimit4 = peeringDbData.MaxPfx4
-					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx4)
-				}
-
-				if peerData.ImportLimit6 == 0 {
-					peerData.ImportLimit6 = peeringDbData.MaxPfx6
-					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d from PeeringDB", peerName, peeringDbData.MaxPfx6)
-				}
-
-				// Only set AS-SET from PeeringDB if it isn't configure manually
-				if peerData.AsSet == "" {
-					// If the as-set has a space in it, split and pick the first element
-					if strings.Contains(peeringDbData.AsSet, " ") {
-						peeringDbData.AsSet = strings.Split(peeringDbData.AsSet, " ")[0]
-						log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, peeringDbData.AsSet)
-					}
-
-					// Trim IRRDB prefix
-					if strings.Contains(peeringDbData.AsSet, "::") {
-						peerData.AsSet = strings.Split(peeringDbData.AsSet, "::")[1]
-						log.Warnf("[%s] has a IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, peerData.AsSet)
-					} else {
-						peerData.AsSet = peeringDbData.AsSet
-					}
-
-					if peeringDbData.AsSet == "" {
-						log.Warnf("[%s] has no as-set in PeeringDB, falling back to their ASN (%d)", peerName, peerData.Asn)
-						peerData.AsSet = fmt.Sprintf("AS%d", peerData.Asn)
-					} else {
-						log.Infof("[%s] has no manual AS-SET defined. Setting to %s from PeeringDB\n", peerName, peeringDbData.AsSet)
-					}
-				} else {
-					log.Infof("[%s] has manual AS-SET: %s", peerName, peerData.AsSet)
-				}
-
-				peerData.PrefixSet4 = getPrefixFilter(peerData.AsSet, 4, globalConfig.IrrDb)
-				peerData.PrefixSet6 = getPrefixFilter(peerData.AsSet, 6, globalConfig.IrrDb)
-
-				// Update the "latest operation" timestamp
-				peerData.QueryTime = time.Now().Format(time.RFC1123)
-			} else if peerData.Type == "upstream" || peerData.Type == "import-valid" {
-				// Check for a zero prefix import limit
-				if peerData.ImportLimit4 == 0 {
-					peerData.ImportLimit4 = DefaultIPv4TableSize
-					log.Infof("[%s] has no IPv4 import limit configured. Setting to %d", peerName, DefaultIPv4TableSize)
-				}
-
-				if peerData.ImportLimit6 == 0 {
-					peerData.ImportLimit6 = DefaultIPv6TableSize
-					log.Infof("[%s] has no IPv6 import limit configured. Setting to %d", peerName, DefaultIPv6TableSize)
-				}
+		// Build IRR prefix sets
+		if *peerData.FilterIRR {
+			// Check for empty as-set
+			if peerData.ASSet == nil || *peerData.ASSet == "" {
+				log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
 			}
-		}
 
-		// If as-set is empty and the peer type requires it
-		if peerData.AsSet == "" && (peerData.Type == "peer" || peerData.Type == "downstream") {
-			log.Fatalf("[%s] has no AS-SET defined and filtering profile requires it.", peerName)
-		}
-
-		// Print peer info
-		printPeerInfo(peerName, peerData)
-
-		if !opts.DryRun {
-			// Create the peer specific file
-			peerSpecificFile, err := os.Create(path.Join(globalConfig.BirdDirectory, "AS"+strconv.Itoa(int(peerData.Asn))+"_"+normalize(peerName)+".conf"))
+			prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig)
 			if err != nil {
-				log.Fatalf("Create peer specific output file: %v", err)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-
-			// Render the template and write to disk
-			log.Infof("[%s] Writing config", peerName)
-			err = peerTemplate.ExecuteTemplate(peerSpecificFile, "peer.tmpl", &Wrapper{Peer: *peerData, Config: *globalConfig})
+			*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefixesFromIRR4)
+			prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig)
 			if err != nil {
-				log.Fatalf("Execute template: %v", err)
+				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-
-			log.Infof("[%s] Wrote config", peerName)
-		} else {
-			log.Infof("Dry run is enabled, skipped writing peer config(s)")
+			*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
 		}
+
+		printStructInfo(peerName, peerData)
+
+		// Create peer file
+		peerFileName := path.Join(cliFlags.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *sanitize(peerName)))
+		peerSpecificFile, err := os.Create(peerFileName)
+		if err != nil {
+			log.Fatalf("Create peer specific output file: %v", err)
+		}
+
+		// Render the template and write to buffer
+		var b bytes.Buffer
+		log.Debugf("[%s] Writing config", peerName)
+		err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
+		if err != nil {
+			log.Fatalf("Execute template: %v", err)
+		}
+
+		// Reformat config and write template to file
+		if _, err := peerSpecificFile.Write([]byte(reformatBirdConfig(b.String()))); err != nil {
+			log.Fatalf("Write template to file: %v", err)
+		}
+
+		log.Debugf("[%s] Wrote config", peerName)
+
+	} // end peer loop
+
+	// Run BIRD config validation
+	log.Debugln("Validating BIRD config")
+	cmd := exec.Command(cliFlags.BirdBinary, "-c", "bird.conf", "-p")
+	cmd.Dir = cliFlags.CacheDirectory
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("BIRD config validation: %v", err)
 	}
+	log.Infof("BIRD config validation passed")
 
-	if !opts.DryRun {
+	if !cliFlags.DryRun {
 		// Write VRRP config
-		writeVrrpConfig(globalConfig)
+		writeVRRPConfig(globalConfig)
 
-		if globalConfig.BirdSocket != "" {
-			writeUiFile(globalConfig)
+		if cliFlags.WebUIFile != "" {
+			writeUIFile(globalConfig)
 		} else {
-			log.Infof("--ui-file is not defined, not creating a UI file")
+			log.Infof("Web UI is not defined, NOT writing UI")
 		}
 
-		if !opts.NoConfigure {
+		// Remove old configs
+		birdConfigFiles, err := filepath.Glob(path.Join(cliFlags.BirdDirectory, "AS*.conf"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, f := range birdConfigFiles {
+			log.Debugf("Removing old BIRD config file %s", f)
+			if err := os.Remove(f); err != nil {
+				log.Fatalf("Removing old BIRD config files: %v", err)
+			}
+		}
+
+		// Copy from cache to bird config
+		files, err := filepath.Glob(path.Join(cliFlags.CacheDirectory, "*.conf"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, f := range files {
+			fileNameParts := strings.Split(f, "/")
+			fileNameTail := fileNameParts[len(fileNameParts)-1]
+			newFileLoc := path.Join(cliFlags.BirdDirectory, fileNameTail)
+			log.Debugf("Moving %s to %s", f, newFileLoc)
+			if err := MoveFile(f, newFileLoc); err != nil {
+				log.Fatalf("Moving cache file to bird directory: %v", err)
+			}
+		}
+
+		if !cliFlags.NoConfigure {
 			log.Infoln("Reconfiguring BIRD")
-			if err = runBirdCommand("configure", globalConfig.BirdSocket); err != nil {
+			if err = runBirdCommand("configure", cliFlags.BirdSocket); err != nil {
 				log.Fatal(err)
 			}
 		} else {
 			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
 		}
+	} // end dry run check
 
-		// Configure interfaces
-		configureInterfaces(globalConfig)
+	// Delete lockfile
+	if cliFlags.LockFile != "" {
+		if err := os.Remove(cliFlags.LockFile); err != nil {
+			log.Fatalf("Removing lockfile: %v", err)
+		}
 	}
+}
+
+func main() {
+	run(os.Args)
 }

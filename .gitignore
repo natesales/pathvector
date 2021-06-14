@@ -9,5 +9,7 @@ output/*
 
 # Release
 dist/
-
 build/
+
+# Coverage
+cover.*

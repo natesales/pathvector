@@ -1,57 +1,57 @@
 # Update time: {{ UnixTimestamp }}
-# bird.conf
 
-define ASN = {{ .Asn }};
-{{ if .RouterId }}
-router id {{ .RouterId }};
-{{- end }}
+define ASN = {{ .ASN }};
+router id {{ .RouterID }};
 
-{{ if .OriginSet4 -}}
-define LOCAL_v4 = [
-{{ BirdSet .OriginSet4 }}
+{{ if .Prefixes4 -}}
+define LOCALv4 = [
+{{$first := true}}{{range $i, $prefix := .Prefixes4}}{{if $first}}{{$first = false}}{{else}},{{end}}
+  {{$prefix}}
+{{end}}
 ];
 {{- end }}
 
-{{if or .Static4 .OriginSet6 }}
+{{if or .Prefixes4 .Augments.Statics4 }}
 protocol static static4 {
   ipv4;
-  {{- range $i, $prefix := .OriginSet4 }}
+  {{- range $i, $prefix := .Prefixes4 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := .Static4 }}
+  {{- range $prefix, $nexthop := .Augments.Statics4 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
 {{- end }}
 
-{{ if .OriginSet6 -}}
-define LOCAL_v6 = [
-{{ BirdSet .OriginSet6 }}
+{{ if .Prefixes6 -}}
+define LOCALv6 = [
+{{$first := true}}{{range $i, $prefix := .Prefixes6}}{{if $first}}{{$first = false}}{{else}},{{end}}
+  {{$prefix}}
+{{end}}
 ];
 {{- end }}
 
-{{if or .Static4 .OriginSet6 }}
+{{if or .Prefixes6 .Augments.Statics6 }}
 protocol static static6 {
   ipv6;
-  {{- range $i, $prefix := .OriginSet6 }}
+  {{- range $i, $prefix := .Prefixes6 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := .Static6 }}
+  {{- range $prefix, $nexthop := .Augments.Statics6 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
 {{- end }}
 
-{{ if .DefaultEnabled -}}
 protocol static default4 {
   ipv4;
   route 0.0.0.0/0 reject;
 }
+
 protocol static default6 {
   ipv6;
   route ::/0 reject;
 }
-{{- end }}
 
 # ---- Parameters ----
 
@@ -68,20 +68,20 @@ protocol direct { ipv4; ipv6; }
 
 protocol kernel {
   scan time 10;
+  {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
   ipv4 {
     export filter {
-      {{- range $i, $rule := .KernelAccept4 }}
+      {{- range $i, $rule := .Augments.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
-      {{- range $i, $rule := .KernelReject4 }}
+      {{- range $i, $rule := .Augments.Reject4 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
-      if (proto = "explstatic4") then accept;
-      {{ if .PrefSrc4 -}}
-      if source = RTS_STATIC {{ if .OriginSet4 -}}&& proto != "static4"{{ end }} then {
+      {{ if .Source4 -}}
+      if source = RTS_STATIC {{ if .Prefixes4 -}}&& proto != "static4"{{ end }} then {
         accept;
       } else if source = RTS_BGP then {
-        krt_prefsrc = {{ .PrefSrc4 }};
+        krt_prefsrc = {{ .Source4 }};
         accept;
       }
       reject;
@@ -95,20 +95,20 @@ protocol kernel {
 
 protocol kernel {
   scan time 10;
+  {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
   ipv6 {
     export filter {
-      {{- range $i, $rule := .KernelAccept6 }}
+      {{- range $i, $rule := .Augments.Accept6 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
-      {{- range $i, $rule := .KernelReject6 }}
+      {{- range $i, $rule := .Augments.Reject6 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
-      if (proto = "explstatic6") then accept;
-      {{ if .PrefSrc6 -}}
-      if source = RTS_STATIC {{ if .OriginSet6 -}}&& proto != "static6"{{ end }} then {
+      {{ if .Source6 -}}
+      if source = RTS_STATIC {{ if .Prefixes6 -}}&& proto != "static6"{{ end }} then {
         accept;
       } else if source = RTS_BGP then {
-        krt_prefsrc = {{ .PrefSrc6 }};
+        krt_prefsrc = {{ .Source6 }};
         accept;
       } else {
         reject;
@@ -157,7 +157,7 @@ protocol rpki {
   roa6 { table rpki6; };
 
   transport tcp;
-  remote "{{ .RtrServer }}" port {{ .RtrPort }};
+  remote "{{ .RTRServerHost }}" port {{ .RTRServerPort }};
 
   retry keep 90;
   refresh keep 900;
@@ -191,7 +191,7 @@ define TRANSIT_ASNS = [
 ];
 
 define BOGONS_v4 = [
-  {{ if .FilterDefault -}}0.0.0.0/0,              # Default route{{ end }}
+  {{ if not .AcceptDefault -}}0.0.0.0/0,              # Default route{{ end }}
   0.0.0.0/8{8,32},        # IANA - Local Identification
   10.0.0.0/8{8,32},       # RFC 1918 - Private Use
   100.64.0.0/10{10,32},   # RFC 6598 - Shared Address Space
@@ -208,7 +208,7 @@ define BOGONS_v4 = [
 ];
 
 define BOGONS_v6 = [
-  {{ if .FilterDefault -}}::/0,                     # Default route{{ end }}
+  {{ if not .AcceptDefault -}}::/0,                     # Default route{{ end }}
   ::/8{8,128},              # loopback, unspecified, v4-mapped
   64:ff9b::/96{96,128},     # RFC 6052 - IPv4-IPv6 Translation
   100::/8{8,128},           # RFC 6666 - reserved for Discard-Only Address Block
@@ -252,82 +252,66 @@ define BOGON_ASNS = [
   4294967295              # Reserved. RFC7300
 ];
 
-# ---- Functions ----
+# Helper Functions
 
 function _reject(string reason) {
   reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+}
+
+# Filtering Functions
+
+function reject_transit_paths() {
+  if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
 }
 
 function honor_graceful_shutdown() {
   if (65535, 0) ~ bgp_community then bgp_local_pref = 0;
 }
 
-function reject_transit_paths() {
-  if (bgp_path ~ TRANSIT_ASNS) then _reject("transit path");
-}
-
-function strip_info_communities() {
-  bgp_large_community.delete([(ASN, 0, *)]);
-}
-
-function accept_local() {
-  {{ if .OriginSet4 -}}
-  if (net ~ LOCAL_v4 ) then {
-    bgp_large_community.add((ASN,0,100)); # Originated
-    accept;
-  }
+function reject_local() {
+  {{ if .Prefixes4 -}}
+  if (net ~ LOCALv4) then _reject("own prefix");
   {{- end }}
-
-  {{ if .OriginSet6 -}}
-  if (net ~ LOCAL_v6 ) then {
-    bgp_large_community.add((ASN,0,100)); # Originated
-    accept;
-  }
+  {{ if .Prefixes6 -}}
+  if (net ~ LOCALv6) then _reject("own prefix");
   {{- end }}
 }
 
-function process_prepends() {
-  if ((ASN,0,103) ~ bgp_large_community) then { # Learned from downstream
-    if ((ASN,1,401) ~ bgp_large_community) then {
-      print "Adding single prepend for ", net;
-      bgp_path.prepend(ASN);
-    }
-
-    if ((ASN,1,402) ~ bgp_large_community) then {
-      print "Adding double prepend for ", net;
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-    }
-
-    if ((ASN,1,403) ~ bgp_large_community) then {
-      print "Adding triple prepend for ", net;
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-      bgp_path.prepend(ASN);
-    }
-  }
-}
-
-function reject_bogons() {
-  {{ if .OriginSet4 -}}
-  if (net ~ LOCAL_v4) then _reject("own prefix");
-  {{- end }}
-  {{ if .OriginSet6 -}}
-  if (net ~ LOCAL_v6) then _reject("own prefix");
-  {{- end }}
+function reject_bogon_asns() {
   if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
-  if (bgp_path.len > 100) then _reject("long AS_PATH");
+}
 
+function reject_long_as_paths() {
+  if (bgp_path.len > 100) then _reject("long AS path");
+}
+
+function reject_rpki_invalid() {
   if (net.type = NET_IP4) then {
-    if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
-    if (net ~ BOGONS_v4) then _reject("bogon prefix");
     if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
 
   if (net.type = NET_IP6) then {
-    if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
-    if (net ~ BOGONS_v6) then _reject("bogon prefix");
     if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+  }
+}
+
+function reject_out_of_bounds_routes() {
+  if (net.type = NET_IP4) then {
+    if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (net.len > 48 || net.len < 12) then _reject("out of bounds (48 > len > 12)");
+  }
+}
+
+function reject_bogon_routes() {
+  if (net.type = NET_IP4) then {
+    if (net ~ BOGONS_v4) then _reject("bogon route");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (net ~ BOGONS_v6) then _reject("bogon route");
   }
 }
 
@@ -337,6 +321,50 @@ function enforce_first_as(int peer_asn) {
 
 function enforce_peer_nexthop(ip addr) {
   if (bgp_next_hop != addr) then _reject("nexhop doesn't match neighbor address");
+}
+
+# Processing Functions
+
+function remove_info_communities() {
+  bgp_large_community.delete([(ASN, 0, *)]);
+}
+
+function remove_private_asns() {
+  bgp_path.delete([64512..65534, 4200000000..4294967294]);
+}
+
+function process_prepends() {
+  if ((ASN,1,401) ~ bgp_large_community) then {
+    print "Adding single prepend for ", net;
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,1,402) ~ bgp_large_community) then {
+    print "Adding double prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+
+  if ((ASN,1,403) ~ bgp_large_community) then {
+    print "Adding triple prepend for ", net;
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+    bgp_path.prepend(ASN);
+  }
+}
+
+function accept_local() {
+  {{ if .Prefixes4 -}}
+  if (net ~ LOCALv4) then {
+    accept;
+  }
+  {{- end }}
+
+  {{ if .Prefixes6 -}}
+  if (net ~ LOCALv6) then {
+    accept;
+  }
+  {{- end }}
 }
 
 # ---- Peers ----

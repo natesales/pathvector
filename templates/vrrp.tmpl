@@ -2,7 +2,7 @@
 vrrp_instance VRRP{{ $instanceId }} {
     state {{ .State }}
     interface {{ .Interface }}
-    virtual_router_id {{ .VRRID }}
+    virtual_router_id {{ .VRID }}
     priority {{ .Priority }}
     advert_int 1
     {{- if .VIPs4 }}

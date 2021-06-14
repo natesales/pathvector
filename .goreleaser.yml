@@ -1,5 +1,6 @@
 before:
   hooks:
+    - go generate
     - go mod download
     - arista/build-wrapper.sh
 

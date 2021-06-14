@@ -22,7 +22,7 @@ func birdRead(reader io.Reader) (string, error) {
 
 // runBirdCommand runs a bird command
 func runBirdCommand(command string, socket string) error {
-	log.Debug("Connecting to BIRD socket")
+	log.Debugln("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
 		log.Fatalf("BIRD socket connect: %v", err)
@@ -35,19 +35,21 @@ func runBirdCommand(command string, socket string) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("BIRD init response: %s", resp)
+	log.Debugf("BIRD init response: %s", resp)
 
-	log.Printf("Sending BIRD command: %s", command)
+	log.Debugf("Sending BIRD command: %s", command)
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
-	log.Printf("Sent BIRD command: %s", command)
+	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
 		log.Fatalf("BIRD write error: %s\n", err)
 	}
 
+	log.Debugln("Reading from socket")
 	resp, err = birdRead(conn)
 	if err != nil {
 		return err
 	}
+	log.Debugln("Done reading from socket")
 
 	// Print bird output as multiple lines
 	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {

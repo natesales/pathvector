@@ -27,7 +27,7 @@ var cliFlags struct {
 	CacheDirectory        string `long:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/wireframe/cache/"`
 	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
 	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:"/run/wireframe.html"`
+	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
 	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 }
@@ -434,19 +434,20 @@ func documentConfig() {
 func documentCliFlags() {
 	fmt.Println("<!-- Code generated DO NOT EDIT -->")
 	fmt.Println("## CLI Flags")
-	fmt.Println("| Option | Type | Description |")
-	fmt.Println("|--------|------|-------------|")
+	fmt.Println("| Option | Type | Default | Description |")
+	fmt.Println("|--------|------|---------|-------------|")
 	t := reflect.TypeOf(cliFlags)
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		short := field.Tag.Get("short")
 		long := field.Tag.Get("long")
 		description := field.Tag.Get("description")
+		fDefault := field.Tag.Get("default")
 		// Add dash and comma only if short is defined
 		if short != "" {
 			short = "-" + short + ", "
 		}
 
-		fmt.Printf("| %s --%s | %s | %s |\n", short, long, field.Type.String(), description)
+		fmt.Printf("| %s --%s | %s | %s | %s |\n", short, long, field.Type.String(), fDefault, description)
 	}
 }

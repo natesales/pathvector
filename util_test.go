@@ -31,7 +31,7 @@ func TestSanitize(t *testing.T) {
 		{"fooBAR-*-", "FOOBAR"},
 		{"FOOBAR", "FOOBAR"},
 		{"AS65530", "AS65530"},
-		{"65530", "65530"},
+		{"65530", "PEER_65530"},
 	}
 	for _, tc := range testCases {
 		if out := *sanitize(tc.input); out != tc.expectedOutput {

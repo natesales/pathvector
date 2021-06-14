@@ -37,12 +37,6 @@ func printStructInfo(label string, instance interface{}) {
 	}
 }
 
-func deleteLockfile() {
-	if err := os.Remove(cliFlags.LockFile); err != nil {
-		log.Fatalf("Removing lockfile: %v", err)
-	}
-}
-
 // runPeeringDbQuery updates peer values from PeeringDB
 func runPeeringDbQuery(peerName string, peerData *peer) {
 	pDbData, err := getPeeringDbData(*peerData.ASN)
@@ -86,17 +80,19 @@ func runPeeringDbQuery(peerName string, peerData *peer) {
 	}
 }
 
-func main() {
-	if len(os.Args) == 2 && os.Args[1] == "generate-config-docs" {
+// run allows integration testing with an arbitrary slice of arguments. During normal runtime,
+// the main function will pass os.Args as the argument.
+func run(args []string) {
+	if len(args) == 2 && args[1] == "generate-config-docs" {
 		documentConfig()
 		os.Exit(1)
-	} else if len(os.Args) == 2 && os.Args[1] == "generate-cli-docs" {
+	} else if len(os.Args) == 2 && args[1] == "generate-cli-docs" {
 		documentCliFlags()
 		os.Exit(1)
 	}
 
 	// Parse cli flags
-	_, err := flags.ParseArgs(&cliFlags, os.Args)
+	_, err := flags.ParseArgs(&cliFlags, args)
 	if err != nil {
 		if !strings.Contains(err.Error(), "Usage") {
 			log.Fatal(err)
@@ -132,7 +128,7 @@ func main() {
 		}
 	}
 
-	//Load templates from embedded filesystem
+	// Load templates from embedded filesystem
 	log.Debugln("Loading templates from embedded filesystem")
 	err = loadTemplates(embedFs)
 	if err != nil {
@@ -305,5 +301,14 @@ func main() {
 		}
 	} // end dry run check
 
-	deleteLockfile()
+	// Delete lockfile
+	if cliFlags.LockFile != "" {
+		if err := os.Remove(cliFlags.LockFile); err != nil {
+			log.Fatalf("Removing lockfile: %v", err)
+		}
+	}
+}
+
+func main() {
+	run(os.Args)
 }

@@ -39,7 +39,7 @@ func printStructInfo(label string, instance interface{}) {
 
 func deleteLockfile() {
 	if err := os.Remove(cliFlags.LockFile); err != nil {
-		log.Fatalf("removing lockfile: %v", err)
+		log.Fatalf("Removing lockfile: %v", err)
 	}
 }
 
@@ -111,7 +111,7 @@ func main() {
 	}
 
 	if cliFlags.ShowVersion {
-		log.Printf("wireframe version %s (https://github.com/natesales/wireframe)\n", version)
+		log.Printf("Wireframe version %s (https://github.com/natesales/wireframe)\n", version)
 		os.Exit(0)
 	}
 
@@ -120,15 +120,15 @@ func main() {
 	// Check for lockfile
 	if cliFlags.LockFile != "" {
 		if _, err := os.Stat(cliFlags.LockFile); err == nil {
-			log.Fatal("wireframe lockfile exists, exiting")
+			log.Fatal("Wireframe lockfile exists, exiting")
 		} else if os.IsNotExist(err) {
 			// If the lockfile doesn't exist, create it
-			log.Debugln("lockfile doesn't exist, creating one")
+			log.Debugln("Lockfile doesn't exist, creating one")
 			if err := ioutil.WriteFile(cliFlags.LockFile, []byte(""), 0755); err != nil {
-				log.Fatalf("writing lockfile: %v", err)
+				log.Fatalf("Writing lockfile: %v", err)
 			}
 		} else {
-			log.Fatalf("accessing lockfile: %v", err)
+			log.Fatalf("Accessing lockfile: %v", err)
 		}
 	}
 
@@ -144,7 +144,7 @@ func main() {
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
 	configFile, err := ioutil.ReadFile(cliFlags.ConfigFile)
 	if err != nil {
-		log.Fatal("reading config file: " + err.Error())
+		log.Fatal("Reading config file: " + err.Error())
 	}
 	globalConfig, err := loadConfig(configFile)
 	if err != nil {
@@ -233,12 +233,12 @@ func main() {
 			log.Debugf("[%s] Writing config", peerName)
 			err = peerTemplate.ExecuteTemplate(&b, "peer.tmpl", &wrapper{peerName, *peerData, *globalConfig})
 			if err != nil {
-				log.Fatalf("execute template: %v", err)
+				log.Fatalf("Execute template: %v", err)
 			}
 
 			// Reformat config and write template to file
 			if _, err := peerSpecificFile.Write([]byte(reformatBirdConfig(b.String()))); err != nil {
-				log.Fatalf("write template to file: %v", err)
+				log.Fatalf("Write template to file: %v", err)
 			}
 
 			log.Debugf("[%s] Wrote config", peerName)
@@ -265,7 +265,7 @@ func main() {
 		if cliFlags.WebUIFile != "" {
 			writeUIFile(globalConfig)
 		} else {
-			log.Infof("web UI is not defined, NOT writing UI")
+			log.Infof("Web UI is not defined, NOT writing UI")
 		}
 
 		// Remove old configs
@@ -274,9 +274,9 @@ func main() {
 			log.Fatal(err)
 		}
 		for _, f := range birdConfigFiles {
-			log.Debugf("removing old BIRD config file %s", f)
+			log.Debugf("Removing old BIRD config file %s", f)
 			if err := os.Remove(f); err != nil {
-				log.Fatalf("removing old BIRD config files: %v", err)
+				log.Fatalf("Removing old BIRD config files: %v", err)
 			}
 		}
 
@@ -289,9 +289,9 @@ func main() {
 			fileNameParts := strings.Split(f, "/")
 			fileNameTail := fileNameParts[len(fileNameParts)-1]
 			newFileLoc := path.Join(cliFlags.BirdDirectory, fileNameTail)
-			log.Debugf("moving %s to %s", f, newFileLoc)
+			log.Debugf("Moving %s to %s", f, newFileLoc)
 			if err := MoveFile(f, newFileLoc); err != nil {
-				log.Fatalf("moving cache file to bird directory: %v", err)
+				log.Fatalf("Moving cache file to bird directory: %v", err)
 			}
 		}
 

@@ -155,7 +155,7 @@ func loadTemplates(fs embed.FS) error {
 // writeVRRPConfig writes the VRRP config to a keepalived config file
 func writeVRRPConfig(config *config) {
 	if len(config.VRRPInstances) < 1 {
-		log.Infof("no VRRP instances defined, not writing config")
+		log.Infof("No VRRP instances are defined, not writing config")
 		return
 	}
 

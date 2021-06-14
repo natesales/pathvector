@@ -159,18 +159,18 @@ type config struct {
 func loadConfig(configBlob []byte) (*config, error) {
 	var c config
 	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
-		return nil, errors.New("yaml unmarshal: " + err.Error())
+		return nil, errors.New("YAML unmarshal: " + err.Error())
 	}
 
 	validate := validator.New()
 	if err := validate.Struct(&c); err != nil {
-		return nil, errors.New("validation: " + err.Error())
+		return nil, errors.New("Validation: " + err.Error())
 	}
 
 	// Check for invalid templates
 	for templateName, templateData := range c.Templates {
 		if templateData.Template != nil && *templateData.Template != "" {
-			log.Fatalf("templates must not have a template field set, but %s does", templateName)
+			log.Fatalf("Templates must not have a template field set, but %s does", templateName)
 		}
 	}
 
@@ -183,7 +183,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
 			if template == nil || &template == nil {
-				log.Fatalf("template %s not found", *peerData.Template)
+				log.Fatalf("Template %s not found", *peerData.Template)
 			}
 			templateValue := reflect.ValueOf(*template)
 			peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
@@ -216,7 +216,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 			fieldValue := peerValue.FieldByName(fieldName)
 			defaultString := templateValueType.Field(i).Tag.Get("default")
 			if defaultString == "" {
-				log.Fatalf("code error: field %s has no default value", fieldName)
+				log.Fatalf("Code error: field %s has no default value", fieldName)
 			} else if defaultString != "-" {
 				log.Debugf("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
 				if fieldValue.IsNil() {
@@ -228,7 +228,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					case reflect.Int:
 						defaultValueInt, err := strconv.Atoi(defaultString)
 						if err != nil {
-							log.Fatalf("cant convert '%s' to uint", defaultString)
+							log.Fatalf("Can't convert '%s' to uint", defaultString)
 						}
 						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultValueInt)
 						fieldValue.Set(reflect.ValueOf(&defaultValueInt))
@@ -236,14 +236,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 						var err error // explicit declaration used to avoid scope issues of defaultValue
 						defaultBool, err := strconv.ParseBool(defaultString)
 						if err != nil {
-							log.Fatalf("can't parse bool %s", defaultString)
+							log.Fatalf("Can't parse bool %s", defaultString)
 						}
 						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultBool)
 						fieldValue.Set(reflect.ValueOf(&defaultBool))
 					case reflect.Struct, reflect.Slice:
 						// Ignore structs and slices
 					default:
-						log.Fatalf("unknown kind %+v for field %s", elemToSwitch, fieldName)
+						log.Fatalf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
 					}
 				}
 			} else {
@@ -256,7 +256,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 	for _, prefix := range c.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
-			return nil, errors.New("invalid origin prefix: " + prefix)
+			return nil, errors.New("Invalid origin prefix: " + prefix)
 		}
 
 		if pfx.To4() == nil { // If IPv6
@@ -274,10 +274,10 @@ func loadConfig(configBlob []byte) (*config, error) {
 	for prefix, nexthop := range c.Augments.Statics {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
-			return nil, errors.New("invalid static prefix: " + prefix)
+			return nil, errors.New("Invalid static prefix: " + prefix)
 		}
 		if net.ParseIP(nexthop) == nil {
-			return nil, errors.New("invalid static nexthop: " + nexthop)
+			return nil, errors.New("Invalid static nexthop: " + nexthop)
 		}
 
 		if pfx.To4() == nil { // If IPv6
@@ -293,7 +293,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 		for _, vip := range vrrpInstance.VIPs {
 			ip, _, err := net.ParseCIDR(vip)
 			if err != nil {
-				return nil, errors.New("invalid VIP: " + vip)
+				return nil, errors.New("Invalid VIP: " + vip)
 			}
 
 			if ip.To4() == nil { // If IPv6
@@ -319,7 +319,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 			for _, prefix := range *peerData.Prefixes {
 				pfx, _, err := net.ParseCIDR(prefix)
 				if err != nil {
-					return nil, errors.New("invalid prefix: " + prefix)
+					return nil, errors.New("Invalid prefix: " + prefix)
 				}
 
 				if pfx.To4() == nil { // If IPv6
@@ -345,7 +345,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					}
 					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, community)
 				} else {
-					return nil, errors.New("invalid import community: " + community)
+					return nil, errors.New("Invalid import community: " + community)
 				}
 			}
 		}
@@ -358,7 +358,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 				} else if communityType == "large" {
 					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
 				} else {
-					return nil, errors.New("invalid export community: " + community)
+					return nil, errors.New("Invalid export community: " + community)
 				}
 			}
 		}
@@ -371,7 +371,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 				} else if communityType == "large" {
 					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
 				} else {
-					return nil, errors.New("invalid announce community: " + community)
+					return nil, errors.New("Invalid announce community: " + community)
 				}
 			}
 		}
@@ -407,7 +407,7 @@ func documentConfigTypes(t reflect.Type) {
 		}
 
 		if description == "" {
-			log.Fatalf("code error: %s doesn't have a description", field.Name)
+			log.Fatalf("Code error: %s doesn't have a description", field.Name)
 		} else if description != "-" { // Ignore descriptions that are -
 			if strings.Contains(field.Type.String(), "main.") { // If the type is a config struct
 				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice and add to set (reflect.Type to bool map)

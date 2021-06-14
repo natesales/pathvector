@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: Install bgpq4 and bird2
         run: |
-          echo "deb http://deb.debian.org/debian/ sid main" > /etc/apt/sources.list
-          apt update
-          apt install -y bird2 bgpq4
+          echo "deb http://deb.debian.org/debian/ sid main" | sudo tee -a /etc/apt/sources.list
+          sudo apt update
+          sudo apt install -y bird2 bgpq4
 
       - name: Set up Go 1.16
         uses: actions/setup-go@v2

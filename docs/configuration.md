@@ -9,8 +9,7 @@
 | large-communities | []string |  |  | List of RFC8092 large BGP communities |
 | router-id | string |  | required | Router ID (dotted quad notation) |
 | irr-server | string | rr.ntt.net |  | Internet routing registry server |
-| rtr-server | string | rtr.rpki.cloudflare.com |  | RPKI-to-router server |
-| rtr-port | int | 8282 |  | RPKI-to-router port |
+| rtr-server | string | rtr.rpki.cloudflare.com:8282 |  | RPKI-to-router server |
 | keep-filtered | bool | false |  | Should filtered routes be kept in memory? |
 | merge-paths | bool | false |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | source4 | string |  |  | Source IPv4 address |

@@ -1,7 +1,6 @@
 router-id: 192.0.2.1
 irr-server: rr.ntt.net
-rtr-server: rtr.rpki.cloudflare.com
-rtr-port: 8282
+rtr-server: rtr.rpki.cloudflare.com:8282
 keep-filtered: true
 merge-paths: true
 source4: 192.0.2.1

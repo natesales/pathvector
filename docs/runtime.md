@@ -13,7 +13,7 @@
 |  --cache-directory | string | /var/run/wireframe/cache/ | Directory to store runtime configuration cache |
 |  --bird-socket | string | /run/bird/bird.ctl | UNIX control socket for BIRD |
 |  --keepalived-config | string | /etc/keepalived.conf | Configuration file for keepalived |
-|  --web-ui-file | string | /run/wireframe.html | File to write web UI to (disabled if empty) |
+|  --web-ui-file | string |  | File to write web UI to (disabled if empty) |
 |  --peeringdb-query-timeout | uint | 10 | PeeringDB query timeout in seconds |
 |  --irr-query-timeout | uint | 30 | IRR query timeout in seconds |
 
@@ -40,7 +40,6 @@ Application Options:
       --keepalived-config=       Configuration file for keepalived (default:
                                  /etc/keepalived.conf)
       --web-ui-file=             File to write web UI to (disabled if empty)
-                                 (default: /run/wireframe.html)
       --peeringdb-query-timeout= PeeringDB query timeout in seconds (default:
                                  10)
       --irr-query-timeout=       IRR query timeout in seconds (default: 30)

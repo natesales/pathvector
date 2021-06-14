@@ -138,8 +138,7 @@ type config struct {
 
 	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com"`
-	RTRPort       int    `yaml:"rtr-port" description:"RPKI-to-router port" default:"8282"`
+	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
@@ -152,8 +151,10 @@ type config struct {
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
 
-	Prefixes4 []string `yaml:"-" description:"-"`
-	Prefixes6 []string `yaml:"-" description:"-"`
+	RTRServerHost string   `yaml:"-" description:"-"`
+	RTRServerPort int      `yaml:"-" description:"-"`
+	Prefixes4     []string `yaml:"-" description:"-"`
+	Prefixes6     []string `yaml:"-" description:"-"`
 }
 
 // loadConfig loads a configuration file from a YAML file
@@ -312,6 +313,20 @@ func loadConfig(configBlob []byte) (*config, error) {
 		} else {
 			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
 		}
+	}
+
+	// Parse RTR server
+	if c.RTRServer != "" {
+		rtrServerParts := strings.Split(c.RTRServer, ":")
+		if len(rtrServerParts) != 2 {
+			log.Fatalf("Invalid rtr-server '%s' format should be host:port", rtrServerParts)
+		}
+		c.RTRServerHost = rtrServerParts[0]
+		rtrServerPort, err := strconv.Atoi(rtrServerParts[1])
+		if err != nil {
+			log.Fatalf("Invalid RTR server port %s", rtrServerParts[1])
+		}
+		c.RTRServerPort = rtrServerPort
 	}
 
 	for _, peerData := range c.Peers {

@@ -157,7 +157,7 @@ protocol rpki {
   roa6 { table rpki6; };
 
   transport tcp;
-  remote "{{ .RTRServer }}" port {{ .RTRPort }};
+  remote "{{ .RTRServerHost }}" port {{ .RTRServerPort }};
 
   retry keep 90;
   refresh keep 900;
@@ -356,14 +356,12 @@ function process_prepends() {
 function accept_local() {
   {{ if .Prefixes4 -}}
   if (net ~ LOCALv4) then {
-    bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }
   {{- end }}
 
   {{ if .Prefixes6 -}}
   if (net ~ LOCALv6) then {
-    bgp_large_community.add((ASN,0,100)); # Originated
     accept;
   }
   {{- end }}

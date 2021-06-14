@@ -145,21 +145,11 @@ type config struct {
 
 	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
-	Interfaces    map[string]iface `yaml:"interfaces" description:"Network interface configuration"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
 
 	Prefixes4 []string `yaml:"-" description:"-"`
 	Prefixes6 []string `yaml:"-" description:"-"`
-}
-
-// iface represents a network interface
-type iface struct {
-	MTU       uint     `yaml:"mtu" description:"Interface MTU (Maximum Transmission Unit)" default:"1500"`
-	XDPRTR    bool     `yaml:"xdprtr" description:"Should XDPRTR be loaded on this interface?" default:"false"`
-	Addresses []string `yaml:"addresses" description:"List of addresses to add to this interface"`
-	Dummy     bool     `yaml:"dummy" description:"Should a new dummy interface be created with this configuration?" default:"false"`
-	Down      bool     `yaml:"down" description:"Should the interface be set to a down state?" default:"false"`
 }
 
 // loadConfig loads a configuration file from a YAML file

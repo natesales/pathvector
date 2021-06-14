@@ -236,8 +236,5 @@ func main() {
 		} else {
 			log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
 		}
-
-		// Configure interfaces
-		configureInterfaces(globalConfig)
 	} // end dry run check
 }

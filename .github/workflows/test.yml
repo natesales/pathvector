@@ -11,9 +11,9 @@ jobs:
     steps:
       - name: Install bgpq4 and bird2
         run: |
-          sudo add-apt-repository universe --yes
-          sudo apt update
-          sudo apt install -y bird2 bgpq4
+          wget https://mirrors.kernel.org/ubuntu/pool/universe/b/bgpq4/bgpq4_0.0.6-2_amd64.deb
+          sudo dpkg -i bgpq4*.deb
+          sudo apt install -y bird2
 
       - name: Set up Go 1.16
         uses: actions/setup-go@v2

@@ -8,6 +8,8 @@
 | `-n`, `--no-configure` | `bool` | Don't configure BIRD |
 | `-V`, `--version` | `bool` | Show version and exit |
 | `-`, `--bird-directory` | `string` | Directory to store BIRD configs |
+| `-`, `--bird-binary` | `string` | Path to bird binary |
+| `-`, `--cache-directory` | `string` | Directory to store runtime configuration cache |
 | `-`, `--bird-socket` | `string` | UNIX control socket for BIRD |
 | `-`, `--keepalived-config` | `string` | Configuration file for keepalived |
 | `-`, `--web-ui-file` | `string` | File to write web UI to |
@@ -27,6 +29,9 @@ Application Options:
   -V, --version                  Show version and exit
       --bird-directory=          Directory to store BIRD configs (default:
                                  /etc/bird/)
+      --bird-binary=             Path to bird binary (default: /usr/sbin/bird)
+      --cache-directory=         Directory to store runtime configuration cache
+                                 (default: /var/run/wireframe/cache/)
       --bird-socket=             UNIX control socket for BIRD (default:
                                  /run/bird/bird.ctl)
       --keepalived-config=       Configuration file for keepalived (default:

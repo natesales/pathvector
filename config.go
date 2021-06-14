@@ -17,7 +17,7 @@ import (
 
 var cliFlags struct {
 	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
-	LockFile              string `long:"lock-file" description:"Lock file (check disabled if empty)" default:""`
+	LockFileDirectory     string `long:"lock-file-directory" description:"Lock file directory (lockfile check disabled if empty)" default:""`
 	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
 	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
 	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`

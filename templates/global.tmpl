@@ -1,5 +1,4 @@
 # Update time: {{ UnixTimestamp }}
-# bird.conf
 
 define ASN = {{ .ASN }};
 router id {{ .RouterID }};
@@ -25,7 +24,7 @@ protocol static static4 {
 {{- end }}
 
 {{ if .Prefixes6 -}}
-define LOCAL6 = [
+define LOCALv6 = [
 {{$first := true}}{{range $i, $prefix := .Prefixes6}}{{if $first}}{{$first = false}}{{else}},{{end}}
   {{$prefix}}
 {{end}}

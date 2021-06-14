@@ -257,9 +257,9 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			c.Prefixes4 = append(c.Prefixes4, prefix)
-		} else { // If IPv4
 			c.Prefixes6 = append(c.Prefixes6, prefix)
+		} else { // If IPv4
+			c.Prefixes4 = append(c.Prefixes4, prefix)
 		}
 	}
 

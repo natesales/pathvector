@@ -104,7 +104,7 @@ type peer struct {
 	ImportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
 	ExportStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
 	ExportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
-	AnnounceStandardCommunities *[]string `yaml:"" description:"-" default:"-"`
+	AnnounceStandardCommunities *[]string `yaml:"-" description:"-" default:"-"`
 	AnnounceLargeCommunities    *[]string `yaml:"-" description:"-" default:"-"`
 }
 

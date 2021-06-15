@@ -378,20 +378,24 @@ func loadConfig(configBlob []byte) (*config, error) {
 				}
 			}
 		}
-		if peerData.AnnounceCommunities != nil {
-			for _, community := range *peerData.AnnounceCommunities {
-				communityType := categorizeCommunity(community)
-
-				if communityType == "standard" {
-					*peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
-				} else if communityType == "large" {
-					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
-				} else {
-					return nil, errors.New("Invalid announce community: " + community)
-				}
-			}
-		}
-
+                if peerData.AnnounceCommunities != nil {
+                        for _, community := range *peerData.AnnounceCommunities {
+                                communityType := categorizeCommunity(community)
+                                if communityType == "standard" {
+                                        if peerData.AnnounceStandardCommunities == nil {
+                                                peerData.AnnounceStandardCommunities = &[]string{}
+                                        }
+                                        *peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
+                                } else if communityType == "large" {
+                                        if peerData.AnnounceLargeCommunities == nil {
+                                                peerData.AnnounceLargeCommunities = &[]string{}
+                                        }
+                                        *peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
+                                } else {
+                                        return nil, errors.New("Invalid Announce community: " + community)
+                                }
+                        }
+                }
 		// Check for no originated prefixes but announce-originated enabled
 		if len(c.Prefixes) < 1 && *peerData.AnnounceOriginated {
 			// No locally originated prefixes are defined, so there's nothing to originate

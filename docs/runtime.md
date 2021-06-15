@@ -3,7 +3,7 @@
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | -c,  --config | string | /etc/wireframe.yml | Configuration file in YAML, TOML, or JSON format |
-|  --lock-file-directory | string |  | Lock file directory (lockfile check disabled if empty) |
+|  --lock-file | string |  | Lock file (check disabled if empty) |
 | -v,  --verbose | bool |  | Show verbose log messages |
 | -d,  --dry-run | bool |  | Don't modify configuration |
 | -n,  --no-configure | bool |  | Don't configure BIRD |
@@ -16,7 +16,6 @@
 |  --web-ui-file | string |  | File to write web UI to (disabled if empty) |
 |  --peeringdb-query-timeout | uint | 10 | PeeringDB query timeout in seconds |
 |  --irr-query-timeout | uint | 30 | IRR query timeout in seconds |
-| -m,  --mode | string | generate | Should this run generate a config or start the optimization daemon? (generate or daemon) |
 
 # Usage
 ```
@@ -26,8 +25,7 @@ Usage:
 Application Options:
   -c, --config=                  Configuration file in YAML, TOML, or JSON
                                  format (default: /etc/wireframe.yml)
-      --lock-file-directory=     Lock file directory (lockfile check disabled
-                                 if empty)
+      --lock-file=               Lock file (check disabled if empty)
   -v, --verbose                  Show verbose log messages
   -d, --dry-run                  Don't modify configuration
   -n, --no-configure             Don't configure BIRD
@@ -45,9 +43,6 @@ Application Options:
       --peeringdb-query-timeout= PeeringDB query timeout in seconds (default:
                                  10)
       --irr-query-timeout=       IRR query timeout in seconds (default: 30)
-  -m, --mode=                    Should this run generate a config or start the
-                                 optimization daemon? (generate or daemon)
-                                 (default: generate)
 
 Help Options:
   -h, --help                     Show this help message

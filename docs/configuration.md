@@ -20,7 +20,6 @@
 | templates | map[string]*peer |  |  | BGP peer templates |
 | vrrp | []vrrpInstance |  |  | List of VRRP instances |
 | augments | augments |  |  | Custom configuration options |
-| optimizer | optimizer |  |  | Route optimizer options |
 
 <!-- Code generated DO NOT EDIT -->
 ## *peer
@@ -74,10 +73,6 @@
 | pre-export | *string |  |  | Configuration to add at the beginning of the export filter |
 | pre-import-final | *string |  |  | Configuration to add immediately before the final accept/reject on import |
 | pre-export-final | *string |  |  | Configuration to add immediately before the final accept/reject on export |
-| probe-sources | *[]string |  |  | Optimizer probe source addresses |
-| optimize | *bool | false |  | Should the optimizer be enabled for this peer? |
-| optimize-inbound | *bool | false |  | Should the optimizer modify inbound policy? |
-| optimize-outbound | *bool | false |  | Should the optimizer modify outbound policy? |
 
 <!-- Code generated DO NOT EDIT -->
 ## vrrpInstance
@@ -98,14 +93,4 @@
 | reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
-
-<!-- Code generated DO NOT EDIT -->
-## optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| probe-count | int |  |  | Number of pings to send in each run |
-| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int |  |  | Time to wait between each optimizer run |
-| cache-size | int |  |  | Number of probe results to store per peer |
 

@@ -26,7 +26,9 @@ type peeringDbData struct {
 // Query PeeringDB for an ASN
 func getPeeringDbData(asn int) (*peeringDbData, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(cliFlags.PeeringDbQueryTimeout)}
+
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
+
 	if err != nil {
 		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
 	}

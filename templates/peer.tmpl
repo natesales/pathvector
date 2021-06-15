@@ -68,7 +68,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ if BoolDeref $peer.FilterIRR }}
-            if (net ~ AS{{ $peer.ASN }}_{{ $peerName }}_PFX_v{{ $af }}) then {
+            if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName  }}_PFX_v{{ $af }}) then {
                 accept;
             } else {
                 reject;

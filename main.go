@@ -72,10 +72,10 @@ func runPeeringDbQuery(peerName string, peerData *peer) {
 
 		// Trim IRRDB prefix
 		if strings.Contains(pDbData.ASSet, "::") {
-			*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+			peerData.ASSet = &strings.Split(pDbData.ASSet, "::")[1]
 			log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 		} else {
-			*peerData.ASSet = pDbData.ASSet
+			peerData.ASSet = &pDbData.ASSet
 		}
 	}
 }
@@ -201,12 +201,30 @@ func run(args []string) {
 			if err != nil {
 				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-			*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefixesFromIRR4)
+
+
+			// *peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefixesFromIRR4)
+			var prefixSet4 []string
+			if peerData.PrefixSet4 != nil {
+				prefixSet4 = append(prefixSet4, *peerData.PrefixSet4...)
+			}
+
+			prefixSet4 = append(prefixSet4, prefixesFromIRR4...)
+			peerData.PrefixSet4 = &prefixSet4
+
+
 			prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig)
 			if err != nil {
 				log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 			}
-			*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
+
+			// *peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
+			var prefixSet6 []string
+			if peerData.PrefixSet6 != nil {
+				prefixSet6 = append(prefixSet6, *peerData.PrefixSet6...)
+			}
+			prefixSet6 = append(prefixSet6, prefixesFromIRR6...)
+			peerData.PrefixSet6 = &prefixSet6
 		}
 
 		printStructInfo(peerName, peerData)

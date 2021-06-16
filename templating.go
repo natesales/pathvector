@@ -10,7 +10,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -128,25 +127,25 @@ func loadTemplates(fs embed.FS) error {
 	// Generate peer template
 	peerTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/peer.tmpl")
 	if err != nil {
-		return errorx.Decorate(err, "Reading peer template")
+		return fmt.Errorf("reading peer template: %v", err)
 	}
 
 	// Generate global template
 	globalTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/global.tmpl")
 	if err != nil {
-		return errorx.Decorate(err, "Reading global template")
+		return fmt.Errorf("reading global template: %v", err)
 	}
 
 	// Generate UI template
 	uiTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
 	if err != nil {
-		return errorx.Decorate(err, "Reading ui template")
+		return fmt.Errorf("reading UI template: %v", err)
 	}
 
 	// Generate VRRP template
 	vrrpTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
 	if err != nil {
-		return errorx.Decorate(err, "Reading VRRP template")
+		return fmt.Errorf("reading VRRP template: %v", err)
 	}
 
 	return nil // nil error

@@ -1,11 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"strings"
 
-	"github.com/joomcode/errorx"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,7 +14,7 @@ func birdRead(reader io.Reader) (string, error) {
 	n, err := reader.Read(buf[:])
 
 	if err != nil {
-		return "", errorx.Decorate(err, "BIRD read") // empty return string
+		return "", fmt.Errorf("BIRD read: %v", err)
 	}
 
 	return string(buf[:n]), nil // nil error

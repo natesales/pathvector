@@ -1,3 +1,5 @@
+github.com/creasty/defaults v1.5.1 h1:j8WexcS3d/t4ZmllX4GEkl4wIB/trOr035ajcLHCISM=
+github.com/creasty/defaults v1.5.1/go.mod h1:FPZ+Y0WNrbqOVw+c6av63eyHUAl6pMHZwqLPvXUZGfY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -13,8 +15,6 @@ github.com/go-playground/validator/v10 v10.6.1 h1:W6TRDXt4WcWp4c4nf/G+6BkGdhiIo0
 github.com/go-playground/validator/v10 v10.6.1/go.mod h1:xm76BBt941f7yWdGnI2DVPFFg1UK3YY04qifoXU3lOk=
 github.com/jessevdk/go-flags v1.5.0 h1:1jKYvbxEjfUl0fmqTCOfonvskHHXMjBySTLW4y9LFvc=
 github.com/jessevdk/go-flags v1.5.0/go.mod h1:Fw0T6WPc1dYxT4mKEZRfG5kJhaTDP9pj1c2EWnYs/m4=
-github.com/joomcode/errorx v1.0.3 h1:3e1mi0u7/HTPNdg6d6DYyKGBhA5l9XpsfuVE29NxnWw=
-github.com/joomcode/errorx v1.0.3/go.mod h1:eQzdtdlNyN7etw6YCS4W4+lu442waxZYw5yvz0ULrRo=
 github.com/leodido/go-urn v1.2.0 h1:hpXL4XnriNwQ/ABnpepYM/1vCLWNDfUNts8dX3xTG6Y=
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

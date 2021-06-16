@@ -60,7 +60,7 @@
 | filter-max-prefix | *bool | true |  | Should max prefix filtering be applied? |
 | filter-bogon-routes | *bool | true |  | Should bogon prefixes be rejected? |
 | filter-bogon-asns | *bool | true |  | Should paths containing a bogon ASN be rejected? |
-| filter-tier1-asns | *bool | false |  | Should paths containing 'Tier 1' ASNs be rejected (Peerlock Lite)?' |
+| filter-transit-asns | *bool | false |  | Should paths containing transit-free ASNs be rejected? (Peerlock Lite)' |
 | filter-prefix-length | *bool | true |  | Should too large/small prefixes (IPv4: len > 24 || len < 8; IPv6: len > 48 || len < 12) be rejected? |
 | auto-import-limits | *bool | false |  | Get import limits automatically from PeeringDB? |
 | auto-as-set | *bool | false |  | Get as-set automatically from PeeringDB? |

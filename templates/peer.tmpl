@@ -52,7 +52,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.FilterRPKI }}reject_rpki_invalid();{{ end }}
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
-            {{ if BoolDeref $peer.FilterTier1ASNs }}reject_transit_paths();{{ end }}
+            {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
 

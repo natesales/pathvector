@@ -206,7 +206,7 @@ func run(args []string) {
 
 				prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig.IRRServer)
 				if err != nil {
-					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
+					log.Fatalf("[%s] unable to get IRR prefix list from %s", peerName, *peerData.ASSet)
 				}
 				if peerData.PrefixSet4 == nil {
 					peerData.PrefixSet4 = &[]string{}
@@ -215,7 +215,7 @@ func run(args []string) {
 				peerData.PrefixSet4 = &pfx4
 				prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig.IRRServer)
 				if err != nil {
-					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
+					log.Fatalf("[%s] unable to get IRR prefix list from %s", peerName, *peerData.ASSet)
 				}
 				if peerData.PrefixSet6 == nil {
 					peerData.PrefixSet6 = &[]string{}

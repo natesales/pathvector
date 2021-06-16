@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -178,6 +179,11 @@ type config struct {
 // loadConfig loads a configuration file from a YAML file
 func loadConfig(configBlob []byte) (*config, error) {
 	var c config
+	// Set global config defaults
+	if err := defaults.Set(&c); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
 		return nil, errors.New("YAML unmarshal: " + err.Error())
 	}

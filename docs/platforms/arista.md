@@ -1,6 +1,6 @@
 # Arista
 
-Wireframe can be run on Arista switches by installing a SWIX (Switch Extension) file. The [arista](https://github.com/natesales/wireframe/tree/main/arista) directory contains packaging configuration to build a SWIX bundle extension containing Wireframe, BIRD2, GoRTR, and bgpq4. 
+Pathvector can run on Arista switches by installing a SWIX (Switch Extension) file. The SWIX bundle for each release contains Pathvector, BIRD2, GoRTR, and bgpq4. 
 
 ## Installation
 

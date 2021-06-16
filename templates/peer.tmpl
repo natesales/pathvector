@@ -1,22 +1,22 @@
 {{ $peer := .Peer }}{{ $peerName := .Name }}{{ $global := .Config }}
 
-# {{ .Name }} AS{{ .Peer.ASN }}
+# {{ .Name }} AS{{ $peer.ASN }}
 
-define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ .Peer.ImportLimit4 }};
-define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ .Peer.ImportLimit6 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ $peer.ImportLimit4 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ $peer.ImportLimit6 }};
 
-{{ if .Peer.FilterIRR }}
-    {{ if NotEmpty .Peer.PrefixSet4 }}
-        define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = [
-        {{ BirdSet .Peer.PrefixSet4 }}
-        ];
-    {{ end }}
+{{ if $peer.FilterIRR }}
+{{ if NotEmpty $peer.PrefixSet4 }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = [
+{{ BirdSet $peer.PrefixSet4 }}
+];
+{{ end }}
 
-    {{ if NotEmpty .Peer.PrefixSet6 }}
-        define AS{{ .Peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
-        {{ BirdSet .Peer.PrefixSet6 }}
-        ];
-    {{ end }}
+{{ if NotEmpty $peer.PrefixSet6 }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
+{{ BirdSet $peer.PrefixSet6 }}
+];
+{{ end }}
 {{ end }}
 
 {{ range $i, $neighbor := $peer.NeighborIPs }}
@@ -68,11 +68,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ if BoolDeref $peer.FilterIRR }}
-            if (net ~ AS{{ $peer.ASN }}_{{ $peerName }}_PFX_v{{ $af }}) then {
-                accept;
-            } else {
-                reject;
-            }
+            if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { reject; }
             {{ end }}
             {{ StrDeref $peer.PreImportFinal }}
             accept;

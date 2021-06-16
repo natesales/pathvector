@@ -5,13 +5,10 @@ router id {{ .RouterID }};
 
 {{ if .Prefixes4 -}}
 define LOCALv4 = [
-{{$first := true}}{{range $i, $prefix := .Prefixes4}}{{if $first}}{{$first = false}}{{else}},{{end}}
-  {{$prefix}}
-{{end}}
+{{ BirdSet .Prefixes4 }}
 ];
 {{- end }}
-
-{{if or .Prefixes4 .Augments.Statics4 }}
+{{ if or .Prefixes4 .Augments.Statics4 }}
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .Prefixes4 }}
@@ -25,13 +22,10 @@ protocol static static4 {
 
 {{ if .Prefixes6 -}}
 define LOCALv6 = [
-{{$first := true}}{{range $i, $prefix := .Prefixes6}}{{if $first}}{{$first = false}}{{else}},{{end}}
-  {{$prefix}}
-{{end}}
+{{ BirdSet .Prefixes6 }}
 ];
 {{- end }}
-
-{{if or .Prefixes6 .Augments.Statics6 }}
+{{ if or .Prefixes6 .Augments.Statics6 }}
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .Prefixes6 }}

@@ -17,7 +17,7 @@ import (
 
 var cliFlags struct {
 	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/wireframe.yml"`
-	LockFile              string `long:"lock-file" description:"Lock file (check disabled if empty)" default:""`
+	LockFileDirectory     string `long:"lock-file-directory" description:"Lock file directory (lockfile check disabled if empty)" default:""`
 	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
 	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
 	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
@@ -30,6 +30,7 @@ var cliFlags struct {
 	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
 	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	Mode                  string `short:"m" long:"mode" description:"Should this run generate a config or start the optimization daemon? (generate or daemon)" default:"generate"`
 }
 
 type peer struct {
@@ -96,6 +97,12 @@ type peer struct {
 	PreImportFinal *string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import" default:"-"`
 	PreExportFinal *string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export" default:"-"`
 
+	// Optimizer
+	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`
+	OptimizerEnabled      *bool     `yaml:"optimize" description:"Should the optimizer be enabled for this peer?" default:"false"`
+	OptimizeInbound       *bool     `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
+	OptimizeOutbound      *bool     `yaml:"optimize-outbound" description:"Should the optimizer modify outbound policy?" default:"false"`
+
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
@@ -130,6 +137,16 @@ type augments struct {
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
+type optimizer struct {
+	Targets     []string `yaml:"targets" description:"List of probe targets"`
+	PingCount   int      `yaml:"probe-count" description:"Number of pings to send in each run"`
+	PingTimeout int      `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered"`
+	Interval    int      `yaml:"probe-interval" description:"Time to wait between each optimizer run"`
+	CacheSize   int      `yaml:"cache-size" description:"Number of probe results to store per peer"` // There will be a total of probeCacheSize*len(targets) results stored (TODO: double check if this is really true)
+
+	Db map[string][]probeResult `yaml:"-" description:"-"`
+}
+
 type config struct {
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
@@ -150,6 +167,7 @@ type config struct {
 	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     optimizer        `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`
@@ -370,8 +388,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 			for _, community := range *peerData.ExportCommunities {
 				communityType := categorizeCommunity(community)
 				if communityType == "standard" {
+					if peerData.ExportStandardCommunities == nil {
+						peerData.ExportStandardCommunities = &[]string{}
+					}
 					*peerData.ExportStandardCommunities = append(*peerData.ExportStandardCommunities, community)
 				} else if communityType == "large" {
+					if peerData.ExportLargeCommunities == nil {
+						peerData.ExportLargeCommunities = &[]string{}
+					}
 					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
 				} else {
 					return nil, errors.New("Invalid export community: " + community)
@@ -383,8 +407,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 				communityType := categorizeCommunity(community)
 
 				if communityType == "standard" {
+					if peerData.AnnounceStandardCommunities == nil {
+						peerData.AnnounceStandardCommunities = &[]string{}
+					}
 					*peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
 				} else if communityType == "large" {
+					if peerData.AnnounceLargeCommunities == nil {
+						peerData.AnnounceLargeCommunities = &[]string{}
+					}
 					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
 				} else {
 					return nil, errors.New("Invalid announce community: " + community)

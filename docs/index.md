@@ -1,4 +1,7 @@
-# Wireframe
+<!-- This empty header is there to make mkdocs remove the title -->
+#
+
+![Banner](assets/banner.png)
 
 Wireframe is a declarative routing platform with robust BGP filtering support for the core and peering edge.
 

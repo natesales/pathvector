@@ -1,6 +1,9 @@
-site_name: Wireframe
-repo_url: https://github.com/natesales/wireframe
+site_name: Pathvector
+repo_url: https://github.com/natesales/pathvector
 theme:
   name: material
+  logo: assets/logo.png
   palette:
-    primary: black
+    scheme: slate
+extra_css:
+  - assets/style.css

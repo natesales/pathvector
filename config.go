@@ -478,7 +478,7 @@ func documentConfigTypes(t reflect.Type) {
 }
 
 func documentConfig() {
-	fmt.Println("# Configuration")
+	fmt.Println("# Options")
 	documentConfigTypes(reflect.TypeOf(config{}))
 }
 

@@ -388,8 +388,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 			for _, community := range *peerData.ExportCommunities {
 				communityType := categorizeCommunity(community)
 				if communityType == "standard" {
+					if peerData.ExportStandardCommunities == nil {
+						peerData.ExportStandardCommunities = &[]string{}
+					}
 					*peerData.ExportStandardCommunities = append(*peerData.ExportStandardCommunities, community)
 				} else if communityType == "large" {
+					if peerData.ExportLargeCommunities == nil {
+						peerData.ExportLargeCommunities = &[]string{}
+					}
 					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
 				} else {
 					return nil, errors.New("Invalid export community: " + community)
@@ -401,8 +407,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 				communityType := categorizeCommunity(community)
 
 				if communityType == "standard" {
+					if peerData.AnnounceStandardCommunities == nil {
+						peerData.AnnounceStandardCommunities = &[]string{}
+					}
 					*peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
 				} else if communityType == "large" {
+					if peerData.AnnounceLargeCommunities == nil {
+						peerData.AnnounceLargeCommunities = &[]string{}
+					}
 					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
 				} else {
 					return nil, errors.New("Invalid announce community: " + community)

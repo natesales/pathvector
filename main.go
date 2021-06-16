@@ -72,10 +72,10 @@ func runPeeringDbQuery(peerName string, peerData *peer) {
 
 		// Trim IRRDB prefix
 		if strings.Contains(pDbData.ASSet, "::") {
-			*peerData.ASSet = strings.Split(pDbData.ASSet, "::")[1]
+			peerData.ASSet = &strings.Split(pDbData.ASSet, "::")[1]
 			log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 		} else {
-			*peerData.ASSet = pDbData.ASSet
+			peerData.ASSet = &pDbData.ASSet
 		}
 	}
 }
@@ -204,16 +204,24 @@ func run(args []string) {
 					log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
 				}
 
-				prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig)
+				prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig.IRRServer)
 				if err != nil {
 					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 				}
-				*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefixesFromIRR4)
-				prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig)
+				if peerData.PrefixSet4 == nil {
+					peerData.PrefixSet4 = &[]string{}
+				}
+				pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
+				peerData.PrefixSet4 = &pfx4
+				prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig.IRRServer)
 				if err != nil {
 					log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
 				}
-				*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefixesFromIRR6)
+				if peerData.PrefixSet6 == nil {
+					peerData.PrefixSet6 = &[]string{}
+				}
+				pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
+				*peerData.PrefixSet6 = pfx6
 			}
 
 			printStructInfo(peerName, peerData)

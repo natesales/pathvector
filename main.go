@@ -109,7 +109,7 @@ func run(args []string) {
 	}
 
 	if cliFlags.ShowVersion {
-		log.Printf("Wireframe version %s (https://github.com/natesales/wireframe)\n", version)
+		log.Printf("Pathvector version %s (https://github.com/natesales/pathvector)\n", version)
 		os.Exit(0)
 	}
 
@@ -121,7 +121,7 @@ func run(args []string) {
 	// Check lockfile
 	if cliFlags.LockFileDirectory != "" {
 		if _, err := os.Stat(path.Join(cliFlags.LockFileDirectory, cliFlags.Mode+".lock")); err == nil {
-			log.Fatal("Wireframe lockfile exists, exiting")
+			log.Fatal("Lockfile exists, exiting")
 		} else if os.IsNotExist(err) {
 			// If the lockfile doesn't exist, create it
 			log.Debugln("Lockfile doesn't exist, creating one")
@@ -133,7 +133,7 @@ func run(args []string) {
 		}
 	}
 
-	log.Debugf("Starting wireframe %s mode: %s", version, cliFlags.Mode)
+	log.Debugf("Starting pathvector %s mode: %s", version, cliFlags.Mode)
 
 	// Load the config file from config file
 	log.Debugf("Loading config from %s", cliFlags.ConfigFile)
@@ -185,7 +185,7 @@ func run(args []string) {
 		}
 
 		// Print global config
-		printStructInfo("wireframe.global", globalConfig)
+		printStructInfo("pathvector.global", globalConfig)
 
 		// Iterate over peers
 		for peerName, peerData := range globalConfig.Peers {

@@ -1,4 +1,4 @@
-module github.com/natesales/wireframe
+module github.com/natesales/pathvector
 
 go 1.16
 

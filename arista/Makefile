@@ -1,4 +1,4 @@
-all: prepare bird gortr bgpq4 wireframe manifest swix
+all: prepare bird gortr bgpq4 pathvector manifest swix
 
 clean:
 	rm -rf build
@@ -27,16 +27,16 @@ bgpq4:
 	cd build/bgpq4 && make
 	nfpm package --packager rpm --target build/ --config bgpq4-nfpm.yml
 
-wireframe:
-	if [ ! -d "build/wireframe/" ] ; then git clone https://github.com/natesales/wireframe build/wireframe/ ; fi
-	cd build/wireframe && go generate && CGO_ENABLED=0 go build -ldflags="-X 'main.version=$$(git describe --tags `git rev-list --tags --max-count=1`)'"
-	nfpm package --packager rpm --target build/ --config wireframe-nfpm.yml
+pathvector:
+	if [ ! -d "build/pathvector/" ] ; then git clone https://github.com/natesales/pathvector build/pathvector/ ; fi
+	cd build/pathvector && go generate && CGO_ENABLED=0 go build -ldflags="-X 'main.version=$$(git describe --tags `git rev-list --tags --max-count=1`)'"
+	nfpm package --packager rpm --target build/ --config pathvector-nfpm.yml
 
 manifest:
 	cd build && echo "format: 1" > manifest.txt
-	cd build && echo "primaryRpm: $$(ls wireframe*.rpm)" >> manifest.txt
+	cd build && echo "primaryRpm: $$(ls pathvector*.rpm)" >> manifest.txt
 	cd build && for f in $$(ls *.rpm); do echo "$$f-sha1: $$(sha1sum $$f | cut -d " " -f 1)"; done >> manifest.txt
 
 swix:
-	cd build && zip wireframe-arista-bundle-$$(git describe --tags `git rev-list --tags --max-count=1`).swix manifest.txt *.rpm
+	cd build && zip pathvector-arista-bundle-$$(git describe --tags `git rev-list --tags --max-count=1`).swix manifest.txt *.rpm
 	mv build/*.swix .

@@ -3,7 +3,7 @@
 ## CLI Flags
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| -c,  --config | string | /etc/wireframe.yml | Configuration file in YAML, TOML, or JSON format |
+| -c,  --config | string | /etc/pathvector.yml | Configuration file in YAML, TOML, or JSON format |
 |  --lock-file-directory | string |  | Lock file directory (lockfile check disabled if empty) |
 | -v,  --verbose | bool |  | Show verbose log messages |
 | -d,  --dry-run | bool |  | Don't modify configuration |
@@ -11,7 +11,7 @@
 | -V,  --version | bool |  | Show version and exit |
 |  --bird-directory | string | /etc/bird/ | Directory to store BIRD configs |
 |  --bird-binary | string | /usr/sbin/bird | Path to bird binary |
-|  --cache-directory | string | /var/run/wireframe/cache/ | Directory to store runtime configuration cache |
+|  --cache-directory | string | /var/run/pathvector/cache/ | Directory to store runtime configuration cache |
 |  --bird-socket | string | /run/bird/bird.ctl | UNIX control socket for BIRD |
 |  --keepalived-config | string | /etc/keepalived.conf | Configuration file for keepalived |
 |  --web-ui-file | string |  | File to write web UI to (disabled if empty) |
@@ -22,10 +22,10 @@
 ## Usage
 ```
 Usage:
-  wireframe [OPTIONS]
+  pathvector [OPTIONS]
 
 Application Options:
-  -c, --config=                  Configuration file in YAML, TOML, or JSON format (default: /etc/wireframe.yml)
+  -c, --config=                  Configuration file in YAML, TOML, or JSON format (default: /etc/pathvector.yml)
       --lock-file-directory=     Lock file directory (lockfile check disabled if empty)
   -v, --verbose                  Show verbose log messages
   -d, --dry-run                  Don't modify configuration
@@ -33,7 +33,7 @@ Application Options:
   -V, --version                  Show version and exit
       --bird-directory=          Directory to store BIRD configs (default: /etc/bird/)
       --bird-binary=             Path to bird binary (default: /usr/sbin/bird)
-      --cache-directory=         Directory to store runtime configuration cache (default: /var/run/wireframe/cache/)
+      --cache-directory=         Directory to store runtime configuration cache (default: /var/run/pathvector/cache/)
       --bird-socket=             UNIX control socket for BIRD (default: /run/bird/bird.ctl)
       --keepalived-config=       Configuration file for keepalived (default: /etc/keepalived.conf)
       --web-ui-file=             File to write web UI to (disabled if empty)

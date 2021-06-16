@@ -40,12 +40,12 @@ var funcMap = template.FuncMap{
 		return items
 	},
 
-	"BirdSet": func(filter []string) string {
+	"BirdSet": func(prefixes []string) string {
 		// Build a formatted BIRD prefix list
 		output := ""
-		for i, prefix := range filter {
-			output += "    " + prefix
-			if i != len(filter)-1 {
+		for i, prefix := range prefixes {
+			output += "  " + prefix
+			if i != len(prefixes)-1 {
 				output += ",\n"
 			}
 		}

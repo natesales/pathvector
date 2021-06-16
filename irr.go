@@ -14,7 +14,7 @@ import (
 func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, error) {
 	// Run bgpq4 for BIRD format with aggregation enabled
 	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, asSet)
-	log.Printf("Running bgpq4 %s", cmdArgs)
+	log.Debugf("Running bgpq4 %s", cmdArgs)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)

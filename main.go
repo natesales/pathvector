@@ -34,7 +34,7 @@ func printStructInfo(label string, instance interface{}) {
 		if !(contains(excludedFields, attrName)) {
 			v := reflect.Indirect(s.Field(i))
 			if v.IsValid() {
-				log.Infof("[%s] field %s = %v\n", label, attrName, v)
+				log.Debugf("[%s] field %s = %v\n", label, attrName, v)
 			}
 		}
 	}
@@ -104,8 +104,7 @@ func run(args []string) {
 	}
 
 	// Enable debug logging in development releases
-	if //noinspection GoBoolExpressions
-	version == "devel" || cliFlags.Verbose {
+	if cliFlags.Verbose {
 		log.SetLevel(log.DebugLevel)
 	}
 
@@ -190,6 +189,8 @@ func run(args []string) {
 
 		// Iterate over peers
 		for peerName, peerData := range globalConfig.Peers {
+			log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
+
 			// Set sanitized peer name
 			peerData.ProtocolName = sanitize(peerName)
 

@@ -60,8 +60,8 @@ func runPeeringDbQuery(peerName string, peerData *peer) {
 		}
 	}
 
-	// Set as-set
-	if *peerData.AutoASSet {
+	// Set as-set if auto-as-set is enabled and there isn't a manual AS set defined
+	if *peerData.AutoASSet && peerData.ASSet == nil {
 		if pDbData.ASSet == "" {
 			log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
 			// TODO: Exit or skip this peer?
@@ -216,6 +216,10 @@ func run(args []string) {
 				}
 				pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
 				peerData.PrefixSet4 = &pfx4
+				if len(pfx4) == 0 {
+					log.Fatalf("[%s] has a prefix filter defined but no IPv4 prefixes", peerName)
+				}
+
 				prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig.IRRServer)
 				if err != nil {
 					log.Fatalf("[%s] unable to get IRR prefix list from %s", peerName, *peerData.ASSet)
@@ -224,7 +228,10 @@ func run(args []string) {
 					peerData.PrefixSet6 = &[]string{}
 				}
 				pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
-				*peerData.PrefixSet6 = pfx6
+				peerData.PrefixSet6 = &pfx6
+				if len(pfx6) == 0 {
+					log.Fatalf("[%s] has a prefix filter defined but no IPv6 prefixes", peerName)
+				}
 			}
 
 			printStructInfo(peerName, peerData)

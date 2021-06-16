@@ -23,18 +23,17 @@ func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, er
 		return nil, err
 	}
 
-	// Remove whitespace and commas from output
-	output := strings.ReplaceAll(string(stdout), ",\n    ", "\n")
+	var prefixes []string
+	for i, line := range strings.Split(string(stdout), "\n") {
+		if i == 0 { // Skip first line, as it is the definition line
+			continue
+		}
+		if strings.Contains(line, "];") { // Skip last line and return
+			break
+		}
+		// Trim whitespace and remove the comma, then append to the prefixes slice
+		prefixes = append(prefixes, strings.TrimSpace(strings.TrimRight(line, ",")))
+	}
 
-	// Remove array prefix
-	output = strings.ReplaceAll(output, "NN = [\n    ", "")
-
-	// Remove array suffix
-	output = strings.ReplaceAll(output, "];", "")
-
-	// Remove whitespace (in this case there should only be trailing whitespace)
-	output = strings.TrimSpace(output)
-
-	// Split output by newline
-	return strings.Split(output, "\n"), nil
+	return prefixes, nil
 }

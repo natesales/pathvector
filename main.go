@@ -32,7 +32,10 @@ func printStructInfo(label string, instance interface{}) {
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
 		if !(contains(excludedFields, attrName)) {
-			log.Infof("[%s] field %s = %v\n", label, attrName, reflect.Indirect(s.Field(i)))
+			v := reflect.Indirect(s.Field(i))
+			if v.IsValid() {
+				log.Infof("[%s] field %s = %v\n", label, attrName, v)
+			}
 		}
 	}
 }

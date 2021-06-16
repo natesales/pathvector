@@ -44,7 +44,7 @@ var funcMap = template.FuncMap{
 		// Build a formatted BIRD prefix list
 		output := ""
 		for i, prefix := range prefixes {
-			output += "\t" + prefix
+			output += "  " + prefix
 			if i != len(prefixes)-1 {
 				output += ",\n"
 			}

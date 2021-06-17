@@ -62,6 +62,7 @@ protocol direct { ipv4; ipv6; }
 
 protocol kernel {
   scan time 10;
+  {{ if .KernelLearn }}learn;{{ end }}
   {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
   ipv4 {
     export filter {
@@ -89,6 +90,7 @@ protocol kernel {
 
 protocol kernel {
   scan time 10;
+  {{ if .KernelLearn }}learn;{{ end }}
   {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
   ipv6 {
     export filter {

@@ -47,6 +47,7 @@ type peer struct {
 	LocalPref         *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	Multihop          *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen            *string   `yaml:"listen" description:"BGP listen address" default:"-"`
+	LocalASN          *int      `yaml:"local-asn" description:"Local ASN as defined in the global ASN field" default:"-"`
 	LocalPort         *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
 	NeighborPort      *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive           *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`

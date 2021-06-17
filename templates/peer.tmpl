@@ -22,7 +22,7 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
 {{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{ if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
 protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
-    local{{ if $peer.Listen }} {{ $peer.Listen }}{{ end }} as ASN{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
+    local{{ if $peer.Listen }} {{ $peer.Listen }}{{ end }} as {{ if IntDeref $peer.LocalASN }}{{ IntDeref $peer.LocalASN }}{{ else }}ASN{{ end }}{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
     {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}
     {{ if BoolDeref $peer.Disabled }}disabled;{{ end }}

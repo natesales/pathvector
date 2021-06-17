@@ -7,6 +7,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "*.go"
 
 jobs:
   deploy-docs:
@@ -15,6 +16,9 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v2
+
+      - name: Generate documentation
+        run: go generate -x
 
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master

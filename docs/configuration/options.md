@@ -11,6 +11,7 @@
 | irr-server | string | rr.ntt.net |  | Internet routing registry server |
 | rtr-server | string | rtr.rpki.cloudflare.com:8282 |  | RPKI-to-router server |
 | keep-filtered | bool | false |  | Should filtered routes be kept in memory? |
+| kernel-learn | bool | false |  | Inject Kernel routes into BIRD wich have been injected into the kernel from other deamons e.g FRR OSPFd |
 | merge-paths | bool | false |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | source4 | string |  |  | Source IPv4 address |
 | source6 | string |  |  | Source IPv6 address |
@@ -21,26 +22,6 @@
 | vrrp | []vrrpInstance |  |  | List of VRRP instances |
 | augments | augments |  |  | Custom configuration options |
 | optimizer | optimizer |  |  | Route optimizer options |
-
-<!-- Code generated DO NOT EDIT -->
-## vrrpInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
-
-<!-- Code generated DO NOT EDIT -->
-## augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
 
 <!-- Code generated DO NOT EDIT -->
 ## optimizer
@@ -108,4 +89,24 @@
 | optimize | *bool | false |  | Should the optimizer be enabled for this peer? |
 | optimize-inbound | *bool | false |  | Should the optimizer modify inbound policy? |
 | optimize-outbound | *bool | false |  | Should the optimizer modify outbound policy? |
+
+<!-- Code generated DO NOT EDIT -->
+## vrrpInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+
+<!-- Code generated DO NOT EDIT -->
+## augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
 

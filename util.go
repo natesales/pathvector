@@ -61,7 +61,7 @@ func categorizeCommunity(input string) string {
 	}
 
 	// Test if it fits the criteria for a large community
-	largeSplit := strings.Split(input, ":")
+	largeSplit := strings.Split(input, ",")
 	if len(largeSplit) == 3 {
 		firstPart, err := strconv.Atoi(largeSplit[0])
 		if err != nil {

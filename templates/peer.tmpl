@@ -32,6 +32,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     {{ if BoolDeref $peer.RSClient }}rs client;{{ end }}
     {{ if BoolDeref $peer.RRClient }}rr client;{{ end }}
     {{ if BoolDeref $peer.BFD }}bfd on;{{ end }}
+    {{ if BoolDeref $peer.AllowLocalAS }}allow local as ASN;{{ end }}
     {{ StrDeref $peer.SessionGlobal }}
     {{ $protocols := MakeSlice }}
     {{ if BoolDeref $peer.MPUnicast46 }}

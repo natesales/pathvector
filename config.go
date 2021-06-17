@@ -383,7 +383,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					if peerData.ImportLargeCommunities == nil {
 						peerData.ImportLargeCommunities = &[]string{}
 					}
-					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, community)
+					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, strings.ReplaceAll(community, ":", ","))
 				} else {
 					return nil, errors.New("Invalid import community: " + community)
 				}
@@ -402,7 +402,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					if peerData.ExportLargeCommunities == nil {
 						peerData.ExportLargeCommunities = &[]string{}
 					}
-					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
+					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, strings.ReplaceAll(community, ":", ","))
 				} else {
 					return nil, errors.New("Invalid export community: " + community)
 				}
@@ -421,7 +421,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					if peerData.AnnounceLargeCommunities == nil {
 						peerData.AnnounceLargeCommunities = &[]string{}
 					}
-					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
+					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, strings.ReplaceAll(community, ":", ","))
 				} else {
 					return nil, errors.New("Invalid announce community: " + community)
 				}

@@ -36,6 +36,7 @@
 | local-pref | *int | 100 |  | BGP local preference |
 | multihop | *bool | false |  | Should BGP multihop be enabled? (255 max hops) |
 | listen | *string |  |  | BGP listen address |
+| local-asn | *int |  |  | Local ASN as defined in the global ASN field |
 | local-port | *int | 179 |  | Local TCP port |
 | neighbor-port | *int | 179 |  | Neighbor TCP port |
 | passive | *bool | false |  | Should we listen passively? |

@@ -17,9 +17,6 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v2
 
-      - name: Generate documentation
-        run: go generate -x
-
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         env:

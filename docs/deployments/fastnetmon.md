@@ -27,6 +27,11 @@ set main email_notifications_recipients noc@example.com
 
 set hostgroup global threshold_mbps 900
 set hostgroup global ban_for_bandwidth enable
+set hostgroup global threshold_tcp_syn_mbps 10
+set hostgroup global ban_for_tcp_syn_bandwidth enable
+set hostgroup global threshold_icmp_mbps 10
+set hostgroup global ban_for_icmp_bandwidth enable
+
 set hostgroup global enable_ban enable
 set main enable_ban_ipv6 enable
 set main enable_ban enable

@@ -109,7 +109,7 @@ func run(args []string) {
 	}
 
 	if cliFlags.ShowVersion {
-		log.Printf("Pathvector version %s (https://github.com/natesales/pathvector)\n", version)
+		log.Printf("Pathvector version %s (https://pathvector.io)\n", version)
 		os.Exit(0)
 	}
 

@@ -7,7 +7,7 @@ priority: "extra"
 maintainer: "Nate Sales <nate@natesales.net>"
 description: Pathvector is a declarative routing control-plane platform for BGP with robust filtering and route optimization
 vendor: "Nate Sales"
-homepage: "https://github.com/natesales/pathvector"
+homepage: "https://pathvector.io"
 contents:
   - src: ./build/pathvector/pathvector
     dst: /usr/bin/pathvector

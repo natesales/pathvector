@@ -6,7 +6,7 @@ Pathvector is a declarative routing control-plane platform for BGP with robust f
 [![License](https://img.shields.io/github/license/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/blob/main/LICENSE)
 [![Release](https://img.shields.io/github/v/release/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/releases)
 
-### Documentation: https://natesales.github.io/pathvector
+### Documentation: https://pathvector.io
 
 ## Features
 

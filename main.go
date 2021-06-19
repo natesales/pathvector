@@ -157,6 +157,12 @@ func run(args []string) {
 		}
 		log.Debugln("Finished loading templates")
 
+		// Create cache directory
+		log.Debugf("Making cache directory %s", cliFlags.CacheDirectory)
+		if err := os.MkdirAll(cliFlags.CacheDirectory, os.FileMode(0755)); err != nil {
+			log.Fatal(err)
+		}
+
 		// Create the global output file
 		log.Debug("Creating global config")
 		globalFile, err := os.Create(path.Join(cliFlags.CacheDirectory, "bird.conf"))

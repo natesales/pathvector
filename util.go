@@ -3,9 +3,12 @@ package main
 import (
 	"io"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
@@ -128,4 +131,21 @@ func MoveFile(source, destination string) (err error) {
 		return err
 	}
 	return nil
+}
+
+// printStructInfo prints a configuration struct values
+func printStructInfo(label string, instance interface{}) {
+	// Fields to exclude from print output
+	excludedFields := []string{""}
+	s := reflect.ValueOf(instance).Elem()
+	typeOf := s.Type()
+	for i := 0; i < s.NumField(); i++ {
+		attrName := typeOf.Field(i).Name
+		if !(contains(excludedFields, attrName)) {
+			v := reflect.Indirect(s.Field(i))
+			if v.IsValid() {
+				log.Debugf("[%s] field %s = %v\n", label, attrName, v)
+			}
+		}
+	}
 }

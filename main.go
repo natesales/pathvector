@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"reflect"
 	"strings"
 
 	"github.com/jessevdk/go-flags"
@@ -22,66 +21,6 @@ var version = "devel" // set by the build process
 
 //go:embed templates/*
 var embedFs embed.FS
-
-// printStructInfo prints a configuration struct values
-func printStructInfo(label string, instance interface{}) {
-	// Fields to exclude from print output
-	excludedFields := []string{""}
-	s := reflect.ValueOf(instance).Elem()
-	typeOf := s.Type()
-	for i := 0; i < s.NumField(); i++ {
-		attrName := typeOf.Field(i).Name
-		if !(contains(excludedFields, attrName)) {
-			v := reflect.Indirect(s.Field(i))
-			if v.IsValid() {
-				log.Debugf("[%s] field %s = %v\n", label, attrName, v)
-			}
-		}
-	}
-}
-
-// runPeeringDbQuery updates peer values from PeeringDB
-func runPeeringDbQuery(peerName string, peerData *peer) {
-	pDbData, err := getPeeringDbData(*peerData.ASN)
-	if err != nil {
-		log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
-	}
-
-	// Set import limits
-	if *peerData.AutoImportLimits {
-		*peerData.ImportLimit6 = pDbData.ImportLimit4
-		*peerData.ImportLimit6 = pDbData.ImportLimit6
-
-		if pDbData.ImportLimit4 == 0 {
-			log.Warnf("[%s] has an IPv4 import limit of zero from PeeringDB", peerName)
-		}
-		if pDbData.ImportLimit6 == 0 {
-			log.Warnf("[%s] has an IPv6 import limit of zero from PeeringDB", peerName)
-		}
-	}
-
-	// Set as-set if auto-as-set is enabled and there isn't a manual AS set defined
-	if *peerData.AutoASSet && peerData.ASSet == nil {
-		if pDbData.ASSet == "" {
-			log.Fatalf("[%s] doesn't have an as-set in PeeringDB", peerName)
-			// TODO: Exit or skip this peer?
-		}
-
-		// If the as-set has a space in it, split and pick the first one
-		if strings.Contains(pDbData.ASSet, " ") {
-			pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
-			log.Warnf("[%s] has a space in their PeeringDB as-set field. Selecting first element %s", peerName, pDbData.ASSet)
-		}
-
-		// Trim IRRDB prefix
-		if strings.Contains(pDbData.ASSet, "::") {
-			peerData.ASSet = &strings.Split(pDbData.ASSet, "::")[1]
-			log.Warnf("[%s] has an IRRDB prefix in their PeeringDB as-set field. Using %s", peerName, *peerData.ASSet)
-		} else {
-			peerData.ASSet = &pDbData.ASSet
-		}
-	}
-}
 
 // run allows integration testing with an arbitrary slice of arguments. During normal runtime,
 // the main function will pass os.Args as the argument.
@@ -204,7 +143,9 @@ func run(args []string) {
 			if *peerData.AutoImportLimits || *peerData.AutoASSet {
 				log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-				runPeeringDbQuery(peerName, peerData)
+				if err := runPeeringDbQuery(peerData); err != nil {
+					log.Debugf("[%s] %v", peerName, err)
+				}
 			} // end peeringdb query enabled
 
 			// Build IRR prefix sets

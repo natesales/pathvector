@@ -37,3 +37,38 @@ func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, er
 
 	return prefixes, nil
 }
+
+func buildIRRPrefixSet(peerData *peer, irrServer string) error {
+	// Check for empty as-set
+	if peerData.ASSet == nil || *peerData.ASSet == "" {
+		return fmt.Errorf("peer has filter-irr enabled and no as-set defined")
+	}
+
+	prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, irrServer)
+	if err != nil {
+		return fmt.Errorf("unable to get IRR prefix list from %s", *peerData.ASSet)
+	}
+	if peerData.PrefixSet4 == nil {
+		peerData.PrefixSet4 = &[]string{}
+	}
+	pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
+	peerData.PrefixSet4 = &pfx4
+	if len(pfx4) == 0 {
+		return fmt.Errorf("peer has a prefix filter defined but no IPv4 prefixes")
+	}
+
+	prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, irrServer)
+	if err != nil {
+		return fmt.Errorf("unable to get IRR prefix list from %s", *peerData.ASSet)
+	}
+	if peerData.PrefixSet6 == nil {
+		peerData.PrefixSet6 = &[]string{}
+	}
+	pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
+	peerData.PrefixSet6 = &pfx6
+	if len(pfx6) == 0 {
+		return fmt.Errorf("peer has a prefix filter defined but no IPv6 prefixes")
+	}
+
+	return nil // nil error
+}

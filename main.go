@@ -150,35 +150,8 @@ func run(args []string) {
 
 			// Build IRR prefix sets
 			if *peerData.FilterIRR {
-				// Check for empty as-set
-				if peerData.ASSet == nil || *peerData.ASSet == "" {
-					log.Fatalf("[%s] has filter-irr enabled and no as-set defined", peerName)
-				}
-
-				prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, globalConfig.IRRServer)
-				if err != nil {
-					log.Fatalf("[%s] unable to get IRR prefix list from %s", peerName, *peerData.ASSet)
-				}
-				if peerData.PrefixSet4 == nil {
-					peerData.PrefixSet4 = &[]string{}
-				}
-				pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
-				peerData.PrefixSet4 = &pfx4
-				if len(pfx4) == 0 {
-					log.Fatalf("[%s] has a prefix filter defined but no IPv4 prefixes", peerName)
-				}
-
-				prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, globalConfig.IRRServer)
-				if err != nil {
-					log.Fatalf("[%s] unable to get IRR prefix list from %s", peerName, *peerData.ASSet)
-				}
-				if peerData.PrefixSet6 == nil {
-					peerData.PrefixSet6 = &[]string{}
-				}
-				pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
-				peerData.PrefixSet6 = &pfx6
-				if len(pfx6) == 0 {
-					log.Fatalf("[%s] has a prefix filter defined but no IPv6 prefixes", peerName)
+				if err := buildIRRPrefixSet(peerData, globalConfig.IRRServer); err != nil {
+					log.Fatal(err)
 				}
 			}
 

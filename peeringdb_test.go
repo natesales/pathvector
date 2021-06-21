@@ -56,3 +56,31 @@ func TestPeeringDbNoPage(t *testing.T) {
 		t.Errorf("expected PeeringDB page not exist error, got %v", err)
 	}
 }
+
+func intPtr(i int) *int {
+	return &i
+}
+
+func boolPtr(b bool) *bool {
+	return &b
+}
+
+func TestPeeringDbQueryAndModify(t *testing.T) {
+	testCases := []struct {
+		asn  int
+		name string
+		auto bool
+	}{
+		{112, "AS112", true},
+		{112, "AS112", false},
+	}
+	for _, tc := range testCases {
+		runPeeringDbQuery(tc.name, &peer{
+			ASN:              intPtr(tc.asn),
+			AutoImportLimits: boolPtr(tc.auto),
+			AutoASSet:        boolPtr(tc.auto),
+			ImportLimit4:     intPtr(0),
+			ImportLimit6:     intPtr(0),
+		})
+	}
+}

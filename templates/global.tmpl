@@ -14,7 +14,7 @@ protocol static static4 {
   {{- range $i, $prefix := .Prefixes4 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := .Augments.Statics4 }}
+  {{- range $prefix, $nexthop := MapDeref .Augments.Statics4 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }

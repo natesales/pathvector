@@ -98,6 +98,13 @@ var funcMap = template.FuncMap{
 		return 0
 	},
 
+	"MapDeref": func(m *map[string]string) map[string]string {
+		if m != nil {
+			return *m
+		}
+		return map[string]string{}
+	},
+
 	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
 	"UniqueProtocolName": func(s *string, af string) string {
 		protoName := fmt.Sprintf("%sv%s", *s, af)

@@ -2,6 +2,8 @@ asn: 65530
 router-id: 192.0.2.1
 source4: 192.0.2.1
 source6: 2001:db8::1
+web-ui-file: /tmp/pathvector-test/ui.html
+cache-directory: /tmp/pathvector-test/cache/
 prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48

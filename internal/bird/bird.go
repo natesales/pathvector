@@ -1,9 +1,12 @@
-package main
+package bird
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/internal/config"
 	"io"
 	"net"
+	"os"
+	"os/exec"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -20,12 +23,12 @@ func birdRead(reader io.Reader) (string, error) {
 	return string(buf[:n]), nil // nil error
 }
 
-// runBirdCommand runs a bird command
-func runBirdCommand(command string, socket string) error {
+// Run runs a bird command
+func Run(command string, socket string) error {
 	log.Debugln("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Fatalf("BIRD socket connect: %v", err)
+		return fmt.Errorf("BIRD socket connect: %v", err)
 	}
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
@@ -41,7 +44,7 @@ func runBirdCommand(command string, socket string) error {
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
 	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
-		log.Fatalf("BIRD write error: %s\n", err)
+		return fmt.Errorf("BIRD write error: %s\n", err)
 	}
 
 	log.Debugln("Reading from socket")
@@ -57,4 +60,13 @@ func runBirdCommand(command string, socket string) error {
 	}
 
 	return nil // nil error
+}
+
+// Validate runs BIRD for config validation
+func Validate(global *config.Global) error {
+	cmd := exec.Command(global.BirdBinary, "-c", "bird.conf", "-p")
+	cmd.Dir = global.CacheDirectory
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }

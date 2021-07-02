@@ -1,8 +1,10 @@
-package main
+package templating
 
 import (
 	"embed"
 	"fmt"
+	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/internal/util"
 	"os"
 	"path"
 	"strconv"
@@ -15,11 +17,14 @@ import (
 
 var protocolNames []string
 
-// wrapper is passed to the peer template
-type wrapper struct {
+//go:embed templates/*
+var embedFS embed.FS
+
+// ConfigWrapper is passed to the peer template
+type ConfigWrapper struct {
 	Name   string
-	Peer   peer
-	Config config
+	Peer   config.Peer
+	Global config.Global
 }
 
 // Template functions
@@ -110,7 +115,7 @@ var funcMap = template.FuncMap{
 		protoName := fmt.Sprintf("%sv%s", *s, af)
 		i := 1
 		for {
-			if !contains(protocolNames, protoName) {
+			if !util.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
 				return protoName
 			}
@@ -122,35 +127,35 @@ var funcMap = template.FuncMap{
 
 // Templates
 
-var peerTemplate *template.Template
-var globalTemplate *template.Template
-var uiTemplate *template.Template
-var vrrpTemplate *template.Template
+var PeerTemplate *template.Template
+var GlobalTemplate *template.Template
+var UITemplate *template.Template
+var VRRPTemplate *template.Template
 
-// loadTemplates loads the templates from the embedded filesystem
-func loadTemplates(fs embed.FS) error {
+// Load loads the templates from the embedded filesystem
+func Load() error {
 	var err error
 
 	// Generate peer template
-	peerTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/peer.tmpl")
+	PeerTemplate, err = template.New("").Funcs(funcMap).ParseFS(embedFS, "templates/peer.tmpl")
 	if err != nil {
 		return fmt.Errorf("reading peer template: %v", err)
 	}
 
 	// Generate global template
-	globalTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/global.tmpl")
+	GlobalTemplate, err = template.New("").Funcs(funcMap).ParseFS(embedFS, "templates/global.tmpl")
 	if err != nil {
 		return fmt.Errorf("reading global template: %v", err)
 	}
 
 	// Generate UI template
-	uiTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
+	UITemplate, err = template.New("").Funcs(funcMap).ParseFS(embedFS, "templates/ui.tmpl")
 	if err != nil {
 		return fmt.Errorf("reading UI template: %v", err)
 	}
 
 	// Generate VRRP template
-	vrrpTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
+	VRRPTemplate, err = template.New("").Funcs(funcMap).ParseFS(embedFS, "templates/vrrp.tmpl")
 	if err != nil {
 		return fmt.Errorf("reading VRRP template: %v", err)
 	}
@@ -158,46 +163,51 @@ func loadTemplates(fs embed.FS) error {
 	return nil // nil error
 }
 
-// writeVRRPConfig writes the VRRP config to a keepalived config file
-func writeVRRPConfig(config *config) {
-	if len(config.VRRPInstances) < 1 {
+// WriteVRRPConfig writes the VRRP config to a keepalived config file
+func WriteVRRPConfig(g *config.Global) error {
+	if len(g.VRRPInstances) < 1 {
 		log.Infof("No VRRP instances are defined, not writing config")
-		return
+		return nil
 	}
 
 	// Create the VRRP config file
-	keepalivedFile, err := os.Create(path.Join(cliFlags.KeepalivedConfig))
+	keepalivedFile, err := os.Create(path.Join(g.KeepalivedConfig))
 	if err != nil {
-		log.Fatalf("Create peer specific output file: %v", err)
+		return fmt.Errorf("create peer specific output file: %v", err)
 	}
 
 	// Render the template and write to disk
-	err = vrrpTemplate.ExecuteTemplate(keepalivedFile, "vrrp.tmpl", config.VRRPInstances)
+	err = VRRPTemplate.ExecuteTemplate(keepalivedFile, "vrrp.tmpl", g.VRRPInstances)
 	if err != nil {
-		log.Fatalf("Execute template: %v", err)
+		return fmt.Errorf("execute template: %v", err)
 	}
+
+	return nil
 }
 
-// writeUIFile renders and writes the web UI file
-func writeUIFile(config *config) {
+// WriteUIFile renders and writes the web UI file
+func WriteUIFile(g *config.Global) error {
 	// Create the UI output file
 	log.Debug("Creating UI output file")
-	uiFileObj, err := os.Create(cliFlags.WebUIFile)
+	uiFile, err := os.Create(g.WebUIFile)
 	if err != nil {
-		log.Fatalf("Create UI output file: %v", err)
+		return fmt.Errorf("create UI output file: %v", err)
 	}
 	log.Debug("Finished creating UI file")
 
 	// Render the UI template and write to disk
 	log.Debug("Writing UI file")
-	err = uiTemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
+	err = UITemplate.ExecuteTemplate(uiFile, "ui.tmpl", g)
 	if err != nil {
-		log.Fatalf("Execute UI template: %v", err)
+		return fmt.Errorf("execute UI template: %v", err)
 	}
 	log.Debug("Finished writing UI file")
+
+	return nil // nil error
 }
 
-func reformatBirdConfig(input string) string {
+// ReformatBirdConfig reformats a BIRD configuration file to look clean and consistent
+func ReformatBirdConfig(input string) string {
 	formatted := ""
 	for _, line := range strings.Split(input, "\n") {
 		if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") {

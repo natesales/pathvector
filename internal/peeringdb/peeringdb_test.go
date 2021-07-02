@@ -1,9 +1,12 @@
-package main
+package peeringdb
 
 import (
+	"github.com/natesales/pathvector/internal/config"
 	"strings"
 	"testing"
 )
+
+var peeringDbTimeout uint = 5
 
 func TestPeeringDbQuery(t *testing.T) {
 	testCases := []struct {
@@ -20,7 +23,7 @@ func TestPeeringDbQuery(t *testing.T) {
 		{65530, "RIPE::RS-KROOT RIPE::RS-KROOT-V6", "RIPE NCC K-Root Operations", 5, 5, true}, // Private ASN, no PeeringDB page
 	}
 	for _, tc := range testCases {
-		pDbData, err := getPeeringDbData(tc.asn)
+		pDbData, err := getPeeringDbData(tc.asn, peeringDbTimeout)
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		}
@@ -51,7 +54,7 @@ func TestPeeringDbQuery(t *testing.T) {
 }
 
 func TestPeeringDbNoPage(t *testing.T) {
-	_, err := getPeeringDbData(65530)
+	_, err := getPeeringDbData(65530, peeringDbTimeout)
 	if err == nil || !strings.Contains(err.Error(), "doesn't have a PeeringDB page") {
 		t.Errorf("expected PeeringDB page not exist error, got %v", err)
 	}
@@ -75,13 +78,13 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 		{112, false, false},
 	}
 	for _, tc := range testCases {
-		err := runPeeringDbQuery(&peer{
+		err := Run(&config.Peer{
 			ASN:              intPtr(tc.asn),
 			AutoImportLimits: boolPtr(tc.auto),
 			AutoASSet:        boolPtr(tc.auto),
 			ImportLimit4:     intPtr(0),
 			ImportLimit6:     intPtr(0),
-		})
+		}, peeringDbTimeout)
 
 		// If it errored but shouldn't have
 		if err != nil && !tc.shouldError {

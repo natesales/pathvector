@@ -1,9 +1,10 @@
-package main
+package peeringdb
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/natesales/pathvector/internal/config"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -11,13 +12,13 @@ import (
 	"time"
 )
 
-// peeringDbResponse contains the response from a PeeringDB query
-type peeringDbResponse struct {
-	Data []peeringDbData `json:"data"`
+// Response contains the response from a PeeringDB query
+type Response struct {
+	Data []Data `json:"data"`
 }
 
-// peeringDbData contains the actual data from PeeringDB response
-type peeringDbData struct {
+// Data contains the actual data from PeeringDB response
+type Data struct {
 	Name         string `json:"name"`
 	ASSet        string `json:"irr_as_set"`
 	ImportLimit4 int    `json:"info_prefixes4"`
@@ -25,8 +26,8 @@ type peeringDbData struct {
 }
 
 // Query PeeringDB for an ASN
-func getPeeringDbData(asn int) (*peeringDbData, error) {
-	httpClient := http.Client{Timeout: time.Second * time.Duration(cliFlags.PeeringDbQueryTimeout)}
+func getPeeringDbData(asn int, timeout uint) (*Data, error) {
+	httpClient := http.Client{Timeout: time.Second * time.Duration(timeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
 	if err != nil {
 		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
@@ -47,7 +48,7 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 		return nil, errors.New("PeeringDB read: " + err.Error())
 	}
 
-	var pDbResponse peeringDbResponse
+	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
 		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
 	}
@@ -59,9 +60,9 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 	return &pDbResponse.Data[0], nil // nil error
 }
 
-// runPeeringDbQuery updates peer values from PeeringDB
-func runPeeringDbQuery(peerData *peer) error {
-	pDbData, err := getPeeringDbData(*peerData.ASN)
+// Run updates peer values from PeeringDB
+func Run(peerData *config.Peer, timeout uint) error {
+	pDbData, err := getPeeringDbData(*peerData.ASN, timeout)
 	if err != nil {
 		return fmt.Errorf("unable to get PeeringDB data: %+v", err)
 	}

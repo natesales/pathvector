@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"errors"
@@ -12,29 +12,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
+
+	"github.com/natesales/pathvector/internal/probe"
 )
 
-//go:generate ./generate.sh
-
-var cliFlags struct {
-	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/pathvector.yml"`
-	LockFileDirectory     string `long:"lock-file-directory" description:"Lock file directory (lockfile check disabled if empty)" default:""`
-	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
-	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
-	ShowVersion           bool   `short:"V" long:"version" description:"Show version and exit"`
-	BirdDirectory         string `long:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BirdBinary            string `long:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
-	CacheDirectory        string `long:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
-	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
-	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
-	Mode                  string `short:"m" long:"mode" description:"Should this run generate a config or start the optimization daemon? (generate or daemon)" default:"generate"`
-}
-
-type peer struct {
+type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
 
 	Description *string `yaml:"description" description:"Peer description" default:"-"`
@@ -117,7 +99,7 @@ type peer struct {
 	AnnounceLargeCommunities    *[]string `yaml:"-" description:"-" default:"-"`
 }
 
-type vrrpInstance struct {
+type VRRPInstance struct {
 	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')" validate:"required"`
 	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on" validate:"required"`
 	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)" validate:"required"`
@@ -146,10 +128,20 @@ type optimizer struct {
 	Interval    int      `yaml:"probe-interval" description:"Time to wait between each optimizer run"`
 	CacheSize   int      `yaml:"cache-size" description:"Number of probe results to store per peer"` // There will be a total of probeCacheSize*len(targets) results stored (TODO: double check if this is really true)
 
-	Db map[string][]probeResult `yaml:"-" description:"-"`
+	Db map[string][]probe.Result `yaml:"-" description:"-"`
 }
 
-type config struct {
+type Global struct {
+	// Runtime
+	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BirdBinary            string `yaml:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
+	CacheDirectory        string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
+	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
+	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
@@ -166,9 +158,9 @@ type config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 
-	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
-	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
-	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
+	Peers         map[string]*Peer `yaml:"peers" description:"BGP peer configuration"`
+	Templates     map[string]*Peer `yaml:"templates" description:"BGP peer templates"`
+	VRRPInstances []VRRPInstance   `yaml:"vrrp" description:"List of VRRP instances"`
 	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
 	Optimizer     optimizer        `yaml:"optimizer" description:"Route optimizer options"`
 
@@ -178,43 +170,97 @@ type config struct {
 	Prefixes6     []string `yaml:"-" description:"-"`
 }
 
-// loadConfig loads a configuration file from a YAML file
-func loadConfig(configBlob []byte) (*config, error) {
-	var c config
-	// Set global config defaults
-	if err := defaults.Set(&c); err != nil {
-		log.Fatal(err)
+// categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
+func categorizeCommunity(input string) string {
+	// Test if it fits the criteria for a standard community
+	standardSplit := strings.Split(input, ",")
+	if len(standardSplit) == 2 {
+		firstPart, err := strconv.Atoi(standardSplit[0])
+		if err != nil {
+			return ""
+		}
+		secondPart, err := strconv.Atoi(standardSplit[1])
+		if err != nil {
+			return ""
+		}
+
+		if firstPart < 0 || firstPart > 65535 {
+			return ""
+		}
+		if secondPart < 0 || secondPart > 65535 {
+			return ""
+		}
+		return "standard"
 	}
 
-	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
+	// Test if it fits the criteria for a large community
+	largeSplit := strings.Split(input, ":")
+	if len(largeSplit) == 3 {
+		firstPart, err := strconv.Atoi(largeSplit[0])
+		if err != nil {
+			return ""
+		}
+		secondPart, err := strconv.Atoi(largeSplit[1])
+		if err != nil {
+			return ""
+		}
+		thirdPart, err := strconv.Atoi(largeSplit[2])
+		if err != nil {
+			return ""
+		}
+
+		if firstPart < 0 || firstPart > 4294967295 {
+			return ""
+		}
+		if secondPart < 0 || secondPart > 4294967295 {
+			return ""
+		}
+		if thirdPart < 0 || thirdPart > 4294967295 {
+			return ""
+		}
+		return "large"
+	}
+
+	return ""
+}
+
+// Load loads a configuration file from a YAML file
+func Load(configBlob []byte) (*Global, error) {
+	var g Global
+	// Set global config defaults
+	if err := defaults.Set(&g); err != nil {
+		return nil, err
+	}
+
+	if err := yaml.UnmarshalStrict(configBlob, &g); err != nil {
 		return nil, errors.New("YAML unmarshal: " + err.Error())
 	}
 
 	validate := validator.New()
-	if err := validate.Struct(&c); err != nil {
+	if err := validate.Struct(&g); err != nil {
 		return nil, errors.New("Validation: " + err.Error())
 	}
 
 	// Check for invalid templates
-	for templateName, templateData := range c.Templates {
+	for templateName, templateData := range g.Templates {
 		if templateData.Template != nil && *templateData.Template != "" {
-			log.Fatalf("Templates must not have a template field set, but %s does", templateName)
+			return nil, fmt.Errorf("Templates must not have a template field set, but %s does", templateName)
 		}
 	}
 
-	for peerName, peerData := range c.Peers {
+	for peerName, peerData := range g.Peers {
 		if peerData.NeighborIPs == nil || len(*peerData.NeighborIPs) < 1 {
-			log.Fatalf("[%s] has no neighbors defined", peerName)
+			return nil, fmt.Errorf("[%s] has no neighbors defined", peerName)
 		}
 
 		// Assign values from template
 		if peerData.Template != nil && *peerData.Template != "" {
-			template := c.Templates[*peerData.Template]
+			template := g.Templates[*peerData.Template]
 			if template == nil || &template == nil {
-				log.Fatalf("Template %s not found", *peerData.Template)
+				return nil, fmt.Errorf("Template %s not found", *peerData.Template)
 			}
 			templateValue := reflect.ValueOf(*template)
-			peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
+			peerValue := reflect.ValueOf(g.Peers[peerName]).Elem()
 
 			templateValueType := templateValue.Type()
 			for i := 0; i < templateValueType.NumField(); i++ {
@@ -237,14 +283,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 		} // end peer template processor
 
 		// Set default values
-		peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
+		peerValue := reflect.ValueOf(g.Peers[peerName]).Elem()
 		templateValueType := peerValue.Type()
 		for i := 0; i < templateValueType.NumField(); i++ {
 			fieldName := templateValueType.Field(i).Name
 			fieldValue := peerValue.FieldByName(fieldName)
 			defaultString := templateValueType.Field(i).Tag.Get("default")
 			if defaultString == "" {
-				log.Fatalf("Code error: field %s has no default value", fieldName)
+				return nil, fmt.Errorf("Code error: field %s has no default value", fieldName)
 			} else if defaultString != "-" {
 				log.Debugf("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
 				if fieldValue.IsNil() {
@@ -256,7 +302,7 @@ func loadConfig(configBlob []byte) (*config, error) {
 					case reflect.Int:
 						defaultValueInt, err := strconv.Atoi(defaultString)
 						if err != nil {
-							log.Fatalf("Can't convert '%s' to uint", defaultString)
+							return nil, fmt.Errorf("can't convert '%s' to uint", defaultString)
 						}
 						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultValueInt)
 						fieldValue.Set(reflect.ValueOf(&defaultValueInt))
@@ -264,14 +310,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 						var err error // explicit declaration used to avoid scope issues of defaultValue
 						defaultBool, err := strconv.ParseBool(defaultString)
 						if err != nil {
-							log.Fatalf("Can't parse bool %s", defaultString)
+							return nil, fmt.Errorf("Can't parse bool %s", defaultString)
 						}
 						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultBool)
 						fieldValue.Set(reflect.ValueOf(&defaultBool))
 					case reflect.Struct, reflect.Slice:
 						// Ignore structs and slices
 					default:
-						log.Fatalf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
+						return nil, fmt.Errorf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
 					}
 				}
 			} else {
@@ -281,25 +327,25 @@ func loadConfig(configBlob []byte) (*config, error) {
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
-	for _, prefix := range c.Prefixes {
+	for _, prefix := range g.Prefixes {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("Invalid origin prefix: " + prefix)
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			c.Prefixes6 = append(c.Prefixes6, prefix)
+			g.Prefixes6 = append(g.Prefixes6, prefix)
 		} else { // If IPv4
-			c.Prefixes4 = append(c.Prefixes4, prefix)
+			g.Prefixes4 = append(g.Prefixes4, prefix)
 		}
 	}
 
 	// Initialize static maps
-	c.Augments.Statics4 = map[string]string{}
-	c.Augments.Statics6 = map[string]string{}
+	g.Augments.Statics4 = map[string]string{}
+	g.Augments.Statics6 = map[string]string{}
 
 	// Parse static routes
-	for prefix, nexthop := range c.Augments.Statics {
+	for prefix, nexthop := range g.Augments.Statics {
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("Invalid static prefix: " + prefix)
@@ -309,14 +355,14 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			c.Augments.Statics6[prefix] = nexthop
+			g.Augments.Statics6[prefix] = nexthop
 		} else { // If IPv4
-			c.Augments.Statics4[prefix] = nexthop
+			g.Augments.Statics4[prefix] = nexthop
 		}
 	}
 
 	// Parse VRRP configs
-	for _, vrrpInstance := range c.VRRPInstances {
+	for _, vrrpInstance := range g.VRRPInstances {
 		// Sort VIPs by address family
 		for _, vip := range vrrpInstance.VIPs {
 			ip, _, err := net.ParseCIDR(vip)
@@ -342,20 +388,20 @@ func loadConfig(configBlob []byte) (*config, error) {
 	}
 
 	// Parse RTR server
-	if c.RTRServer != "" {
-		rtrServerParts := strings.Split(c.RTRServer, ":")
+	if g.RTRServer != "" {
+		rtrServerParts := strings.Split(g.RTRServer, ":")
 		if len(rtrServerParts) != 2 {
-			log.Fatalf("Invalid rtr-server '%s' format should be host:port", rtrServerParts)
+			return nil, fmt.Errorf("Invalid rtr-server '%s' format should be host:port", rtrServerParts)
 		}
-		c.RTRServerHost = rtrServerParts[0]
+		g.RTRServerHost = rtrServerParts[0]
 		rtrServerPort, err := strconv.Atoi(rtrServerParts[1])
 		if err != nil {
-			log.Fatalf("Invalid RTR server port %s", rtrServerParts[1])
+			return nil, fmt.Errorf("Invalid RTR server port %s", rtrServerParts[1])
 		}
-		c.RTRServerPort = rtrServerPort
+		g.RTRServerPort = rtrServerPort
 	}
 
-	for _, peerData := range c.Peers {
+	for _, peerData := range g.Peers {
 		// Build static prefix filters
 		if peerData.Prefixes != nil {
 			for _, prefix := range *peerData.Prefixes {
@@ -431,13 +477,13 @@ func loadConfig(configBlob []byte) (*config, error) {
 		}
 
 		// Check for no originated prefixes but announce-originated enabled
-		if len(c.Prefixes) < 1 && *peerData.AnnounceOriginated {
+		if len(g.Prefixes) < 1 && *peerData.AnnounceOriginated {
 			// No locally originated prefixes are defined, so there's nothing to originate
 			*peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
 
-	return &c, nil // nil error
+	return &g, nil // nil error
 }
 
 func documentConfigTypes(t reflect.Type) {
@@ -481,26 +527,5 @@ func documentConfigTypes(t reflect.Type) {
 
 func documentConfig() {
 	fmt.Println("# Options")
-	documentConfigTypes(reflect.TypeOf(config{}))
-}
-
-func documentCliFlags() {
-	fmt.Println("<!-- Code generated DO NOT EDIT -->")
-	fmt.Println("## CLI Flags")
-	fmt.Println("| Option | Type | Default | Description |")
-	fmt.Println("|--------|------|---------|-------------|")
-	t := reflect.TypeOf(cliFlags)
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		short := field.Tag.Get("short")
-		long := field.Tag.Get("long")
-		description := field.Tag.Get("description")
-		fDefault := field.Tag.Get("default")
-		// Add dash and comma only if short is defined
-		if short != "" {
-			short = "-" + short + ", "
-		}
-
-		fmt.Printf("| %s --%s | %s | %s | %s |\n", short, long, field.Type.String(), fDefault, description)
-	}
+	documentConfigTypes(reflect.TypeOf(Global{}))
 }

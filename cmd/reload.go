@@ -26,6 +26,7 @@ var reloadCmd = &cobra.Command{
 	Use:   "reload",
 	Short: "Reload the current configuration",
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Printf("Connecting to %s", server)
 		conn, err := grpc.Dial(server, grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf("gRPC dial: %v", err)

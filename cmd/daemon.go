@@ -50,7 +50,7 @@ func (s reloadServer) FetchResponse(req *protobuf.ReloadRequest, srv protobuf.Re
 	go func() {
 		defer wg.Done()
 		log.SetOutput(gRPCLogger{})
-		log.Printf("Updating config for AS%d", req.Asn)
+		log.Printf("Pathvector server version %s", version)
 
 		if err := loadConfig(); err != nil {
 			log.Print(err)

@@ -32,33 +32,6 @@
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 <!-- Code generated DO NOT EDIT -->
-## VRRPInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
-<!-- Code generated DO NOT EDIT -->
-## Augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-<!-- Code generated DO NOT EDIT -->
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| probe-count | int |  |  | Number of pings to send in each run |
-| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int |  |  | Time to wait between each optimizer run |
-| cache-size | int |  |  | Number of probe results to store per peer |
-<!-- Code generated DO NOT EDIT -->
 ## Peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -115,3 +88,30 @@
 | optimize | bool | false |  | Should the optimizer be enabled for this peer? |
 | optimize-inbound | bool | false |  | Should the optimizer modify inbound policy? |
 | optimize-outbound | bool | false |  | Should the optimizer modify outbound policy? |
+<!-- Code generated DO NOT EDIT -->
+## VRRPInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+<!-- Code generated DO NOT EDIT -->
+## Augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+<!-- Code generated DO NOT EDIT -->
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| probe-count | int |  |  | Number of pings to send in each run |
+| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int |  |  | Time to wait between each optimizer run |
+| cache-size | int |  |  | Number of probe results to store per peer |

@@ -10,7 +10,6 @@ Usage:
 
 Available Commands:
   completion  generate the autocompletion script for the specified shell
-  docs        Generate documentation
   exec        Execute a remote pathvector command
   help        Help about any command
   version     Show version information

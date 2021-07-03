@@ -13,3 +13,6 @@ build/
 
 # Coverage
 cover.*
+
+# Protobuf
+proto/*.pb.go

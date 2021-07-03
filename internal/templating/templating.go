@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var protocolNames []string
+var ProtocolNames []string
 
 //go:embed templates/*
 var embedFS embed.FS
@@ -115,8 +115,8 @@ var funcMap = template.FuncMap{
 		protoName := fmt.Sprintf("%sv%s", *s, af)
 		i := 1
 		for {
-			if !util.Contains(protocolNames, protoName) {
-				protocolNames = append(protocolNames, protoName)
+			if !util.Contains(ProtocolNames, protoName) {
+				ProtocolNames = append(ProtocolNames, protoName)
 				return protoName
 			}
 			protoName = fmt.Sprintf("%sv%s_%d", *s, af, i)
@@ -166,7 +166,7 @@ func Load() error {
 // WriteVRRPConfig writes the VRRP config to a keepalived config file
 func WriteVRRPConfig(g *config.Global) error {
 	if len(g.VRRPInstances) < 1 {
-		log.Infof("No VRRP instances are defined, not writing config")
+		log.Debugf("No VRRP instances are defined, not writing config")
 		return nil
 	}
 

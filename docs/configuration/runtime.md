@@ -1,56 +1,25 @@
 # Runtime
-<!-- Code generated DO NOT EDIT -->
-## CLI Flags
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| -c,  --config | string | /etc/pathvector.yml | Configuration file in YAML, TOML, or JSON format |
-|  --lock-file-directory | string |  | Lock file directory (lockfile check disabled if empty) |
-| -v,  --verbose | bool |  | Show verbose log messages |
-| -d,  --dry-run | bool |  | Don't modify configuration |
-| -n,  --no-configure | bool |  | Don't configure BIRD |
-| -V,  --version | bool |  | Show version and exit |
-|  --bird-directory | string | /etc/bird/ | Directory to store BIRD configs |
-|  --bird-binary | string | /usr/sbin/bird | Path to bird binary |
-|  --cache-directory | string | /var/run/pathvector/cache/ | Directory to store runtime configuration cache |
-|  --bird-socket | string | /run/bird/bird.ctl | UNIX control socket for BIRD |
-|  --keepalived-config | string | /etc/keepalived.conf | Configuration file for keepalived |
-|  --web-ui-file | string |  | File to write web UI to (disabled if empty) |
-|  --peeringdb-query-timeout | uint | 10 | PeeringDB query timeout in seconds |
-|  --irr-query-timeout | uint | 30 | IRR query timeout in seconds |
-| -m,  --mode | string | generate | Should this run generate a config or start the optimization daemon? (generate or daemon) |
 
 ## Usage
 ```
+Pathvector is a declarative routing control plane platform for BGP with robust filtering and route optimization.
+
 Usage:
-  pathvector [OPTIONS]
+  pathvector [flags]
+  pathvector [command]
 
-Application Options:
-  -c, --config=                  Configuration file in YAML, TOML, or JSON
-                                 format (default: /etc/pathvector.yml)
-      --lock-file-directory=     Lock file directory (lockfile check disabled
-                                 if empty)
-  -v, --verbose                  Show verbose log messages
-  -d, --dry-run                  Don't modify configuration
-  -n, --no-configure             Don't configure BIRD
-  -V, --version                  Show version and exit
-      --bird-directory=          Directory to store BIRD configs (default:
-                                 /etc/bird/)
-      --bird-binary=             Path to bird binary (default: /usr/sbin/bird)
-      --cache-directory=         Directory to store runtime configuration cache
-                                 (default: /var/run/pathvector/cache/)
-      --bird-socket=             UNIX control socket for BIRD (default:
-                                 /run/bird/bird.ctl)
-      --keepalived-config=       Configuration file for keepalived (default:
-                                 /etc/keepalived.conf)
-      --web-ui-file=             File to write web UI to (disabled if empty)
-      --peeringdb-query-timeout= PeeringDB query timeout in seconds (default:
-                                 10)
-      --irr-query-timeout=       IRR query timeout in seconds (default: 30)
-  -m, --mode=                    Should this run generate a config or start the
-                                 optimization daemon? (generate or daemon)
-                                 (default: generate)
+Available Commands:
+  completion  generate the autocompletion script for the specified shell
+  docs        Generate documentation
+  exec        Execute a remote pathvector command
+  help        Help about any command
+  version     Show version information
 
-Help Options:
-  -h, --help                     Show this help message
+Flags:
+  -c, --config string   config file (default "/etc/pathvector.yml")
+  -h, --help            help for pathvector
+  -l, --listen string   API listen address (default ":8084")
+  -v, --verbose         enable verbose logging
 
+Use "pathvector [command] --help" for more information about a command.
 ```

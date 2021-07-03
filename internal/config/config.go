@@ -110,7 +110,7 @@ type VRRPInstance struct {
 	VIPs6 []string `yaml:"-" description:"-"`
 }
 
-type augments struct {
+type Augments struct {
 	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
 	Accept6 []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
 	Reject4 []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
@@ -121,7 +121,7 @@ type augments struct {
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
-type optimizer struct {
+type Optimizer struct {
 	Targets     []string `yaml:"targets" description:"List of probe targets"`
 	PingCount   int      `yaml:"probe-count" description:"Number of pings to send in each run"`
 	PingTimeout int      `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered"`
@@ -162,8 +162,8 @@ type Global struct {
 	Peers         map[string]*Peer `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances []VRRPInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     optimizer        `yaml:"optimizer" description:"Route optimizer options"`
+	Augments      Augments         `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     Optimizer        `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`
@@ -487,10 +487,16 @@ func Load(configBlob []byte) (*Global, error) {
 	return &g, nil // nil error
 }
 
+func cleanTypeString(in string) string {
+	in = strings.Replace(in, "config.", "", -1)
+	in = strings.Replace(in, "*", "", -1)
+	return in
+}
+
 func documentConfigTypes(t reflect.Type) {
 	fmt.Println("<!-- Code generated DO NOT EDIT -->")
 	childTypesSet := map[reflect.Type]bool{}
-	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
+	fmt.Println("## " + cleanTypeString(t.String()))
 	fmt.Println("| Option | Type | Default | Validation | Description |")
 	fmt.Println("|--------|------|---------|------------|-------------|")
 	// Handle pointer types
@@ -510,23 +516,23 @@ func documentConfigTypes(t reflect.Type) {
 		if description == "" {
 			log.Fatalf("Code error: %s doesn't have a description", field.Name)
 		} else if description != "-" { // Ignore descriptions that are -
-			if strings.Contains(field.Type.String(), "main.") { // If the type is a config struct
+			if strings.Contains(field.Type.String(), "config.") { // If the type is a config struct
 				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice and add to set (reflect.Type to bool map)
 					childTypesSet[field.Type.Elem()] = true
 				} else {
 					childTypesSet[field.Type] = true
 				}
 			}
-			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
+			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, cleanTypeString(field.Type.String()), fDefault, validation, description)
 		}
 	}
-	fmt.Println()
 	for childType := range childTypesSet {
 		documentConfigTypes(childType)
 	}
 }
 
-func documentConfig() {
+// PrintDocs generates configuration docs
+func PrintDocs() {
 	fmt.Println("# Options")
 	documentConfigTypes(reflect.TypeOf(Global{}))
 }

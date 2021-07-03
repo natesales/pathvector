@@ -25,8 +25,9 @@ func birdRead(reader io.Reader) (string, error) {
 	return string(buf[:n]), nil // nil error
 }
 
-// Run runs a bird command
-func Run(command string, socket string, timeout uint) error {
+// Run runs a bird command with given command, socket, and timeout.
+// If clean, the output will not include BIRD 4 character codes or multiline prefix
+func Run(command string, socket string, timeout uint, clean bool) error {
 	log.Debugf("Connecting to BIRD socket with timeout %d", timeout)
 	conn, err := net.DialTimeout("unix", socket, time.Duration(timeout)*time.Second)
 	if err != nil {
@@ -35,7 +36,7 @@ func Run(command string, socket string, timeout uint) error {
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
 
-	log.Println("Connected to BIRD socket")
+	log.Debugln("Connected to BIRD socket")
 	resp, err := birdRead(conn)
 	if err != nil {
 		return err
@@ -58,7 +59,19 @@ func Run(command string, socket string, timeout uint) error {
 
 	// Print bird output as multiple lines
 	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-		log.Printf("BIRD response (multiline): %s", line)
+		if clean {
+			if strings.HasPrefix(line, "1002") || strings.HasPrefix(line, "2002") {
+				log.Print(line[5:])
+			} else if strings.HasPrefix(line, " ") {
+				log.Print(line[1:])
+			} else if strings.TrimSpace(line) == "0000" {
+				// Ignore 0000 termination sequence
+			} else {
+				log.Print(line)
+			}
+		} else {
+			log.Printf("BIRD response (multiline): %s", line)
+		}
 	}
 
 	return nil // nil error

@@ -17,7 +17,7 @@ func TestBirdConn(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Millisecond * 10) // Wait for the server to start
-		if err := Run("bird command test\n", unixSocket); err != nil {
+		if err := Run("bird command test\n", unixSocket, 5, false); err != nil {
 			t.Error(err)
 		}
 	}()

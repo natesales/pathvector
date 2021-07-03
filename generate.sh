@@ -1,6 +1,10 @@
 #!/bin/bash
 # This script generates documentation from type definitions
 
+cd proto && protoc --go_out=plugins=grpc:. *.proto
+
+exit 0
+
 echo -n "Generating documentation..."
 go build -o /tmp/
 /tmp/pathvector generate-config-docs > docs/configuration/options.md

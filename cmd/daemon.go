@@ -2,104 +2,115 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/internal/processor"
 	"io/ioutil"
-	"net/http"
+	"net"
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"strings"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
 
 	"github.com/natesales/pathvector/internal/bird"
 	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/internal/processor"
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
+	"github.com/natesales/pathvector/proto"
 )
 
 var listenAddr string
+var updateInterval int
 
 var global *config.Global
 
-func apiResponse(w http.ResponseWriter, ok bool, msg string) {
-	if !ok {
-		log.Warn(msg)
-		w.WriteHeader(http.StatusInternalServerError)
+var globalSrv protobuf.ReloadService_FetchResponseServer
+
+type reloadServer struct{}
+
+type gRPCLogger struct{}
+
+func (l gRPCLogger) Write(p []byte) (int, error) {
+	fmt.Print(string(p))
+	if err := globalSrv.Send(&protobuf.ReloadResponse{Message: string(p)}); err != nil {
+		log.Warnf("gRPC send: %v", err)
 	}
 
-	if _, err := w.Write([]byte(msg)); err != nil {
-		log.Warnf("HTTP write: %v", err)
-	}
+	return 0, nil
+}
+
+func (s reloadServer) FetchResponse(req *protobuf.ReloadRequest, srv protobuf.ReloadService_FetchResponseServer) error {
+	globalSrv = srv
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.SetOutput(gRPCLogger{})
+		log.Printf("Updating config for AS%d", req.Asn)
+
+		if err := loadConfig(); err != nil {
+			log.Print(err)
+		}
+
+		// Reload peer config(s)
+		if err := writePeerConfigs(); err != nil {
+			log.Print(err)
+		}
+
+		log.Debugln("Validating BIRD config")
+		if err := bird.Validate(global); err != nil {
+			log.Print(err)
+		}
+		log.Debugln("BIRD config validation passed")
+
+		// Write VRRP config
+		if err := templating.WriteVRRPConfig(global); err != nil {
+			log.Print(err)
+		}
+
+		if global.WebUIFile != "" {
+			if err := templating.WriteUIFile(global); err != nil {
+				log.Print(err)
+			}
+		} else {
+			log.Infof("Web UI is not defined, NOT writing UI")
+		}
+
+		if err := replaceRunningConfig(global); err != nil {
+			log.Print(err)
+		}
+	}()
+
+	wg.Wait()
+	return nil
 }
 
 var daemonCmd = &cobra.Command{
 	Use:   "daemon",
 	Short: "Start the pathvector daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		http.HandleFunc("/load", func(w http.ResponseWriter, r *http.Request) {
-			if err := loadConfig(); err != nil {
-				apiResponse(w, false, err.Error())
-				return
-			}
+		log.Printf("Starting gRPC listener on %s", listenAddr)
+		lis, err := net.Listen("tcp", listenAddr)
+		if err != nil {
+			log.Fatalf("tcp listen: %v", err)
+		}
 
-			// Reload peer config(s)
-			asn := r.URL.Query().Get("asn")
-			var peerWriteErr error
-			if asn == "" { // If the ASN query param is not set, reload all
-				peerWriteErr = writePeerConfigs()
-			} else { // If the ASN query param is set, only update the given ASN
-				asnInt, err := strconv.ParseUint(asn, 10, 32)
-				if err != nil {
-					apiResponse(w, false, fmt.Sprintf("invalid ASN %s", asn))
-					return
-				}
-				peerWriteErr = writeSinglePeerConfig(uint(asnInt))
-			}
-			if peerWriteErr != nil {
-				apiResponse(w, false, peerWriteErr.Error())
-				return
-			}
+		s := grpc.NewServer()
+		protobuf.RegisterReloadServiceServer(s, reloadServer{})
 
-			log.Debugln("Validating BIRD config")
-			if err := bird.Validate(global); err != nil {
-				apiResponse(w, false, fmt.Errorf("BIRD config validation: %v", err).Error())
-				return
-			}
-			log.Debugln("BIRD config validation passed")
-
-			// Write VRRP config
-			if err := templating.WriteVRRPConfig(global); err != nil {
-				apiResponse(w, false, err.Error())
-				return
-			}
-
-			if global.WebUIFile != "" {
-				if err := templating.WriteUIFile(global); err != nil {
-					apiResponse(w, false, err.Error())
-					return
-				}
-			} else {
-				log.Infof("Web UI is not defined, NOT writing UI")
-			}
-
-			if err := replaceRunningConfig(global); err != nil {
-				apiResponse(w, false, err.Error())
-				return
-			}
-
-			apiResponse(w, true, "Update complete")
-		})
-
-		log.Infof("Starting Pathvector %s on %s", version, listenAddr)
-		log.Fatal(http.ListenAndServe(listenAddr, nil))
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("gRPC serve: %v", err)
+		}
 	},
 }
 
 func init() {
-	daemonCmd.Flags().StringVarP(&listenAddr, "listen", "l", ":8080", "API listen endpoint")
+	daemonCmd.Flags().StringVarP(&listenAddr, "listen", "l", ":8084", "API listen endpoint")
+	daemonCmd.Flags().IntVarP(&updateInterval, "interval", "i", 12, "Regular update interval in hours")
 	rootCmd.AddCommand(daemonCmd)
 }
 
@@ -179,34 +190,6 @@ func writePeerConfigs() error {
 	return nil // nil error
 }
 
-// writeSinglePeerConfig writes a single ASN's configs to disk
-func writeSinglePeerConfig(asn uint) error {
-	log.Debugf("Writing peer configs for AS%d", asn)
-
-	// Remove old cache
-	log.Debugf("Purging cache for AS%d", asn)
-	files, err := filepath.Glob(path.Join(global.CacheDirectory, fmt.Sprintf("AS%d*.conf", asn)))
-	if err != nil {
-		return err
-	}
-	for _, f := range files {
-		if err := os.Remove(f); err != nil {
-			return fmt.Errorf("removing old config files: %v", err)
-		}
-	}
-
-	// Iterate over peers
-	for peerName, peerData := range global.Peers {
-		if uint(*peerData.ASN) == asn {
-			if err := processor.Run(global, peerName, peerData); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil // nil error
-}
-
 // replaceRunningConfig removes the old BIRD configuration, copies the new one from cache, and reloads BIRD
 func replaceRunningConfig(global *config.Global) error {
 	// Remove old configs
@@ -237,7 +220,7 @@ func replaceRunningConfig(global *config.Global) error {
 	}
 
 	log.Infoln("Reconfiguring BIRD")
-	if err = bird.Run("configure", global.BirdSocket); err != nil {
+	if err = bird.Run("configure", global.BirdSocket, global.BirdSocketConnectTimeout); err != nil {
 		return err
 	}
 	log.Infoln("Finished BIRD reconfigure")

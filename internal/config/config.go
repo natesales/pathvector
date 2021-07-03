@@ -133,14 +133,15 @@ type optimizer struct {
 
 type Global struct {
 	// Runtime
-	BirdDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BirdBinary            string `yaml:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
-	CacheDirectory        string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
-	BirdSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
-	PeeringDbQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	BirdDirectory            string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BirdBinary               string `yaml:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
+	CacheDirectory           string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
+	BirdSocket               string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	BirdSocketConnectTimeout uint   `yaml:"bird-socket-connect-timeout" description:"Timeout in seconds during BIRD socket connection" default:"5"`
+	KeepalivedConfig         string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile                string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
+	PeeringDbQueryTimeout    uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	IRRQueryTimeout          uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`

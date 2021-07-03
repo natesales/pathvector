@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package protobuf;
+
+option go_package = ".;protobuf";
+
+service ReloadService {
+  rpc FetchResponse (ReloadRequest) returns (stream ReloadResponse) {}
+}
+
+message ReloadRequest {
+  uint32 asn = 1;
+}
+
+message ReloadResponse {
+  string message = 1;
+}

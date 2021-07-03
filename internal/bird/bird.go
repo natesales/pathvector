@@ -2,14 +2,16 @@ package bird
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/internal/config"
 	"io"
 	"net"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/config"
 )
 
 func birdRead(reader io.Reader) (string, error) {
@@ -24,9 +26,9 @@ func birdRead(reader io.Reader) (string, error) {
 }
 
 // Run runs a bird command
-func Run(command string, socket string) error {
-	log.Debugln("Connecting to BIRD socket")
-	conn, err := net.Dial("unix", socket)
+func Run(command string, socket string, timeout uint) error {
+	log.Debugf("Connecting to BIRD socket with timeout %d", timeout)
+	conn, err := net.DialTimeout("unix", socket, time.Duration(timeout)*time.Second)
 	if err != nil {
 		return fmt.Errorf("BIRD socket connect: %v", err)
 	}

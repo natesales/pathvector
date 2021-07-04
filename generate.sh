@@ -5,26 +5,15 @@
 go build -o /tmp/
 
 # API routes
-blocks=$(grep -B 2 'http.HandleFunc' cmd/root.go | sed -e 's/^[ \t]*//')
-
-delimiter=--
-s=$blocks$delimiter
-routes=();
-while [[ $s ]]; do
-    routes+=("${s%%"$delimiter"*}")
-    s=${s#*"$delimiter"}
-done
-
 echo "# API
 
 Pathvector exposes an API for control and monitoring of the service. It doesn't authenticate requests, so you should protect the API endpoint behind an isolated network or reverse proxy if you want it to listen on something other than loopback (the default).
 
 ## Routes" > docs/api.md
 
-for i in "${routes[@]}"; do
-    echo -e "### \`$(echo "$i" | grep "http.HandleFunc" | cut -d '"' -f 2)\`\n" >> docs/api.md
-    echo -e "$(echo "$i" | grep -E "^\/\/ Usage: " | sed 's/^\/\/ Usage: //')\n" >> docs/api.md
-    echo -e "CLI: \`$(echo "$i" | grep -E "^\/\/ CLI: " | sed 's/^\/\/ CLI: //')\`\n" >> docs/api.md
+grep 'autodoc API route' cmd/root.go | sed -e 's/^[ \t]*//' | while read line; do
+  echo "### \`$(echo $line | grep -o -P '(?<=route ).*(?=:)')\`" >> docs/api.md
+  echo $line | sed -n -e 's/^.*: //p' >> docs/api.md
 done
 
 # Config file docs

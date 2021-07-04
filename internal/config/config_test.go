@@ -246,5 +246,5 @@ func TestCategorizeCommunity(t *testing.T) {
 
 // TODO: Lint this
 func TestDocumentConfig(t *testing.T) {
-	documentConfig()
+	PrintDocs()
 }

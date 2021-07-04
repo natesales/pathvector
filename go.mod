@@ -6,6 +6,7 @@ require (
 	github.com/creasty/defaults v1.5.1
 	github.com/go-ping/ping v0.0.0-20210506233800-ff8be3320020
 	github.com/go-playground/validator/v10 v10.6.1
+	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.2.0
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect

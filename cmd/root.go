@@ -9,7 +9,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -29,10 +33,11 @@ var date = "unknown"
 var description = "Pathvector is a declarative routing control plane platform for BGP with robust filtering and route optimization."
 
 var (
-	configFile string
-	addr       string
-	verbose    bool
-	rootCmd    = NewRootCommand()
+	configFile  string
+	apiAddr     string
+	metricsAddr string
+	verbose     bool
+	rootCmd     = NewRootCommand()
 )
 
 // Execute executes the root command
@@ -47,7 +52,8 @@ func init() {
 		}
 	})
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "/etc/pathvector.yml", "config file")
-	rootCmd.PersistentFlags().StringVarP(&addr, "listen", "l", "localhost:8084", "API listen address")
+	rootCmd.PersistentFlags().StringVarP(&apiAddr, "listen", "l", "localhost:8084", "API listen address")
+	rootCmd.PersistentFlags().StringVarP(&metricsAddr, "metrics", "m", ":9785", "Prometheus metrics listen address")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose logging")
 }
 
@@ -66,6 +72,14 @@ func (l internalLogger) Write(p []byte) (int, error) {
 	}
 	return 0, nil
 }
+
+// Prometheus metrics
+var (
+	lastUpdate = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "pathvector_last_update",
+		Help: "Last pathvector update",
+	})
+)
 
 func setupStream(w http.ResponseWriter, r *http.Request) error {
 	streamWriter = w
@@ -96,8 +110,7 @@ func NewRootCommand() *cobra.Command {
 		Use:   "pathvector",
 		Short: description,
 		Run: func(cmd *cobra.Command, args []string) {
-			// Usage: returns the output of `birdc show protocols`
-			// CLI: pathvector exec show
+			// autodoc API route /show: Returns the output of `birdc show protocols`, CLI equivalent `pathvector exec show`
 			http.HandleFunc("/show", func(w http.ResponseWriter, r *http.Request) {
 				if err := setupStream(w, r); err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
@@ -115,8 +128,7 @@ func NewRootCommand() *cobra.Command {
 				}
 			})
 
-			// Usage: reloads the current configuration. If the ASN parameter is set to zero, all networks will be updated, otherwise only networks with provided ASN will be updated.
-			// CLI: pathvector exec reload [-a ASN]
+			// autodoc API route /reload: Reloads the current configuration. If the ASN parameter is set to zero, all networks will be updated, otherwise only networks with provided ASN will be updated. CLI equivalent `pathvector exec reload [-a ASN]`
 			http.HandleFunc("/reload", func(w http.ResponseWriter, r *http.Request) {
 				if err := setupStream(w, r); err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
@@ -170,8 +182,16 @@ func NewRootCommand() *cobra.Command {
 				}
 			})
 
-			log.Printf("Starting HTTP server on %s", addr)
-			log.Fatal(http.ListenAndServe(addr, nil))
+			// Prometheus metrics server
+			metricsServer := http.NewServeMux()
+			metricsServer.Handle("/metrics", promhttp.Handler())
+			go func() {
+				log.Printf("Starting prometheus metrics server on %s", metricsAddr)
+				log.Fatal(http.ListenAndServe(metricsAddr, metricsServer))
+			}()
+
+			log.Printf("Starting HTTP server on %s", apiAddr)
+			log.Fatal(http.ListenAndServe(apiAddr, nil))
 		},
 	}
 }
@@ -302,6 +322,9 @@ func replaceRunningConfig(global *config.Global, asn uint32) error {
 		return err
 	}
 	log.Debugln("Finished BIRD reconfigure")
+
+	// Set last update metric
+	lastUpdate.Set(float64(time.Now().Unix()))
 
 	return nil // nil error
 }

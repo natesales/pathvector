@@ -4,6 +4,9 @@
 # Setup
 go build -o /tmp/
 
+# Copy index
+cp README.md docs/index.md
+
 # API routes
 echo "# API
 

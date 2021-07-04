@@ -32,6 +32,15 @@
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 <!-- Code generated DO NOT EDIT -->
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| probe-count | int |  |  | Number of pings to send in each run |
+| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int |  |  | Time to wait between each optimizer run |
+| cache-size | int |  |  | Number of probe results to store per peer |
+<!-- Code generated DO NOT EDIT -->
 ## Peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -106,12 +115,3 @@
 | reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
-<!-- Code generated DO NOT EDIT -->
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| probe-count | int |  |  | Number of pings to send in each run |
-| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int |  |  | Time to wait between each optimizer run |
-| cache-size | int |  |  | Number of probe results to store per peer |

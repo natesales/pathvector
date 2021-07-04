@@ -8,6 +8,7 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "*.go"
+      - "generate.sh"
 
 jobs:
   deploy-docs:

@@ -35,6 +35,22 @@ var (
 	rootCmd    = NewRootCommand()
 )
 
+// Execute executes the root command
+func Execute() error {
+	return rootCmd.Execute()
+}
+
+func init() {
+	cobra.OnInitialize(func() {
+		if verbose {
+			log.SetLevel(log.DebugLevel)
+		}
+	})
+	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "/etc/pathvector.yml", "config file")
+	rootCmd.PersistentFlags().StringVarP(&addr, "listen", "l", "localhost:8084", "API listen address")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose logging")
+}
+
 var global *config.Global
 
 var streamWriter http.ResponseWriter
@@ -80,7 +96,9 @@ func NewRootCommand() *cobra.Command {
 		Use:   "pathvector",
 		Short: description,
 		Run: func(cmd *cobra.Command, args []string) {
-			http.HandleFunc("/protocols", func(w http.ResponseWriter, r *http.Request) {
+			// Usage: returns the output of `birdc show protocols`
+			// CLI: pathvector exec show
+			http.HandleFunc("/show", func(w http.ResponseWriter, r *http.Request) {
 				if err := setupStream(w, r); err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
 					return
@@ -97,7 +115,9 @@ func NewRootCommand() *cobra.Command {
 				}
 			})
 
-			http.HandleFunc("/load", func(w http.ResponseWriter, r *http.Request) {
+			// Usage: reloads the current configuration. If the ASN parameter is set to zero, all networks will be updated, otherwise only networks with provided ASN will be updated.
+			// CLI: pathvector exec reload [-a ASN]
+			http.HandleFunc("/reload", func(w http.ResponseWriter, r *http.Request) {
 				if err := setupStream(w, r); err != nil {
 					http.Error(w, err.Error(), http.StatusBadRequest)
 					return
@@ -154,22 +174,6 @@ func NewRootCommand() *cobra.Command {
 			log.Fatal(http.ListenAndServe(addr, nil))
 		},
 	}
-}
-
-// Execute executes the root command
-func Execute() error {
-	return rootCmd.Execute()
-}
-
-func init() {
-	cobra.OnInitialize(func() {
-		if verbose {
-			log.SetLevel(log.DebugLevel)
-		}
-	})
-	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "/etc/pathvector.yml", "config file")
-	rootCmd.PersistentFlags().StringVarP(&addr, "listen", "l", ":8084", "API listen address")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose logging")
 }
 
 // loadConfig reads the YAML config file, templates, and writes out bird.conf

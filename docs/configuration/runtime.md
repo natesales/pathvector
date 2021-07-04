@@ -17,7 +17,7 @@ Available Commands:
 Flags:
   -c, --config string   config file (default "/etc/pathvector.yml")
   -h, --help            help for pathvector
-  -l, --listen string   API listen address (default ":8084")
+  -l, --listen string   API listen address (default "localhost:8084")
   -v, --verbose         enable verbose logging
 
 Use "pathvector [command] --help" for more information about a command.

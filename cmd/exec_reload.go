@@ -19,6 +19,6 @@ var execReloadCmd = &cobra.Command{
 	Short:   "Reload the current configuration",
 	Aliases: []string{"r"},
 	Run: func(cmd *cobra.Command, args []string) {
-		execRemoteCommand("/load", map[string]string{"asn": strconv.Itoa(int(asn))})
+		execRemoteCommand("/reload", map[string]string{"asn": strconv.Itoa(int(asn))})
 	},
 }

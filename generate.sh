@@ -14,8 +14,7 @@ sidebar_position: 4
 ---\n## Usage\n```' > docs/docs/cli.md
 /tmp/pathvector -h >> docs/docs/cli.md
 echo '```' >> docs/docs/cli.md
-echo -e '
----
+echo -e '---
 title: About
 sidebar_position: 1
 ---

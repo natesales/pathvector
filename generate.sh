@@ -14,5 +14,12 @@ sidebar_position: 4
 ---\n## Usage\n```' > docs/docs/cli.md
 /tmp/pathvector -h >> docs/docs/cli.md
 echo '```' >> docs/docs/cli.md
+echo -e '
+---
+title: About
+sidebar_position: 1
+---
+' > docs/docs/about.md
+cat README.md >> docs/docs/about.md
 rm /tmp/pathvector
 echo "done"

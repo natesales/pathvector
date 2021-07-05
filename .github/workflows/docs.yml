@@ -21,6 +21,13 @@ jobs:
         with:
           node-version: '14'
 
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16'
+
+      - name: Generate docs
+        run: go generate
+
       - name: Build docs
         run: cd docs && npm install && npm run build
 

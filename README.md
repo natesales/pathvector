@@ -1,13 +1,12 @@
-![Banner](docs/assets/banner.png)
+![Banner](https://pathvector.io/img/black-border.svg)
 
-Pathvector is a declarative routing control-plane platform for BGP with robust filtering and route optimization.
+Pathvector is a declarative routing platform for BGP which automates route optimization and control plane configuration with secure and repeatable routing policies.
 
+[![Docs](https://img.shields.io/static/v1?label=docs&message=pathvector.io&color=9407cd&style=for-the-badge)](https://pathvector.io)
 [![Go Report](https://goreportcard.com/badge/github.com/natesales/pathvector?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/pathvector)
 [![License](https://img.shields.io/github/license/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/blob/main/LICENSE)
 [![Release](https://img.shields.io/github/v/release/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/releases)
 [![Codecov](https://img.shields.io/codecov/c/github/natesales/pathvector?style=for-the-badge)](https://app.codecov.io/gh/natesales/pathvector)
-
-### Documentation: https://pathvector.io
 
 ## Features
 

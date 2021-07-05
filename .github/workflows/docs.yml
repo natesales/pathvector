@@ -8,6 +8,7 @@ on:
       - "docs/**"
       - "generate.sh"
       - ".github/workflows/docs.yml"
+      - "*.go"
 
 jobs:
   deploy-docs:

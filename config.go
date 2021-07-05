@@ -63,6 +63,7 @@ type peer struct {
 	ImportCommunities   *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities   *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
 	AnnounceCommunities *[]string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer" default:"-"`
+	RemoveCommunities   *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
 
 	// Filtering
 	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
@@ -115,6 +116,8 @@ type peer struct {
 	ExportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
 	AnnounceStandardCommunities *[]string `yaml:"-" description:"-" default:"-"`
 	AnnounceLargeCommunities    *[]string `yaml:"-" description:"-" default:"-"`
+	RemoveStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
+	RemoveLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
 }
 
 type vrrpInstance struct {
@@ -426,6 +429,25 @@ func loadConfig(configBlob []byte) (*config, error) {
 					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, strings.ReplaceAll(community, ":", ","))
 				} else {
 					return nil, errors.New("Invalid announce community: " + community)
+				}
+			}
+		}
+		if peerData.RemoveCommunities != nil {
+			for _, community := range *peerData.RemoveCommunities {
+				communityType := categorizeCommunity(community)
+
+				if communityType == "standard" {
+					if peerData.RemoveStandardCommunities == nil {
+						peerData.RemoveStandardCommunities = &[]string{}
+					}
+					*peerData.RemoveStandardCommunities = append(*peerData.RemoveStandardCommunities, community)
+				} else if communityType == "large" {
+					if peerData.RemoveLargeCommunities == nil {
+						peerData.RemoveLargeCommunities = &[]string{}
+					}
+					*peerData.RemoveLargeCommunities = append(*peerData.RemoveLargeCommunities, strings.ReplaceAll(community, ":", ","))
+				} else {
+					return nil, errors.New("Invalid remove community: " + community)
 				}
 			}
 		}

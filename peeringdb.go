@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // peeringDbResponse contains the response from a PeeringDB query
@@ -86,20 +88,29 @@ func runPeeringDbQuery(peerData *peer) error {
 			// TODO: Exit or skip this peer?
 		}
 
-		// If the as-set has a space in it, split and pick the first one
-		if strings.Contains(pDbData.ASSet, " ") {
-			pDbData.ASSet = strings.Split(pDbData.ASSet, " ")[0]
-			return fmt.Errorf("peer has a space in their PeeringDB as-set field. Selecting first element %s", pDbData.ASSet)
-		}
-
-		// Trim IRRDB prefix
-		if strings.Contains(pDbData.ASSet, "::") {
-			peerData.ASSet = &strings.Split(pDbData.ASSet, "::")[1]
-			return fmt.Errorf("peer has an IRRDB prefix in their PeeringDB as-set field. Using %s", *peerData.ASSet)
-		} else {
-			peerData.ASSet = &pDbData.ASSet
-		}
+		// Used to get address of string
+		asSetOutput := sanitizeASSet(pDbData.ASSet)
+		peerData.ASSet = &asSetOutput
 	}
 
 	return nil // nil error
+}
+
+// sanitizeASSet removes an IRRDB prefix from an AS set and picks the first one if there are multiple
+func sanitizeASSet(asSet string) string {
+	output := asSet
+
+	// If the as-set has a space in it, split and pick the first one
+	if strings.Contains(output, " ") {
+		output = strings.Split(output, " ")[0]
+		log.Warnf("Original as-set %s has a space in it. Selecting first element %s", asSet, output)
+	}
+
+	// Trim IRRDB prefix
+	if strings.Contains(output, "::") {
+		output = strings.Split(output, "::")[1]
+		log.Warnf("Original as-set %s has an IRRDB prefix in it. Using %s", asSet, output)
+	}
+
+	return output
 }

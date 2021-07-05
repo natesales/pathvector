@@ -94,3 +94,20 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 		}
 	}
 }
+
+func TestSanitizeASSet(t *testing.T) {
+	testCases := []struct {
+		asSet    string
+		expected string
+	}{
+		{"AS34553:AS-ALL", "AS34553:AS-ALL"},
+		{"RIPE::AS34553:AS-ALL", "AS34553:AS-ALL"},
+		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "AS-HURRICANE"},
+	}
+	for _, tc := range testCases {
+		out := sanitizeASSet(tc.asSet)
+		if out != tc.expected {
+			t.Errorf("expected %s got %s", tc.expected, out)
+		}
+	}
+}

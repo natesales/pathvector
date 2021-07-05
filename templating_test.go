@@ -16,17 +16,17 @@ func TestLoadTemplates(t *testing.T) {
 
 func TestWriteUIFile(t *testing.T) {
 	cliFlags.WebUIFile = "/tmp/pathvector-go-test-ui.html"
-	writeUIFile(&config{})
+	writeUIFile(&Config{})
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {
 	cliFlags.KeepalivedConfig = "/tmp/pathvector-go-test-keepalived.conf"
-	writeVRRPConfig(&config{})
+	writeVRRPConfig(&Config{})
 }
 
 func TestWriteVRRPConfig(t *testing.T) {
-	writeVRRPConfig(&config{
-		VRRPInstances: []vrrpInstance{{
+	writeVRRPConfig(&Config{
+		VRRPInstances: []VRRPInstance{{
 			State: "primary",
 		}},
 	})

@@ -75,7 +75,7 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 		{112, false, false},
 	}
 	for _, tc := range testCases {
-		err := runPeeringDbQuery(&peer{
+		err := runPeeringDbQuery(&Peer{
 			ASN:              intPtr(tc.asn),
 			AutoImportLimits: boolPtr(tc.auto),
 			AutoASSet:        boolPtr(tc.auto),

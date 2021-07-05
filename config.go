@@ -34,7 +34,8 @@ var cliFlags struct {
 	Mode                  string `short:"m" long:"mode" description:"Should this run generate a config or start the optimization daemon? (generate or daemon)" default:"generate"`
 }
 
-type peer struct {
+// Peer stores a single peer config
+type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
 
 	Description *string `yaml:"description" description:"Peer description" default:"-"`
@@ -120,7 +121,8 @@ type peer struct {
 	RemoveLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
 }
 
-type vrrpInstance struct {
+// VRRPInstance stores a single VRRP instance
+type VRRPInstance struct {
 	State     string   `yaml:"state" description:"VRRP instance state ('primary' or 'backup')" validate:"required"`
 	Interface string   `yaml:"interface" description:"Interface to send VRRP packets on" validate:"required"`
 	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)" validate:"required"`
@@ -131,7 +133,8 @@ type vrrpInstance struct {
 	VIPs6 []string `yaml:"-" description:"-"`
 }
 
-type augments struct {
+// Augments store BIRD specific options
+type Augments struct {
 	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
 	Accept6 []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
 	Reject4 []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
@@ -142,7 +145,8 @@ type augments struct {
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
-type optimizer struct {
+// Optimizer stores route optimizer configuration
+type Optimizer struct {
 	Targets     []string `yaml:"targets" description:"List of probe targets"`
 	PingCount   int      `yaml:"probe-count" description:"Number of pings to send in each run"`
 	PingTimeout int      `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered"`
@@ -152,7 +156,8 @@ type optimizer struct {
 	Db map[string][]probeResult `yaml:"-" description:"-"`
 }
 
-type config struct {
+// Config stores the global configuration
+type Config struct {
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
@@ -169,11 +174,11 @@ type config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 
-	Peers         map[string]*peer `yaml:"peers" description:"BGP peer configuration"`
-	Templates     map[string]*peer `yaml:"templates" description:"BGP peer templates"`
-	VRRPInstances []vrrpInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      augments         `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     optimizer        `yaml:"optimizer" description:"Route optimizer options"`
+	Peers         map[string]*Peer `yaml:"peers" description:"BGP peer configuration"`
+	Templates     map[string]*Peer `yaml:"templates" description:"BGP peer templates"`
+	VRRPInstances []VRRPInstance   `yaml:"vrrp" description:"List of VRRP instances"`
+	Augments      Augments         `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     Optimizer        `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`
@@ -182,8 +187,8 @@ type config struct {
 }
 
 // loadConfig loads a configuration file from a YAML file
-func loadConfig(configBlob []byte) (*config, error) {
-	var c config
+func loadConfig(configBlob []byte) (*Config, error) {
+	var c Config
 	// Set global config defaults
 	if err := defaults.Set(&c); err != nil {
 		log.Fatal(err)
@@ -462,9 +467,16 @@ func loadConfig(configBlob []byte) (*config, error) {
 	return &c, nil // nil error
 }
 
+func sanitizeConfigName(s string) string {
+	out := s
+	out = strings.ReplaceAll(out, "*", "")
+	out = strings.ReplaceAll(out, "main.", "")
+	return out
+}
+
 func documentConfigTypes(t reflect.Type) {
 	childTypesSet := map[reflect.Type]bool{}
-	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
+	fmt.Println("## " + sanitizeConfigName(t.String()))
 	fmt.Println("| Option | Type | Default | Validation | Description |")
 	fmt.Println("|--------|------|---------|------------|-------------|")
 	// Handle pointer types
@@ -491,7 +503,7 @@ func documentConfigTypes(t reflect.Type) {
 					childTypesSet[field.Type] = true
 				}
 			}
-			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, strings.Replace(field.Type.String(), "main.", "", -1), fDefault, validation, description)
+			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, sanitizeConfigName(field.Type.String()), fDefault, validation, description)
 		}
 	}
 	fmt.Println()
@@ -501,5 +513,5 @@ func documentConfigTypes(t reflect.Type) {
 }
 
 func documentConfig() {
-	documentConfigTypes(reflect.TypeOf(config{}))
+	documentConfigTypes(reflect.TypeOf(Config{}))
 }

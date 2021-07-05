@@ -18,8 +18,8 @@ var protocolNames []string
 // wrapper is passed to the peer template
 type wrapper struct {
 	Name   string
-	Peer   peer
-	Config config
+	Peer   Peer
+	Config Config
 }
 
 // Template functions
@@ -159,7 +159,7 @@ func loadTemplates(fs embed.FS) error {
 }
 
 // writeVRRPConfig writes the VRRP config to a keepalived config file
-func writeVRRPConfig(config *config) {
+func writeVRRPConfig(config *Config) {
 	if len(config.VRRPInstances) < 1 {
 		log.Infof("No VRRP instances are defined, not writing config")
 		return
@@ -179,7 +179,7 @@ func writeVRRPConfig(config *config) {
 }
 
 // writeUIFile renders and writes the web UI file
-func writeUIFile(config *config) {
+func writeUIFile(config *Config) {
 	// Create the UI output file
 	log.Debug("Creating UI output file")
 	uiFileObj, err := os.Create(cliFlags.WebUIFile)

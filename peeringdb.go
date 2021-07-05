@@ -62,7 +62,7 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 }
 
 // runPeeringDbQuery updates peer values from PeeringDB
-func runPeeringDbQuery(peerData *peer) error {
+func runPeeringDbQuery(peerData *Peer) error {
 	pDbData, err := getPeeringDbData(*peerData.ASN)
 	if err != nil {
 		return fmt.Errorf("unable to get PeeringDB data: %+v", err)

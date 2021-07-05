@@ -38,7 +38,7 @@ func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, er
 	return prefixes, nil
 }
 
-func buildIRRPrefixSet(peerData *peer, irrServer string) error {
+func buildIRRPrefixSet(peerData *Peer, irrServer string) error {
 	// Check for empty as-set
 	if peerData.ASSet == nil || *peerData.ASSet == "" {
 		return fmt.Errorf("peer has filter-irr enabled and no as-set defined")

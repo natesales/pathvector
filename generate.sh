@@ -7,7 +7,7 @@ echo -e '---
 title: Configuration
 sidebar_position: 3
 ---\n' > docs/docs/configuration.md
-/tmp/pathvector generate-config-docs >> docs/docs/configuration.md
+/tmp/pathvector docs >> docs/docs/configuration.md
 echo -e '---
 title: CLI
 sidebar_position: 4

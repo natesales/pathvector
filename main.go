@@ -20,7 +20,12 @@ import (
 //go:embed templates/*
 var embedFs embed.FS
 
-var version = "devel" // set by the build process
+// Build process flags
+var (
+	version = "devel"
+	commit  = "unknown"
+	date    = "unknown"
+)
 
 // CLI Flags
 var (
@@ -29,7 +34,6 @@ var (
 	verbose               bool
 	dryRun                bool
 	noConfigure           bool
-	showVersion           bool
 	birdDirectory         string
 	birdBinary            string
 	cacheDirectory        string
@@ -40,12 +44,30 @@ var (
 	irrQueryTimeout       uint
 )
 
+// CLI Commands
 var (
 	rootCmd = &cobra.Command{
 		Use:   "pathvector",
 		Short: "Pathvector is a declarative routing platform for BGP which automates route optimization and control plane configuration with secure and repeatable routing policies.",
 		Run: func(cmd *cobra.Command, args []string) {
 			run()
+		},
+	}
+
+	docsCmd = &cobra.Command{
+		Use:    "docs",
+		Short:  "Generate documentation",
+		Hidden: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			documentConfig()
+		},
+	}
+
+	versionCmd = &cobra.Command{
+		Use:   "version",
+		Short: "Show version information",
+		Run: func(cmd *cobra.Command, args []string) {
+			log.Printf("Pathvector %s commit %s date %s\n", version, commit, date)
 		},
 	}
 )
@@ -56,7 +78,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose log messages")
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Don't modify configuration")
 	rootCmd.PersistentFlags().BoolVarP(&noConfigure, "no-configure", "n", false, "Don't configure BIRD")
-	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "V", false, "Show version and exit")
 	rootCmd.PersistentFlags().StringVar(&birdDirectory, "bird-directory", "/etc/bird/", "Directory to store BIRD configs")
 	rootCmd.PersistentFlags().StringVar(&birdBinary, "bird-binary", "/usr/sbin/bird", "Path to bird binary")
 	rootCmd.PersistentFlags().StringVar(&cacheDirectory, "cache-directory", "/var/run/pathvector/cache/", "Directory to store runtime configuration cache")
@@ -66,14 +87,8 @@ func init() {
 	rootCmd.PersistentFlags().UintVar(&peeringDbQueryTimeout, "peeringdb-query-timeout", 10, "PeeringDB query timeout in seconds")
 	rootCmd.PersistentFlags().UintVar(&irrQueryTimeout, "irr-query-timeout", 30, "IRR query timeout in seconds")
 
-	rootCmd.AddCommand(&cobra.Command{
-		Use:    "docs",
-		Short:  "Generate documentation",
-		Hidden: true,
-		Run: func(cmd *cobra.Command, args []string) {
-			documentConfig()
-		},
-	})
+	rootCmd.AddCommand(docsCmd)
+	rootCmd.AddCommand(versionCmd)
 }
 
 // run allows integration testing with an arbitrary slice of arguments. During normal runtime,
@@ -82,11 +97,6 @@ func run() {
 	// Enable debug logging in development releases
 	if verbose {
 		log.SetLevel(log.DebugLevel)
-	}
-
-	if showVersion {
-		log.Printf("Pathvector version %s (https://pathvector.io)\n", version)
-		os.Exit(0)
 	}
 
 	// Check lockfile

@@ -222,10 +222,6 @@ peers:
 }
 
 // TODO: lint the resulting markdown files
-func TestDocumentCLIFlags(t *testing.T) {
-	documentCliFlags()
-}
-
 func TestDocumentConfig(t *testing.T) {
 	documentConfig()
 }

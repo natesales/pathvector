@@ -2,7 +2,7 @@
 
 [FastNetMon](https://fastnetmon.com) is a software-based DoS/DDoS detection tool that analyzes flows and signals a mitigation action over BGP such as traffic redirection or selective destination blackholes.
 
-To get started with Pathvector and FastNetMon, first install [Pathvector](/installation) and [FastNetMon Advanced](https://fastnetmon.com/docs-fnm-advanced/advanced-install-guide/).
+To get started with Pathvector and FastNetMon, first install [Pathvector](/docs/installation) and [FastNetMon Advanced](https://fastnetmon.com/docs-fnm-advanced/advanced-install-guide/).
 
 ## Configure FastNetMon
 

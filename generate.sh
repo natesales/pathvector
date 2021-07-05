@@ -3,11 +3,16 @@
 
 echo -n "Generating documentation..."
 go build -o /tmp/
-/tmp/pathvector generate-config-docs > docs/configuration/options.md
-echo '# Runtime' > docs/configuration/runtime.md
-/tmp/pathvector generate-cli-docs >> docs/configuration/runtime.md
-echo -e '\n## Usage\n```' >> docs/configuration/runtime.md
-/tmp/pathvector -h >> docs/configuration/runtime.md
-echo '```' >> docs/configuration/runtime.md
+echo -e '---
+title: Configuration
+sidebar_position: 3
+---\n' > docs/docs/configuration.md
+/tmp/pathvector generate-config-docs >> docs/docs/configuration.md
+echo -e '---
+title: CLI
+sidebar_position: 4
+---\n## Usage\n```' > docs/docs/cli.md
+/tmp/pathvector -h >> docs/docs/cli.md
+echo '```' >> docs/docs/cli.md
 rm /tmp/pathvector
 echo "done"

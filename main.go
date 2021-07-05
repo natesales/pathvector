@@ -28,9 +28,6 @@ func run(args []string) {
 	if len(args) == 2 && args[1] == "generate-config-docs" {
 		documentConfig()
 		os.Exit(1)
-	} else if len(os.Args) == 2 && args[1] == "generate-cli-docs" {
-		documentCliFlags()
-		os.Exit(1)
 	}
 
 	// Parse cli flags

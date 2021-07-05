@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Installation
 
 Pathvector uses [bird2](https://gitlab.nic.cz/labs/bird/) as it's BGP daemon and supports version `bird >= 2.0.7`. Pathvector releases can be downloaded as prebuilt binaries or packages from GitHub or as deb/rpm packages from https://github.com/natesales/repo. You can also build Pathvector from source by cloning the repo and running `go generate && go build`.
@@ -43,3 +47,11 @@ On the switch from the EOS CLI:
 10. Save changes: `wr mem`
 
 After installing the bundle extension, your switch will have a few new EOS CLI commands: `birdc`, `bgpq4`, and `pathvector`. These are just wrappers for the binaries installed on the underlying Linux system. 
+
+## VyOS
+
+TODO
+
+## Juniper
+
+TODO

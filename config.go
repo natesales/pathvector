@@ -463,7 +463,6 @@ func loadConfig(configBlob []byte) (*config, error) {
 }
 
 func documentConfigTypes(t reflect.Type) {
-	fmt.Println("<!-- Code generated DO NOT EDIT -->")
 	childTypesSet := map[reflect.Type]bool{}
 	fmt.Println("## " + strings.Replace(t.String(), "main.", "", -1))
 	fmt.Println("| Option | Type | Default | Validation | Description |")
@@ -502,27 +501,5 @@ func documentConfigTypes(t reflect.Type) {
 }
 
 func documentConfig() {
-	fmt.Println("# Options")
 	documentConfigTypes(reflect.TypeOf(config{}))
-}
-
-func documentCliFlags() {
-	fmt.Println("<!-- Code generated DO NOT EDIT -->")
-	fmt.Println("## CLI Flags")
-	fmt.Println("| Option | Type | Default | Description |")
-	fmt.Println("|--------|------|---------|-------------|")
-	t := reflect.TypeOf(cliFlags)
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		short := field.Tag.Get("short")
-		long := field.Tag.Get("long")
-		description := field.Tag.Get("description")
-		fDefault := field.Tag.Get("default")
-		// Add dash and comma only if short is defined
-		if short != "" {
-			short = "-" + short + ", "
-		}
-
-		fmt.Printf("| %s --%s | %s | %s | %s |\n", short, long, field.Type.String(), fDefault, description)
-	}
 }

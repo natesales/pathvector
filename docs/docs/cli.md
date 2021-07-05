@@ -1,24 +1,7 @@
-# Runtime
-<!-- Code generated DO NOT EDIT -->
-## CLI Flags
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| -c,  --config | string | /etc/pathvector.yml | Configuration file in YAML, TOML, or JSON format |
-|  --lock-file-directory | string |  | Lock file directory (lockfile check disabled if empty) |
-| -v,  --verbose | bool |  | Show verbose log messages |
-| -d,  --dry-run | bool |  | Don't modify configuration |
-| -n,  --no-configure | bool |  | Don't configure BIRD |
-| -V,  --version | bool |  | Show version and exit |
-|  --bird-directory | string | /etc/bird/ | Directory to store BIRD configs |
-|  --bird-binary | string | /usr/sbin/bird | Path to bird binary |
-|  --cache-directory | string | /var/run/pathvector/cache/ | Directory to store runtime configuration cache |
-|  --bird-socket | string | /run/bird/bird.ctl | UNIX control socket for BIRD |
-|  --keepalived-config | string | /etc/keepalived.conf | Configuration file for keepalived |
-|  --web-ui-file | string |  | File to write web UI to (disabled if empty) |
-|  --peeringdb-query-timeout | uint | 10 | PeeringDB query timeout in seconds |
-|  --irr-query-timeout | uint | 30 | IRR query timeout in seconds |
-| -m,  --mode | string | generate | Should this run generate a config or start the optimization daemon? (generate or daemon) |
-
+---
+title: CLI
+sidebar_position: 4
+---
 ## Usage
 ```
 Usage:

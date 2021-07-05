@@ -1,4 +1,4 @@
-name: Publish docs via GitHub Pages
+name: Deploy pathvector.io
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     paths:
       - "docs/**"
       - "generate.sh"
+      - ".github/workflows/docs.yml"
 
 jobs:
   deploy-docs:

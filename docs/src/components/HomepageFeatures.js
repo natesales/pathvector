@@ -8,8 +8,8 @@ const FeatureList = [
         Svg: require('../../static/img/undraw_security.svg').default,
         description: (
             <>
-                Enforce RPKI, IRR, import limits, Tier 1 ASN filters, next hop address & ASN restriction and more.
-                Generate secure routing policy by default.
+                Generate secure routing policy by default by enforcing RPKI, IRR, import limits, Tier 1 ASN filters,
+                next hop address & ASN restriction and more.
             </>
         ),
     },

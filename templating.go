@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"text/template"
@@ -166,7 +165,7 @@ func writeVRRPConfig(config *Config) {
 	}
 
 	// Create the VRRP config file
-	keepalivedFile, err := os.Create(path.Join(cliFlags.KeepalivedConfig))
+	keepalivedFile, err := os.Create(keepalivedConfig)
 	if err != nil {
 		log.Fatalf("Create peer specific output file: %v", err)
 	}
@@ -182,7 +181,7 @@ func writeVRRPConfig(config *Config) {
 func writeUIFile(config *Config) {
 	// Create the UI output file
 	log.Debug("Creating UI output file")
-	uiFileObj, err := os.Create(cliFlags.WebUIFile)
+	uiFileObj, err := os.Create(webUIFile)
 	if err != nil {
 		log.Fatalf("Create UI output file: %v", err)
 	}

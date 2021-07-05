@@ -19,7 +19,7 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		{"AS-FROOT", 4, []string{"192.5.4.0/23{23,24}", "199.212.90.0/23", "199.212.92.0/23", "202.41.142.0/24"}, false},
 	}
 	for _, tc := range testCases {
-		cliFlags.IRRQueryTimeout = 10
+		irrQueryTimeout = 10
 		out, err := getIRRPrefixSet(tc.asSet, tc.family, "rr.ntt.net")
 		if err != nil && !tc.shouldError {
 			t.Error(err)

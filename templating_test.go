@@ -15,12 +15,12 @@ func TestLoadTemplates(t *testing.T) {
 }
 
 func TestWriteUIFile(t *testing.T) {
-	cliFlags.WebUIFile = "/tmp/pathvector-go-test-ui.html"
+	webUIFile = "/tmp/pathvector-go-test-ui.html"
 	writeUIFile(&Config{})
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {
-	cliFlags.KeepalivedConfig = "/tmp/pathvector-go-test-keepalived.conf"
+	keepalivedConfig = "/tmp/pathvector-go-test-keepalived.conf"
 	writeVRRPConfig(&Config{})
 }
 

@@ -16,24 +16,6 @@ import (
 
 //go:generate ./generate.sh
 
-var cliFlags struct {
-	ConfigFile            string `short:"c" long:"config" description:"Configuration file in YAML, TOML, or JSON format" default:"/etc/pathvector.yml"`
-	LockFileDirectory     string `long:"lock-file-directory" description:"Lock file directory (lockfile check disabled if empty)" default:""`
-	Verbose               bool   `short:"v" long:"verbose" description:"Show verbose log messages"`
-	DryRun                bool   `short:"d" long:"dry-run" description:"Don't modify configuration"`
-	NoConfigure           bool   `short:"n" long:"no-configure" description:"Don't configure BIRD"`
-	ShowVersion           bool   `short:"V" long:"version" description:"Show version and exit"`
-	BirdDirectory         string `long:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BirdBinary            string `long:"bird-binary" description:"Path to bird binary" default:"/usr/sbin/bird"`
-	CacheDirectory        string `long:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
-	BirdSocket            string `long:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	KeepalivedConfig      string `long:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `long:"web-ui-file" description:"File to write web UI to (disabled if empty)"`
-	PeeringDbQueryTimeout uint   `long:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	IRRQueryTimeout       uint   `long:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
-	Mode                  string `short:"m" long:"mode" description:"Should this run generate a config or start the optimization daemon? (generate or daemon)" default:"generate"`
-}
-
 // Peer stores a single peer config
 type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`

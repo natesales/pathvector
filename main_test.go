@@ -23,9 +23,11 @@ func TestIntegrations(t *testing.T) {
 		t.Error(err)
 	}
 	for _, testFile := range files {
-		t.Logf("running integration with args %v", args)
-		run(append(args, []string{
+		args = append(args, []string{
 			"--config", testFile,
-		}...))
+		}...)
+		t.Logf("running integration with args %v", args)
+		rootCmd.SetArgs(args)
+		rootCmd.Execute()
 	}
 }

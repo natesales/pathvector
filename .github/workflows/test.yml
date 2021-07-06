@@ -36,7 +36,7 @@ jobs:
         run: sudo bash tests/setup.sh
 
       - name: Generate coverage report
-        run: sudo go test -race -coverprofile=coverage.txt -covermode=atomic
+        run: go test -race -coverprofile=coverage.txt -covermode=atomic
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1

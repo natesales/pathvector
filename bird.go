@@ -100,7 +100,7 @@ func moveCacheAndReconfig() {
 		fileNameTail := fileNameParts[len(fileNameParts)-1]
 		newFileLoc := path.Join(birdDirectory, fileNameTail)
 		log.Debugf("Moving %s to %s", f, newFileLoc)
-		if err := MoveFile(f, newFileLoc); err != nil {
+		if err := moveFile(f, newFileLoc); err != nil {
 			log.Fatalf("Moving cache file to bird directory: %v", err)
 		}
 	}

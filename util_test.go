@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -60,5 +62,40 @@ func TestCategorizeCommunity(t *testing.T) {
 		} else if cType != tc.expectedOutput {
 			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
 		}
+	}
+}
+
+func TestMoveFile(t *testing.T) {
+	// Make temporary cache directory
+	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
+		t.Error(err)
+	}
+
+	inputString := "Test File"
+
+	if err := ioutil.WriteFile("test-cache/source.txt", []byte(inputString), 0755); err != nil {
+		t.Error(err)
+	}
+
+	if err := moveFile("test-cache/source.txt", "test-cache/dest.txt"); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Stat("test-cache/dest.txt"); os.IsNotExist(err) {
+		t.Errorf("file text-cache/dest.txt doesn't exist but should")
+	}
+
+	if _, err := os.Stat("test-cache/source.txt"); err == nil {
+		t.Errorf("file text-cache/source.txt exists but shouldn't")
+	}
+
+	if contents, err := ioutil.ReadFile("test-cache/dest.txt"); err != nil {
+		if string(contents) != inputString {
+			t.Errorf("expected %s got %s", inputString, contents)
+		}
+	}
+
+	if err := os.Remove("test-cache/dest.txt"); err != nil {
+		t.Error(err)
 	}
 }

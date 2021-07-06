@@ -94,8 +94,8 @@ func categorizeCommunity(input string) string {
 	return ""
 }
 
-// MoveFile moves a file from a source to destination
-func MoveFile(source, destination string) (err error) {
+// moveFile moves a file from a source to destination
+func moveFile(source, destination string) (err error) {
 	src, err := os.Open(source)
 	if err != nil {
 		return err

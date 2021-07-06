@@ -64,7 +64,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
 
+            # pathvector:localpref
             bgp_local_pref = {{ $peer.LocalPref }};
+            # /pathvector:localpref
 
             {{ if BoolDeref $peer.HonorGracefulShutdown }}honor_graceful_shutdown();{{ end }}
 

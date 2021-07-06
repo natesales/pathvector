@@ -87,7 +87,6 @@ type Peer struct {
 	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`
 	OptimizerEnabled      *bool     `yaml:"optimize" description:"Should the optimizer be enabled for this peer?" default:"false"`
 	OptimizeInbound       *bool     `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
-	OptimizeOutbound      *bool     `yaml:"optimize-outbound" description:"Should the optimizer modify outbound policy?" default:"false"`
 
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
@@ -133,10 +132,12 @@ type Optimizer struct {
 	LatencyThreshold     uint     `yaml:"latency-threshold" description:"Maximum allowable latency in milliseconds" default:"100"`
 	PacketLossThreshold  float64  `yaml:"packet-loss-threshold" description:"Maximum allowable packet loss (percent)" default:"0.5"`
 	AcquisitionThreshold float64  `yaml:"acquisition-threshold" description:"Acquisition percentage to start applying optimizations (range 0-1)" default:"0.9"`
-	PingCount            int      `yaml:"probe-count" description:"Number of pings to send in each run" default:"5"`
-	PingTimeout          int      `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered" default:"1"`
-	Interval             int      `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
-	CacheSize            int      `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
+	LocalPrefModifier    uint     `yaml:"modifier" description:"Amount to lower local pref by for depreferred peers" default:"20"`
+
+	PingCount   int `yaml:"probe-count" description:"Number of pings to send in each run" default:"5"`
+	PingTimeout int `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered" default:"1"`
+	Interval    int `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
+	CacheSize   int `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
 
 	Db      map[string][]probeResult `yaml:"-" description:"-"`
 	Disable bool                     `yaml:"-" description:"-"`

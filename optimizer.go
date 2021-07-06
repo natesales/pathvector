@@ -1,7 +1,12 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"net"
+	"path"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -103,7 +108,7 @@ func startProbe(sourceMap map[string][]string) error {
 
 		// Only start optimizing if enough metrics have been acquired
 		if acquisitionProgress(len(sourceMap)) >= globalOptimizer.AcquisitionThreshold {
-
+			computeMetrics()
 		}
 
 		// Sleep before sending the next probe
@@ -149,14 +154,43 @@ func computeMetrics() {
 		// TODO: Email/hook script alerts
 		if p[peer].PacketLoss >= globalOptimizer.PacketLossThreshold {
 			log.Debugf("[Optimizer] Peer %s exceeded maximum allowable packet loss: %f >= %f", peer, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold)
+			optimizePeer(peer)
 		}
 		if p[peer].Latency >= time.Duration(globalOptimizer.LatencyThreshold)*time.Millisecond {
 			log.Debugf("[Optimizer] Peer %s exceeded maximum allowable latency: %v >= %v", peer, p[peer].Latency, globalOptimizer.LatencyThreshold)
+			optimizePeer(peer)
 		}
 	}
 }
 
-//func substituteLocalPref(peer string) {
-//	s := strings.Split(peer, optimizationDelimiter)
-//	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%d_%s.conf", s[0], *sanitize(s[1])))
-//}
+func optimizePeer(peer string) {
+	s := strings.Split(peer, optimizationDelimiter)
+	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", s[0], *sanitize(s[1])))
+	peerFile, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatal("reading peer file: " + err.Error())
+	}
+	peerData := globalConfig.Peers[s[1]]
+
+	if *peerData.OptimizeInbound {
+		// Calculate new local pref
+		currentLocalPref := *peerData.LocalPref
+		newLocalPref := uint(currentLocalPref) - globalOptimizer.LocalPrefModifier
+
+		lpRegex := regexp.MustCompile(`bgp_local_pref = .*; # pathvector:localpref`)
+		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
+
+		if err := ioutil.WriteFile(fileName, []byte(modified), 0755); err != nil {
+			log.Fatal(err)
+		} else {
+			log.Printf("[Optimizer] Lowered %s local-pref from %d to %d", s[1], currentLocalPref, newLocalPref)
+		}
+	}
+
+	// Run BIRD config validation
+	birdValidate()
+
+	if !dryRun {
+		moveCacheAndReconfig()
+	}
+}

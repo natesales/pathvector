@@ -221,10 +221,7 @@ var (
 				log.Infof("Starting optimizer")
 				sourceMap := map[string][]string{} // Peer name to list of source addresses
 				for peerName, peerData := range globalConfig.Peers {
-					if peerData.OptimizerEnabled != nil && *peerData.OptimizerEnabled {
-						if peerData.OptimizerProbeSources == nil || len(*peerData.OptimizerProbeSources) < 1 {
-							log.Fatalf("[%s] has optimize enabled but no probe sources", peerName)
-						}
+					if peerData.OptimizerProbeSources != nil && len(*peerData.OptimizerProbeSources) > 0 {
 						sourceMap[fmt.Sprintf("%d%s%s", *peerData.ASN, optimizationDelimiter, peerName)] = *peerData.OptimizerProbeSources
 					}
 				}

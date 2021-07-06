@@ -19,6 +19,5 @@ peers:
     neighbors:
       - 203.0.113.12
       - 2001:db8::12
-    optimize: true
     optimize-inbound: true
     probe-sources: [ "192.0.2.1", "2001:db8::1" ]

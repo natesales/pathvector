@@ -85,7 +85,6 @@ type Peer struct {
 
 	// Optimizer
 	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`
-	OptimizerEnabled      *bool     `yaml:"optimize" description:"Should the optimizer be enabled for this peer?" default:"false"`
 	OptimizeInbound       *bool     `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
 
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`

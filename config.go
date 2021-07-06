@@ -157,6 +157,7 @@ type Config struct {
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 

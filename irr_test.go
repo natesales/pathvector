@@ -31,3 +31,37 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		}
 	}
 }
+
+func stringPtr(s string) *string {
+	return &s
+}
+
+func TestBuildIRRPrefixSet(t *testing.T) {
+	testCases := []struct {
+		asSet       string
+		prefixSet4  []string
+		prefixSet6  []string
+		shouldError bool
+	}{
+		{"AS112", []string{"192.31.196.0/24", "192.175.48.0/24"}, []string{"2001:4:112::/48", "2620:4f:8000::/48"}, false},
+		{"", []string{}, []string{}, true}, // Empty as-set
+	}
+	for _, tc := range testCases {
+		peer := Peer{ASSet: stringPtr(tc.asSet)}
+		err := buildIRRPrefixSet(&peer, "rr.ntt.net")
+		if err != nil && tc.shouldError {
+			return
+		}
+		if err != nil && !tc.shouldError {
+			t.Error(err)
+		} else if err == nil && tc.shouldError {
+			t.Errorf("as-set %s should error but didn't", tc.asSet)
+		}
+		if !reflect.DeepEqual(tc.prefixSet4, *peer.PrefixSet4) {
+			t.Errorf("as-set %s IPv4 prefix set expected %v got %v", tc.asSet, tc.prefixSet4, peer.PrefixSet4)
+		}
+		if !reflect.DeepEqual(tc.prefixSet6, *peer.PrefixSet6) {
+			t.Errorf("as-set %s IPv6 prefix set expected %v got %v", tc.asSet, tc.prefixSet6, peer.PrefixSet6)
+		}
+	}
+}

@@ -44,7 +44,8 @@ func TestOptimizerAcquisitionProgress(t *testing.T) {
 		}}}, 1, 0.4}, // Partially full cache
 	}
 	for _, tc := range testCases {
-		out := acquisitionProgress(tc.optimizer, tc.numPeers)
+		globalOptimizer = tc.optimizer
+		out := acquisitionProgress(tc.numPeers)
 		if out != tc.expected {
 			t.Errorf("expected same %f got %f", tc.expected, out)
 		}

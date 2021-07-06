@@ -138,7 +138,8 @@ type Optimizer struct {
 	Interval             int      `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
 	CacheSize            int      `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
 
-	Db map[string][]probeResult `yaml:"-" description:"-"`
+	Db      map[string][]probeResult `yaml:"-" description:"-"`
+	Disable bool                     `yaml:"-" description:"-"`
 }
 
 // Config stores the global configuration

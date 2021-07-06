@@ -51,14 +51,19 @@ func sendPing(source string, target string, count int, timeout int) (*ping.Stati
 }
 
 // startProbe starts the probe scheduler to send probes to all configured targets and logs the results
-func startProbe(o Optimizer, sourceMap map[string][]string) error {
+func startProbe(sourceMap map[string][]string) error {
 	// Initialize Db map
-	if o.Db == nil {
-		o.Db = map[string][]probeResult{} // peerName to list of probe results
+	if globalOptimizer.Db == nil {
+		globalOptimizer.Db = map[string][]probeResult{} // peerName to list of probe results
 	}
 
-	// Loop over every source/target pair
 	for {
+		// Break optimization loop (used for testing)
+		if globalOptimizer.Disable {
+			return nil
+		}
+
+		// Loop over every source/target pair
 		for peerName, sources := range sourceMap {
 			for _, source := range sources {
 				for _, target := range o.Targets {

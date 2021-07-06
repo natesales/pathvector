@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestMainGenerate(t *testing.T) {
@@ -42,6 +43,12 @@ func TestMainProbe(t *testing.T) {
 		t.Error(err)
 	}
 	for _, testFile := range files {
+		// Disable the optimizer after it's ran for a bit
+		go func() {
+			time.Sleep(2 * time.Second)
+			globalOptimizer.Disable = true
+		}()
+
 		args = append(args, []string{
 			"--config", testFile,
 		}...)

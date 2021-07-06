@@ -263,7 +263,7 @@ var (
 						if peerData.OptimizerProbeSources == nil || len(*peerData.OptimizerProbeSources) < 1 {
 							log.Fatalf("[%s] has optimize enabled but no probe sources", peerName)
 						}
-						sourceMap[peerName] = *peerData.OptimizerProbeSources
+						sourceMap[fmt.Sprintf("%d%s%s", *peerData.ASN, optimizationDelimiter, peerName)] = *peerData.OptimizerProbeSources
 					}
 				}
 				log.Debugf("Optimizer probe sources: %v", sourceMap)

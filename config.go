@@ -359,9 +359,17 @@ func loadConfig(configBlob []byte) (*Config, error) {
 				}
 
 				if pfx.To4() == nil { // If IPv6
-					*peerData.PrefixSet4 = append(*peerData.PrefixSet4, prefix)
+					if peerData.PrefixSet6 == nil {
+						peerData.PrefixSet6 = &[]string{}
+					}
+					pfxSet6 := append(*peerData.PrefixSet6, prefix)
+					peerData.PrefixSet6 = &pfxSet6
 				} else { // If IPv4
-					*peerData.PrefixSet6 = append(*peerData.PrefixSet6, prefix)
+					if peerData.PrefixSet4 == nil {
+						peerData.PrefixSet4 = &[]string{}
+					}
+					pfxSet4 := append(*peerData.PrefixSet4, prefix)
+					peerData.PrefixSet4 = &pfxSet4
 				}
 			}
 		}

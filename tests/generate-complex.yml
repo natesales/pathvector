@@ -1,0 +1,29 @@
+asn: 65530
+router-id: 192.0.2.1
+source4: 192.0.2.1
+source6: 2001:db8::1
+prefixes:
+  - 192.0.2.0/24
+  - 2001:db8::/48
+
+peers:
+  Example:
+    asn: 65510
+    import-communities:
+      - 65530,1
+      - 65530:65530:1
+    export-communities:
+      - 65530,2
+      - 65530:65530:2
+    announce-communities:
+      - 65530,3
+      - 65530:65530:3
+    remove-communities:
+      - 65530,4
+      - 65530:65530:4
+    neighbors:
+      - 203.0.113.12
+      - 2001:db8::12
+    prefixes:
+      - 198.51.100.0/24
+      - 2001:db8:1::/48

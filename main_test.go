@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestMainGenerate(t *testing.T) {
@@ -52,16 +51,10 @@ func TestMainOptimizer(t *testing.T) {
 		}...))
 		rootCmd.Execute()
 
-		// Disable the optimizer after it's ran for a bit
-		go func() {
-			time.Sleep(5 * time.Second)
-			t.Log("disabling optimizer")
-			globalOptimizer.Disable = true
-		}()
-
 		args = append(args, []string{
 			"optimizer",
 			"--udp",
+			"--exit-on-cache-full",
 			"--config", testFile,
 		}...)
 		t.Logf("running probe integration with args %v", args)

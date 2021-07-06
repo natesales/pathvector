@@ -27,6 +27,7 @@ var (
 
 // CLI Flags
 var (
+	// Global
 	configFile            string
 	lockFileDirectory     string
 	verbose               bool
@@ -41,7 +42,9 @@ var (
 	peeringDbQueryTimeout uint
 	irrQueryTimeout       uint
 
-	probeUdpMode bool
+	// Optimizer
+	probeUdpMode    bool
+	exitOnCacheFull bool
 )
 
 var globalConfig *Config
@@ -275,6 +278,7 @@ func init() {
 	for _, cmd := range subCommands {
 		if cmd.Use == "optimizer" {
 			cmd.Flags().BoolVarP(&probeUdpMode, "udp", "u", false, "use UDP probe (else ICMP)")
+			cmd.Flags().BoolVarP(&exitOnCacheFull, "exit-on-cache-full", "e", false, "should the optimizer process exit when the cache is full?")
 		}
 		rootCmd.AddCommand(cmd)
 	}

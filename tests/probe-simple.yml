@@ -7,8 +7,8 @@ prefixes:
   - 2001:db8::/48
 
 optimizer:
-  acquisition-threshold: 0.1  # Start optimizing at 1% probe acquisition
-  probe-interval: 1 # 1 second between probe runs
+  probe-interval: 1
+  cache-size: 3
   targets:
     - 192.0.2.2
 
@@ -19,5 +19,5 @@ peers:
       - 203.0.113.12
       - 2001:db8::12
     optimize: true
-    probe-sources: [ "192.0.2.1", "2001:db8::1" ]
     optimize-inbound: true
+    probe-sources: [ "192.0.2.1", "2001:db8::1" ]

@@ -68,11 +68,6 @@ func startProbe(sourceMap map[string][]string) error {
 	}
 
 	for {
-		// Break optimization loop (used for testing)
-		if globalOptimizer.Disable {
-			return nil
-		}
-
 		// Loop over every source/target pair
 		for peerName, sources := range sourceMap {
 			for _, source := range sources {
@@ -94,43 +89,33 @@ func startProbe(sourceMap map[string][]string) error {
 							Stats: *stats,
 						}
 
+						log.Debugf("[Optimizer] cache usage: %d/%d", len(globalOptimizer.Db[peerName]), globalOptimizer.CacheSize)
+
 						if len(globalOptimizer.Db[peerName]) < globalOptimizer.CacheSize {
 							// If the array is not full to CacheSize, append the result
 							globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName], result)
 						} else {
-							// If the array is full to probeCacheSize, chop off the first element and append the result
-							globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName][1:], result)
+							// If the array is full to probeCacheSize...
+							if exitOnCacheFull {
+								return nil
+							} else {
+								// Chop off the first element and append the result
+								globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName][1:], result)
+							}
 						}
 					}
 				}
 			}
 		}
 
-		// Only start optimizing if enough metrics have been acquired
-		if acquisitionProgress(len(sourceMap)) >= globalOptimizer.AcquisitionThreshold {
-			computeMetrics()
-		}
+		// Compute averages
+		computeMetrics()
 
 		// Sleep before sending the next probe
 		waitInterval := time.Duration(globalOptimizer.Interval) * time.Second
 		log.Debugf("[Optimizer] Waiting %s until next probe run", waitInterval)
 		time.Sleep(waitInterval)
 	}
-}
-
-// acquisitionProgress returns the percent value of how full the probe database is. A value of 1 represents completely full and ready to optimize.
-func acquisitionProgress(numPeers int) float64 {
-	totalEntries := globalOptimizer.CacheSize * numPeers // Expected total number of entries to make up a 100% probe acquisition
-
-	actualEntries := 0
-	// For each peer, increment actualEntries by the number of entries recorded
-	for peer := range globalOptimizer.Db { // For each peer in the database
-		actualEntries += len(globalOptimizer.Db[peer])
-	}
-
-	percent := float64(actualEntries) / float64(totalEntries)
-	log.Debugf("[Optimizer] Acquisition progress: %d/%d (%v%%)", actualEntries, totalEntries, percent*10)
-	return percent
 }
 
 // computeMetrics calculates average latency and packet loss

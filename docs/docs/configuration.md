@@ -108,7 +108,6 @@ sidebar_position: 3
 | targets | []string |  |  | List of probe targets |
 | latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
 | packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| acquisition-threshold | float64 | 0.9 |  | Acquisition percentage to start applying optimizations (range 0-1) |
 | modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
 | probe-count | int | 5 |  | Number of pings to send in each run |
 | probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |

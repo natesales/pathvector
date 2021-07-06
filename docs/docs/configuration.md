@@ -18,6 +18,7 @@ sidebar_position: 3
 | merge-paths | bool | false |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | source4 | string |  |  | Source IPv4 address |
 | source6 | string |  |  | Source IPv6 address |
+| default-route | bool | true |  | Add a default route |
 | accept-default | bool | false |  | Should default routes be added to the bogon list? |
 | kernel-table | int |  |  | Kernel table |
 | peers | map[string]Peer |  |  | BGP peer configuration |
@@ -25,15 +26,6 @@ sidebar_position: 3
 | vrrp | []VRRPInstance |  |  | List of VRRP instances |
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| probe-count | int |  |  | Number of pings to send in each run |
-| probe-timeout | int |  |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int |  |  | Time to wait between each optimizer run |
-| cache-size | int |  |  | Number of probe results to store per peer |
 
 ## Peer
 | Option | Type | Default | Validation | Description |
@@ -91,7 +83,6 @@ sidebar_position: 3
 | probe-sources | []string |  |  | Optimizer probe source addresses |
 | optimize | bool | false |  | Should the optimizer be enabled for this peer? |
 | optimize-inbound | bool | false |  | Should the optimizer modify inbound policy? |
-| optimize-outbound | bool | false |  | Should the optimizer modify outbound policy? |
 
 ## VRRPInstance
 | Option | Type | Default | Validation | Description |
@@ -110,4 +101,17 @@ sidebar_position: 3
 | reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
+
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| acquisition-threshold | float64 | 0.9 |  | Acquisition percentage to start applying optimizations (range 0-1) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
 

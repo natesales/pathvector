@@ -204,9 +204,8 @@ var (
 
 	subCommands = []*cobra.Command{
 		{
-			Use:    "optimizer",
-			Short:  "Start optimization daemon",
-			Hidden: true,
+			Use:   "optimizer",
+			Short: "Start optimization daemon",
 			Run: func(cmd *cobra.Command, args []string) {
 				log.Debugf("Loading config from %s", configFile)
 				configFile, err := ioutil.ReadFile(configFile)

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestIntegrations(t *testing.T) {
+func TestMainGenerate(t *testing.T) {
 	// Make temporary cache directory
 	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
@@ -18,7 +18,7 @@ func TestIntegrations(t *testing.T) {
 		"--cache-directory", "test-cache",
 		"--web-ui-file", "test-cache/ui.html",
 	}
-	files, err := filepath.Glob("tests/*.yml")
+	files, err := filepath.Glob("tests/generate-*.yml")
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,7 +26,26 @@ func TestIntegrations(t *testing.T) {
 		args = append(args, []string{
 			"--config", testFile,
 		}...)
-		t.Logf("running integration with args %v", args)
+		t.Logf("running generate integration with args %v", args)
+		rootCmd.SetArgs(args)
+		rootCmd.Execute()
+	}
+}
+
+func TestMainProbe(t *testing.T) {
+	args := []string{
+		"probe",
+		"--verbose",
+	}
+	files, err := filepath.Glob("tests/probe-*.yml")
+	if err != nil {
+		t.Error(err)
+	}
+	for _, testFile := range files {
+		args = append(args, []string{
+			"--config", testFile,
+		}...)
+		t.Logf("running probe integration with args %v", args)
 		rootCmd.SetArgs(args)
 		rootCmd.Execute()
 	}

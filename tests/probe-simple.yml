@@ -11,6 +11,7 @@ optimizer:
   cache-size: 3
   targets:
     - 192.0.2.2
+  alert-script: tests/alert-test.sh
 
 peers:
   Example:

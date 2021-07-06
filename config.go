@@ -138,6 +138,8 @@ type Optimizer struct {
 	Interval    int `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
 	CacheSize   int `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
 
+	AlertScript string `yaml:"alert-script" description:"Script to call on optimizer event"`
+
 	Db map[string][]probeResult `yaml:"-" description:"-"`
 }
 

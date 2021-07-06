@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
+	"os/exec"
 	"path"
 	"regexp"
 	"strings"
@@ -136,26 +138,47 @@ func computeMetrics() {
 		p[peer].Latency = p[peer].Latency / time.Duration(totalProbes)
 
 		// Check thresholds to apply optimizations
-		// TODO: Email/hook script alerts
+		var alerts []string
+		peerASN, peerName := parsePeerDelimiter(peer)
 		if p[peer].PacketLoss >= globalOptimizer.PacketLossThreshold {
-			log.Debugf("[Optimizer] Peer %s exceeded maximum allowable packet loss: %f >= %f", peer, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold)
-			optimizePeer(peer)
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s exceeded maximum allowable packet loss: %f >= %f", peerASN, peerName, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold))
 		}
 		if p[peer].Latency >= time.Duration(globalOptimizer.LatencyThreshold)*time.Millisecond {
-			log.Debugf("[Optimizer] Peer %s exceeded maximum allowable latency: %v >= %v", peer, p[peer].Latency, globalOptimizer.LatencyThreshold)
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s exceeded maximum allowable latency: %v >= %v", peerASN, peerName, p[peer].Latency, globalOptimizer.LatencyThreshold))
+		}
+
+		// If there is at least one alert,
+		if len(alerts) > 0 {
+			for _, alert := range alerts {
+				log.Debugf("[Optimizer] %s", alert)
+				if globalOptimizer.AlertScript != "" {
+					birdCmd := exec.Command(globalOptimizer.AlertScript, alert)
+					birdCmd.Stdout = os.Stdout
+					birdCmd.Stderr = os.Stderr
+					if err := birdCmd.Run(); err != nil {
+						log.Warnf("[Optimizer] alert script: %v", err)
+					}
+				}
+			}
 			optimizePeer(peer)
 		}
 	}
 }
 
+// parsePeerDelimiter parses a ASN/name string and returns the ASN and name
+func parsePeerDelimiter(i string) (string, string) {
+	parts := strings.Split(i, optimizationDelimiter)
+	return parts[0], parts[1]
+}
+
 func optimizePeer(peer string) {
-	s := strings.Split(peer, optimizationDelimiter)
-	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", s[0], *sanitize(s[1])))
+	peerASN, peerName := parsePeerDelimiter(peer)
+	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *sanitize(peerName)))
 	peerFile, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.Fatal("reading peer file: " + err.Error())
 	}
-	peerData := globalConfig.Peers[s[1]]
+	peerData := globalConfig.Peers[peerName]
 
 	if *peerData.OptimizeInbound {
 		// Calculate new local pref
@@ -168,7 +191,7 @@ func optimizePeer(peer string) {
 		if err := ioutil.WriteFile(fileName, []byte(modified), 0755); err != nil {
 			log.Fatal(err)
 		} else {
-			log.Printf("[Optimizer] Lowered %s local-pref from %d to %d", s[1], currentLocalPref, newLocalPref)
+			log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
 		}
 	}
 

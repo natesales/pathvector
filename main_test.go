@@ -60,7 +60,8 @@ func TestMainOptimizer(t *testing.T) {
 		}()
 
 		args = append(args, []string{
-			"probe",
+			"optimizer",
+			"--udp",
 			"--config", testFile,
 		}...)
 		t.Logf("running probe integration with args %v", args)

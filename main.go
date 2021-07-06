@@ -40,6 +40,8 @@ var (
 	webUIFile             string
 	peeringDbQueryTimeout uint
 	irrQueryTimeout       uint
+
+	probeUdpMode bool
 )
 
 var globalConfig *Config
@@ -199,8 +201,8 @@ var (
 
 	subCommands = []*cobra.Command{
 		{
-			Use:    "probe",
-			Short:  "Start optimization probe",
+			Use:    "optimizer",
+			Short:  "Start optimization daemon",
 			Hidden: true,
 			Run: func(cmd *cobra.Command, args []string) {
 				log.Debugf("Loading config from %s", configFile)
@@ -271,6 +273,9 @@ func init() {
 	rootCmd.PersistentFlags().UintVar(&irrQueryTimeout, "irr-query-timeout", 30, "IRR query timeout in seconds")
 
 	for _, cmd := range subCommands {
+		if cmd.Use == "optimizer" {
+			cmd.Flags().BoolVarP(&probeUdpMode, "udp", "u", false, "use UDP probe (else ICMP)")
+		}
 		rootCmd.AddCommand(cmd)
 	}
 }

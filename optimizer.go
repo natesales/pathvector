@@ -38,7 +38,7 @@ func sameAddressFamily(a string, b string) bool {
 }
 
 // sendPing sends a probe ping to a specified target
-func sendPing(source string, target string, count int, timeout int) (*ping.Statistics, error) {
+func sendPing(source string, target string, count int, timeout int, udp bool) (*ping.Statistics, error) {
 	pinger, err := ping.NewPinger(target)
 	if err != nil {
 		return &ping.Statistics{}, err
@@ -49,7 +49,7 @@ func sendPing(source string, target string, count int, timeout int) (*ping.Stati
 	pinger.Timeout = time.Duration(timeout) * time.Second
 	pinger.Source = source
 	pinger.SetNetwork("ip") // TODO: Is this needed?
-	pinger.SetPrivileged(true)
+	pinger.SetPrivileged(!udp)
 
 	// Run the ping
 	err = pinger.Run()
@@ -79,7 +79,7 @@ func startProbe(sourceMap map[string][]string) error {
 				for _, target := range globalOptimizer.Targets {
 					if sameAddressFamily(source, target) {
 						log.Debugf("[Optimizer] Sending %d ICMP probes src %s dst %s", globalOptimizer.PingCount, source, target)
-						stats, err := sendPing(source, target, globalOptimizer.PingCount, globalOptimizer.PingTimeout)
+						stats, err := sendPing(source, target, globalOptimizer.PingCount, globalOptimizer.PingTimeout, probeUdpMode)
 						if err != nil {
 							return err
 						}

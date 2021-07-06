@@ -81,7 +81,6 @@ sidebar_position: 3
 | pre-import-final | string |  |  | Configuration to add immediately before the final accept/reject on import |
 | pre-export-final | string |  |  | Configuration to add immediately before the final accept/reject on export |
 | probe-sources | []string |  |  | Optimizer probe source addresses |
-| optimize | bool | false |  | Should the optimizer be enabled for this peer? |
 | optimize-inbound | bool | false |  | Should the optimizer modify inbound policy? |
 
 ## VRRPInstance
@@ -113,4 +112,5 @@ sidebar_position: 3
 | probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
 | probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
 | cache-size | int | 15 |  | Number of probe results to store per peer |
+| alert-script | string |  |  | Script to call on optimizer event |
 

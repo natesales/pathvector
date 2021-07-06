@@ -270,7 +270,10 @@ var (
 				if len(sourceMap) == 0 {
 					log.Fatal("No peers have optimization enabled, exiting now")
 				}
-				log.Fatal(startProbe(globalConfig.Optimizer, sourceMap))
+				globalOptimizer = globalConfig.Optimizer
+				if err := startProbe(sourceMap); err != nil {
+					log.Fatal(err)
+				}
 			},
 		}, {
 			Use:    "docs",

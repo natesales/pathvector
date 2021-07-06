@@ -141,10 +141,10 @@ func computeMetrics() {
 		var alerts []string
 		peerASN, peerName := parsePeerDelimiter(peer)
 		if p[peer].PacketLoss >= globalOptimizer.PacketLossThreshold {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s exceeded maximum allowable packet loss: %f >= %f", peerASN, peerName, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold))
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable packet loss: %f >= %f", peerASN, peerName, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold))
 		}
 		if p[peer].Latency >= time.Duration(globalOptimizer.LatencyThreshold)*time.Millisecond {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s exceeded maximum allowable latency: %v >= %v", peerASN, peerName, p[peer].Latency, globalOptimizer.LatencyThreshold))
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v", peerASN, peerName, p[peer].Latency, globalOptimizer.LatencyThreshold))
 		}
 
 		// If there is at least one alert,

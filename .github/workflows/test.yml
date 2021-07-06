@@ -32,6 +32,9 @@ jobs:
       - name: go build
         run: go build -v .
 
+      - name: Setup integration test environment
+        run: sudo bash tests/setup.sh
+
       - name: Generate coverage report
         run: sudo go test -race -coverprofile=coverage.txt -covermode=atomic
 

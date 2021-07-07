@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -269,6 +270,20 @@ var (
 					log.Fatal(err)
 				}
 				fmt.Println(string(c))
+			},
+		}, {
+			Use:   "match ASN1 ASN2",
+			Short: "Find common IXPs between ASNs",
+			Run: func(cmd *cobra.Command, args []string) {
+				asnA, err := strconv.Atoi(args[len(args)-1])
+				if err != nil {
+					log.Fatal(err)
+				}
+				asnB, err := strconv.Atoi(args[len(args)-2])
+				if err != nil {
+					log.Fatal(err)
+				}
+				commonIxs(uint(asnA), uint(asnB))
 			},
 		},
 	}

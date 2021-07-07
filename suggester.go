@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -67,7 +68,7 @@ func peeringDbIxLans(asn uint) ([]peeringDbIxLanData, error) {
 }
 
 // commonIxs gets common IXPs from PeeringDB
-func commonIxs(a uint, b uint) {
+func commonIxs(a uint, b uint, config bool) {
 	networkA, err := peeringDbIxLans(a)
 	if err != nil {
 		log.Fatalf("AS%d: %v", a, err)
@@ -77,10 +78,16 @@ func commonIxs(a uint, b uint) {
 		log.Fatalf("AS%d: %v", a, err)
 	}
 
+	networkBInfo, err := getPeeringDbData(int(b))
+	if err != nil {
+		log.Fatalf("AS%d: %v", b, err)
+	}
+
 	for _, ixA := range networkA {
 		for _, ixB := range networkB {
 			if ixA.IxlanId == ixB.IxlanId {
-				fmt.Printf(`%s
+				if !config {
+					fmt.Printf(`%s
   AS%d
   %s
   %s
@@ -90,6 +97,15 @@ func commonIxs(a uint, b uint) {
   %s
 
 `, ixA.Name, a, ixA.Ipaddr4, ixA.Ipaddr6, b, ixB.Ipaddr4, ixB.Ipaddr6)
+				} else {
+					fmt.Printf(`  %s %s:
+    asn: %d
+    neighbors:
+      - %s
+      - %s
+
+`, networkBInfo.Name, strings.Split(ixA.Name, ":")[0], b, ixB.Ipaddr4, ixB.Ipaddr6)
+				}
 			}
 		}
 	}

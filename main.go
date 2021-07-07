@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -47,6 +48,10 @@ var (
 	// Optimizer
 	probeUdpMode    bool
 	exitOnCacheFull bool
+
+	// Match
+	matchConfig   bool
+	matchLocalASN uint
 )
 
 var globalConfig *Config
@@ -272,18 +277,34 @@ var (
 				fmt.Println(string(c))
 			},
 		}, {
-			Use:   "match ASN1 ASN2",
-			Short: "Find common IXPs between ASNs",
+			Use:   "match ASN",
+			Short: "Find common IXPs for a given ASN",
 			Run: func(cmd *cobra.Command, args []string) {
-				asnA, err := strconv.Atoi(args[len(args)-1])
+				if matchLocalASN == 0 {
+					// Load the config file from config file
+					log.Debugf("Loading config from %s", configFile)
+					configFile, err := ioutil.ReadFile(configFile)
+					if err != nil {
+						log.Fatal("Reading config file: " + err.Error())
+					}
+					globalConfig, err := loadConfig(configFile)
+					if err != nil {
+						log.Fatal(err)
+					}
+					log.Debugln("Finished loading config")
+					matchLocalASN = uint(globalConfig.ASN)
+				}
+
+				if len(args) != 1 {
+					log.Fatal("Usage: pathvector match ASN")
+				}
+
+				peerASN, err := strconv.Atoi(args[0])
 				if err != nil {
 					log.Fatal(err)
 				}
-				asnB, err := strconv.Atoi(args[len(args)-2])
-				if err != nil {
-					log.Fatal(err)
-				}
-				commonIxs(uint(asnA), uint(asnB))
+
+				commonIxs(matchLocalASN, uint(peerASN), matchConfig)
 			},
 		},
 	}
@@ -313,6 +334,9 @@ func init() {
 		if cmd.Use == "optimizer" {
 			cmd.Flags().BoolVarP(&probeUdpMode, "udp", "u", false, "use UDP probe (else ICMP)")
 			cmd.Flags().BoolVarP(&exitOnCacheFull, "exit-on-cache-full", "e", false, "should the optimizer process exit when the cache is full?")
+		} else if strings.Contains(cmd.Use, "match") {
+			cmd.Flags().UintVarP(&matchLocalASN, "local-asn", "l", 0, "Local ASN to match")
+			cmd.Flags().BoolVarP(&matchConfig, "generate-config", "g", false, "Should configuration be generated? (else plaintext)")
 		}
 		rootCmd.AddCommand(cmd)
 	}

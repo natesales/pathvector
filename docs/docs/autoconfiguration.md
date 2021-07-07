@@ -13,6 +13,37 @@ Generated YAML output will be indented 2 spaces by default to fit within the YAM
 ~ ▴ grep ^asn /etc/pathvector.yml
 asn: 34553
 ~ ▴ pathvector match 13335
+  Cloudflare SIX Seattle:
+    asn: 13335
+    neighbors:
+      - 206.81.81.10
+      - 2001:504:16::3417
+
+  Cloudflare NWAX:
+    asn: 13335
+    neighbors:
+      - 198.32.195.95
+      - 2620:124:2000::95
+
+  Cloudflare KCIX:
+    asn: 13335
+    neighbors:
+      - 206.51.7.34
+      - 2001:504:1b:1::34
+
+  Cloudflare Speed-IX:
+    asn: 13335
+    neighbors:
+      - 185.1.95.191
+      - 2001:7f8:b7::a501:3335:1
+```
+
+## Plaintext
+
+```bash
+~ ▴ grep ^asn /etc/pathvector.yml
+asn: 34553
+~ ▴ pathvector match 13335
 SIX Seattle: MTU 1500
   AS34553
   206.81.80.97
@@ -48,37 +79,6 @@ Speed-IX: SPEED-IX
   AS13335
   185.1.95.191
   2001:7f8:b7::a501:3335:1
-```
-
-## Plaintext
-
-```bash
-~ ▴ grep ^asn /etc/pathvector.yml
-asn: 34553
-~ ▴ pathvector match 13335
-  Cloudflare SIX Seattle:
-    asn: 13335
-    neighbors:
-      - 206.81.81.10
-      - 2001:504:16::3417
-
-  Cloudflare NWAX:
-    asn: 13335
-    neighbors:
-      - 198.32.195.95
-      - 2620:124:2000::95
-
-  Cloudflare KCIX:
-    asn: 13335
-    neighbors:
-      - 206.51.7.34
-      - 2001:504:1b:1::34
-
-  Cloudflare Speed-IX:
-    asn: 13335
-    neighbors:
-      - 185.1.95.191
-      - 2001:7f8:b7::a501:3335:1
 ```
 
 ## Arbitrary ASN

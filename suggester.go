@@ -81,13 +81,13 @@ func commonIxs(a uint, b uint) {
 		for _, ixB := range networkB {
 			if ixA.IxlanId == ixB.IxlanId {
 				fmt.Printf(`%s
-    AS%d
-    %s
-    %s
-    
-    AS%d
-    %s
-    %s
+  AS%d
+  %s
+  %s
+  
+  AS%d
+  %s
+  %s
 
 `, ixA.Name, a, ixA.Ipaddr4, ixA.Ipaddr6, b, ixB.Ipaddr4, ixB.Ipaddr6)
 			}

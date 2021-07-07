@@ -11,6 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 // Embedded filesystem
@@ -246,6 +247,28 @@ var (
 			Short: "Show version information",
 			Run: func(cmd *cobra.Command, args []string) {
 				log.Printf("Pathvector %s commit %s date %s\n", version, commit, date)
+			},
+		}, {
+			Use:   "dump",
+			Short: "Dump configuration",
+			Run: func(cmd *cobra.Command, args []string) {
+				// Load the config file from config file
+				log.Debugf("Loading config from %s", configFile)
+				configFile, err := ioutil.ReadFile(configFile)
+				if err != nil {
+					log.Fatal("Reading config file: " + err.Error())
+				}
+				globalConfig, err := loadConfig(configFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				log.Debugln("Finished loading config")
+
+				c, err := yaml.Marshal(&globalConfig)
+				if err != nil {
+					log.Fatal(err)
+				}
+				fmt.Println(string(c))
 			},
 		},
 	}

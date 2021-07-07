@@ -12,6 +12,7 @@ Usage:
 
 Available Commands:
   completion  generate the autocompletion script for the specified shell
+  dump        Dump configuration
   help        Help about any command
   optimizer   Start optimization daemon
   version     Show version information

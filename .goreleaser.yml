@@ -12,6 +12,7 @@ builds:
     goarch:
       - amd64
       - arm64
+      - mips64
 
 changelog:
   sort: asc
@@ -48,7 +49,7 @@ publishers:
   # after binaries and packages are built but before the release step so packages for vendor platforms can be
   # added to the release.
   - name: vendorbuild
-    cmd: vendorbuild.sh
+    cmd: ./vendorbuild.sh
 
   - name: fury.io
     ids:

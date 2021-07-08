@@ -1,0 +1,24 @@
+global:
+  version: "1.0"
+  active: ""
+  debug: false
+  fogportalprofile:
+    fogpip: ""
+    fogpport: ""
+    fogpapiprefix: ""
+    fogpurlscheme: ""
+  dockerconfig:
+    server_uri: ""
+    api_version: ""
+author:
+  name: |
+    Pathvector
+  link: https://pathvector.io
+profiles: {"": {host_ip: 127.0.0.1, host_port: 8443, auth_keys: cm9vdDo=, auth_token: "",
+    local_repo: /software/downloads, api_prefix: /iox/api/v2/hosting/, url_scheme: https,
+    ssh_port: 2222, rsa_key: "", certificate: "", cpu_architecture: "", middleware: {
+      mw_ip: "", mw_port: "", mw_baseuri: "", mw_urlscheme: "", mw_access_token: ""}},
+  default: {host_ip: 127.0.0.1, host_port: 8443, auth_keys: cm9vdDpc, auth_token: "",
+    local_repo: /software/downloads, api_prefix: /iox/api/v2/hosting/, url_scheme: https,
+    ssh_port: 2222, rsa_key: "", certificate: "", cpu_architecture: "", middleware: {
+      mw_ip: "", mw_port: "", mw_baseuri: "", mw_urlscheme: "", mw_access_token: ""}}}

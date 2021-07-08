@@ -1,0 +1,23 @@
+descriptor-schema-version: "2.4"
+
+info:
+  name: Pathvector
+  description: Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
+  version: "4.3.3"
+  author-link: "https://pathvector.io"
+  author-name: "Nate Sales"
+
+app:
+  type: docker
+  cpuarch: x86_64
+  resources:
+    profile: custom
+    cpu: 200
+    memory: 64
+    disk: 2
+  #    network:
+  #      - interface-name: eth0
+
+  startup:
+    rootfs: rootfs.tar
+    target: "/var/pathvector/pathvector"

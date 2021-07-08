@@ -8,10 +8,14 @@ import ImageSwitcher from "../components/ImageSwitcher";
 function HomepageHeader() {
     return (
         <header style={{
-            textAlign: "center"
+            textAlign: "center",
+            marginTop: "10px"
         }}>
             <div className="container">
-                <ImageSwitcher darkImageSrc={"/img/full-white.svg"} lightImageSrc={"/img/full-black.svg"} width={"50%"}/>
+                <ImageSwitcher darkImageSrc={"/img/full-white.svg"} lightImageSrc={"/img/full-black.svg"} width={"500px"}/>
+                <p style={{fontSize: "1.25em"}}>
+                    Pathvector is a declarative BGP routing platform that automates route optimization and control
+                    plane configuration with secure and repeatable routing policy.</p>
                 <div className={styles.buttons}>
                     <Link
                         className="button button--secondary button--lg"

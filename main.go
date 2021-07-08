@@ -60,7 +60,7 @@ var globalConfig *Config
 var (
 	rootCmd = &cobra.Command{
 		Use:   "pathvector",
-		Short: "Pathvector is a declarative routing platform for BGP which automates route optimization and control plane configuration with secure and repeatable routing policies.",
+		Short: "Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.",
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check lockfile
 			if lockFileDirectory != "" {

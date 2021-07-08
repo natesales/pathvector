@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -f "dist/arista.lock" ]; then
+  exit 0
+else
+  touch dist/arista.lock
+fi
+
 rm -rf dist/arista/
 mkdir dist/arista/
 echo "format: 1" > dist/arista/manifest.txt

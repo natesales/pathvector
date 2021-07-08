@@ -32,7 +32,7 @@ export default function Home() {
     return (
         <Layout
             title={`Pathvector | Edge Routing Platform`}
-            description="Description will go into a meta tag in <head />">
+            description="Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.">
             <HomepageHeader/>
             <main>
                 <HomepageFeatures/>

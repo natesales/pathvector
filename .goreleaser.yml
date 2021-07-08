@@ -44,7 +44,7 @@ nfpms:
 
 publishers:
   - name: build-arista
-    cmd: make -f vendorbuild/Makefile.arista
+    cmd: ./vendorbuild/arista.sh
 
   - name: fury.io
     ids:

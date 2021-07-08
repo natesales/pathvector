@@ -12,6 +12,7 @@ builds:
     goarch:
       - amd64
       - arm64
+      - mips64
 
 changelog:
   sort: asc

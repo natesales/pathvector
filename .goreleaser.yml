@@ -54,4 +54,4 @@ publishers:
 
 release:
   extra_files:
-    - glob: arista/pathvector-*-arista-amd64.swix
+    - glob: dist/arista/pathvector-*-arista-amd64.swix

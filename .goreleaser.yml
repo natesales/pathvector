@@ -2,6 +2,7 @@ before:
   hooks:
     - go generate
     - go mod download
+    - rm -f dist/vendor.lock
 
 builds:
   - id: pathvector
@@ -43,8 +44,11 @@ nfpms:
       - bird2
 
 publishers:
-  - name: build-arista
-    cmd: ./vendorbuild/arista.sh
+  # The vendorbuild publisher isn't really a publisher at all. It's a hack to run the vendorbuild.sh script
+  # after binaries and packages are built but before the release step so packages for vendor platforms can be
+  # added to the release.
+  - name: vendorbuild
+    cmd: vendorbuild.sh
 
   - name: fury.io
     ids:

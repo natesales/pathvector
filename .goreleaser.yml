@@ -2,7 +2,6 @@ before:
   hooks:
     - go generate
     - go mod download
-    - arista/build-wrapper.sh
 
 builds:
   - id: pathvector
@@ -44,6 +43,9 @@ nfpms:
       - bird2
 
 publishers:
+  - name: build-arista
+    cmd: make -f vendorbuild/Makefile.arista
+
   - name: fury.io
     ids:
       - pathvector
@@ -52,4 +54,4 @@ publishers:
 
 release:
   extra_files:
-    - glob: arista/pathvector-arista-bundle-*.swix
+    - glob: arista/pathvector-*-arista-amd64.swix

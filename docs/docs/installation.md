@@ -39,9 +39,21 @@ Not Supported (MIPS1004Kc): ER-X, ER-X-SFP, ER-10X
 Pathvector can run on Arista switches by installing a SWIX (Switch Extension) file from [releases](https://github.com/natesales/pathvector/releases). First, copy the `pathvector-*.swix` file to `/mnt/flash/` on your switch.
 
 From the EOS CLI:
+
 1. Copy the extension to extensions: `copy flash:pathvector-*.swix extensions:`
 2. Install the extension: `extension pathvector-bundle.swix`
 3. Mark the extension to be installed on boot: `copy installed-extensions boot-extensions`
 4. Add the pathvector alias: `alias pathvector "bash pathvector"`
 5. Add Pathvector to scheduler (optional): `schedule pathvector interval 720 max-log-files 1 command pathvector -c /mnt/flash/pathvector.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
 6. Save changes: `wr mem`
+
+## Building from source
+
+Pathvector can be easily built from source for some, but not all, of the [many supported Go platforms](https://github.com/golang/go/blob/master/src/go/build/syslist.go).
+
+For example, to build Pathvector for M1 Macs:
+
+```bash
+git clone https://github.com/natesales/pathvector
+GOOS=darwin GOARCH=arm64 go build
+```

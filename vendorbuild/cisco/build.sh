@@ -1,9 +1,10 @@
 #!/bin/bash
 
-cd vendorbuild/cisco/ || echo "Invalid path, must be in pathvector root"
+cd vendorbuild/cisco/ || { echo "Invalid path, must be in pathvector root"; exit 1; }
+echo "Building Cisco package..."
 
 # Remove old builds
-rm -f *.tar
+rm -f ./*.tar
 
 # Download ioxclient if it doesn't already exist
 if [ ! -f ioxclient ]; then

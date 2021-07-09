@@ -2,7 +2,6 @@ before:
   hooks:
     - go generate
     - go mod download
-    - rm -f dist/vendor.lock
 
 builds:
   - id: pathvector
@@ -28,7 +27,7 @@ nfpms:
     vendor: Nate Sales
     homepage: https://pathvector.io
     maintainer: Nate Sales <nate@natesales.net>
-    description: Pathvector is a declarative routing control-plane platform for BGP with robust filtering and route optimization
+    description: Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
     license: GNU GPL-3.0
     section: utils
     priority: extra
@@ -59,4 +58,6 @@ publishers:
 
 release:
   extra_files:
-    - glob: dist/arista/pathvector-*-arista-amd64.swix
+    - glob: dist/pathvector-*arista*
+    - glob: dist/pathvector-*juniper*
+    - glob: dist/pathvector-*cisco*

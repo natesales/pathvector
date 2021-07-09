@@ -100,10 +100,9 @@ func startProbe(sourceMap map[string][]string) error {
 							// If the array is full to probeCacheSize...
 							if exitOnCacheFull {
 								return nil
-							} else {
-								// Chop off the first element and append the result
-								globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName][1:], result)
 							}
+							// Chop off the first element and append the result
+							globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName][1:], result)
 						}
 					}
 				}

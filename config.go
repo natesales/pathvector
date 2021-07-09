@@ -42,6 +42,8 @@ type Peer struct {
 	RemovePrivateASNs *bool     `yaml:"remove-private-asns" description:"Should private ASNs be removed from path before exporting?" default:"true"`
 	MPUnicast46       *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 	AllowLocalAS      *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
+	AddPathTx         *bool     `yaml:"add-path-tx" description:"Enable BGP additional paths on export?" default:"false"`
+	AddPathRx         *bool     `yaml:"add-path-rx" description:"Enable BGP additional paths on import?" default:"false"`
 
 	ImportCommunities   *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities   *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`

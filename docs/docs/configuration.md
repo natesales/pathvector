@@ -64,6 +64,8 @@ sidebar_position: 3
 | remove-private-asns | bool | true |  | Should private ASNs be removed from path before exporting? |
 | mp-unicast-46 | bool | false |  | Should this peer be configured with multiprotocol IPv4 and IPv6 unicast? |
 | allow-local-as | bool | false |  | Should routes originated by the local ASN be accepted? |
+| add-path-tx | bool | false |  | Enable BGP additional paths on export? |
+| add-path-rx | bool | false |  | Enable BGP additional paths on import? |
 | import-communities | []string |  |  | List of communities to add to all imported routes |
 | export-communities | []string |  |  | List of communities to add to all exported routes |
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |

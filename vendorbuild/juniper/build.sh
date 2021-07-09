@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Temporary exit to not build Juniper package until it can be signed
+exit 0
+
 # Clone jetez if it doesn't already exist
 if [ ! -d ../vendorbuild/juniper/jetez ]; then
   git clone https://github.com/Juniper/jetez ../vendorbuild/juniper/jetez

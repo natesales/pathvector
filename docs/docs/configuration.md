@@ -70,6 +70,7 @@ sidebar_position: 3
 | export-communities | []string |  |  | List of communities to add to all exported routes |
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |
 | remove-communities | []string |  |  | List of communities to remove before from routes announced by this peer |
+| remove-all-communities | int |  |  | Remove all communities beginning with this value |
 | as-set | string |  |  | Peer's as-set for filtering |
 | import-limit4 | int | 1000000 |  | Maximum number of IPv4 prefixes to import |
 | import-limit6 | int | 200000 |  | Maximum number of IPv6 prefixes to import |

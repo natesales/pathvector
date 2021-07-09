@@ -45,10 +45,11 @@ type Peer struct {
 	AddPathTx         *bool     `yaml:"add-path-tx" description:"Enable BGP additional paths on export?" default:"false"`
 	AddPathRx         *bool     `yaml:"add-path-rx" description:"Enable BGP additional paths on import?" default:"false"`
 
-	ImportCommunities   *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
-	ExportCommunities   *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
-	AnnounceCommunities *[]string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer" default:"-"`
-	RemoveCommunities   *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
+	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
+	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
+	AnnounceCommunities  *[]string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer" default:"-"`
+	RemoveCommunities    *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
+	RemoveAllCommunities *int      `yaml:"remove-all-communities" description:"Remove all standard and large communities beginning with this value" default:"-"`
 
 	// Filtering
 	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`

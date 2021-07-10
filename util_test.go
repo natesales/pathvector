@@ -99,3 +99,16 @@ func TestMoveFile(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestPrintTable(t *testing.T) {
+	printTable([]string{"foo", "bar", "baz"}, [][]string{{"foo", "bar", "baz"}, {"foo", "bar", "baz"}})
+}
+
+func TestStrDeref(t *testing.T) {
+	if out := strDeref(nil); out != "" {
+		t.Errorf("strDeref failed. expected '' got '%s'", out)
+	}
+	if out := strDeref(stringPtr("foo")); out != "foo" {
+		t.Errorf("strDeref failed. expected 'foo' got '%s'", out)
+	}
+}

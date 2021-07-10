@@ -56,9 +56,12 @@ var funcMap = template.FuncMap{
 		return arr == nil || len(*arr) == 0
 	},
 
-	"UnixTimestamp": func() string {
-		// Get current UNIX timestamp
-		return strconv.Itoa(int(time.Now().Unix()))
+	"Timestamp": func(format string) string {
+		// Get current timestamp
+		if format == "unix" {
+			return strconv.Itoa(int(time.Now().Unix()))
+		}
+		return time.Now().String()
 	},
 
 	"MakeSlice": func(args ...interface{}) []interface{} {

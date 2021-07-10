@@ -2,6 +2,6 @@ package main
 
 import "testing"
 
-func TestSuggesterIXs(t *testing.T) {
+func TestCommonIXs(t *testing.T) {
 	commonIxs(34553, 13335, false)
 }

@@ -17,3 +17,6 @@ cover.*
 # Vendor build
 vendorbuild/juniper/*.pem
 vendorbuild/cisco/ioxclient
+
+# Testing
+test-cache/

@@ -119,7 +119,7 @@
                         {{ $ip }}<br>
                     {{ end }}
                 </td>
-                <td>{{ if BoolDeref $peer.Multihop }}multihop{{ end }} {{ if BoolDeref $peer.Disabled }}disabled{{ end }} {{ if BoolDeref $peer.Passive }}passive{{ end }}</td>
+                <td>{{ StrSliceJoin $peer.BooleanOptions }}</td>
             </tr>
         {{- end }}
         </tbody>

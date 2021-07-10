@@ -107,6 +107,20 @@ var funcMap = template.FuncMap{
 		return map[string]string{}
 	},
 
+	"StrSliceDeref": func(s *[]string) []string {
+		if s != nil {
+			return *s
+		}
+		return []string{}
+	},
+
+	"StrSliceJoin": func(s *[]string) string {
+		if s != nil {
+			return strings.Join(*s, ", ")
+		}
+		return ""
+	},
+
 	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
 	"UniqueProtocolName": func(s *string, af string) string {
 		protoName := fmt.Sprintf("%sv%s", *s, af)

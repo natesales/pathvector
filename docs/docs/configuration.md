@@ -14,7 +14,7 @@ sidebar_position: 3
 | irr-server | string | rr.ntt.net |  | Internet routing registry server |
 | rtr-server | string | rtr.rpki.cloudflare.com:8282 |  | RPKI-to-router server |
 | keep-filtered | bool | false |  | Should filtered routes be kept in memory? |
-| kernel-learn | bool | false |  | Inject Kernel routes into BIRD wich have been injected into the kernel from other deamons e.g FRR OSPFd |
+| kernel-learn | bool | false |  | Should routes from the kernel be learned into BIRD? |
 | merge-paths | bool | false |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | source4 | string |  |  | Source IPv4 address |
 | source6 | string |  |  | Source IPv6 address |
@@ -26,19 +26,6 @@ sidebar_position: 3
 | vrrp | []VRRPInstance |  |  | List of VRRP instances |
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
-| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
-| probe-count | int | 5 |  | Number of pings to send in each run |
-| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
-| cache-size | int | 15 |  | Number of probe results to store per peer |
-| alert-script | string |  |  | Script to call on optimizer event |
 
 ## Peer
 | Option | Type | Default | Validation | Description |
@@ -70,7 +57,7 @@ sidebar_position: 3
 | export-communities | []string |  |  | List of communities to add to all exported routes |
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |
 | remove-communities | []string |  |  | List of communities to remove before from routes announced by this peer |
-| remove-all-communities | int |  |  | Remove all communities beginning with this value |
+| remove-all-communities | int |  |  | Remove all standard and large communities beginning with this value |
 | as-set | string |  |  | Peer's as-set for filtering |
 | import-limit4 | int | 1000000 |  | Maximum number of IPv4 prefixes to import |
 | import-limit6 | int | 200000 |  | Maximum number of IPv6 prefixes to import |
@@ -116,4 +103,17 @@ sidebar_position: 3
 | reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
+
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
+| alert-script | string |  |  | Script to call on optimizer event |
 

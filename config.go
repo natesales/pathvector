@@ -102,6 +102,7 @@ type Peer struct {
 	AnnounceLargeCommunities    *[]string `yaml:"-" description:"-" default:"-"`
 	RemoveStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
 	RemoveLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
+	BooleanOptions              *[]string `yaml:"-" description:"-" default:"-"`
 }
 
 // VRRPInstance stores a single VRRP instance
@@ -205,10 +206,12 @@ func loadConfig(configBlob []byte) (*Config, error) {
 			log.Fatalf("[%s] has no neighbors defined", peerName)
 		}
 
+		peerData.BooleanOptions = &[]string{}
+
 		// Assign values from template
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
-			if template == nil || &template == nil {
+			if template == nil {
 				log.Fatalf("Template %s not found", *peerData.Template)
 			}
 			templateValue := reflect.ValueOf(*template)
@@ -223,7 +226,6 @@ func loadConfig(configBlob []byte) (*Config, error) {
 					peerHasValueConfigured := pVal.IsValid()
 					tValue := templateValue.Field(i)
 					templateHasValueConfigured := !tValue.IsNil()
-
 					if templateHasValueConfigured && !peerHasValueConfigured {
 						// Use the template's value
 						peerFieldValue.Set(templateValue.Field(i))
@@ -270,6 +272,11 @@ func loadConfig(configBlob []byte) (*Config, error) {
 						// Ignore structs and slices
 					default:
 						log.Fatalf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
+					}
+				} else {
+					// Add boolean values to the peer's config
+					if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
+						*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
 					}
 				}
 			} else {

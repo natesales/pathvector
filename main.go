@@ -52,6 +52,9 @@ var (
 	// Match
 	matchConfig   bool
 	matchLocalASN uint
+
+	// Dump
+	pretty bool
 )
 
 var globalConfig *Config
@@ -270,11 +273,29 @@ var (
 				}
 				log.Debugln("Finished loading config")
 
-				c, err := yaml.Marshal(&globalConfig)
-				if err != nil {
-					log.Fatal(err)
+				if !pretty {
+					c, err := yaml.Marshal(&globalConfig)
+					if err != nil {
+						log.Fatal(err)
+					}
+					fmt.Println(string(c))
+				} else {
+					var data [][]string
+					for peerName, peerData := range globalConfig.Peers {
+						data = append(data, []string{
+							peerName,
+							fmt.Sprintf("%d", *peerData.ASN),
+							fmt.Sprintf("%d", *peerData.LocalPref),
+							strDeref(peerData.ASSet),
+							fmt.Sprintf("%d", *peerData.Prepends),
+							fmt.Sprintf("%s", *peerData.NeighborIPs),
+							strings.Join(*peerData.BooleanOptions, ", "),
+							strDeref(peerData.Template),
+						})
+					}
+
+					printTable([]string{"Name", "ASN", "Local Pref", "AS Set", "Prepends", "Neighbors", "Options", "Template"}, data)
 				}
-				fmt.Println(string(c))
 			},
 		}, {
 			Use:   "match ASN",
@@ -337,6 +358,8 @@ func init() {
 		} else if strings.Contains(cmd.Use, "match") {
 			cmd.Flags().UintVarP(&matchLocalASN, "local-asn", "l", 0, "Local ASN to match")
 			cmd.Flags().BoolVarP(&matchConfig, "generate-config", "g", false, "Should configuration be generated? (else plaintext)")
+		} else if cmd.Use == "dump" {
+			cmd.Flags().BoolVar(&pretty, "pretty", false, "Use nicely formatted output")
 		}
 		rootCmd.AddCommand(cmd)
 	}

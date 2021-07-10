@@ -54,7 +54,7 @@ var (
 	matchLocalASN uint
 
 	// Dump
-	pretty bool
+	dumpYaml bool
 )
 
 var globalConfig *Config
@@ -273,7 +273,7 @@ var (
 				}
 				log.Debugln("Finished loading config")
 
-				if !pretty {
+				if dumpYaml {
 					c, err := yaml.Marshal(&globalConfig)
 					if err != nil {
 						log.Fatal(err)
@@ -286,15 +286,14 @@ var (
 							peerName,
 							fmt.Sprintf("%d", *peerData.ASN),
 							fmt.Sprintf("%d", *peerData.LocalPref),
-							strDeref(peerData.ASSet),
 							fmt.Sprintf("%d", *peerData.Prepends),
-							fmt.Sprintf("%s", *peerData.NeighborIPs),
-							strings.Join(*peerData.BooleanOptions, ", "),
+							strings.Join(*peerData.NeighborIPs, ", "),
 							strDeref(peerData.Template),
+							strings.Join(*peerData.BooleanOptions, ", "),
 						})
 					}
 
-					printTable([]string{"Name", "ASN", "Local Pref", "AS Set", "Prepends", "Neighbors", "Options", "Template"}, data)
+					printTable([]string{"Name", "ASN", "Local Pref", "Prepends", "Neighbors", "Template", "Options"}, data)
 				}
 			},
 		}, {
@@ -359,7 +358,7 @@ func init() {
 			cmd.Flags().UintVarP(&matchLocalASN, "local-asn", "l", 0, "Local ASN to match")
 			cmd.Flags().BoolVarP(&matchConfig, "generate-config", "g", false, "Should configuration be generated? (else plaintext)")
 		} else if cmd.Use == "dump" {
-			cmd.Flags().BoolVar(&pretty, "pretty", false, "Use nicely formatted output")
+			cmd.Flags().BoolVar(&dumpYaml, "yaml", false, "use YAML output (else use formatted table output)")
 		}
 		rootCmd.AddCommand(cmd)
 	}

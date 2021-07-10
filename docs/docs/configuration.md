@@ -27,6 +27,15 @@ sidebar_position: 3
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 
+## VRRPInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+
 ## Augments
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -107,13 +116,4 @@ sidebar_position: 3
 | pre-export-final | string |  |  | Configuration to add immediately before the final accept/reject on export |
 | probe-sources | []string |  |  | Optimizer probe source addresses |
 | optimize-inbound | bool | false |  | Should the optimizer modify inbound policy? |
-
-## VRRPInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
 

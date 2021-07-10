@@ -32,7 +32,7 @@ var (
 var (
 	// Global
 	configFile            string
-	lockFileDirectory     string
+	lockFile              string
 	verbose               bool
 	dryRun                bool
 	noConfigure           bool
@@ -66,13 +66,13 @@ var (
 		Short: "Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.",
 		Run: func(cmd *cobra.Command, args []string) {
 			// Check lockfile
-			if lockFileDirectory != "" {
-				if _, err := os.Stat(lockFileDirectory); err == nil {
+			if lockFile != "" {
+				if _, err := os.Stat(lockFile); err == nil {
 					log.Fatal("Lockfile exists, exiting")
 				} else if os.IsNotExist(err) {
 					// If the lockfile doesn't exist, create it
 					log.Debugln("Lockfile doesn't exist, creating one")
-					if err := ioutil.WriteFile(lockFileDirectory, []byte(""), 0755); err != nil {
+					if err := ioutil.WriteFile(lockFile, []byte(""), 0755); err != nil {
 						log.Fatalf("Writing lockfile: %v", err)
 					}
 				} else {
@@ -204,8 +204,8 @@ var (
 			} // end dry run check
 
 			// Delete lockfile
-			if lockFileDirectory != "" {
-				if err := os.Remove(lockFileDirectory); err != nil {
+			if lockFile != "" {
+				if err := os.Remove(lockFile); err != nil {
 					log.Fatalf("Removing lockfile: %v", err)
 				}
 			}
@@ -337,7 +337,7 @@ func init() {
 		}
 	})
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "/etc/pathvector.yml", "Configuration file in YAML, TOML, or JSON format")
-	rootCmd.PersistentFlags().StringVar(&lockFileDirectory, "lock-file-directory", "", "Lock file directory (lockfile check disabled if empty")
+	rootCmd.PersistentFlags().StringVar(&lockFile, "lock", "", "Lock file (lockfile check disabled if empty")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose log messages")
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Don't modify configuration")
 	rootCmd.PersistentFlags().BoolVarP(&noConfigure, "no-configure", "n", false, "Don't configure BIRD")

@@ -28,7 +28,7 @@ Flags:
   -h, --help                           help for pathvector
       --irr-query-timeout uint         IRR query timeout in seconds (default 30)
       --keepalived-config string       Configuration file for keepalived (default "/etc/keepalived.conf")
-      --lock-file-directory string     Lock file directory (lockfile check disabled if empty
+      --lock string                    Lock file (lockfile check disabled if empty
   -n, --no-configure                   Don't configure BIRD
       --peeringdb-query-timeout uint   PeeringDB query timeout in seconds (default 10)
   -v, --verbose                        Show verbose log messages

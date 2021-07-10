@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -30,7 +31,9 @@ func TestMainGenerate(t *testing.T) {
 		}...)
 		t.Logf("running generate integration with args %v", args)
 		rootCmd.SetArgs(args)
-		rootCmd.Execute()
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -49,7 +52,9 @@ func TestMainOptimizer(t *testing.T) {
 		rootCmd.SetArgs(append(args, []string{
 			"--config", testFile,
 		}...))
-		rootCmd.Execute()
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 
 		args = append(args, []string{
 			"optimizer",
@@ -59,7 +64,9 @@ func TestMainOptimizer(t *testing.T) {
 		}...)
 		t.Logf("running probe integration with args %v", args)
 		rootCmd.SetArgs(args)
-		rootCmd.Execute()
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 
 		// Check if local pref is lowered
 		checkFile, err := ioutil.ReadFile("test-cache/AS65510_EXAMPLE.conf")
@@ -95,7 +102,9 @@ func TestMainDumpTable(t *testing.T) {
 		}...)
 		t.Logf("running dump integration with args %v", args)
 		rootCmd.SetArgs(args)
-		rootCmd.Execute()
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -123,6 +132,50 @@ func TestMainDumpYAML(t *testing.T) {
 		}...)
 		t.Logf("running dump integration with args %v", args)
 		rootCmd.SetArgs(args)
-		rootCmd.Execute()
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestMainVersion(t *testing.T) {
+	rootCmd.SetArgs([]string{
+		"version",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMainDocs(t *testing.T) {
+	rootCmd.SetArgs([]string{
+		"docs",
+	})
+	if err := rootCmd.Execute(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMainMatch(t *testing.T) {
+	baseArgs := []string{
+		"match",
+		"--verbose",
+	}
+
+	testCases := []struct {
+		asnA uint
+		asnB uint
+	}{
+		{34553, 13335},
+		{54113, 13335},
+	}
+	for _, tc := range testCases {
+		rootCmd.SetArgs(append(baseArgs, []string{
+			"-l", fmt.Sprintf("%d", tc.asnA),
+			fmt.Sprintf("%d", tc.asnB),
+		}...))
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 	}
 }

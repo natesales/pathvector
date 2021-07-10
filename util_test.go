@@ -49,9 +49,21 @@ func TestCategorizeCommunity(t *testing.T) {
 		shouldError    bool
 	}{
 		{"34553,0", "standard", false},
+		{"1,1", "standard", false},
 		{"4242424242:4242424242:0", "large", false},
+		{"1:1:0", "large", false},
 		{":", "", true},
 		{"4242424242,0", "", true},
+		{"0,4242424242", "", true},
+		{"foo,1", "", true},
+		{"1,bar", "", true},
+		{"", "", true},
+		{":1:1", "", true},
+		{"1::1", "", true},
+		{"1:1:", "", true},
+		{"-1:1:1", "", true},
+		{"1:-1:1", "", true},
+		{"1:1:-1", "", true},
 	}
 	for _, tc := range testCases {
 		cType := categorizeCommunity(tc.input)

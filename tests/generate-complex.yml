@@ -9,6 +9,8 @@ prefixes:
 peers:
   Example:
     asn: 65510
+    allow-local-as: true
+    add-path-tx: true
     import-communities:
       - 65530,1
       - 65530:65530:1

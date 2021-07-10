@@ -71,3 +71,58 @@ func TestMainOptimizer(t *testing.T) {
 		}
 	}
 }
+
+func TestMainDumpTable(t *testing.T) {
+	// Make temporary cache directory
+	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
+		t.Error(err)
+	}
+
+	args := []string{
+		"dump",
+		"--verbose",
+		"--dry-run",
+		"--cache-directory", "test-cache",
+		"--web-ui-file", "test-cache/ui.html",
+	}
+	files, err := filepath.Glob("tests/generate-*.yml")
+	if err != nil {
+		t.Error(err)
+	}
+	for _, testFile := range files {
+		args = append(args, []string{
+			"--config", testFile,
+		}...)
+		t.Logf("running dump integration with args %v", args)
+		rootCmd.SetArgs(args)
+		rootCmd.Execute()
+	}
+}
+
+func TestMainDumpYAML(t *testing.T) {
+	// Make temporary cache directory
+	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
+		t.Error(err)
+	}
+
+	args := []string{
+		"dump",
+		"--yaml",
+		"--verbose",
+		"--dry-run",
+		"--cache-directory", "test-cache",
+		"--web-ui-file", "test-cache/ui.html",
+	}
+	files, err := filepath.Glob("tests/generate-*.yml")
+	if err != nil {
+		t.Error(err)
+	}
+	for _, testFile := range files {
+		args = append(args, []string{
+			"--config", testFile,
+		}...)
+		t.Logf("running dump integration with args %v", args)
+		rootCmd.SetArgs(args)
+		rootCmd.Execute()
+	}
+}

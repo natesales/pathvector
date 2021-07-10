@@ -3,7 +3,8 @@ import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
 import styles from './index.module.css';
 import HomepageFeatures from '../components/HomepageFeatures';
-import ImageSwitcher from "../components/ImageSwitcher";
+import ThemedImage from '@theme/ThemedImage';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 
 function HomepageHeader() {
     return (
@@ -12,7 +13,15 @@ function HomepageHeader() {
             marginTop: "10px"
         }}>
             <div className="container">
-                <ImageSwitcher darkImageSrc={"/img/full-white.svg"} lightImageSrc={"/img/full-black.svg"} width={"500px"}/>
+                <ThemedImage
+                    alt="Pathvector Logo"
+                    sources={{
+                        light: useBaseUrl("/img/full-black.svg"),
+                        dark: useBaseUrl("/img/full-white.svg"),
+                    }}
+                    width={"500px"}
+                />
+
                 <p style={{fontSize: "1.25em"}}>
                     Pathvector is a declarative BGP routing platform that automates route optimization and control
                     plane configuration with secure and repeatable routing policy.</p>

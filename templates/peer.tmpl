@@ -57,6 +57,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
 
+            {{ if StrDeref $peer.ImportNextHop }}bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};{{ end }}
+
             {{ range $i, $pattern := StringSliceIter $peer.RemoveStandardCommunities }}
             bgp_community.delete([({{ $pattern }})]);
             {{ end }}
@@ -107,6 +109,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}
+
+            {{ if StrDeref $peer.ExportNextHop }}bgp_next_hop = {{ StrDeref $peer.ExportNextHop }};{{ end }}
 
             {{ if BoolDeref $peer.AnnounceOriginated }}
             accept_local();

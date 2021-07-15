@@ -70,7 +70,7 @@ func runPeeringDbQuery(peerData *Peer) {
 
 	// Set import limits
 	if *peerData.AutoImportLimits {
-		*peerData.ImportLimit6 = pDbData.ImportLimit4
+		*peerData.ImportLimit4 = pDbData.ImportLimit4
 		*peerData.ImportLimit6 = pDbData.ImportLimit6
 
 		if pDbData.ImportLimit4 == 0 {

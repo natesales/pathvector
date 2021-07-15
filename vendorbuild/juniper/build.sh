@@ -9,7 +9,9 @@ if [ ! -d ../vendorbuild/juniper/jetez ]; then
 fi
 
 # Link xorrisofs
-sudo ln -s "$(which xorrisofs)" /usr/bin/mkisofs
+if [ ! -e /usr/bin/mkisofs ]; then
+  sudo ln -s "$(which xorrisofs)" /usr/bin/mkisofs
+fi
 
 # Copy binary
 cp pathvector_freebsd_amd64/pathvector ../vendorbuild/juniper/src

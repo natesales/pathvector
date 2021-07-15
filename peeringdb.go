@@ -62,10 +62,10 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 }
 
 // runPeeringDbQuery updates peer values from PeeringDB
-func runPeeringDbQuery(peerData *Peer) error {
+func runPeeringDbQuery(peerData *Peer) {
 	pDbData, err := getPeeringDbData(*peerData.ASN)
 	if err != nil {
-		return fmt.Errorf("unable to get PeeringDB data: %+v", err)
+		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}
 
 	// Set import limits
@@ -74,26 +74,23 @@ func runPeeringDbQuery(peerData *Peer) error {
 		*peerData.ImportLimit6 = pDbData.ImportLimit6
 
 		if pDbData.ImportLimit4 == 0 {
-			return fmt.Errorf("peer has an IPv4 import limit of zero from PeeringDB")
+			log.Warnf("peer AS%d has an IPv4 import limit of zero from PeeringDB", *peerData.ASN)
 		}
 		if pDbData.ImportLimit6 == 0 {
-			return fmt.Errorf("peer has an IPv6 import limit of zero from PeeringDB")
+			log.Warnf("peer AS%d has an IPv6 import limit of zero from PeeringDB", *peerData.ASN)
 		}
 	}
 
 	// Set as-set if auto-as-set is enabled and there isn't a manual AS set defined
 	if *peerData.AutoASSet && peerData.ASSet == nil {
 		if pDbData.ASSet == "" {
-			return fmt.Errorf("peer doesn't have an as-set in PeeringDB")
-			// TODO: Exit or skip this peer?
+			log.Fatalf("peer AS%d doesn't have an as-set in PeeringDB", *peerData.ASN)
 		}
 
 		// Used to get address of string
 		asSetOutput := sanitizeASSet(pDbData.ASSet)
 		peerData.ASSet = &asSetOutput
 	}
-
-	return nil // nil error
 }
 
 // sanitizeASSet removes an IRRDB prefix from an AS set and picks the first one if there are multiple

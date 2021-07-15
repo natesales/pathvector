@@ -149,9 +149,7 @@ var (
 				if *peerData.AutoImportLimits || *peerData.AutoASSet {
 					log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-					if err := runPeeringDbQuery(peerData); err != nil {
-						log.Debugf("[%s] %v", peerName, err)
-					}
+					runPeeringDbQuery(peerData)
 				} // end peeringdb query enabled
 
 				// Build IRR prefix sets

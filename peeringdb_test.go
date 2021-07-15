@@ -67,31 +67,20 @@ func boolPtr(b bool) *bool {
 
 func TestPeeringDbQueryAndModify(t *testing.T) {
 	testCases := []struct {
-		asn         int
-		auto        bool
-		shouldError bool
+		asn  int
+		auto bool
 	}{
-		{112, true, false},
-		{112, false, false},
+		{112, true},
+		{112, false},
 	}
 	for _, tc := range testCases {
-		err := runPeeringDbQuery(&Peer{
+		runPeeringDbQuery(&Peer{
 			ASN:              intPtr(tc.asn),
 			AutoImportLimits: boolPtr(tc.auto),
 			AutoASSet:        boolPtr(tc.auto),
 			ImportLimit4:     intPtr(0),
 			ImportLimit6:     intPtr(0),
 		})
-
-		// If it errored but shouldn't have
-		if err != nil && !tc.shouldError {
-			t.Error(err)
-		}
-
-		// If it didn't error but should have
-		if tc.shouldError && err == nil {
-			t.Errorf("asn %d should have errored but didnt", tc.asn)
-		}
 	}
 }
 

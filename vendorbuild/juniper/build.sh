@@ -31,4 +31,6 @@ sudo rm -rf /usr/bin/mkisofs
 rm -rf ../vendorbuild/juniper/src/pathvector
 
 # Rename file
-mv pathvector*tgz pathvector-"$version"-juniper-amd64.tgz
+if [ ! -e pathvector-"$version"-juniper-amd64.tgz ]; then
+  mv pathvector*tgz pathvector-"$version"-juniper-amd64.tgz
+fi

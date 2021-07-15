@@ -282,7 +282,7 @@ func loadConfig(configBlob []byte) (*Config, error) {
 					}
 				}
 			} else {
-				log.Debugf("[%s] skipping field %s with ingored default (-)", peerName, fieldName)
+				log.Debugf("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
 	}

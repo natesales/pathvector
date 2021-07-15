@@ -24,6 +24,16 @@ jobs:
       - name: Move nfpm to /usr/bin/
         run: sudo mv bin/nfpm /usr/bin/nfpm
 
+      - run: 'echo $JUNIPER_KEY" > vendorbuild/juniper/key.pem'
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.JUNIPER_KEY }}
+
+      - run: 'echo $JUNIPER_CERT" > vendorbuild/juniper/cert.pem'
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.JUNIPER_CERT }}
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:

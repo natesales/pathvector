@@ -5,4 +5,4 @@ arch: "x86"
 abi: "64"
 files:
   - source: pathvector
-    destination: /var/db/scripts/pathvector/pathvector
+    destination: /var/db/scripts/jet/pathvector

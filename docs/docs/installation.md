@@ -36,16 +36,29 @@ Not Supported (MIPS1004Kc): ER-X, ER-X-SFP, ER-10X
 
 ## Arista EOS
 
-Pathvector can run on Arista switches by installing a SWIX (Switch Extension) file from [releases](https://github.com/natesales/pathvector/releases). First, copy the `pathvector-*.swix` file to `/mnt/flash/` on your switch.
+Pathvector can run on Arista switches by installing a SWIX (Switch Extension) file from [releases](https://github.com/natesales/pathvector/releases). First, copy the `pathvector-arista.swix` file to `/mnt/flash/` on your switch.
 
 From the EOS CLI:
 
-1. Copy the extension to extensions: `copy flash:pathvector-*.swix extensions:`
-2. Install the extension: `extension pathvector-bundle.swix`
+1. Copy the extension to extensions: `copy flash:pathvector-arista.swix extensions:`
+2. Install the extension: `extension pathvector-arista.swix`
 3. Mark the extension to be installed on boot: `copy installed-extensions boot-extensions`
 4. Add the pathvector alias: `alias pathvector "bash pathvector"`
 5. Add Pathvector to scheduler (optional): `schedule pathvector interval 720 max-log-files 1 command pathvector -c /mnt/flash/pathvector.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
 6. Save changes: `wr mem`
+
+## Juniper JunOS
+
+Pathvector can run on Juniper devices by installing a signed JunOS extension package. First, download the Pathvector Juniper release, either to your local machine and SCP it over to the Juniper router/switch, or pull it directly in the `request system software` command by replacing the filename with the URL to the file.
+
+```shell
+junos# set system extensions providers pathvector license-type customer deployment-scope commercial
+junos> request system software add pathvector-juniper.tgz
+```
+
+## Cisco IOx
+
+Pathvector can run on IOx compatible Cisco devices by installing a IOx package release, or directly to the device with ioxclient. See https://developer.cisco.com/docs/iox/#!app-management/application-management for more information. 
 
 ## Building from source
 

@@ -24,15 +24,14 @@ jobs:
       - name: Move nfpm to /usr/bin/
         run: sudo mv bin/nfpm /usr/bin/nfpm
 
-      - run: 'echo "$JUNIPER_KEY" | base64 -d > vendorbuild/juniper/key.pem'
+      - name: Store signing files
+        run: |
+          echo "$JUNIPER_KEY" | base64 -d > vendorbuild/juniper/key.pem
+          echo "$JUNIPER_CERT" | base64 -d > vendorbuild/juniper/cert.pem
         shell: bash
         env:
-          SSH_KEY: ${{ secrets.JUNIPER_KEY }}
-
-      - run: 'echo "$JUNIPER_CERT" | base64 -d > vendorbuild/juniper/cert.pem'
-        shell: bash
-        env:
-          SSH_KEY: ${{ secrets.JUNIPER_CERT }}
+          JUNIPER_KEY: ${{ secrets.JUNIPER_KEY }}
+          JUNIPER_CERT: ${{ secrets.JUNIPER_CERT }}
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2

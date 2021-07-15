@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo "format: 1" > manifest.txt
 echo "primaryRpm: $(ls pathvector*linux-amd64.rpm)" >> manifest.txt
 for f in pathvector*linux-amd64.rpm; do echo "$f-sha1: $(sha1sum $f | cut -d " " -f 1)"; done >> manifest.txt

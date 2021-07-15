@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Download ioxclient if it doesn't already exist
 if [ ! -f ../vendorbuild/cisco/ioxclient ]; then
   wget https://pubhub.devnetcloud.com/media/iox/docs/artifacts/ioxclient/ioxclient-v1.13.0.0/ioxclient_1.13.0.0_linux_amd64.tar.gz

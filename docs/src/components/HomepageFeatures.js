@@ -28,7 +28,7 @@ const FeatureList = [
         Svg: require('../../static/img/undraw_code.svg').default,
         description: (
             <>
-                Create templates and code snippets to avoid duplicate configuration. Write a policy one and reuse it as
+                Create templates and code snippets to avoid duplicate configuration. Write a policy once and reuse it as
                 many times as you like.
             </>
         ),

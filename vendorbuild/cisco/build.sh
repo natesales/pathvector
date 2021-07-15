@@ -14,6 +14,7 @@ sed "s/pathvector:version/$version/" ../vendorbuild/cisco/package-template.yaml 
 
 # Build docker image
 cp ../vendorbuild/cisco/ioxclientcfg.yaml ~/.ioxclientcfg.yaml
+docker build -t pathvector-iox:$version . -f ../vendorbuild/cisco/Dockerfile
 ../vendorbuild/cisco/ioxclient docker package pathvector-iox:$version .
 rm ~/.ioxclientcfg.yaml
 

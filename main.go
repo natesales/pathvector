@@ -55,6 +55,11 @@ var (
 
 	// Dump
 	dumpYaml bool
+
+	// Portal update
+	hostname   string
+	portalHost string
+	portalKey  string
 )
 
 var globalConfig *Config
@@ -324,6 +329,26 @@ var (
 
 				commonIxs(matchLocalASN, uint(peerASN), matchConfig)
 			},
+		}, {
+			Use:   "update-portal",
+			Short: "Update peering-portal with local sessions",
+			Run: func(cmd *cobra.Command, args []string) {
+				// Load the config file from config file
+				log.Debugf("Loading config from %s", configFile)
+				configFile, err := ioutil.ReadFile(configFile)
+				if err != nil {
+					log.Fatal("Reading config file: " + err.Error())
+				}
+				globalConfig, err := loadConfig(configFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+				log.Debugln("Finished loading config")
+
+				if err := portalRecord(portalHost, portalKey, hostname, globalConfig.Peers); err != nil {
+					log.Fatal(err)
+				}
+			},
 		},
 	}
 )
@@ -357,6 +382,10 @@ func init() {
 			cmd.Flags().BoolVarP(&matchConfig, "generate-config", "g", false, "Should configuration be generated? (else plaintext)")
 		} else if cmd.Use == "dump" {
 			cmd.Flags().BoolVar(&dumpYaml, "yaml", false, "use YAML output (else use formatted table output)")
+		} else if cmd.Use == "update-portal" {
+			cmd.Flags().StringVar(&hostname, "hostname", "", "router hostname")
+			cmd.Flags().StringVar(&portalHost, "portal-host", "", "peering portal host")
+			cmd.Flags().StringVar(&portalKey, "portal-key", "", "peering portal API key")
 		}
 		rootCmd.AddCommand(cmd)
 	}

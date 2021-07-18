@@ -11,12 +11,13 @@ Usage:
   pathvector [command]
 
 Available Commands:
-  completion  generate the autocompletion script for the specified shell
-  dump        Dump configuration
-  help        Help about any command
-  match       Find common IXPs for a given ASN
-  optimizer   Start optimization daemon
-  version     Show version information
+  completion    generate the autocompletion script for the specified shell
+  dump          Dump configuration
+  help          Help about any command
+  match         Find common IXPs for a given ASN
+  optimizer     Start optimization daemon
+  update-portal Update peering-portal with local sessions
+  version       Show version information
 
 Flags:
       --bird-binary string             Path to bird binary (default "/usr/sbin/bird")

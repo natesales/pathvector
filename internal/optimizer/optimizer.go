@@ -1,4 +1,4 @@
-package main
+package optimizer
 
 import (
 	"fmt"
@@ -13,22 +13,24 @@ import (
 
 	"github.com/go-ping/ping"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/bird"
+	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/internal/util"
 )
 
-var globalOptimizer Optimizer
-
-// optimizationDelimiter is an arbitrary delimiter used to split ASN from peerName
-var optimizationDelimiter = "####"
-
-// probeResult stores a single probe result
-type probeResult struct {
-	Time  int64
-	Stats ping.Statistics
-}
+// Delimiter is an arbitrary delimiter used to split ASN from peerName
+var Delimiter = "####"
 
 type peerAvg struct {
 	Latency    time.Duration
 	PacketLoss float64
+}
+
+// parsePeerDelimiter parses a ASN/name string and returns the ASN and name
+func parsePeerDelimiter(i string) (string, string) {
+	parts := strings.Split(i, Delimiter)
+	return parts[0], parts[1]
 }
 
 // sameAddressFamily returns if two strings (IP addresses) are of the same address family
@@ -62,47 +64,47 @@ func sendPing(source string, target string, count int, timeout int, udp bool) (*
 	return pinger.Statistics(), nil // nil error
 }
 
-// startProbe starts the probe scheduler to send probes to all configured targets and logs the results
-func startProbe(sourceMap map[string][]string) error {
+// StartProbe starts the probe scheduler to send probes to all configured targets and logs the results
+func StartProbe(o *config.Optimizer, sourceMap map[string][]string, global *config.Config, noConfigure bool, dryRun bool) error {
 	// Initialize Db map
-	if globalOptimizer.Db == nil {
-		globalOptimizer.Db = map[string][]probeResult{} // peerName to list of probe results
+	if o.Db == nil {
+		o.Db = map[string][]config.ProbeResult{} // peerName to list of probe results
 	}
 
 	for {
 		// Loop over every source/target pair
 		for peerName, sources := range sourceMap {
 			for _, source := range sources {
-				for _, target := range globalOptimizer.Targets {
+				for _, target := range o.Targets {
 					if sameAddressFamily(source, target) {
-						log.Debugf("[Optimizer] Sending %d ICMP probes src %s dst %s", globalOptimizer.PingCount, source, target)
-						stats, err := sendPing(source, target, globalOptimizer.PingCount, globalOptimizer.PingTimeout, probeUdpMode)
+						log.Debugf("[Optimizer] Sending %d ICMP probes src %s dst %s", o.PingCount, source, target)
+						stats, err := sendPing(source, target, o.PingCount, o.PingTimeout, o.ProbeUDPMode)
 						if err != nil {
 							return err
 						}
 
 						// Check for nil Db entries
-						if globalOptimizer.Db[peerName] == nil {
-							globalOptimizer.Db[peerName] = []probeResult{}
+						if o.Db[peerName] == nil {
+							o.Db[peerName] = []config.ProbeResult{}
 						}
 
-						result := probeResult{
+						result := config.ProbeResult{
 							Time:  time.Now().UnixNano(),
 							Stats: *stats,
 						}
 
-						log.Debugf("[Optimizer] cache usage: %d/%d", len(globalOptimizer.Db[peerName]), globalOptimizer.CacheSize)
+						log.Debugf("[Optimizer] cache usage: %d/%d", len(o.Db[peerName]), o.CacheSize)
 
-						if len(globalOptimizer.Db[peerName]) < globalOptimizer.CacheSize {
+						if len(o.Db[peerName]) < o.CacheSize {
 							// If the array is not full to CacheSize, append the result
-							globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName], result)
+							o.Db[peerName] = append(o.Db[peerName], result)
 						} else {
 							// If the array is full to probeCacheSize...
-							if exitOnCacheFull {
+							if o.ExitOnCacheFull {
 								return nil
 							}
 							// Chop off the first element and append the result
-							globalOptimizer.Db[peerName] = append(globalOptimizer.Db[peerName][1:], result)
+							o.Db[peerName] = append(o.Db[peerName][1:], result)
 						}
 					}
 				}
@@ -110,48 +112,50 @@ func startProbe(sourceMap map[string][]string) error {
 		}
 
 		// Compute averages
-		computeMetrics()
+		computeMetrics(o, global, noConfigure, dryRun)
 
 		// Sleep before sending the next probe
-		waitInterval := time.Duration(globalOptimizer.Interval) * time.Second
+		waitInterval := time.Duration(o.Interval) * time.Second
 		log.Debugf("[Optimizer] Waiting %s until next probe run", waitInterval)
 		time.Sleep(waitInterval)
 	}
 }
 
 // computeMetrics calculates average latency and packet loss
-func computeMetrics() {
+func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool, dryRun bool) {
 	p := map[string]*peerAvg{}
-	for peer := range globalOptimizer.Db {
+	for peer := range o.Db {
 		if p[peer] == nil {
 			p[peer] = &peerAvg{Latency: 0, PacketLoss: 0}
 		}
-		for result := range globalOptimizer.Db[peer] {
-			p[peer].PacketLoss += globalOptimizer.Db[peer][result].Stats.PacketLoss
-			p[peer].Latency += globalOptimizer.Db[peer][result].Stats.AvgRtt
+		for result := range o.Db[peer] {
+			p[peer].PacketLoss += o.Db[peer][result].Stats.PacketLoss
+			p[peer].Latency += o.Db[peer][result].Stats.AvgRtt
 		}
 
 		// Calculate average latency and packet loss
-		totalProbes := float64(len(globalOptimizer.Db[peer]))
+		totalProbes := float64(len(o.Db[peer]))
 		p[peer].PacketLoss = p[peer].PacketLoss / totalProbes
 		p[peer].Latency = p[peer].Latency / time.Duration(totalProbes)
 
 		// Check thresholds to apply optimizations
 		var alerts []string
 		peerASN, peerName := parsePeerDelimiter(peer)
-		if p[peer].PacketLoss >= globalOptimizer.PacketLossThreshold {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable packet loss: %f >= %f", peerASN, peerName, p[peer].PacketLoss, globalOptimizer.PacketLossThreshold))
+		if p[peer].PacketLoss >= o.PacketLossThreshold {
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable packet loss: %f >= %f",
+				peerASN, peerName, p[peer].PacketLoss, o.PacketLossThreshold))
 		}
-		if p[peer].Latency >= time.Duration(globalOptimizer.LatencyThreshold)*time.Millisecond {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v", peerASN, peerName, p[peer].Latency, globalOptimizer.LatencyThreshold))
+		if p[peer].Latency >= time.Duration(o.LatencyThreshold)*time.Millisecond {
+			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v",
+				peerASN, peerName, p[peer].Latency, o.LatencyThreshold))
 		}
 
 		// If there is at least one alert,
 		if len(alerts) > 0 {
 			for _, alert := range alerts {
 				log.Debugf("[Optimizer] %s", alert)
-				if globalOptimizer.AlertScript != "" {
-					birdCmd := exec.Command(globalOptimizer.AlertScript, alert)
+				if o.AlertScript != "" {
+					birdCmd := exec.Command(o.AlertScript, alert)
 					birdCmd.Stdout = os.Stdout
 					birdCmd.Stderr = os.Stderr
 					if err := birdCmd.Run(); err != nil {
@@ -159,30 +163,43 @@ func computeMetrics() {
 					}
 				}
 			}
-			optimizePeer(peer)
+			modifyPref(peer,
+				global.Peers,
+				o.LocalPrefModifier,
+				global.CacheDirectory,
+				global.BIRDDirectory,
+				global.BIRDSocket,
+				global.BIRDBinary,
+				noConfigure,
+				dryRun,
+			)
 		}
 	}
 }
 
-// parsePeerDelimiter parses a ASN/name string and returns the ASN and name
-func parsePeerDelimiter(i string) (string, string) {
-	parts := strings.Split(i, optimizationDelimiter)
-	return parts[0], parts[1]
-}
-
-func optimizePeer(peer string) {
-	peerASN, peerName := parsePeerDelimiter(peer)
-	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *sanitize(peerName)))
+func modifyPref(
+	peerPair string,
+	peers map[string]*config.Peer,
+	localPrefModifier uint,
+	cacheDirectory string,
+	birdDirectory string,
+	birdSocket string,
+	birdBinary string,
+	noConfigure bool,
+	dryRun bool,
+) {
+	peerASN, peerName := parsePeerDelimiter(peerPair)
+	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
 	peerFile, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		log.Fatal("reading peer file: " + err.Error())
 	}
-	peerData := globalConfig.Peers[peerName]
 
+	peerData := peers[peerName]
 	if *peerData.OptimizeInbound {
 		// Calculate new local pref
 		currentLocalPref := *peerData.LocalPref
-		newLocalPref := uint(currentLocalPref) - globalOptimizer.LocalPrefModifier
+		newLocalPref := uint(currentLocalPref) - localPrefModifier
 
 		lpRegex := regexp.MustCompile(`bgp_local_pref = .*; # pathvector:localpref`)
 		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
@@ -195,9 +212,9 @@ func optimizePeer(peer string) {
 	}
 
 	// Run BIRD config validation
-	birdValidate()
+	bird.Validate(birdBinary, cacheDirectory)
 
 	if !dryRun {
-		moveCacheAndReconfig()
+		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package bird
 
 import (
 	"fmt"
@@ -11,10 +11,13 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/util"
 )
 
-func birdRead(reader io.Reader) (string, error) {
-	buf := make([]byte, 1024)
+func read(reader io.Reader) (string, error) {
+	// TODO: This buffer isn't a good solution, and might not fit the full response from BIRD
+	buf := make([]byte, 16384)
 	n, err := reader.Read(buf[:])
 
 	if err != nil {
@@ -24,20 +27,20 @@ func birdRead(reader io.Reader) (string, error) {
 	return string(buf[:n]), nil // nil error
 }
 
-// runBirdCommand runs a bird command
-func runBirdCommand(command string, socket string) error {
+// RunCommand runs a BIRD command
+func RunCommand(command string, socket string) (string, error) {
 	log.Debugln("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Fatalf("BIRD socket connect: %v", err)
+		return "", err
 	}
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
 
 	log.Println("Connected to BIRD socket")
-	resp, err := birdRead(conn)
+	resp, err := read(conn)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Debugf("BIRD init response: %s", resp)
 
@@ -45,13 +48,13 @@ func runBirdCommand(command string, socket string) error {
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
 	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
-		log.Fatalf("BIRD write error: %s\n", err)
+		return "", err
 	}
 
 	log.Debugln("Reading from socket")
-	resp, err = birdRead(conn)
+	resp, err = read(conn)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Debugln("Done reading from socket")
 
@@ -60,14 +63,13 @@ func runBirdCommand(command string, socket string) error {
 		log.Printf("BIRD response (multiline): %s", line)
 	}
 
-	return nil // nil error
+	return resp, nil // nil error
 }
 
-// birdValidate checks if the cached configuration is syntactically valid
-func birdValidate() {
-	log.Debugln("Validating BIRD config")
-	birdCmd := exec.Command(birdBinary, "-c", "bird.conf", "-p")
-	birdCmd.Dir = cacheDirectory
+// Validate checks if the cached configuration is syntactically valid
+func Validate(binary string, cacheDir string) {
+	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
+	birdCmd.Dir = cacheDir
 	birdCmd.Stdout = os.Stdout
 	birdCmd.Stderr = os.Stderr
 	if err := birdCmd.Run(); err != nil {
@@ -76,8 +78,8 @@ func birdValidate() {
 	log.Infof("BIRD config validation passed")
 }
 
-// moveCacheAndReconfig moves cached files to the production BIRD directory and reconfigures
-func moveCacheAndReconfig() {
+// MoveCacheAndReconfigure moves cached files to the production BIRD directory and reconfigures
+func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSocket string, noConfigure bool) {
 	// Remove old configs
 	birdConfigFiles, err := filepath.Glob(path.Join(birdDirectory, "AS*.conf"))
 	if err != nil {
@@ -100,17 +102,37 @@ func moveCacheAndReconfig() {
 		fileNameTail := fileNameParts[len(fileNameParts)-1]
 		newFileLoc := path.Join(birdDirectory, fileNameTail)
 		log.Debugf("Moving %s to %s", f, newFileLoc)
-		if err := moveFile(f, newFileLoc); err != nil {
+		if err := util.MoveFile(f, newFileLoc); err != nil {
 			log.Fatalf("Moving cache file to bird directory: %v", err)
 		}
 	}
 
 	if !noConfigure {
 		log.Infoln("Reconfiguring BIRD")
-		if err = runBirdCommand("configure", birdSocket); err != nil {
+		if _, err = RunCommand("configure", birdSocket); err != nil {
 			log.Fatal(err)
 		}
-	} else {
-		log.Infoln("Option --no-configure is set, NOT reconfiguring bird")
 	}
+}
+
+// Reformat takes a BIRD config file as a string and outputs a nicely formatted version as a string
+func Reformat(input string) string {
+	formatted := ""
+	for _, line := range strings.Split(input, "\n") {
+		if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") {
+			formatted += "\n"
+		}
+
+		if !func(input string) bool {
+			for _, chr := range []rune(input) {
+				if string(chr) != " " {
+					return false
+				}
+			}
+			return true
+		}(line) {
+			formatted += line + "\n"
+		}
+	}
+	return formatted
 }

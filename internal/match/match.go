@@ -1,4 +1,4 @@
-package main
+package match
 
 import (
 	"encoding/json"
@@ -9,6 +9,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/peeringdb"
 )
 
 type peeringDbIxLanResponse struct {
@@ -33,7 +35,7 @@ type peeringDbIxLanData struct {
 	Status      string    `json:"status"`
 }
 
-func peeringDbIxLans(asn uint) ([]peeringDbIxLanData, error) {
+func peeringDbIxLans(asn uint, peeringDbQueryTimeout uint) ([]peeringDbIxLanData, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(peeringDbQueryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/netixlan?asn=%d", asn), nil)
 	if err != nil {
@@ -67,27 +69,28 @@ func peeringDbIxLans(asn uint) ([]peeringDbIxLanData, error) {
 	return pDbResponse.Data, nil // nil error
 }
 
-// commonIxs gets common IXPs from PeeringDB
-func commonIxs(a uint, b uint, config bool) {
-	networkA, err := peeringDbIxLans(a)
+// CommonIXs gets common IXPs from PeeringDB
+func CommonIXs(a uint, b uint, yamlFormat bool, queryTimeout uint) string {
+	networkA, err := peeringDbIxLans(a, queryTimeout)
 	if err != nil {
 		log.Fatalf("AS%d: %v", a, err)
 	}
-	networkB, err := peeringDbIxLans(b)
+	networkB, err := peeringDbIxLans(b, queryTimeout)
 	if err != nil {
 		log.Fatalf("AS%d: %v", a, err)
 	}
 
-	networkBInfo, err := getPeeringDbData(int(b))
+	networkBInfo, err := peeringdb.NetworkInfo(b, queryTimeout)
 	if err != nil {
 		log.Fatalf("AS%d: %v", b, err)
 	}
 
+	out := ""
 	for _, ixA := range networkA {
 		for _, ixB := range networkB {
 			if ixA.IxlanId == ixB.IxlanId {
-				if !config {
-					fmt.Printf(`%s
+				if !yamlFormat {
+					out += fmt.Sprintf(`%s
   AS%d
   %s
   %s
@@ -98,7 +101,7 @@ func commonIxs(a uint, b uint, config bool) {
 
 `, ixA.Name, a, ixA.Ipaddr4, ixA.Ipaddr6, b, ixB.Ipaddr4, ixB.Ipaddr6)
 				} else {
-					fmt.Printf(`  %s %s:
+					out += fmt.Sprintf(`  %s %s:
     asn: %d
     neighbors:
       - %s
@@ -109,4 +112,5 @@ func commonIxs(a uint, b uint, config bool) {
 			}
 		}
 	}
+	return out
 }

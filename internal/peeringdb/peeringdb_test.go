@@ -1,9 +1,13 @@
-package main
+package peeringdb
 
 import (
+	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/internal/util"
 	"strings"
 	"testing"
 )
+
+const peeringDbQueryTimeout = 10 // 10 seconds
 
 func TestPeeringDbQuery(t *testing.T) {
 	testCases := []struct {
@@ -20,7 +24,7 @@ func TestPeeringDbQuery(t *testing.T) {
 		{65530, "RIPE::RS-KROOT RIPE::RS-KROOT-V6", "RIPE NCC K-Root Operations", 5, 5, true}, // Private ASN, no PeeringDB page
 	}
 	for _, tc := range testCases {
-		pDbData, err := getPeeringDbData(tc.asn)
+		pDbData, err := NetworkInfo(uint(tc.asn), peeringDbQueryTimeout)
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		}
@@ -51,18 +55,10 @@ func TestPeeringDbQuery(t *testing.T) {
 }
 
 func TestPeeringDbNoPage(t *testing.T) {
-	_, err := getPeeringDbData(65530)
+	_, err := NetworkInfo(65530, peeringDbQueryTimeout)
 	if err == nil || !strings.Contains(err.Error(), "doesn't have a PeeringDB page") {
 		t.Errorf("expected PeeringDB page not exist error, got %v", err)
 	}
-}
-
-func intPtr(i int) *int {
-	return &i
-}
-
-func boolPtr(b bool) *bool {
-	return &b
 }
 
 func TestPeeringDbQueryAndModify(t *testing.T) {
@@ -74,13 +70,13 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 		{112, false},
 	}
 	for _, tc := range testCases {
-		runPeeringDbQuery(&Peer{
-			ASN:              intPtr(tc.asn),
-			AutoImportLimits: boolPtr(tc.auto),
-			AutoASSet:        boolPtr(tc.auto),
-			ImportLimit4:     intPtr(0),
-			ImportLimit6:     intPtr(0),
-		})
+		Update(&config.Peer{
+			ASN:              util.IntPtr(tc.asn),
+			AutoImportLimits: util.BoolPtr(tc.auto),
+			AutoASSet:        util.BoolPtr(tc.auto),
+			ImportLimit4:     util.IntPtr(0),
+			ImportLimit6:     util.IntPtr(0),
+		}, peeringDbQueryTimeout)
 	}
 }
 

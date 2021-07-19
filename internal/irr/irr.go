@@ -1,8 +1,9 @@
-package main
+package irr
 
 import (
 	"context"
 	"fmt"
+	"github.com/natesales/pathvector/internal/config"
 	"os/exec"
 	"strings"
 	"time"
@@ -10,12 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Use bgpq4 to generate a prefix filter and return only the filter lines
-func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, error) {
+// PrefixSet uses bgpq4 to generate a prefix filter and return only the filter lines
+func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint) ([]string, error) {
 	// Run bgpq4 for BIRD format with aggregation enabled
 	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, asSet)
 	log.Debugf("Running bgpq4 %s", cmdArgs)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
 	stdout, err := cmd.Output()
@@ -38,13 +39,14 @@ func getIRRPrefixSet(asSet string, family uint8, irrServer string) ([]string, er
 	return prefixes, nil
 }
 
-func buildIRRPrefixSet(peerData *Peer, irrServer string) error {
+// Update updates a peer's IRR prefix set
+func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 	// Check for empty as-set
 	if peerData.ASSet == nil || *peerData.ASSet == "" {
 		return fmt.Errorf("peer has filter-irr enabled and no as-set defined")
 	}
 
-	prefixesFromIRR4, err := getIRRPrefixSet(*peerData.ASSet, 4, irrServer)
+	prefixesFromIRR4, err := PrefixSet(*peerData.ASSet, 4, irrServer, queryTimeout)
 	if err != nil {
 		return fmt.Errorf("unable to get IPv4 IRR prefix list from %s", *peerData.ASSet)
 	}
@@ -57,7 +59,7 @@ func buildIRRPrefixSet(peerData *Peer, irrServer string) error {
 		return fmt.Errorf("peer has a prefix filter defined but no IPv4 prefixes")
 	}
 
-	prefixesFromIRR6, err := getIRRPrefixSet(*peerData.ASSet, 6, irrServer)
+	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout)
 	if err != nil {
 		return fmt.Errorf("unable to get IPv6 IRR prefix list from %s", *peerData.ASSet)
 	}

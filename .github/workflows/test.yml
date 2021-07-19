@@ -26,17 +26,13 @@ jobs:
       - name: Get dependencies
         run: go get -v -t -d ./...
 
-      - name: go generate
-        run: go generate -x
-
-      - name: go build
-        run: go build -v .
+      - run: go generate -x
+      - run: go build -v .
 
       - name: Setup integration test environment
         run: sudo bash tests/setup.sh
 
-      - name: Generate coverage report
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic
+      - run: go test -race -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1

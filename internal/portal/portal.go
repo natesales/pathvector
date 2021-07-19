@@ -1,18 +1,23 @@
-package main
+package portal
 
 import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/natesales/pathvector/internal/bird"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/config"
 )
 
-// Session stores a portal BGP session
+// session stores a portal BGP session
 type session struct {
 	Name       string `json:"name"`
 	Router     string `json:"router"`
@@ -22,8 +27,14 @@ type session struct {
 	State      string `json:"state"`
 }
 
-// portalRecord records a peer session to the peering portal server
-func portalRecord(host string, key string, routerHostname string, peers map[string]*Peer) error {
+// Record records a peer session to the peering portal server
+func Record(host string, key string, routerHostname string, peers map[string]*config.Peer, birdSocket string) error {
+	// Get protocols
+	protocols, err := bird.RunCommand("show protocols", birdSocket)
+	if err != nil {
+		return err
+	}
+
 	var sessions []session
 	for name, peer := range peers {
 		for _, neighborIP := range *peer.NeighborIPs {
@@ -32,12 +43,25 @@ func portalRecord(host string, key string, routerHostname string, peers map[stri
 			if peer.Listen != nil {
 				localIP = *peer.Listen
 			}
+			// Get session state
+			state := "UNKNOWN"
+			for _, line := range strings.Split(strings.TrimSuffix(protocols, "\n"), "\n") {
+				line = strings.TrimSpace(line)
+				if strings.Contains(line, *peer.ProtocolName) {
+					line = strings.Split(line, "BGP ")[1]
+					line = strings.ReplaceAll(line, "---", "")
+					space := regexp.MustCompile(`\s+`)
+					state = space.ReplaceAllString(line, " ")
+					break
+				}
+			}
 			sessions = append(sessions, session{
 				Name:       name,
 				Router:     routerHostname,
 				ASN:        uint32(*peer.ASN),
 				LocalIP:    localIP,
 				NeighborIP: neighborIP,
+				State:      state,
 			})
 		}
 	}
@@ -51,6 +75,7 @@ func portalRecord(host string, key string, routerHostname string, peers map[stri
 		return err
 	}
 	u.Path = "/session"
+	log.Debugf("Posting %s", jsonValue)
 	req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(jsonValue))
 	if err != nil {
 		return err
@@ -68,7 +93,7 @@ func portalRecord(host string, key string, routerHostname string, peers map[stri
 	}
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
-		return fmt.Errorf("Portal server: %s", respText)
+		return fmt.Errorf("portal server: %s", respText)
 	}
 
 	return nil

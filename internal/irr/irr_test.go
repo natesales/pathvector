@@ -1,9 +1,13 @@
-package main
+package irr
 
 import (
+	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/internal/util"
 	"reflect"
 	"testing"
 )
+
+const irrQueryTimeout = 10
 
 func TestGetIRRPrefixSet(t *testing.T) {
 	testCases := []struct {
@@ -19,8 +23,7 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		{"AS-FROOT", 4, []string{"192.5.4.0/23{23,24}", "199.212.90.0/23", "199.212.92.0/23", "202.41.142.0/24"}, false},
 	}
 	for _, tc := range testCases {
-		irrQueryTimeout = 10
-		out, err := getIRRPrefixSet(tc.asSet, tc.family, "rr.ntt.net")
+		out, err := PrefixSet(tc.asSet, tc.family, "rr.ntt.net", irrQueryTimeout)
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		} else if err == nil && tc.shouldError {
@@ -30,10 +33,6 @@ func TestGetIRRPrefixSet(t *testing.T) {
 			t.Errorf("as-set %s family %d failed. expected '%s' got '%s'", tc.asSet, tc.family, tc.expectedOutput, out)
 		}
 	}
-}
-
-func stringPtr(s string) *string {
-	return &s
 }
 
 func TestBuildIRRPrefixSet(t *testing.T) {
@@ -47,8 +46,8 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 		{"", []string{}, []string{}, true}, // Empty as-set
 	}
 	for _, tc := range testCases {
-		peer := Peer{ASSet: stringPtr(tc.asSet)}
-		err := buildIRRPrefixSet(&peer, "rr.ntt.net")
+		peer := config.Peer{ASSet: util.StrPtr(tc.asSet)}
+		err := Update(&peer, "rr.ntt.net", irrQueryTimeout)
 		if err != nil && tc.shouldError {
 			return
 		}

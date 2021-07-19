@@ -6,6 +6,8 @@ import (
 	"github.com/natesales/pathvector/cmd"
 )
 
+//go:generate ./generate.sh
+
 func main() {
 	if err := cmd.Execute(); err != nil {
 		log.Fatal(err)

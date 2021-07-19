@@ -16,7 +16,8 @@ import (
 )
 
 func read(reader io.Reader) (string, error) {
-	buf := make([]byte, 1024)
+	// TODO: This buffer isn't a good solution, and might not fit the full response from BIRD
+	buf := make([]byte, 16384)
 	n, err := reader.Read(buf[:])
 
 	if err != nil {

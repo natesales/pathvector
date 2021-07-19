@@ -3,6 +3,7 @@ package bird
 import (
 	"net"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -17,8 +18,13 @@ func TestBirdConn(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Millisecond * 10) // Wait for the server to start
-		if _, err := RunCommand("bird command test\n", unixSocket); err != nil {
+		resp, err := RunCommand("bird command test\n", unixSocket)
+		if err != nil {
 			t.Error(err)
+		}
+		// Print bird output as multiple lines
+		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
+			log.Printf("BIRD response (multiline): %s", line)
 		}
 	}()
 

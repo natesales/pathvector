@@ -6,6 +6,17 @@ sidebar_position: 3
 ## Config
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
+| peeringdb-query-timeout | uint | 10 |  | PeeringDB query timeout in seconds |
+| irr-query-timeout | uint | 30 |  | IRR query timeout in seconds |
+| bird-directory | string | /etc/bird/ |  | Directory to store BIRD configs |
+| bird-binary | string | /usr/sbin/bird |  | Path to BIRD binary |
+| bird-socket | string | /run/bird/bird.ctl |  | UNIX control socket for BIRD |
+| cache-directory | string | /var/run/pathvector/cache/ |  | Directory to store runtime configuration cache |
+| keepalived-config | string | /etc/keepalived.conf |  | Configuration file for keepalived |
+| web-ui-file | string |  |  | File to write web UI to (disabled if empty) |
+| portal-host | string |  |  | Peering portal host (disabled if empty) |
+| portal-key | string |  |  | Peering portal API key |
+| hostname | string |  |  | Router hostname (default system hostname) |
 | asn | int | 0 | required | Autonomous System Number |
 | prefixes | []string |  |  | List of prefixes to announce |
 | communities | []string |  |  | List of RFC1997 BGP communities |
@@ -117,5 +128,7 @@ sidebar_position: 3
 | probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
 | probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
 | cache-size | int | 15 |  | Number of probe results to store per peer |
+| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
 | alert-script | string |  |  | Script to call on optimizer event |
+| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 

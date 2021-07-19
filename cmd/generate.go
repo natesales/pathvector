@@ -16,6 +16,7 @@ import (
 	"github.com/natesales/pathvector/internal/embed"
 	"github.com/natesales/pathvector/internal/irr"
 	"github.com/natesales/pathvector/internal/peeringdb"
+	"github.com/natesales/pathvector/internal/portal"
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
 )
@@ -161,6 +162,14 @@ var generateCmd = &cobra.Command{
 
 			bird.MoveCacheAndReconfigure(c.BIRDDirectory, c.CacheDirectory, c.BIRDSocket, noConfigure)
 		} // end dry run check
+
+		// Update portal
+		if c.PortalHost != "" {
+			log.Debugln("Updating peering portal")
+			if err := portal.Record(c.PortalHost, c.PortalKey, c.Hostname, c.Peers, c.BIRDSocket); err != nil {
+				log.Fatal(err)
+			}
+		}
 
 		// Delete lockfile
 		if lockFile != "" {

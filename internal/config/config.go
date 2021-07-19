@@ -3,20 +3,20 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/go-ping/ping"
-	"github.com/natesales/pathvector/internal/util"
 	"net"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/creasty/defaults"
+	"github.com/go-ping/ping"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-)
 
-//go:generate ./generate.sh
+	"github.com/natesales/pathvector/internal/util"
+)
 
 // Peer stores a single peer config
 type Peer struct {
@@ -171,6 +171,10 @@ type Config struct {
 	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
 	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 
+	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
+	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
+	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
+
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
@@ -276,6 +280,15 @@ func Load(configBlob []byte) (*Config, error) {
 		if templateData.Template != nil && *templateData.Template != "" {
 			log.Fatalf("Templates must not have a template field set, but %s does", templateName)
 		}
+	}
+
+	// Set hostname if empty
+	if c.Hostname == "" {
+		hostname, err := os.Hostname()
+		if err != nil {
+			log.Fatalf("Hostname is not defined and unable to get system hostname: %s", err)
+		}
+		c.Hostname = hostname
 	}
 
 	for peerName, peerData := range c.Peers {

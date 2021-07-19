@@ -58,11 +58,6 @@ func RunCommand(command string, socket string) (string, error) {
 	}
 	log.Debugln("Done reading from socket")
 
-	// Print bird output as multiple lines
-	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-		log.Printf("BIRD response (multiline): %s", line)
-	}
-
 	return resp, nil // nil error
 }
 
@@ -109,8 +104,13 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 
 	if !noConfigure {
 		log.Infoln("Reconfiguring BIRD")
-		if _, err = RunCommand("configure", birdSocket); err != nil {
+		resp, err := RunCommand("configure", birdSocket)
+		if err != nil {
 			log.Fatal(err)
+		}
+		// Print bird output as multiple lines
+		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
+			log.Printf("BIRD response (multiline): %s", line)
 		}
 	}
 }

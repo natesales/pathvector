@@ -48,6 +48,8 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 			for _, line := range strings.Split(strings.TrimSuffix(protocols, "\n"), "\n") {
 				line = strings.TrimSpace(line)
 				if strings.Contains(line, *peer.ProtocolName) {
+					line = strings.Split(line, "BGP ")[1]
+					line = strings.ReplaceAll(line, "---", "")
 					space := regexp.MustCompile(`\s+`)
 					state = space.ReplaceAllString(line, " ")
 					break

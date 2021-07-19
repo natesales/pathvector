@@ -5,9 +5,12 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/natesales/pathvector/internal/bird"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 
@@ -25,7 +28,13 @@ type session struct {
 }
 
 // Record records a peer session to the peering portal server
-func Record(host string, key string, routerHostname string, peers map[string]*config.Peer) error {
+func Record(host string, key string, routerHostname string, peers map[string]*config.Peer, birdSocket string) error {
+	// Get protocols
+	protocols, err := bird.RunCommand("show protocols", birdSocket)
+	if err != nil {
+		return err
+	}
+
 	var sessions []session
 	for name, peer := range peers {
 		for _, neighborIP := range *peer.NeighborIPs {
@@ -34,12 +43,23 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 			if peer.Listen != nil {
 				localIP = *peer.Listen
 			}
+			// Get session state
+			state := "UNKNOWN"
+			for _, line := range strings.Split(strings.TrimSuffix(protocols, "\n"), "\n") {
+				line = strings.TrimSpace(line)
+				if strings.Contains(line, *peer.ProtocolName) {
+					space := regexp.MustCompile(`\s+`)
+					state = space.ReplaceAllString(line, " ")
+					break
+				}
+			}
 			sessions = append(sessions, session{
 				Name:       name,
 				Router:     routerHostname,
 				ASN:        uint32(*peer.ASN),
 				LocalIP:    localIP,
 				NeighborIP: neighborIP,
+				State:      state,
 			})
 		}
 	}
@@ -53,6 +73,7 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 		return err
 	}
 	u.Path = "/session"
+	log.Debugf("Posting %s", jsonValue)
 	req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(jsonValue))
 	if err != nil {
 		return err

@@ -38,7 +38,7 @@ var portalUpdateCmd = &cobra.Command{
 		}
 		log.Debugln("Finished loading config")
 
-		if err := portal.Record(portalHost, portalKey, hostname, c.Peers); err != nil {
+		if err := portal.Record(portalHost, portalKey, hostname, c.Peers, c.BIRDSocket); err != nil {
 			log.Fatal(err)
 		}
 	},

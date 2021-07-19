@@ -106,9 +106,6 @@ var generateCmd = &cobra.Command{
 		for peerName, peerData := range c.Peers {
 			log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
 
-			// Set sanitized peer name
-			peerData.ProtocolName = util.Sanitize(peerName)
-
 			// If a PeeringDB query is required
 			if *peerData.AutoImportLimits || *peerData.AutoASSet {
 				log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)

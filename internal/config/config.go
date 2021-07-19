@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-ping/ping"
+	"github.com/natesales/pathvector/internal/util"
 	"net"
 	"reflect"
 	"strconv"
@@ -278,6 +279,9 @@ func Load(configBlob []byte) (*Config, error) {
 	}
 
 	for peerName, peerData := range c.Peers {
+		// Set sanitized peer name
+		peerData.ProtocolName = util.Sanitize(peerName)
+
 		if peerData.NeighborIPs == nil || len(*peerData.NeighborIPs) < 1 {
 			log.Fatalf("[%s] has no neighbors defined", peerName)
 		}

@@ -27,11 +27,11 @@ func read(reader io.Reader) (string, error) {
 }
 
 // RunCommand runs a BIRD command
-func RunCommand(command string, socket string) error {
+func RunCommand(command string, socket string) (string, error) {
 	log.Debugln("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		log.Fatalf("BIRD socket connect: %v", err)
+		return "", err
 	}
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
@@ -39,7 +39,7 @@ func RunCommand(command string, socket string) error {
 	log.Println("Connected to BIRD socket")
 	resp, err := read(conn)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Debugf("BIRD init response: %s", resp)
 
@@ -47,13 +47,13 @@ func RunCommand(command string, socket string) error {
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
 	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
-		log.Fatalf("BIRD write error: %s\n", err)
+		return "", err
 	}
 
 	log.Debugln("Reading from socket")
 	resp, err = read(conn)
 	if err != nil {
-		return err
+		return "", err
 	}
 	log.Debugln("Done reading from socket")
 
@@ -62,7 +62,7 @@ func RunCommand(command string, socket string) error {
 		log.Printf("BIRD response (multiline): %s", line)
 	}
 
-	return nil // nil error
+	return resp, nil // nil error
 }
 
 // Validate checks if the cached configuration is syntactically valid
@@ -108,7 +108,7 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 
 	if !noConfigure {
 		log.Infoln("Reconfiguring BIRD")
-		if err = RunCommand("configure", birdSocket); err != nil {
+		if _, err = RunCommand("configure", birdSocket); err != nil {
 			log.Fatal(err)
 		}
 	}

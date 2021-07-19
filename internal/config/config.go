@@ -1,8 +1,9 @@
-package main
+package config
 
 import (
 	"errors"
 	"fmt"
+	"github.com/go-ping/ping"
 	"net"
 	"reflect"
 	"strconv"
@@ -131,6 +132,12 @@ type Augments struct {
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
 
+// ProbeResult stores a single probe result
+type ProbeResult struct {
+	Time  int64
+	Stats ping.Statistics
+}
+
 // Optimizer stores route optimizer configuration
 type Optimizer struct {
 	Targets             []string `yaml:"targets" description:"List of probe targets"`
@@ -143,13 +150,26 @@ type Optimizer struct {
 	Interval    int `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
 	CacheSize   int `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
 
+	ProbeUDPMode bool `yaml:"probe-udp" description:"Use UDP probe (else ICMP)" default:"false"`
+
 	AlertScript string `yaml:"alert-script" description:"Script to call on optimizer event"`
 
-	Db map[string][]probeResult `yaml:"-" description:"-"`
+	ExitOnCacheFull bool `yaml:"exit-on-cache-full" description:"Exit optimizer on cache full" default:"false"`
+
+	Db map[string][]ProbeResult `yaml:"-" description:"-"`
 }
 
 // Config stores the global configuration
 type Config struct {
+	PeeringDBQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	BIRDDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BIRDBinary            string `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
+	BIRDSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	CacheDirectory        string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
+	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
+
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
@@ -179,8 +199,62 @@ type Config struct {
 	Prefixes6     []string `yaml:"-" description:"-"`
 }
 
-// loadConfig loads a configuration file from a YAML file
-func loadConfig(configBlob []byte) (*Config, error) {
+// categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
+func categorizeCommunity(input string) string {
+	// Test if it fits the criteria for a standard community
+	standardSplit := strings.Split(input, ",")
+	if len(standardSplit) == 2 {
+		firstPart, err := strconv.Atoi(standardSplit[0])
+		if err != nil {
+			return ""
+		}
+		secondPart, err := strconv.Atoi(standardSplit[1])
+		if err != nil {
+			return ""
+		}
+
+		if firstPart < 0 || firstPart > 65535 {
+			return ""
+		}
+		if secondPart < 0 || secondPart > 65535 {
+			return ""
+		}
+		return "standard"
+	}
+
+	// Test if it fits the criteria for a large community
+	largeSplit := strings.Split(input, ":")
+	if len(largeSplit) == 3 {
+		firstPart, err := strconv.Atoi(largeSplit[0])
+		if err != nil {
+			return ""
+		}
+		secondPart, err := strconv.Atoi(largeSplit[1])
+		if err != nil {
+			return ""
+		}
+		thirdPart, err := strconv.Atoi(largeSplit[2])
+		if err != nil {
+			return ""
+		}
+
+		if firstPart < 0 || firstPart > 4294967295 {
+			return ""
+		}
+		if secondPart < 0 || secondPart > 4294967295 {
+			return ""
+		}
+		if thirdPart < 0 || thirdPart > 4294967295 {
+			return ""
+		}
+		return "large"
+	}
+
+	return ""
+}
+
+// Load loads a configuration file from a YAML file
+func Load(configBlob []byte) (*Config, error) {
 	var c Config
 	// Set global config defaults
 	if err := defaults.Set(&c); err != nil {
@@ -477,7 +551,7 @@ func loadConfig(configBlob []byte) (*Config, error) {
 func sanitizeConfigName(s string) string {
 	out := s
 	out = strings.ReplaceAll(out, "*", "")
-	out = strings.ReplaceAll(out, "main.", "")
+	out = strings.ReplaceAll(out, "config.", "")
 	return out
 }
 
@@ -503,7 +577,7 @@ func documentConfigTypes(t reflect.Type) {
 		if description == "" {
 			log.Fatalf("Code error: %s doesn't have a description", field.Name)
 		} else if description != "-" { // Ignore descriptions that are -
-			if strings.Contains(field.Type.String(), "main.") { // If the type is a config struct
+			if strings.Contains(field.Type.String(), "config.") { // If the type is a config struct
 				if field.Type.Kind() == reflect.Map || field.Type.Kind() == reflect.Slice { // Extract the element if the type is a map or slice and add to set (reflect.Type to bool map)
 					childTypesSet[field.Type.Elem()] = true
 				} else {
@@ -519,6 +593,7 @@ func documentConfigTypes(t reflect.Type) {
 	}
 }
 
-func documentConfig() {
+// DocumentConfig prints a YAML file with autogenerated configuration documentation
+func DocumentConfig() {
 	documentConfigTypes(reflect.TypeOf(Config{}))
 }

@@ -5,6 +5,8 @@ source6: 2001:db8::1
 prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48
+web-ui-file: test-cache/ui.html
+cache-directory: test-cache
 
 peers:
   Example:

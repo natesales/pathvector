@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"reflect"
@@ -6,7 +6,42 @@ import (
 	"testing"
 )
 
-func TestLoadConfig(t *testing.T) {
+func TestCategorizeCommunity(t *testing.T) {
+	testCases := []struct {
+		input          string
+		expectedOutput string
+		shouldError    bool
+	}{
+		{"34553,0", "standard", false},
+		{"1,1", "standard", false},
+		{"4242424242:4242424242:0", "large", false},
+		{"1:1:0", "large", false},
+		{":", "", true},
+		{"4242424242,0", "", true},
+		{"0,4242424242", "", true},
+		{"foo,1", "", true},
+		{"1,bar", "", true},
+		{"", "", true},
+		{":1:1", "", true},
+		{"1::1", "", true},
+		{"1:1:", "", true},
+		{"-1:1:1", "", true},
+		{"1:-1:1", "", true},
+		{"1:1:-1", "", true},
+	}
+	for _, tc := range testCases {
+		cType := categorizeCommunity(tc.input)
+		if cType != "" && tc.shouldError {
+			t.Errorf("categorizeCommunity should have errored on '%s' but didn't. expected error, got '%s'", tc.input, cType)
+		} else if cType == "" && !tc.shouldError {
+			t.Errorf("categorizeCommunity shouldn't have errored on '%s' but did. expected '%s'", tc.input, tc.expectedOutput)
+		} else if cType != tc.expectedOutput {
+			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
+		}
+	}
+}
+
+func TestLoad(t *testing.T) {
 	configFile := `
 asn: 34553
 router-id: 192.0.2.1
@@ -39,7 +74,7 @@ peers:
       - 2001:db8:2::25
 `
 
-	globalConfig, err := loadConfig([]byte(configFile))
+	globalConfig, err := Load([]byte(configFile))
 	if err != nil {
 		t.Error(err)
 	}
@@ -63,7 +98,7 @@ peers:
 
 func TestLoadConfigInvalidYAML(t *testing.T) {
 	configFile := "INVALID YAML"
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "YAML unmarshal") {
 		t.Errorf("expected yaml unmarshal error, got %+v", err)
 	}
@@ -71,7 +106,7 @@ func TestLoadConfigInvalidYAML(t *testing.T) {
 
 func TestLoadConfigValidationError(t *testing.T) {
 	configFile := "router-id: foo"
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "validation") {
 		t.Errorf("expected validation error, got %+v", err)
 	}
@@ -84,7 +119,7 @@ router-id: 192.0.2.1
 prefixes:
   - foo/24
   - 2001:db8::/48`
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "Invalid origin prefix") {
 		t.Errorf("expected invalid origin prefix error, got %+v", err)
 	}
@@ -101,7 +136,7 @@ vrrp:
     vips:
       - 192.0.2.2/24
       - 2001:db8::2/64`
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "VRRP state must be") {
 		t.Errorf("expected VRRP state error, got %+v", err)
 	}
@@ -116,7 +151,7 @@ augments:
     "foo/24" : "192.0.2.10"
     "2001:db8:2::/64" : "2001:db8::1"
 `
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "Invalid static prefix") {
 		t.Errorf("expected invalid static prefix error, got %+v", err)
 	}
@@ -134,7 +169,7 @@ vrrp:
       - foo/24
       - 2001:db8::2/64`
 
-	_, err := loadConfig([]byte(configFile))
+	_, err := Load([]byte(configFile))
 	if err == nil || !strings.Contains(err.Error(), "Invalid VIP") {
 		t.Errorf("expected invalid VIP error, got %+v", err)
 	}
@@ -170,7 +205,7 @@ peers:
     neighbors:
       - 192.0.2.4
 `
-	globalConfig, err := loadConfig([]byte(configFile))
+	globalConfig, err := Load([]byte(configFile))
 	if err != nil {
 		t.Error(err)
 	}
@@ -223,7 +258,7 @@ peers:
 
 // TODO: lint the resulting markdown files
 func TestDocumentConfig(t *testing.T) {
-	documentConfig()
+	DocumentConfig()
 }
 
 func TestSanitizeConfigName(t *testing.T) {
@@ -231,7 +266,7 @@ func TestSanitizeConfigName(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"main.foo", "foo"},
+		{"config.foo", "foo"},
 		{"*string", "string"},
 		{"map[string]*peer", "map[string]peer"},
 	}

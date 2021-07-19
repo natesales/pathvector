@@ -1,4 +1,4 @@
-package main
+package peeringdb
 
 import (
 	"encoding/json"
@@ -6,30 +6,31 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/config"
 )
 
-// peeringDbResponse contains the response from a PeeringDB query
-type peeringDbResponse struct {
-	Data []peeringDbData `json:"data"`
+// Response contains the response from a PeeringDB query
+type Response struct {
+	Data []Data `json:"data"`
 }
 
-// peeringDbData contains the actual data from PeeringDB response
-type peeringDbData struct {
+// Data contains the actual data from PeeringDB response
+type Data struct {
 	Name         string `json:"name"`
 	ASSet        string `json:"irr_as_set"`
 	ImportLimit4 int    `json:"info_prefixes4"`
 	ImportLimit6 int    `json:"info_prefixes6"`
 }
 
-// Query PeeringDB for an ASN
-func getPeeringDbData(asn int) (*peeringDbData, error) {
-	httpClient := http.Client{Timeout: time.Second * time.Duration(peeringDbQueryTimeout)}
-	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?asn="+strconv.Itoa(int(asn)), nil)
+// NetworkInfo returns PeeringDB for an ASN
+func NetworkInfo(asn uint, queryTimeout uint) (*Data, error) {
+	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/net?asn=%d", asn), nil)
 	if err != nil {
 		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
 	}
@@ -49,7 +50,7 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 		return nil, errors.New("PeeringDB read: " + err.Error())
 	}
 
-	var pDbResponse peeringDbResponse
+	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
 		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
 	}
@@ -61,17 +62,17 @@ func getPeeringDbData(asn int) (*peeringDbData, error) {
 	return &pDbResponse.Data[0], nil // nil error
 }
 
-// runPeeringDbQuery updates peer values from PeeringDB
-func runPeeringDbQuery(peerData *Peer) {
-	pDbData, err := getPeeringDbData(*peerData.ASN)
+// Update updates peer values from PeeringDB
+func Update(peerData *config.Peer, queryTimeout uint) {
+	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout)
 	if err != nil {
 		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}
 
 	// Set import limits
 	if *peerData.AutoImportLimits {
-		*peerData.ImportLimit4 = pDbData.ImportLimit4
-		*peerData.ImportLimit6 = pDbData.ImportLimit6
+		peerData.ImportLimit4 = &pDbData.ImportLimit4
+		peerData.ImportLimit6 = &pDbData.ImportLimit6
 
 		if pDbData.ImportLimit4 == 0 {
 			log.Warnf("peer AS%d has an IPv4 import limit of zero from PeeringDB", *peerData.ASN)

@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"io/ioutil"
@@ -16,7 +16,7 @@ func TestContains(t *testing.T) {
 		{[]string{"foo", "bar"}, "baz", false},
 	}
 	for _, tc := range testCases {
-		if out := contains(tc.array, tc.element); out != tc.expectedOutput {
+		if out := Contains(tc.array, tc.element); out != tc.expectedOutput {
 			t.Errorf("array %+v element %s failed. expected '%v' got '%v'", tc.array, tc.element, tc.expectedOutput, out)
 		}
 	}
@@ -36,43 +36,8 @@ func TestSanitize(t *testing.T) {
 		{"65530", "PEER_65530"},
 	}
 	for _, tc := range testCases {
-		if out := *sanitize(tc.input); out != tc.expectedOutput {
+		if out := *Sanitize(tc.input); out != tc.expectedOutput {
 			t.Errorf("sanitize %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, out)
-		}
-	}
-}
-
-func TestCategorizeCommunity(t *testing.T) {
-	testCases := []struct {
-		input          string
-		expectedOutput string
-		shouldError    bool
-	}{
-		{"34553,0", "standard", false},
-		{"1,1", "standard", false},
-		{"4242424242:4242424242:0", "large", false},
-		{"1:1:0", "large", false},
-		{":", "", true},
-		{"4242424242,0", "", true},
-		{"0,4242424242", "", true},
-		{"foo,1", "", true},
-		{"1,bar", "", true},
-		{"", "", true},
-		{":1:1", "", true},
-		{"1::1", "", true},
-		{"1:1:", "", true},
-		{"-1:1:1", "", true},
-		{"1:-1:1", "", true},
-		{"1:1:-1", "", true},
-	}
-	for _, tc := range testCases {
-		cType := categorizeCommunity(tc.input)
-		if cType != "" && tc.shouldError {
-			t.Errorf("categorizeCommunity should have errored on '%s' but didn't. expected error, got '%s'", tc.input, cType)
-		} else if cType == "" && !tc.shouldError {
-			t.Errorf("categorizeCommunity shouldn't have errored on '%s' but did. expected '%s'", tc.input, tc.expectedOutput)
-		} else if cType != tc.expectedOutput {
-			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
 		}
 	}
 }
@@ -89,7 +54,7 @@ func TestMoveFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := moveFile("test-cache/source.txt", "test-cache/dest.txt"); err != nil {
+	if err := MoveFile("test-cache/source.txt", "test-cache/dest.txt"); err != nil {
 		t.Error(err)
 	}
 
@@ -113,14 +78,14 @@ func TestMoveFile(t *testing.T) {
 }
 
 func TestPrintTable(t *testing.T) {
-	printTable([]string{"foo", "bar", "baz"}, [][]string{{"foo", "bar", "baz"}, {"foo", "bar", "baz"}})
+	PrintTable([]string{"foo", "bar", "baz"}, [][]string{{"foo", "bar", "baz"}, {"foo", "bar", "baz"}})
 }
 
 func TestStrDeref(t *testing.T) {
-	if out := strDeref(nil); out != "" {
+	if out := StrDeref(nil); out != "" {
 		t.Errorf("strDeref failed. expected '' got '%s'", out)
 	}
-	if out := strDeref(stringPtr("foo")); out != "foo" {
+	if out := StrDeref(StrPtr("foo")); out != "foo" {
 		t.Errorf("strDeref failed. expected 'foo' got '%s'", out)
 	}
 }

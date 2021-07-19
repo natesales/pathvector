@@ -1,4 +1,4 @@
-package main
+package portal
 
 import (
 	"bytes"
@@ -10,9 +10,11 @@ import (
 	"net/url"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/internal/config"
 )
 
-// Session stores a portal BGP session
+// session stores a portal BGP session
 type session struct {
 	Name       string `json:"name"`
 	Router     string `json:"router"`
@@ -22,8 +24,8 @@ type session struct {
 	State      string `json:"state"`
 }
 
-// portalRecord records a peer session to the peering portal server
-func portalRecord(host string, key string, routerHostname string, peers map[string]*Peer) error {
+// Record records a peer session to the peering portal server
+func Record(host string, key string, routerHostname string, peers map[string]*config.Peer) error {
 	var sessions []session
 	for name, peer := range peers {
 		for _, neighborIP := range *peer.NeighborIPs {
@@ -68,7 +70,7 @@ func portalRecord(host string, key string, routerHostname string, peers map[stri
 	}
 	if resp.StatusCode != 200 {
 		defer resp.Body.Close()
-		return fmt.Errorf("Portal server: %s", respText)
+		return fmt.Errorf("portal server: %s", respText)
 	}
 
 	return nil

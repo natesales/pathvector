@@ -19,6 +19,7 @@ func init() {
 	portalUpdateCmd.Flags().StringVar(&hostname, "hostname", "", "router hostname")
 	portalUpdateCmd.Flags().StringVar(&portalHost, "portal-host", "", "peering portal host")
 	portalUpdateCmd.Flags().StringVar(&portalKey, "portal-key", "", "peering portal API key")
+	rootCmd.AddCommand(portalUpdateCmd)
 }
 
 var portalUpdateCmd = &cobra.Command{

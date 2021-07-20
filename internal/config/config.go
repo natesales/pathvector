@@ -31,7 +31,8 @@ type Peer struct {
 	Prepends          *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
 	LocalPref         *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	Multihop          *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
-	Listen            *string   `yaml:"listen" description:"BGP listen address" default:"-"`
+	Listen4           *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`
+	Listen6           *string   `yaml:"listen6" description:"IPv6 BGP listen address" default:"-"`
 	LocalASN          *int      `yaml:"local-asn" description:"Local ASN as defined in the global ASN field" default:"-"`
 	LocalPort         *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
 	NeighborPort      *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`

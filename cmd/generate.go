@@ -165,7 +165,7 @@ var generateCmd = &cobra.Command{
 
 		// Update portal
 		if c.PortalHost != "" {
-			log.Debugln("Updating peering portal")
+			log.Infoln("Updating peering portal")
 			if err := portal.Record(c.PortalHost, c.PortalKey, c.Hostname, c.Peers, c.BIRDSocket); err != nil {
 				log.Fatal(err)
 			}

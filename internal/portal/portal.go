@@ -40,8 +40,14 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 		for _, neighborIP := range *peer.NeighborIPs {
 			log.Debugf("Adding %s", neighborIP)
 			localIP := ""
-			if peer.Listen != nil {
-				localIP = *peer.Listen
+			if strings.Contains(neighborIP, ":") { // If IPv6
+				if peer.Listen6 != nil {
+					localIP = *peer.Listen6
+				}
+			} else { // If IPv4
+				if peer.Listen4 != nil {
+					localIP = *peer.Listen4
+				}
 			}
 			// Get session state
 			state := "UNKNOWN"

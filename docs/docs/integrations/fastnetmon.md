@@ -66,7 +66,7 @@ Pathvector config needs a few extra options for the FastNetMon session:
 FastNetMon:
   asn: 65530
   local-asn: 65530  # In this example the ASN and local ASN are set explicitly for iBGP
-  listen: 127.0.0.1
+  listen4: 127.0.0.1
   neighbors: [ "127.0.0.2" ]
   filter-rpki: false  # ROAs may have a maxLength that would cause the routes to be filtered
   filter-prefix-length: false  # Disable prefix length filter so /32 and /128 routes will be accepted

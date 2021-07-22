@@ -6,7 +6,7 @@ sidebar_position: 2
 
 All versions of Pathvector for all supported platforms are available to download from the latest [release page](https://github.com/natesales/pathvector/releases).
 
-It is recommended to run Pathvector every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * pathvector` to your crontab will update the filters at 12 AM and PM every day.
+It is recommended to run Pathvector every 12 hours to update IRR prefix lists and PeeringDB prefix limits. Adding `0 */12 * * * pathvector generate` to your crontab will update the filters at 12 AM and PM every day.
 
 The only required dependency is `bird >= 2.0.7`, but some features require additional dependencies:
 

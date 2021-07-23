@@ -26,6 +26,7 @@ sidebar_position: 3
 | rtr-server | string | rtr.rpki.cloudflare.com:8282 |  | RPKI-to-router server |
 | keep-filtered | bool | false |  | Should filtered routes be kept in memory? |
 | kernel-learn | bool | false |  | Should routes from the kernel be learned into BIRD? |
+| kernel-export | bool | true |  | Export routes to kernel routing table |
 | merge-paths | bool | false |  | Should best and equivalent non-best routes be imported to build ECMP routes? |
 | source4 | string |  |  | Source IPv4 address |
 | source6 | string |  |  | Source IPv6 address |

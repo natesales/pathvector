@@ -186,6 +186,7 @@ type Config struct {
 	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	KernelLearn   bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
+	KernelExport  bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`

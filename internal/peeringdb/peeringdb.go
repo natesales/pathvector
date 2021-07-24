@@ -85,7 +85,8 @@ func Update(peerData *config.Peer, queryTimeout uint) {
 	// Set as-set if auto-as-set is enabled and there isn't a manual AS set defined
 	if *peerData.AutoASSet && peerData.ASSet == nil {
 		if pDbData.ASSet == "" {
-			log.Fatalf("peer AS%d doesn't have an as-set in PeeringDB", *peerData.ASN)
+			log.Warnf("peer AS%d doesn't have an as-set in PeeringDB, using ASN instead", *peerData.ASN)
+			pDbData.ASSet = fmt.Sprintf("AS%d", *peerData.ASN)
 		}
 
 		// Used to get address of string

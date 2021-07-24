@@ -6,10 +6,17 @@ import (
 	"github.com/natesales/pathvector/cmd"
 )
 
+// Build process flags
+var (
+	version = "devel"
+	commit  = "unknown"
+	date    = "unknown"
+)
+
 //go:generate ./generate.sh
 
 func main() {
-	if err := cmd.Execute(); err != nil {
+	if err := cmd.Execute(version, commit, date); err != nil {
 		log.Fatal(err)
 	}
 }

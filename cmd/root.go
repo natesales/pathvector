@@ -41,6 +41,9 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&noConfigure, "no-configure", "n", false, "Don't configure BIRD")
 }
 
-func Execute() error {
+func Execute(v string, c string, d string) error {
+	version = v
+	commit = c
+	date = d
 	return rootCmd.Execute()
 }

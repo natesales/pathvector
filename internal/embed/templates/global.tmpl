@@ -345,6 +345,16 @@ function accept_local() {
   {{- end }}
 }
 
+# ---- BFD ----
+{{ range $i, $instance := .BFDInstances }}
+protocol bfd {{ StrDeref $instance.ProtocolName }} {
+  neighbor {{ StrDeref $instance.Neighbor }};
+  interface "{{ StrDeref $instance.Interface }}" {
+    interval {{ UintDeref $instance.Interval }} ms;
+    multiplier {{ UintDeref $instance.Multiplier }};
+  };
+}
+{{ end }}
 # ---- Peers ----
 
 include "manual*.conf";

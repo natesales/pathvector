@@ -122,6 +122,16 @@ type VRRPInstance struct {
 	VIPs6 []string `yaml:"-" description:"-"`
 }
 
+// BFDInstance stores a single BFD instance
+type BFDInstance struct {
+	Neighbor   *string `yaml:"neighbor" description:"Neighbor IP address" default:"-"`
+	Interface  *string `yaml:"interface" description:"Interface (pattern accepted)" default:"-"`
+	Interval   *uint   `yaml:"interval" description:"RX and TX interval" default:"200"`
+	Multiplier *uint   `yaml:"multiplier" description:"Number of missed packets for the state to be declared down" default:"10"`
+
+	ProtocolName *string `yaml:"-" description:"-" default:"-"`
+}
+
 // Augments store BIRD specific options
 type Augments struct {
 	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
@@ -194,11 +204,12 @@ type Config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 
-	Peers         map[string]*Peer `yaml:"peers" description:"BGP peer configuration"`
-	Templates     map[string]*Peer `yaml:"templates" description:"BGP peer templates"`
-	VRRPInstances []VRRPInstance   `yaml:"vrrp" description:"List of VRRP instances"`
-	Augments      Augments         `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     Optimizer        `yaml:"optimizer" description:"Route optimizer options"`
+	Peers         map[string]*Peer       `yaml:"peers" description:"BGP peer configuration"`
+	Templates     map[string]*Peer       `yaml:"templates" description:"BGP peer templates"`
+	VRRPInstances []VRRPInstance         `yaml:"vrrp" description:"List of VRRP instances"`
+	BFDInstances  map[string]BFDInstance `yaml:"bfd" description:"BFD instances"`
+	Augments      Augments               `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     Optimizer              `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`
@@ -413,6 +424,14 @@ func Load(configBlob []byte) (*Config, error) {
 		} else { // If IPv4
 			c.Augments.Statics4[prefix] = nexthop
 		}
+	}
+
+	// Parse BFD configs
+	for instanceName, bfdInstance := range c.BFDInstances {
+		if net.ParseIP(*bfdInstance.Neighbor) == nil {
+			return nil, fmt.Errorf("invalid BFD neighbor %s", *bfdInstance.Neighbor)
+		}
+		bfdInstance.ProtocolName = util.Sanitize(instanceName)
 	}
 
 	// Parse VRRP configs

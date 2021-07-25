@@ -36,8 +36,50 @@ sidebar_position: 3
 | peers | map[string]Peer |  |  | BGP peer configuration |
 | templates | map[string]Peer |  |  | BGP peer templates |
 | vrrp | []VRRPInstance |  |  | List of VRRP instances |
+| bfd | map[string]BFDInstance |  |  | BFD instances |
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
+
+## VRRPInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| state | string |  | required | VRRP instance state ('primary' or 'backup') |
+| interface | string |  | required | Interface to send VRRP packets on |
+| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
+| priority | uint |  | required | RFC3768 VRRP Priority |
+| vips | []string |  | required,cidr | List of virtual IPs |
+
+## BFDInstance
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| neighbor | string |  |  | Neighbor IP address |
+| interface | string |  |  | Interface (pattern accepted) |
+| interval | uint | 200 |  | RX and TX interval |
+| multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
+
+## Augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
+| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
+| alert-script | string |  |  | Script to call on optimizer event |
+| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 
 ## Peer
 | Option | Type | Default | Validation | Description |
@@ -73,6 +115,7 @@ sidebar_position: 3
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |
 | remove-communities | []string |  |  | List of communities to remove before from routes announced by this peer |
 | remove-all-communities | int |  |  | Remove all standard and large communities beginning with this value |
+| as-prefs | map[uint32]uint32 |  |  | Map of ASN to import local pref (not included in optimizer) |
 | as-set | string |  |  | Peer's as-set for filtering |
 | import-limit4 | int | 1000000 |  | Maximum number of IPv4 prefixes to import |
 | import-limit6 | int | 200000 |  | Maximum number of IPv6 prefixes to import |
@@ -100,37 +143,4 @@ sidebar_position: 3
 | pre-export-final | string |  |  | Configuration to add immediately before the final accept/reject on export |
 | probe-sources | []string |  |  | Optimizer probe source addresses |
 | optimize-inbound | bool | false |  | Should the optimizer modify inbound policy? |
-
-## VRRPInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| state | string |  | required | VRRP instance state ('primary' or 'backup') |
-| interface | string |  | required | Interface to send VRRP packets on |
-| vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
-| priority | uint |  | required | RFC3768 VRRP Priority |
-| vips | []string |  | required,cidr | List of virtual IPs |
-
-## Augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
-| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
-| probe-count | int | 5 |  | Number of pings to send in each run |
-| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
-| cache-size | int | 15 |  | Number of probe results to store per peer |
-| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
-| alert-script | string |  |  | Script to call on optimizer event |
-| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 

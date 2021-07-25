@@ -103,6 +103,13 @@ var funcMap = template.FuncMap{
 		return 0
 	},
 
+	"UintDeref": func(i *uint) uint {
+		if i != nil {
+			return *i
+		}
+		return 0
+	},
+
 	"MapDeref": func(m *map[string]string) map[string]string {
 		if m != nil {
 			return *m

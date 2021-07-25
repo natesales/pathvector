@@ -8,6 +8,13 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 
+bfd:
+  Transit 1:
+    neighbor: 192.0.2.20
+    interface: bond0.10
+    interval: 200
+    multiplier: 10
+
 peers:
   Example:
     asn: 65510

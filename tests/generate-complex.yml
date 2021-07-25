@@ -20,6 +20,10 @@ peers:
     asn: 65510
     allow-local-as: true
     add-path-tx: true
+    as-prefs:
+      65510: 10
+      65520: 20
+      65530: 30
     import-communities:
       - 65530,1
       - 65530:65530:1

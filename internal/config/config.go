@@ -56,6 +56,8 @@ type Peer struct {
 	RemoveCommunities    *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
 	RemoveAllCommunities *int      `yaml:"remove-all-communities" description:"Remove all standard and large communities beginning with this value" default:"-"`
 
+	ASPrefs *map[uint32]uint32 `yaml:"as-prefs" description:"Map of ASN to import local pref (not included in optimizer)" default:"-"`
+
 	// Filtering
 	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
 	ImportLimit4            *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
@@ -71,7 +73,7 @@ type Peer struct {
 	FilterBogonRoutes  *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
 	FilterBogonASNs    *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
 	FilterTransitASNs  *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
-	FilterPrefixLength *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4: len > 24 || len < 8; IPv6: len > 48 || len < 12) be rejected?" default:"true"`
+	FilterPrefixLength *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`
@@ -204,12 +206,12 @@ type Config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 
-	Peers         map[string]*Peer       `yaml:"peers" description:"BGP peer configuration"`
-	Templates     map[string]*Peer       `yaml:"templates" description:"BGP peer templates"`
-	VRRPInstances []VRRPInstance         `yaml:"vrrp" description:"List of VRRP instances"`
-	BFDInstances  map[string]BFDInstance `yaml:"bfd" description:"BFD instances"`
-	Augments      Augments               `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     Optimizer              `yaml:"optimizer" description:"Route optimizer options"`
+	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
+	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
+	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`
+	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
+	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`

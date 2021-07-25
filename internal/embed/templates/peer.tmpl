@@ -73,6 +73,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             bgp_large_community.delete([({{ IntDeref $peer.RemoveAllCommunities }}, *, *)]);
             {{ end }}
 
+            {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
+            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
 
             bgp_local_pref = {{ $peer.LocalPref }}; # pathvector:localpref

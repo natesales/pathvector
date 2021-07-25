@@ -117,6 +117,13 @@ var funcMap = template.FuncMap{
 		return map[string]string{}
 	},
 
+	"Uint32MapDeref": func(m *map[uint32]uint32) map[uint32]uint32 {
+		if m != nil {
+			return *m
+		}
+		return map[uint32]uint32{}
+	},
+
 	"StrSliceDeref": func(s *[]string) []string {
 		if s != nil {
 			return *s
@@ -185,7 +192,7 @@ func Load(fs embed.FS) error {
 }
 
 // WriteVRRPConfig writes the VRRP config to a keepalived config file
-func WriteVRRPConfig(instances []config.VRRPInstance, keepalivedConfig string) {
+func WriteVRRPConfig(instances map[string]*config.VRRPInstance, keepalivedConfig string) {
 	if len(instances) < 1 {
 		log.Infof("No VRRP instances are defined, not writing config")
 		return

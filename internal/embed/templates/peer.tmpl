@@ -67,7 +67,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ if IntDeref $peer.RemoveAllCommunities }}
+            {{ if lt (IntDeref $peer.RemoveAllCommunities) 65535 }}
             bgp_community.delete([({{ IntDeref $peer.RemoveAllCommunities }}, *)]);
+            {{ end }}
             bgp_large_community.delete([({{ IntDeref $peer.RemoveAllCommunities }}, *, *)]);
             {{ end }}
 

@@ -346,8 +346,8 @@ function accept_local() {
 }
 
 # ---- BFD ----
-{{ range $name, $instance := .BFDInstances }}
-protocol bfd {{ $name }} {
+{{ range $i, $instance := .BFDInstances }}
+protocol bfd {{ StrDeref $instance.ProtocolName }} {
   neighbor {{ StrDeref $instance.Neighbor }};
   interface "{{ StrDeref $instance.Interface }}" {
     interval {{ UintDeref $instance.Interval }} ms;

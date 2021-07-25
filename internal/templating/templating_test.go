@@ -18,9 +18,9 @@ func TestWriteUIFile(t *testing.T) {
 }
 
 func TestWriteBlankVRRPConfig(t *testing.T) {
-	WriteVRRPConfig([]config.VRRPInstance{}, "/tmp/pathvector-go-test-keepalived.conf")
+	WriteVRRPConfig(map[string]*config.VRRPInstance{}, "/tmp/pathvector-go-test-keepalived.conf")
 }
 
 func TestWriteVRRPConfig(t *testing.T) {
-	WriteVRRPConfig([]config.VRRPInstance{{State: "primary"}}, "/tmp/pathvector-go-test-keepalived.conf")
+	WriteVRRPConfig(map[string]*config.VRRPInstance{"VRRP 1": {State: "primary"}}, "/tmp/pathvector-go-test-keepalived.conf")
 }

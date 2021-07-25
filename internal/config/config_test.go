@@ -53,13 +53,15 @@ augments:
     "203.0.113.0/24" : "192.0.2.10"
     "2001:db8:2::/64" : "2001:db8::1"
 vrrp:
-  - state: primary
+ VRRP 1:
+    state: primary
     interface: eth0
     priority: 255
     vips:
       - 192.0.2.1/24
       - 2001:db8::1/64
-  - state: backup
+ VRRP 2:
+    state: backup
     interface: eth1
     priority: 255
     vips:
@@ -130,7 +132,8 @@ func TestLoadConfigInvalidVRRPState(t *testing.T) {
 asn: 34553
 router-id: 192.0.2.1
 vrrp:
-  - state: invalid
+  VRRP 1:
+    state: invalid
     interface: eth1
     priority: 255
     vips:
@@ -162,7 +165,8 @@ func TestLoadConfigInvalidVIP(t *testing.T) {
 asn: 34553
 router-id: 192.0.2.1
 vrrp:
-  - state: invalid
+  VRRP 1:
+    state: invalid
     interface: eth1
     priority: 255
     vips:

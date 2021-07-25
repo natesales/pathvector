@@ -8,6 +8,16 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 
+vrrp:
+  VRRP 1:
+    state: primary
+    interface: bond0.10
+    vrid: 1
+    priority: 255
+    vips:
+      - 192.0.2.1/24
+      - 2001:db8::1/48
+
 bfd:
   Transit 1:
     neighbor: 192.0.2.20

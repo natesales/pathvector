@@ -22,15 +22,13 @@ Pathvector releases >= 5.1.2 are available in the https://repo.pathvector.io pac
 continue to be uploaded to the [natesales repo](https://github.com/natesales/repo) for compatibility with existing
 installs, but for security it is recommended to use the repo.pathvector.io for all new installations due to increased
 security by GPG signatures. Packages in repo.pathvector.io are signed
-with [`0983 AC66 7B4F 0B54 F69D`](https://pathvector.io/pgp.asc). Note that packages downloaded from GitHub releases are
+with [`0983 AC66 7B4F 0B54 F69D`](https://repo.pathvector.io/pgp.asc). Note that packages downloaded from GitHub releases are
 not signed.
-
-## Linux
 
 Pathvector on Linux is available for amd64, aarch64, and mips64 as binaries and deb and rpm packages
 from [releases](https://github.com/natesales/pathvector/releases).
 
-### Debian (apt)
+## Debian
 
 ```shell
 curl https://repo.pathvector.io/pgp.asc > /usr/share/keyrings/pathvector.asc
@@ -38,7 +36,7 @@ echo "deb [signed-by=/usr/share/keyrings/pathvector.asc] https://repo.pathvector
 apt update && apt install -y pathvector
 ```
 
-### CentOS (yum)
+## CentOS
 
 ```shell
 yum install -y yum-utils
@@ -46,17 +44,13 @@ yum-config-manager --add-repo https://repo.pathvector.io/yum/pathvector.repo
 yum install pathvector
 ```
 
-### VyOS
+## VyOS
 
-VyOS is based on Debian, see [Debian](#debian-apt) for more information.
+VyOS is based on Debian, see [Debian](#debian) for more information.
 
-### TNSR
+## TNSR
 
-TNSR is based on CentOS, see [CentOS](#centos-yum) for more information.
-
-### Nokia Service Router (SR) Linux
-
-Nokia SR Linux is based on CentOS, see [CentOS](#centos-yum) for more information.
+TNSR is based on CentOS, see [CentOS](#centos) for more information.
 
 ## FreeBSD
 
@@ -65,7 +59,7 @@ Pathvector is available as an amd64/aarch64 binary for FreeBSD from the [release
 ## Ubiquiti EdgeOS
 
 Ubiquiti EdgeRouters are based on Debian. Pathvector supports the ER-8-XG, ER-12P, ER-12, ERPro-8, ER-8, ER-6P, ERPoe-5,
-ER-4, and ERLite-3 routers based on the MIPS64 architecture. See [Debian](#debian-apt) for more information.
+ER-4, and ERLite-3 routers based on the MIPS64 architecture. See [Debian](#debian) for more information.
 
 Not Supported (MIPS1004Kc): ER-X, ER-X-SFP, ER-10X
 
@@ -100,6 +94,10 @@ junos> request system software add pathvector-juniper.tgz
 
 Pathvector can run on IOx compatible Cisco devices by installing a IOx package release, or directly to the device with
 ioxclient. See https://developer.cisco.com/docs/iox/#!app-management/application-management for more information.
+
+## Nokia Service Router (SR) Linux
+
+Nokia SR Linux is based on CentOS, see [CentOS](#centos) for more information.
 
 ## Building from source
 

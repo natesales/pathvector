@@ -69,7 +69,7 @@ protocol kernel {
   ipv4 {
     export filter {
       {{ if .KernelExport }}
-      {{ $length := len .Augments.SRD4 }}{{ if eq $length 0 }}
+      {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
@@ -88,11 +88,13 @@ protocol kernel {
       accept;
       {{ end }}
       {{ else }}
-      if (net ~ [{{ BirdSet .Augments.SRD4 }}]) then {
-        accept;
-      } else {
-        reject;
-      }
+      {{ range $i, $community := StringSliceIter .Augments.SRDStandardCommunities }}
+      if (({{ $community }}) ~ bgp_community) then accept;
+      {{ end }}
+      {{ range $i, $community := StringSliceIter .Augments.SRDLargeCommunities }}
+      if (({{ $community }}) ~ bgp_large_community) then accept;
+      {{ end }}
+      reject;
       {{ end }}
       {{ else }}reject;{{ end }}
     };
@@ -107,7 +109,7 @@ protocol kernel {
   ipv6 {
     export filter {
       {{ if .KernelExport }}
-      {{ $length := len .Augments.SRD6 }}{{ if eq $length 0 }}
+      {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept6 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
@@ -127,11 +129,13 @@ protocol kernel {
       accept;
       {{ end }}
       {{ else }}
-      if (net ~ [{{ BirdSet .Augments.SRD6 }}]) then {
-        accept;
-      } else {
-        reject;
-      }
+      {{ range $i, $community := StringSliceIter .Augments.SRDStandardCommunities }}
+      if (({{ $community }}) ~ bgp_community) then accept;
+      {{ end }}
+      {{ range $i, $community := StringSliceIter .Augments.SRDLargeCommunities }}
+      if (({{ $community }}) ~ bgp_large_community) then accept;
+      {{ end }}
+      reject;
       {{ end }}
       {{ else }}reject;{{ end }}
     };

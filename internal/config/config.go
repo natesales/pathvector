@@ -136,17 +136,17 @@ type BFDInstance struct {
 
 // Augments store BIRD specific options
 type Augments struct {
-	Accept4 []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
-	Accept6 []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
-	Reject4 []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
-	Reject6 []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
-	Statics map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
-	SRD     []string          `yaml:"srd" description:"List of prefixes to export to kernel (if list is not empty, all other prefixes will not be exported)"`
+	Accept4        []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
+	Accept6        []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
+	Reject4        []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
+	Reject6        []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
+	Statics        map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+	SRDCommunities []string          `yaml:"srd-communities" description:"List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)"`
 
-	SRD4     []string          `yaml:"-" description:"-"`
-	SRD6     []string          `yaml:"-" description:"-"`
-	Statics4 map[string]string `yaml:"-" description:"-"`
-	Statics6 map[string]string `yaml:"-" description:"-"`
+	SRDStandardCommunities []string          `yaml:"-" description:"-"`
+	SRDLargeCommunities    []string          `yaml:"-" description:"-"`
+	Statics4               map[string]string `yaml:"-" description:"-"`
+	Statics6               map[string]string `yaml:"-" description:"-"`
 }
 
 // ProbeResult stores a single probe result
@@ -414,19 +414,22 @@ func Load(configBlob []byte) (*Config, error) {
 	c.Augments.Statics4 = map[string]string{}
 	c.Augments.Statics6 = map[string]string{}
 
-	if len(c.Augments.SRD) > 0 {
-		c.Augments.SRD4 = []string{}
-		c.Augments.SRD6 = []string{}
-
-		for _, prefixString := range c.Augments.SRD {
-			ip, _, err := net.ParseCIDR(prefixString)
-			if err != nil {
-				log.Fatalf("unable to parse SRD prefix %s: ", err)
-			}
-			if ip.To4() != nil { // If IPv4
-				c.Augments.SRD4 = append(c.Augments.SRD4, prefixString)
-			} else { // If IPv6
-				c.Augments.SRD6 = append(c.Augments.SRD6, prefixString)
+	// Categorize communities
+	if c.Augments.SRDCommunities != nil {
+		for _, community := range c.Augments.SRDCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				if c.Augments.SRDStandardCommunities == nil {
+					c.Augments.SRDStandardCommunities = []string{}
+				}
+				c.Augments.SRDStandardCommunities = append(c.Augments.SRDStandardCommunities, community)
+			} else if communityType == "large" {
+				if c.Augments.SRDLargeCommunities == nil {
+					c.Augments.SRDLargeCommunities = []string{}
+				}
+				c.Augments.SRDLargeCommunities = append(c.Augments.SRDLargeCommunities, strings.ReplaceAll(community, ":", ","))
+			} else {
+				return nil, errors.New("Invalid SRD community: " + community)
 			}
 		}
 	}

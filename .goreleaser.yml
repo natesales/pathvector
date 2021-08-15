@@ -5,6 +5,8 @@ before:
 
 builds:
   - id: pathvector
+    env:
+      - CGO_ENABLED=0
     goos:
       - linux
       - freebsd

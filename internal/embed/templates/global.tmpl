@@ -69,6 +69,7 @@ protocol kernel {
   ipv4 {
     export filter {
       {{ if .KernelExport }}
+      {{ $length := len .Augments.SRD4 }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
@@ -86,6 +87,13 @@ protocol kernel {
       {{ else }}
       accept;
       {{ end }}
+      {{ else }}
+      if (net ~ [{{ BirdSet .Augments.SRD4 }}]) then {
+        accept;
+      } else {
+        reject;
+      }
+      {{ end }}
       {{ else }}reject;{{ end }}
     };
   };
@@ -99,6 +107,7 @@ protocol kernel {
   ipv6 {
     export filter {
       {{ if .KernelExport }}
+      {{ $length := len .Augments.SRD6 }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept6 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
@@ -116,6 +125,13 @@ protocol kernel {
       }
       {{ else }}
       accept;
+      {{ end }}
+      {{ else }}
+      if (net ~ [{{ BirdSet .Augments.SRD6 }}]) then {
+        accept;
+      } else {
+        reject;
+      }
       {{ end }}
       {{ else }}reject;{{ end }}
     };

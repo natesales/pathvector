@@ -141,7 +141,10 @@ type Augments struct {
 	Reject4 []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
 	Reject6 []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
 	Statics map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+	SRD     []string          `yaml:"srd" description:"List of prefixes to export to kernel (if list is not empty, all other prefixes will not be exported)"`
 
+	SRD4     []string          `yaml:"-" description:"-"`
+	SRD6     []string          `yaml:"-" description:"-"`
 	Statics4 map[string]string `yaml:"-" description:"-"`
 	Statics6 map[string]string `yaml:"-" description:"-"`
 }
@@ -410,6 +413,23 @@ func Load(configBlob []byte) (*Config, error) {
 	// Initialize static maps
 	c.Augments.Statics4 = map[string]string{}
 	c.Augments.Statics6 = map[string]string{}
+
+	if len(c.Augments.SRD) > 0 {
+		c.Augments.SRD4 = []string{}
+		c.Augments.SRD6 = []string{}
+
+		for _, prefixString := range c.Augments.SRD {
+			ip, _, err := net.ParseCIDR(prefixString)
+			if err != nil {
+				log.Fatalf("unable to parse SRD prefix %s: ", err)
+			}
+			if ip.To4() != nil { // If IPv4
+				c.Augments.SRD4 = append(c.Augments.SRD4, prefixString)
+			} else { // If IPv6
+				c.Augments.SRD6 = append(c.Augments.SRD6, prefixString)
+			}
+		}
+	}
 
 	// Parse static routes
 	for prefix, nexthop := range c.Augments.Statics {

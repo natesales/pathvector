@@ -8,6 +8,11 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 
+augments:
+  srd:
+    - 192.0.2.0/24
+    - 2001:db8::/48
+
 vrrp:
   VRRP 1:
     state: primary

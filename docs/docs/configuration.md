@@ -40,6 +40,21 @@ sidebar_position: 3
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
+| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
+| alert-script | string |  |  | Script to call on optimizer event |
+| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
+
 ## Peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -80,6 +95,7 @@ sidebar_position: 3
 | import-limit6 | int | 200000 |  | Maximum number of IPv6 prefixes to import |
 | enforce-first-as | bool | true |  | Should we only accept routes who's first AS is equal to the configured peer address? |
 | enforce-peer-nexthop | bool | true |  | Should we only accept routes with a next hop equal to the configured neighbor address? |
+| force-peer-nexthop | bool | false |  | Rewrite nexthop to peer address |
 | max-prefix-action | string | disable |  | What action should be taken when the max prefix limit is tripped? |
 | allow-blackhole-community | bool | false |  | Should this peer be allowed to send routes with the blackhole community? |
 | filter-irr | bool | false |  | Should IRR filtering be applied? |
@@ -129,19 +145,4 @@ sidebar_position: 3
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
 | srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
-| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
-| probe-count | int | 5 |  | Number of pings to send in each run |
-| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
-| cache-size | int | 15 |  | Number of probe results to store per peer |
-| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
-| alert-script | string |  |  | Script to call on optimizer event |
-| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 

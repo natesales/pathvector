@@ -56,6 +56,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
+            {{ if BoolDeref $peer.ForceNeighborNexthop }}bgp_next_hop = {{ $neighbor }};{{ end }}
 
             {{ if StrDeref $peer.ImportNextHop }}bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};{{ end }}
 

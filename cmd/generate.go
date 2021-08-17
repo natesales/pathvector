@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -90,14 +89,8 @@ var generateCmd = &cobra.Command{
 		log.Debug("Finished writing global config file")
 
 		// Remove old peer-specific configs
-		files, err := filepath.Glob(path.Join(c.CacheDirectory, "AS*.conf"))
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, f := range files {
-			if err := os.Remove(f); err != nil {
-				log.Fatalf("Removing old config files: %v", err)
-			}
+		if err := util.RemoveFileGlob(path.Join(c.CacheDirectory, "AS*.conf")); err != nil {
+			log.Fatalf("Removing old config files: %v", err)
 		}
 
 		// Print global config

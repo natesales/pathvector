@@ -3,6 +3,7 @@ package util
 import (
 	"io"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"unicode"
@@ -112,6 +113,20 @@ func PrintTable(header []string, data [][]string) {
 	table.SetNoWhiteSpace(true)
 	table.AppendBulk(data)
 	table.Render()
+}
+
+// RemoveFileGlob removes files by glob
+func RemoveFileGlob(glob string) error {
+	files, err := filepath.Glob(glob)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if err := os.Remove(f); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Pointer helpers used to write cleaner tests

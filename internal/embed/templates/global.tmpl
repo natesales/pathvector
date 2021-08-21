@@ -171,6 +171,7 @@ function process_blackholes() {
 
 # ---- RPKI ----
 
+{{ if .RPKIEnable }}
 roa4 table rpki4;
 roa6 table rpki6;
 
@@ -185,6 +186,7 @@ protocol rpki {
   refresh keep 900;
   expire keep 172800;
 }
+{{ end }}
 
 # ---- Filter Lists ----
 # Prefix and ASN lists are adapted from https://github.com/neptune-networks/peering/blob/master/templates/bird.conf.erb and https://github.com/NLNOG/bgpfilterguide, check out those repos too!
@@ -308,6 +310,7 @@ function reject_long_as_paths() {
 }
 
 function reject_rpki_invalid() {
+  {{ if .RPKIEnable }}
   if (net.type = NET_IP4) then {
     if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
@@ -315,6 +318,7 @@ function reject_rpki_invalid() {
   if (net.type = NET_IP6) then {
     if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
+  {{ end }}
 }
 
 function reject_out_of_bounds_routes() {

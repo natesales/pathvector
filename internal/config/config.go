@@ -209,6 +209,7 @@ type Config struct {
 	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
+	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
 
 	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`

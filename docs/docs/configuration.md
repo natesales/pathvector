@@ -33,27 +33,13 @@ sidebar_position: 3
 | default-route | bool | true |  | Add a default route |
 | accept-default | bool | false |  | Should default routes be added to the bogon list? |
 | kernel-table | int |  |  | Kernel table |
+| rpki-enable | bool | true |  | Enable RPKI RTR session |
 | peers | map[string]Peer |  |  | BGP peer configuration |
 | templates | map[string]Peer |  |  | BGP peer templates |
 | vrrp | map[string]VRRPInstance |  |  | List of VRRP instances |
 | bfd | map[string]BFDInstance |  |  | BFD instances |
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
-| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
-| probe-count | int | 5 |  | Number of pings to send in each run |
-| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
-| cache-size | int | 15 |  | Number of probe results to store per peer |
-| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
-| alert-script | string |  |  | Script to call on optimizer event |
-| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 
 ## Peer
 | Option | Type | Default | Validation | Description |
@@ -145,4 +131,19 @@ sidebar_position: 3
 | reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
 | statics | map[string]string |  |  | List of static routes to include in BIRD |
 | srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
+
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
+| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
+| alert-script | string |  |  | Script to call on optimizer event |
+| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 

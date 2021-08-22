@@ -56,7 +56,7 @@ timeformat log iso long;
 timeformat protocol iso long;
 timeformat route iso long;
 
-log {{ .LogFile }} all;
+log {{ if eq .LogFile "syslog" }}syslog{{ else }}"{{ .LogFile }}"{{ end }} all;
 
 protocol device {};
 

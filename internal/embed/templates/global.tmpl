@@ -56,7 +56,7 @@ timeformat log iso long;
 timeformat protocol iso long;
 timeformat route iso long;
 
-log syslog all;
+log {{ .LogFile }} all;
 
 protocol device {};
 

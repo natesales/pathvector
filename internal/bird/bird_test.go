@@ -34,30 +34,26 @@ func TestBirdConn(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer l.Close()
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			return
-		}
-		defer conn.Close()
-
-		if _, err := conn.Write([]byte("0001 Fake BIRD response 1")); err != nil {
-			t.Error(err)
-		}
-
-		buf := make([]byte, 1024)
-		n, err := conn.Read(buf[:])
-		if err != nil {
-			t.Error(err)
-		}
-		if string(buf[:n]) != "bird command test\n" {
-			t.Errorf("expected 'bird command test' got %s", string(buf[:n]))
-		}
-
-		if _, err := conn.Write([]byte("0001 Fake BIRD response 2")); err != nil {
-			t.Error(err)
-		}
-
+	conn, err := l.Accept()
+	if err != nil {
 		return
+	}
+	defer conn.Close()
+
+	if _, err := conn.Write([]byte("0001 Fake BIRD response 1")); err != nil {
+		t.Error(err)
+	}
+
+	buf := make([]byte, 1024)
+	n, err := conn.Read(buf[:])
+	if err != nil {
+		t.Error(err)
+	}
+	if string(buf[:n]) != "bird command test\n" {
+		t.Errorf("expected 'bird command test' got %s", string(buf[:n]))
+	}
+
+	if _, err := conn.Write([]byte("0001 Fake BIRD response 2")); err != nil {
+		t.Error(err)
 	}
 }

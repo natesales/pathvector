@@ -27,7 +27,7 @@ func Contains(a []string, x string) bool {
 // Sanitize limits an input string to only uppercase letters and numbers
 func Sanitize(input string) *string {
 	output := ""
-	for _, chr := range []rune(strings.ReplaceAll(strings.ToUpper(input), " ", "_")) {
+	for _, chr := range strings.ReplaceAll(strings.ToUpper(input), " ", "_") {
 		if Contains(alphabet, string(chr)) || string(chr) == "_" {
 			output += string(chr)
 		}

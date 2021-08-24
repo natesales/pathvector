@@ -124,7 +124,7 @@ func Reformat(input string) string {
 		}
 
 		if !func(input string) bool {
-			for _, chr := range []rune(input) {
+			for _, chr := range input {
 				if string(chr) != " " {
 					return false
 				}

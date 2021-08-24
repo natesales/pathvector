@@ -29,6 +29,9 @@ jobs:
       - run: go generate -x
       - run: go build -v .
 
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+
       - name: Setup integration test environment
         run: sudo bash tests/setup.sh
 

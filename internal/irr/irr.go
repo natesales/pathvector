@@ -46,6 +46,18 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 		return fmt.Errorf("peer has filter-irr enabled and no as-set defined")
 	}
 
+	// Does the peer have any IPv4 or IPv6 neighbors?
+	var hasNeighbor4, hasNeighbor6 bool
+	if peerData.NeighborIPs != nil {
+		for _, n := range *peerData.NeighborIPs {
+			if strings.Contains(n, ".") {
+				hasNeighbor4 = true
+			} else if strings.Contains(n, ":") {
+				hasNeighbor6 = true
+			}
+		}
+	}
+
 	prefixesFromIRR4, err := PrefixSet(*peerData.ASSet, 4, irrServer, queryTimeout)
 	if err != nil {
 		return fmt.Errorf("unable to get IPv4 IRR prefix list from %s", *peerData.ASSet)
@@ -55,8 +67,8 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 	}
 	pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
 	peerData.PrefixSet4 = &pfx4
-	if len(pfx4) == 0 {
-		return fmt.Errorf("peer has a prefix filter defined but no IPv4 prefixes")
+	if len(pfx4) == 0 && hasNeighbor4 {
+		return fmt.Errorf("peer has IPv4 session(s) but no IPv4 prefixes")
 	}
 
 	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout)
@@ -68,8 +80,8 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 	}
 	pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
 	peerData.PrefixSet6 = &pfx6
-	if len(pfx6) == 0 {
-		return fmt.Errorf("peer has a prefix filter defined but no IPv6 prefixes")
+	if len(pfx6) == 0 && hasNeighbor6 {
+		return fmt.Errorf("peer has IPv6 session(s) but no IPv6 prefixes")
 	}
 
 	return nil // nil error

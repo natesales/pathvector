@@ -11,5 +11,6 @@ else
 fi
 
 for d in ../vendorbuild/*; do
+  echo "Building for $d"
   "$d"/build.sh
 done

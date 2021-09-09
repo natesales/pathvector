@@ -21,3 +21,4 @@ vendorbuild/cisco/ioxclient
 
 # Testing
 test-cache/
+test-conf.yml

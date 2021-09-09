@@ -1,0 +1,1 @@
+0 */12 * * * pathvector generate >> /var/log/cron.log 2>&1

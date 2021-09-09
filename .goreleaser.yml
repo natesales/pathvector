@@ -58,3 +58,4 @@ release:
     - glob: dist/pathvector-*arista*
     - glob: dist/pathvector-*juniper*
     - glob: dist/pathvector-*cisco*
+    - glob: dist/pathvector-*mikrotik*

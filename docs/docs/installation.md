@@ -22,8 +22,7 @@ Pathvector releases >= 5.1.2 are available in the https://repo.pathvector.io pac
 continue to be uploaded to the [natesales repo](https://github.com/natesales/repo) for compatibility with existing
 installs, but for security it is recommended to use the repo.pathvector.io for all new installations due to increased
 security by GPG signatures. Packages in repo.pathvector.io are signed
-with [`0983 AC66 7B4F 0B54 F69D`](https://repo.pathvector.io/pgp.asc). Note that packages downloaded from GitHub releases are
-not signed.
+with [`0983 AC66 7B4F 0B54 F69D`](https://repo.pathvector.io/pgp.asc). Note that packages downloaded from GitHub releases are not signed.
 
 Pathvector on Linux is available for amd64, aarch64, and mips64 as binaries and deb and rpm packages
 from [releases](https://github.com/natesales/pathvector/releases).
@@ -54,7 +53,8 @@ TNSR is based on CentOS, see [CentOS](#centos) for more information.
 
 ## FreeBSD
 
-Pathvector is available as an amd64/aarch64 binary for FreeBSD from the [releases](https://github.com/natesales/pathvector/releases) page.
+Pathvector is available as an amd64/aarch64 binary for FreeBSD from
+the [releases](https://github.com/natesales/pathvector/releases) page.
 
 ## Ubiquiti EdgeOS
 
@@ -98,6 +98,12 @@ ioxclient. See https://developer.cisco.com/docs/iox/#!app-management/application
 ## Nokia Service Router (SR) Linux
 
 Nokia SR Linux is based on CentOS, see [CentOS](#centos) for more information.
+
+## Mikrotik RouterOS
+
+Pathvector can be installed on >= RouterOS v7.1rc3 on 64-bit ARM hardware. Check
+the [Mikrotik Product Matrix](https://mikrotik.com/products/matrix) for the most recent hardware listing and
+the [RouterOS Container](https://help.mikrotik.com/docs/display/ROS/Container) reference for installation instructions.
 
 ## Building from source
 

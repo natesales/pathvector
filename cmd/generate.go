@@ -109,7 +109,7 @@ var generateCmd = &cobra.Command{
 
 			// Build IRR prefix sets
 			if *peerData.FilterIRR {
-				if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout); err != nil {
+				if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
 					log.Fatal(err)
 				}
 			}

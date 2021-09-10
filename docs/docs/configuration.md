@@ -25,6 +25,7 @@ sidebar_position: 3
 | router-id | string |  | required | Router ID (dotted quad notation) |
 | irr-server | string | rr.ntt.net |  | Internet routing registry server |
 | rtr-server | string | rtr.rpki.cloudflare.com:8282 |  | RPKI-to-router server |
+| bgpq-args | string |  |  | Additional command line arguments to pass to bgpq4 |
 | keep-filtered | bool | false |  | Should filtered routes be kept in memory? |
 | kernel-learn | bool | false |  | Should routes from the kernel be learned into BIRD? |
 | kernel-export | bool | true |  | Export routes to kernel routing table |
@@ -41,16 +42,6 @@ sidebar_position: 3
 | bfd | map[string]BFDInstance |  |  | BFD instances |
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
-
-## Augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
 
 ## Optimizer
 | Option | Type | Default | Validation | Description |
@@ -147,4 +138,14 @@ sidebar_position: 3
 | interface | string |  |  | Interface (pattern accepted) |
 | interval | uint | 200 |  | RX and TX interval |
 | multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
+
+## Augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
 

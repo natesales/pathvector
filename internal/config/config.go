@@ -201,6 +201,7 @@ type Config struct {
 	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	KernelLearn   bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
 	KernelExport  bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`

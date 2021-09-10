@@ -60,7 +60,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 
 	prefixesFromIRR4, err := PrefixSet(*peerData.ASSet, 4, irrServer, queryTimeout)
 	if err != nil {
-		return fmt.Errorf("unable to get IPv4 IRR prefix list from %s", *peerData.ASSet)
+		return fmt.Errorf("unable to get IPv4 IRR prefix list from %s: %s", *peerData.ASSet, err)
 	}
 	if peerData.PrefixSet4 == nil {
 		peerData.PrefixSet4 = &[]string{}
@@ -73,7 +73,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint) error {
 
 	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout)
 	if err != nil {
-		return fmt.Errorf("unable to get IPv6 IRR prefix list from %s", *peerData.ASSet)
+		return fmt.Errorf("unable to get IPv6 IRR prefix list from %s: %s", *peerData.ASSet, err)
 	}
 	if peerData.PrefixSet6 == nil {
 		peerData.PrefixSet6 = &[]string{}

@@ -1,11 +1,11 @@
-name: Test
+name: SSH
 
 on:
   push:
 
 jobs:
-  test:
-    name: test
+  ssh:
+    name: ssh
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.16
@@ -13,7 +13,11 @@ jobs:
         with:
           go-version: 1.16
 
+
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - run: mkdir dist && cd dist && bash ../vendorbuild/mikrotik/mtik-build-test.sh
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
+      # - run: mkdir dist && cd dist && bash ../vendorbuild/mikrotik/mtik-build-test.sh

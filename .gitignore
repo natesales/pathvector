@@ -16,7 +16,7 @@ cover.*
 
 # Vendor build
 vendorbuild/juniper/*.pem
-vendorbuild/juniper/jetez/
+vendorbuild/juniper/jetez
 vendorbuild/cisco/ioxclient
 
 # Testing

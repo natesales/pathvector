@@ -35,6 +35,9 @@ peers:
     asn: 65510
     allow-local-as: true
     add-path-tx: true
+    ttl-security: true
+    confederation-member: true
+    confederation: 1
     as-prefs:
       65510: 10
       65520: 20

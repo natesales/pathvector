@@ -51,6 +51,7 @@ type Peer struct {
 	ExportNextHop       *string   `yaml:"export-next-hop" description:"Rewrite the BGP next hop before announcing routes to this peer" default:"-"`
 	Confederation       *int      `yaml:"confederation" description:"BGP confederation (RFC 5065)" default:"-"`
 	ConfederationMember *bool     `yaml:"confederation-member" description:"Should this peer be a member of the local confederation?" default:"false"`
+	TTLSecurity         *bool     `yaml:"ttl-security" description:"RFC 5082 Generalized TTL Security Mechanism" default:"false"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`

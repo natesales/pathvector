@@ -99,6 +99,7 @@ sidebar_position: 3
 | export-next-hop | string |  |  | Rewrite the BGP next hop before announcing routes to this peer |
 | confederation | int |  |  | BGP confederation (RFC 5065) |
 | confederation-member | bool | false |  | Should this peer be a member of the local confederation? |
+| ttl-security | bool | false |  | RFC 5082 Generalized TTL Security Mechanism |
 | import-communities | []string |  |  | List of communities to add to all imported routes |
 | export-communities | []string |  |  | List of communities to add to all exported routes |
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |

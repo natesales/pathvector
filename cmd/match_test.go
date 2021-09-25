@@ -26,5 +26,15 @@ func TestMatch(t *testing.T) {
 		if err := rootCmd.Execute(); err != nil {
 			t.Error(err)
 		}
+
+		// Local ASN from config file
+		rootCmd.SetArgs(append(baseArgs, []string{
+			"-c", "../tests/generate-simple.yml",
+			"-l", "0",
+			fmt.Sprintf("%d", tc.asnB),
+		}...))
+		if err := rootCmd.Execute(); err != nil {
+			t.Error(err)
+		}
 	}
 }

@@ -43,6 +43,16 @@ sidebar_position: 3
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 
+## Augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
+
 ## Optimizer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -87,6 +97,8 @@ sidebar_position: 3
 | add-path-rx | bool | false |  | Enable BGP additional paths on import? |
 | import-next-hop | string |  |  | Rewrite the BGP next hop before importing routes learned from this peer |
 | export-next-hop | string |  |  | Rewrite the BGP next hop before announcing routes to this peer |
+| confederation | int |  |  | BGP confederation (RFC 5065) |
+| confederation-member | bool | false |  | Should this peer be a member of the local confederation? |
 | import-communities | []string |  |  | List of communities to add to all imported routes |
 | export-communities | []string |  |  | List of communities to add to all exported routes |
 | announce-communities | []string |  |  | Announce all routes matching these communities to the peer |
@@ -138,14 +150,4 @@ sidebar_position: 3
 | interface | string |  |  | Interface (pattern accepted) |
 | interval | uint | 200 |  | RX and TX interval |
 | multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
-
-## Augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
 

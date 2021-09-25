@@ -57,6 +57,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
             {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighbor }};{{ end }}
+            {{ if BoolDeref $peer.ConfederationMember }}confederation member yes;{{ end }}
+            {{ if IntDeref $peer.Confederation }}confederation {{ IntDeref $peer.Confederation }};{{ end }}
 
             {{ if StrDeref $peer.ImportNextHop }}bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};{{ end }}
 

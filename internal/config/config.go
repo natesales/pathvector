@@ -26,29 +26,31 @@ type Peer struct {
 	Disabled    *bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
 	// BGP Attributes
-	ASN               *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
-	NeighborIPs       *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
-	Prepends          *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
-	LocalPref         *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
-	Multihop          *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
-	Listen4           *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`
-	Listen6           *string   `yaml:"listen6" description:"IPv6 BGP listen address" default:"-"`
-	LocalASN          *int      `yaml:"local-asn" description:"Local ASN as defined in the global ASN field" default:"-"`
-	LocalPort         *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
-	NeighborPort      *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
-	Passive           *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
-	NextHopSelf       *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
-	BFD               *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
-	Password          *string   `yaml:"password" description:"BGP MD5 password" default:"-"`
-	RSClient          *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
-	RRClient          *bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
-	RemovePrivateASNs *bool     `yaml:"remove-private-asns" description:"Should private ASNs be removed from path before exporting?" default:"true"`
-	MPUnicast46       *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
-	AllowLocalAS      *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
-	AddPathTx         *bool     `yaml:"add-path-tx" description:"Enable BGP additional paths on export?" default:"false"`
-	AddPathRx         *bool     `yaml:"add-path-rx" description:"Enable BGP additional paths on import?" default:"false"`
-	ImportNextHop     *string   `yaml:"import-next-hop" description:"Rewrite the BGP next hop before importing routes learned from this peer" default:"-"`
-	ExportNextHop     *string   `yaml:"export-next-hop" description:"Rewrite the BGP next hop before announcing routes to this peer" default:"-"`
+	ASN                 *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
+	NeighborIPs         *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
+	Prepends            *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	LocalPref           *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	Multihop            *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
+	Listen4             *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`
+	Listen6             *string   `yaml:"listen6" description:"IPv6 BGP listen address" default:"-"`
+	LocalASN            *int      `yaml:"local-asn" description:"Local ASN as defined in the global ASN field" default:"-"`
+	LocalPort           *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
+	NeighborPort        *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
+	Passive             *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
+	NextHopSelf         *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
+	BFD                 *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
+	Password            *string   `yaml:"password" description:"BGP MD5 password" default:"-"`
+	RSClient            *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
+	RRClient            *bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
+	RemovePrivateASNs   *bool     `yaml:"remove-private-asns" description:"Should private ASNs be removed from path before exporting?" default:"true"`
+	MPUnicast46         *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
+	AllowLocalAS        *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
+	AddPathTx           *bool     `yaml:"add-path-tx" description:"Enable BGP additional paths on export?" default:"false"`
+	AddPathRx           *bool     `yaml:"add-path-rx" description:"Enable BGP additional paths on import?" default:"false"`
+	ImportNextHop       *string   `yaml:"import-next-hop" description:"Rewrite the BGP next hop before importing routes learned from this peer" default:"-"`
+	ExportNextHop       *string   `yaml:"export-next-hop" description:"Rewrite the BGP next hop before announcing routes to this peer" default:"-"`
+	Confederation       *int      `yaml:"confederation" description:"BGP confederation (RFC 5065)" default:"-"`
+	ConfederationMember *bool     `yaml:"confederation-member" description:"Should this peer be a member of the local confederation?" default:"false"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`

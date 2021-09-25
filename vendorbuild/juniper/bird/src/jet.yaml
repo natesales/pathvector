@@ -1,0 +1,10 @@
+---
+basename: "bird"
+comment: The BIRD project aims to develop a fully functional dynamic IP routing daemon primarily targeted on (but not limited to) Linux, FreeBSD and other UNIX-like systems and distributed under the GNU General Public License.
+arch: "x86"
+abi: "64"
+files:
+  - source: bird
+    destination: /usr/local/bin/bird
+  - source: birdc
+    destination: /usr/local/bin/birdc

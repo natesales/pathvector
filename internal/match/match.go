@@ -63,7 +63,7 @@ func peeringDbIxLans(asn uint, peeringDbQueryTimeout uint) ([]peeringDbIxLanData
 	}
 
 	if len(pDbResponse.Data) < 1 {
-		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page", asn)
+		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page or IXPs documented", asn)
 	}
 
 	return pDbResponse.Data, nil // nil error

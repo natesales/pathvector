@@ -22,7 +22,8 @@ Pathvector releases >= 5.1.2 are available in the https://repo.pathvector.io pac
 continue to be uploaded to the [natesales repo](https://github.com/natesales/repo) for compatibility with existing
 installs, but for security it is recommended to use the repo.pathvector.io for all new installations due to increased
 security by GPG signatures. Packages in repo.pathvector.io are signed
-with [`0983 AC66 7B4F 0B54 F69D`](https://repo.pathvector.io/pgp.asc). Note that packages downloaded from GitHub releases are not signed.
+with [`0983 AC66 7B4F 0B54 F69D`](https://repo.pathvector.io/pgp.asc). Note that packages downloaded from GitHub
+releases are not signed.
 
 Pathvector on Linux is available for amd64, aarch64, and mips64 as binaries and deb and rpm packages
 from [releases](https://github.com/natesales/pathvector/releases).
@@ -101,9 +102,16 @@ Nokia SR Linux is based on CentOS, see [CentOS](#centos) for more information.
 
 ## Mikrotik RouterOS
 
-Pathvector can be installed on >= RouterOS v7.1rc3 on 64-bit ARM hardware. Check
+Pathvector can be installed on >= RouterOS v7.1rc3. Check
 the [Mikrotik Product Matrix](https://mikrotik.com/products/matrix) for the most recent hardware listing and
-the [RouterOS Container](https://help.mikrotik.com/docs/display/ROS/Container) reference for installation instructions.
+the [RouterOS Container](https://help.mikrotik.com/docs/display/ROS/Container) reference for installation instructions
+for the container package.
+
+To build a Docker image for an alternate architecture:
+
+```bash
+docker build --output type=tar,dest=pathvector-mikrotik-arm64v8.tar -t pathvector-cron:arm64v8 --build-arg ARCH=arm64v8 -f ../vendorbuild/mikrotik/Dockerfile ..
+```
 
 ## Building from source
 

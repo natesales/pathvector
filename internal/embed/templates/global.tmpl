@@ -350,7 +350,7 @@ function enforce_first_as(int peer_asn) {
 }
 
 function enforce_peer_nexthop(ip addr) {
-  if (bgp_next_hop != addr) then _reject("nexhop doesn't match neighbor address");
+  if (bgp_next_hop != addr) then _reject("nexthop doesn't match neighbor address");
 }
 
 # Processing Functions

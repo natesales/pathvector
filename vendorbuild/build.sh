@@ -1,5 +1,5 @@
 #!/bin/bash
-# vendorbuild.sh Pathvector vendor platform builder
+# Pathvector vendor platform builder
 
 cd dist/
 

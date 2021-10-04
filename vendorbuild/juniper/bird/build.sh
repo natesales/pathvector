@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO: Add this to pathvector repo
 
 set -e
 
@@ -45,4 +46,5 @@ python3 "$jetez_dir"/jet/main.py \
 
 # Cleanup
 sudo rm /usr/bin/mkisofs
+rm -rf bird/
 rm -rf src/bird*

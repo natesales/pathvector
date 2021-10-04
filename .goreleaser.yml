@@ -41,11 +41,11 @@ nfpms:
       - rpm
 
 publishers:
-  # The vendorbuild publisher isn't really a publisher at all. It's a hack to run the vendorbuild.sh script
+  # The vendorbuild publisher isn't really a publisher at all. It's a hack to run the vendorbuild/build.sh script
   # after binaries and packages are built but before the release step so packages for vendor platforms can be
   # added to the release.
   - name: vendorbuild
-    cmd: ./vendorbuild.sh
+    cmd: ./vendorbuild/build.sh
 
   - name: fury.io
     ids:

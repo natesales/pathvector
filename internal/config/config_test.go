@@ -1,9 +1,10 @@
 package config
 
 import (
-	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCategorizeCommunity(t *testing.T) {
@@ -77,25 +78,13 @@ peers:
 `
 
 	globalConfig, err := Load([]byte(configFile))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
-	if globalConfig.ASN != 34553 {
-		t.Errorf("expected ASN 34553 got %d", globalConfig.ASN)
-	}
-	if globalConfig.RouterID != "192.0.2.1" {
-		t.Errorf("expected router-id 192.0.2.1 got %s", globalConfig.RouterID)
-	}
-	if len(globalConfig.Peers) != 1 {
-		t.Errorf("expected 1 peer, got %d", len(globalConfig.Peers))
-	}
-	if *globalConfig.Peers["Example"].ASN != 65530 {
-		t.Errorf("expected peer ASN 34553 got %d", globalConfig.Peers["Example"].ASN)
-	}
-	if !reflect.DeepEqual(*globalConfig.Peers["Example"].NeighborIPs, []string{"203.0.113.25", "2001:db8:2::25"}) {
-		t.Errorf("expected neighbor ips [203.0.113.25 2001:db8:2::25] got %v", globalConfig.Peers["Example"].NeighborIPs)
-	}
+	assert.Equal(t, 34553, globalConfig.ASN)
+	assert.Equal(t, "192.0.2.1", globalConfig.RouterID)
+	assert.Equal(t, 1, len(globalConfig.Peers))
+	assert.Equal(t, 65530, *globalConfig.Peers["Example"].ASN)
+	assert.Equal(t, []string{"203.0.113.25", "2001:db8:2::25"}, *globalConfig.Peers["Example"].NeighborIPs)
 }
 
 func TestLoadConfigInvalidYAML(t *testing.T) {

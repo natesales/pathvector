@@ -8,6 +8,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBirdConn(t *testing.T) {
@@ -19,9 +20,8 @@ func TestBirdConn(t *testing.T) {
 	go func() {
 		time.Sleep(time.Millisecond * 10) // Wait for the server to start
 		resp, err := RunCommand("bird command test\n", unixSocket)
-		if err != nil {
-			t.Error(err)
-		}
+		assert.Nil(t, err)
+
 		// Print bird output as multiple lines
 		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
 			log.Printf("BIRD response (multiline): %s", line)
@@ -30,9 +30,8 @@ func TestBirdConn(t *testing.T) {
 
 	log.Println("Starting fake BIRD socket server")
 	l, err := net.Listen("unix", unixSocket)
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Nil(t, err)
+
 	defer l.Close()
 	conn, err := l.Accept()
 	if err != nil {
@@ -40,20 +39,16 @@ func TestBirdConn(t *testing.T) {
 	}
 	defer conn.Close()
 
-	if _, err := conn.Write([]byte("0001 Fake BIRD response 1")); err != nil {
-		t.Error(err)
-	}
+	_, err = conn.Write([]byte("0001 Fake BIRD response 1"))
+	assert.Nil(t, err)
 
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf[:])
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 	if string(buf[:n]) != "bird command test\n" {
 		t.Errorf("expected 'bird command test' got %s", string(buf[:n]))
 	}
 
-	if _, err := conn.Write([]byte("0001 Fake BIRD response 2")); err != nil {
-		t.Error(err)
-	}
+	_, err = conn.Write([]byte("0001 Fake BIRD response 2"))
+	assert.Nil(t, err)
 }

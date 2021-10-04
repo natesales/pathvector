@@ -22,6 +22,7 @@ type Response struct {
 // Data contains the actual data from PeeringDB response
 type Data struct {
 	Name         string `json:"name"`
+	ASN          uint32 `json:"asn"`
 	ASSet        string `json:"irr_as_set"`
 	ImportLimit4 int    `json:"info_prefixes4"`
 	ImportLimit6 int    `json:"info_prefixes6"`
@@ -93,6 +94,40 @@ func Update(peerData *config.Peer, queryTimeout uint) {
 		asSetOutput := sanitizeASSet(pDbData.ASSet)
 		peerData.ASSet = &asSetOutput
 	}
+}
+
+// NeverViaRouteServers gets a list of networks that report should never be reachable via route servers
+func NeverViaRouteServers(queryTimeout uint) ([]uint32, error) {
+	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
+	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?info_never_via_route_servers=1", nil)
+	if err != nil {
+		return nil, errors.New("PeeringDB GET: " + err.Error())
+	}
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, errors.New("PeeringDB GET request: " + err.Error())
+	}
+	if res.Body != nil {
+		//noinspection GoUnhandledErrorResult
+		defer res.Body.Close()
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.New("PeeringDB read: " + err.Error())
+	}
+
+	var pDbResponse Response
+	if err := json.Unmarshal(body, &pDbResponse); err != nil {
+		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
+	}
+
+	var asns []uint32 // ASNs that are reportedly never reachable via route servers
+	for _, resp := range pDbResponse.Data {
+		asns = append(asns, resp.ASN)
+	}
+
+	return asns, nil // nil error
 }
 
 // sanitizeASSet removes an IRRDB prefix from an AS set and picks the first one if there are multiple

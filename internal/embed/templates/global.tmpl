@@ -341,6 +341,10 @@ function reject_bogon_routes() {
   }
 }
 
+function reject_never_via_route_servers() {
+  if (bgp_path ~ [{{ range $index, $element := .NVRSASNs}}{{if $index}},{{end}}{{$element}}{{end}}]) then _reject("NVRS route");
+}
+
 function enforce_first_as(int peer_asn) {
   if (bgp_path.first != peer_asn) then _reject("invalid first AS");
 }

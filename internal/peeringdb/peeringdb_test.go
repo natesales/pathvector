@@ -3,6 +3,7 @@ package peeringdb
 import (
 	"github.com/natesales/pathvector/internal/config"
 	"github.com/natesales/pathvector/internal/util"
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
@@ -78,6 +79,12 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 			ImportLimit6:     util.IntPtr(0),
 		}, peeringDbQueryTimeout)
 	}
+}
+
+func TestPeeringNeverViaRouteServers(t *testing.T) {
+	asns, err := NeverViaRouteServers(peeringDbQueryTimeout)
+	assert.Nil(t, err)
+	assert.Greater(t, len(asns), 100)
 }
 
 func TestSanitizeASSet(t *testing.T) {

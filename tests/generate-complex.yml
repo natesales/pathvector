@@ -37,6 +37,7 @@ peers:
     add-path-tx: true
     ttl-security: true
     confederation-member: true
+    filter-never-via-route-servers: true
     confederation: 1
     as-prefs:
       65510: 10

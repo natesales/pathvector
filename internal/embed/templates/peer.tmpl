@@ -56,6 +56,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.FilterBogonASNs }}reject_bogon_asns();{{ end }}
             {{ if BoolDeref $peer.FilterPrefixLength }}reject_out_of_bounds_routes();{{ end }}
             {{ if BoolDeref $peer.FilterRPKI }}reject_rpki_invalid();{{ end }}
+            {{ if BoolDeref $peer.FilterNeverViaRouteServers }}reject_never_via_route_servers();{{ end }}
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}

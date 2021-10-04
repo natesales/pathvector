@@ -58,6 +58,15 @@ var generateCmd = &cobra.Command{
 		}
 		log.Debugln("Finished loading config")
 
+		// Run NVRS query
+		if c.QueryNVRS {
+			var err error
+			c.NVRSASNs, err = peeringdb.NeverViaRouteServers(c.PeeringDBQueryTimeout)
+			if err != nil {
+				log.Fatalf("PeeringDB NVRS query: %s", err)
+			}
+		}
+
 		// Load templates from embedded filesystem
 		log.Debugln("Loading templates from embedded filesystem")
 		err = templating.Load(embed.FS)

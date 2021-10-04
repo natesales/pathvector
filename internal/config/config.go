@@ -71,13 +71,14 @@ type Peer struct {
 	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 
-	FilterIRR          *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
-	FilterRPKI         *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	FilterMaxPrefix    *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogonRoutes  *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
-	FilterBogonASNs    *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
-	FilterTransitASNs  *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
-	FilterPrefixLength *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
+	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
+	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	FilterMaxPrefix            *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogonRoutes          *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterBogonASNs            *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
+	FilterTransitASNs          *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
+	FilterPrefixLength         *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
+	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`
@@ -227,6 +228,8 @@ type Config struct {
 	RTRServerPort int      `yaml:"-" description:"-"`
 	Prefixes4     []string `yaml:"-" description:"-"`
 	Prefixes6     []string `yaml:"-" description:"-"`
+	QueryNVRS     bool     `yaml:"-" description:"-"`
+	NVRSASNs      []uint32 `yaml:"-" description:"-"`
 }
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -319,6 +322,11 @@ func Load(configBlob []byte) (*Config, error) {
 	for peerName, peerData := range c.Peers {
 		// Set sanitized peer name
 		peerData.ProtocolName = util.Sanitize(peerName)
+
+		// If any peer has NVRS filtering enabled, mark it for querying.
+		if peerData.FilterNeverViaRouteServers != nil {
+			c.QueryNVRS = true
+		}
 
 		if peerData.NeighborIPs == nil || len(*peerData.NeighborIPs) < 1 {
 			log.Fatalf("[%s] has no neighbors defined", peerName)

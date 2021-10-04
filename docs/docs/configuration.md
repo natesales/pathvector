@@ -43,31 +43,6 @@ sidebar_position: 3
 | augments | Augments |  |  | Custom configuration options |
 | optimizer | Optimizer |  |  | Route optimizer options |
 
-## Augments
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
-| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
-| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
-| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
-| statics | map[string]string |  |  | List of static routes to include in BIRD |
-| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
-
-## Optimizer
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| targets | []string |  |  | List of probe targets |
-| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
-| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
-| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
-| probe-count | int | 5 |  | Number of pings to send in each run |
-| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
-| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
-| cache-size | int | 15 |  | Number of probe results to store per peer |
-| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
-| alert-script | string |  |  | Script to call on optimizer event |
-| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
-
 ## Peer
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
@@ -121,6 +96,7 @@ sidebar_position: 3
 | filter-bogon-asns | bool | true |  | Should paths containing a bogon ASN be rejected? |
 | filter-transit-asns | bool | false |  | Should paths containing transit-free ASNs be rejected? (Peerlock Lite)' |
 | filter-prefix-length | bool | true |  | Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected? |
+| filter-never-via-route-servers | bool | false |  | Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered? |
 | auto-import-limits | bool | false |  | Get import limits automatically from PeeringDB? |
 | auto-as-set | bool | false |  | Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead. |
 | honor-graceful-shutdown | bool | true |  | Should RFC8326 graceful shutdown be enabled? |
@@ -151,4 +127,29 @@ sidebar_position: 3
 | interface | string |  |  | Interface (pattern accepted) |
 | interval | uint | 200 |  | RX and TX interval |
 | multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
+
+## Augments
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| accept4 | []string |  |  | List of BIRD protocols to import into the IPv4 table |
+| accept6 | []string |  |  | List of BIRD protocols to import into the IPv6 table |
+| reject4 | []string |  |  | List of BIRD protocols to not import into the IPv4 table |
+| reject6 | []string |  |  | List of BIRD protocols to not import into the IPv6 table |
+| statics | map[string]string |  |  | List of static routes to include in BIRD |
+| srd-communities | []string |  |  | List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported) |
+
+## Optimizer
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| targets | []string |  |  | List of probe targets |
+| latency-threshold | uint | 100 |  | Maximum allowable latency in milliseconds |
+| packet-loss-threshold | float64 | 0.5 |  | Maximum allowable packet loss (percent) |
+| modifier | uint | 20 |  | Amount to lower local pref by for depreferred peers |
+| probe-count | int | 5 |  | Number of pings to send in each run |
+| probe-timeout | int | 1 |  | Number of seconds to wait before considering the ICMP message unanswered |
+| probe-interval | int | 120 |  | Number of seconds wait between each optimizer run |
+| cache-size | int | 15 |  | Number of probe results to store per peer |
+| probe-udp | bool | false |  | Use UDP probe (else ICMP) |
+| alert-script | string |  |  | Script to call on optimizer event |
+| exit-on-cache-full | bool | false |  | Exit optimizer on cache full |
 

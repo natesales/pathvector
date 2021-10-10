@@ -60,6 +60,7 @@ sidebar_position: 3
 | local-port | int | 179 |  | Local TCP port |
 | neighbor-port | int | 179 |  | Neighbor TCP port |
 | passive | bool | false |  | Should we listen passively? |
+| direct  | bool | false |  | Specify that the neighbor is directly connected |
 | next-hop-self | bool | false |  | Should BGP next-hop-self be enabled? |
 | bfd | bool | false |  | Should BFD be enabled? |
 | password | string |  |  | BGP MD5 password |

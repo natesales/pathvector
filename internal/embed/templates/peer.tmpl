@@ -27,6 +27,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}
     {{ if BoolDeref $peer.Disabled }}disabled;{{ end }}
     {{ if BoolDeref $peer.Passive }}passive;{{ end }}
+    {{ if BoolDeref $peer.Direct }}direct;{{ end }}
     {{ if BoolDeref $peer.Multihop }}multihop 255;{{ end }}
     {{ if StrDeref $peer.Password }}password "{{ StrDeref $peer.Password }}";{{ end }}
     {{ if BoolDeref $peer.RSClient }}rs client;{{ end }}

@@ -37,6 +37,7 @@ type Peer struct {
 	LocalPort           *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
 	NeighborPort        *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
 	Passive             *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
+	Direct              *bool     `yaml:"direct" description:"Specify that the neighbor is directly connected" default:"false"`
 	NextHopSelf         *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
 	BFD                 *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
 	Password            *string   `yaml:"password" description:"BGP MD5 password" default:"-"`

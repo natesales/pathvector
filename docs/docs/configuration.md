@@ -104,6 +104,7 @@ sidebar_position: 3
 | prefixes | []string |  |  | Prefixes to accept |
 | announce-default | bool | false |  | Should a default route be exported to this peer? |
 | announce-originated | bool | true |  | Should locally originated routes be announced to this peer? |
+| announce-all | bool | false |  | Should all routes be exported to this peer? |
 | session-global | string |  |  | Configuration to add to each session before any defined BGP protocols |
 | pre-import | string |  |  | Configuration to add at the beginning of the import filter |
 | pre-export | string |  |  | Configuration to add at the beginning of the export filter |

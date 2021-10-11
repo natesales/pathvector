@@ -11,12 +11,11 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/plugins"
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -226,6 +225,9 @@ func Load(configBlob []byte) (*config.Config, error) {
 				log.Fatalf("Unable to read pre-export-final-file: %s", err)
 			}
 			*peerData.PreExportFinal += "\n" + string(content)
+		}
+		if peerData.DefaultLocalPref != nil && peerData.OptimizeInbound != nil {
+			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
 		}
 	}
 

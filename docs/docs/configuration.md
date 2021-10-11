@@ -384,6 +384,14 @@ BGP local preference
 |------|---------|------------|
 | int   | 100      |          |
 
+### 'default-local-pref'
+
+BGP default local preferance
+
+| Type | Default | Validation |
+|------|-------|------------|
+| int   |       |          |
+
 ### `set-local-pref`
 
 Should an explicit local pref be set?

@@ -74,6 +74,7 @@ type Peer struct {
 
 	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
 	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+  StrictRPKI                 *bool `yaml:"strict-rpki" description:"Should only RPKI valids be accepted?" default:"false"`
 	FilterMaxPrefix            *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
 	FilterBogonRoutes          *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
 	FilterBogonASNs            *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`

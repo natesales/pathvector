@@ -321,6 +321,18 @@ function reject_rpki_invalid() {
   {{ end }}
 }
 
+function force_rpki_strict() {
+  {{ if .RPKIEnable }}
+  if (net.type = NET_IP4) then {
+    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
+  }
+
+  if (net.type = NET_IP6) then {
+    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
+  }
+  {{ end }}
+}
+
 function reject_out_of_bounds_routes() {
   if (net.type = NET_IP4) then {
     if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");

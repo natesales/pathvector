@@ -13,7 +13,7 @@ A clear and concise description of what the bug is.
 **Environment**
 1. Output from `pathvector version`
 2. OS version
-3. Minimum reproducible example of your Pathvector config file formatted with [triple backticks for formatting](https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)
+3. Minimum reproducible example of your Pathvector config file formatted with [triple backticks with the yaml language annotation](https://docs.github.com/en/github/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks)
 
 **To Reproduce**
 Steps to reproduce the behavior:

@@ -144,8 +144,11 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ StrDeref $peer.PreExportFinal }}
-
+            {{ if BoolDeref $peer.AnnounceAll }}
+            accept;
+            {{ else }}
             reject;
+            {{ end }}
         };
     };
     {{ end }}

@@ -1,6 +1,8 @@
 package bird
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"net"
@@ -8,6 +10,8 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -63,13 +67,63 @@ func RunCommand(command string, socket string) (string, error) {
 
 // Validate checks if the cached configuration is syntactically valid
 func Validate(binary string, cacheDir string) {
+	var outb, errb bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
 	birdCmd.Dir = cacheDir
-	birdCmd.Stdout = os.Stdout
-	birdCmd.Stderr = os.Stderr
+	birdCmd.Stdout = &outb
+	birdCmd.Stderr = &errb
+	var errbT string
 	if err := birdCmd.Run(); err != nil {
-		log.Fatalf("BIRD config validation: %v", err)
+		errbT = strings.TrimSuffix(errb.String(), "\n")
+
+		// Check for validation error in format:
+		// bird: ./AS65530_EXAMPLE.conf:20:43 syntax error, unexpected '%'
+		match, err := regexp.MatchString(`bird:.*:\d+:\d+.*`, errbT)
+		if err != nil {
+			log.Fatalf("BIRD error regex match: %s", err)
+		}
+		errorMessageToLog := errbT
+		if match {
+			errorMessageToLog = "BIRD validation error:\n" // Clear error message so we can write the new nicely formatted one
+			respPartsSpace := strings.Split(errbT, " ")
+			respPartsColon := strings.Split(respPartsSpace[1], ":")
+			errorMessage := strings.Join(respPartsSpace[2:], " ")
+			errorFile := respPartsColon[0]
+			errorLine, err := strconv.Atoi(respPartsColon[1])
+			if err != nil {
+				log.Fatalf("BIRD error line int parse: %s", err)
+			}
+			errorChar, err := strconv.Atoi(respPartsColon[2])
+			if err != nil {
+				log.Fatalf("BIRD error line int parse: %s", err)
+			}
+			log.Debugf("Found error in %s:%d:%d message %s", errorFile, errorLine, errorChar, errorMessage)
+
+			// Read output file
+			file, err := os.Open(path.Join(cacheDir, errorFile))
+			if err != nil {
+				log.Fatalf("unable to read BIRD output file for error parsing: %s", err)
+			}
+			defer file.Close()
+
+			scanner := bufio.NewScanner(file)
+			line := 1
+			for scanner.Scan() {
+				if (line >= errorLine-1) && (line <= errorLine+1) { // Print one line above and below the error line
+					errorMessageToLog += scanner.Text() + "\n"
+				}
+				if line == errorLine {
+					errorMessageToLog += strings.Repeat(" ", errorChar-1) + "^ " + errorMessage + "\n"
+				}
+				line++
+			}
+			if err := scanner.Err(); err != nil {
+				log.Fatalf("BIRD output file scan: %s", err)
+			}
+		}
+		log.Fatalln(errorMessageToLog)
 	}
+
 	log.Infof("BIRD config validation passed")
 }
 

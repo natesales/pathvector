@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -643,6 +644,19 @@ func addLink(s string) string {
 	return s
 }
 
+// byReflectType implements sort.Interface to sort a slice of reflect.Type elements by string name
+type byReflectType []reflect.Type
+
+func (s byReflectType) Len() int {
+	return len(s)
+}
+func (s byReflectType) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s byReflectType) Less(i, j int) bool {
+	return s[i].String() < s[j].String()
+}
+
 func documentConfigTypes(t reflect.Type) {
 	childTypesSet := map[reflect.Type]bool{}
 	fmt.Println("## " + sanitizeConfigName(t.String()))
@@ -676,7 +690,15 @@ func documentConfigTypes(t reflect.Type) {
 		}
 	}
 	fmt.Println()
+
+	// Convert the set into a slice and sort it
+	var childTypesSlice []reflect.Type
 	for childType := range childTypesSet {
+		childTypesSlice = append(childTypesSlice, childType)
+	}
+	sort.Sort(byReflectType(childTypesSlice))
+
+	for _, childType := range childTypesSlice {
 		documentConfigTypes(childType)
 	}
 }

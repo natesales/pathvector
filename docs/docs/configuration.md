@@ -43,7 +43,17 @@ sidebar_position: 3
 | augments | [Augments](#augments) |  |  | Custom configuration options |
 | optimizer | [Optimizer](#optimizer) |  |  | Route optimizer options |
 
+## BFDInstance
+
+| Option | Type | Default | Validation | Description |
+|--------|------|---------|------------|-------------|
+| neighbor | string |  |  | Neighbor IP address |
+| interface | string |  |  | Interface (pattern accepted) |
+| interval | uint | 200 |  | RX and TX interval |
+| multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
+
 ## Peer
+
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
 | template | string |  |  | Configuration template |
@@ -121,14 +131,6 @@ sidebar_position: 3
 | vrid | uint |  | required | RFC3768 VRRP Virtual Router ID (1-255) |
 | priority | uint |  | required | RFC3768 VRRP Priority |
 | vips | []string |  | required,cidr | List of virtual IPs |
-
-## BFDInstance
-| Option | Type | Default | Validation | Description |
-|--------|------|---------|------------|-------------|
-| neighbor | string |  |  | Neighbor IP address |
-| interface | string |  |  | Interface (pattern accepted) |
-| interval | uint | 200 |  | RX and TX interval |
-| multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
 
 ## Augments
 | Option | Type | Default | Validation | Description |

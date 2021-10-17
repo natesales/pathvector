@@ -40,8 +40,8 @@ sidebar_position: 3
 | templates | map[string]Peer |  |  | BGP peer templates |
 | vrrp | map[string]VRRPInstance |  |  | List of VRRP instances |
 | bfd | map[string]BFDInstance |  |  | BFD instances |
-| augments | Augments |  |  | Custom configuration options |
-| optimizer | Optimizer |  |  | Route optimizer options |
+| augments | [Augments](#augments) |  |  | Custom configuration options |
+| optimizer | [Optimizer](#optimizer) |  |  | Route optimizer options |
 
 ## Peer
 | Option | Type | Default | Validation | Description |
@@ -60,7 +60,7 @@ sidebar_position: 3
 | local-port | int | 179 |  | Local TCP port |
 | neighbor-port | int | 179 |  | Neighbor TCP port |
 | passive | bool | false |  | Should we listen passively? |
-| direct  | bool | false |  | Specify that the neighbor is directly connected |
+| direct | bool | false |  | Specify that the neighbor is directly connected |
 | next-hop-self | bool | false |  | Should BGP next-hop-self be enabled? |
 | bfd | bool | false |  | Should BFD be enabled? |
 | password | string |  |  | BGP MD5 password |
@@ -92,6 +92,7 @@ sidebar_position: 3
 | allow-blackhole-community | bool | false |  | Should this peer be allowed to send routes with the blackhole community? |
 | filter-irr | bool | false |  | Should IRR filtering be applied? |
 | filter-rpki | bool | true |  | Should RPKI invalids be rejected? |
+| strict-rpki | bool | false |  | Should only RPKI valids be accepted? |
 | filter-max-prefix | bool | true |  | Should max prefix filtering be applied? |
 | filter-bogon-routes | bool | true |  | Should bogon prefixes be rejected? |
 | filter-bogon-asns | bool | true |  | Should paths containing a bogon ASN be rejected? |

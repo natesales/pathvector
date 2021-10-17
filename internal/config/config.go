@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"github.com/creasty/defaults"
 	"github.com/go-ping/ping"
@@ -635,6 +636,13 @@ func sanitizeConfigName(s string) string {
 	return out
 }
 
+func addLink(s string) string {
+	if unicode.IsUpper(rune(s[0])) {
+		return fmt.Sprintf("[%s](#%s)", s, strings.ToLower(s))
+	}
+	return s
+}
+
 func documentConfigTypes(t reflect.Type) {
 	childTypesSet := map[reflect.Type]bool{}
 	fmt.Println("## " + sanitizeConfigName(t.String()))
@@ -664,7 +672,7 @@ func documentConfigTypes(t reflect.Type) {
 					childTypesSet[field.Type] = true
 				}
 			}
-			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, sanitizeConfigName(field.Type.String()), fDefault, validation, description)
+			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation, description)
 		}
 	}
 	fmt.Println()

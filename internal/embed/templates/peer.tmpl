@@ -21,6 +21,7 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
 
 {{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{ if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
+{{ $neighborNoIface := SplitFirst $neighbor "%" }}
 protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     local{{ if eq $af "4" }}{{ if $peer.Listen4 }} {{ $peer.Listen4 }}{{ end }}{{ else }}{{ if $peer.Listen6 }} {{ $peer.Listen6 }}{{ end }}{{ end }} as {{ if IntDeref $peer.LocalASN }}{{ IntDeref $peer.LocalASN }}{{ else }}ASN{{ end }}{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
@@ -60,9 +61,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ if BoolDeref $peer.StrictRPKI }}force_rpki_strict();{{ end }}
             {{ if BoolDeref $peer.FilterNeverViaRouteServers }}reject_never_via_route_servers();{{ end }}
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
-            {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighbor }});{{ end }}
+            {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighborNoIface }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
-            {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighbor }};{{ end }}
+            {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighborNoIface }};{{ end }}
 
             {{ if StrDeref $peer.ImportNextHop }}bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};{{ end }}
 

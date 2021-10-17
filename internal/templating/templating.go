@@ -151,6 +151,10 @@ var funcMap = template.FuncMap{
 			i++
 		}
 	},
+
+	"SplitFirst": func(s string, delim string) string {
+		return strings.Split(s, delim)[0]
+	},
 }
 
 // Templates

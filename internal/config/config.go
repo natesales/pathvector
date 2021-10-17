@@ -91,7 +91,7 @@ type Peer struct {
 	// Export options
 	AnnounceDefault    *bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
 	AnnounceOriginated *bool `yaml:"announce-originated" description:"Should locally originated routes be announced to this peer?" default:"true"`
-	AnnounceAll        *bool `yaml:"announce-all" description:"Should exporting of all routes be enabled for this peer?" default:"false"`
+	AnnounceAll        *bool `yaml:"announce-all" description:"Should all routes be exported to this peer?" default:"false"`
 
 	// Custom daemon configuration
 	SessionGlobal  *string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols" default:"-"`

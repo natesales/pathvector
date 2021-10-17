@@ -20,7 +20,7 @@ Available Commands:
   version       Show version information
 
 Flags:
-  -c, --config string   Configuration file in YAML, TOML, or JSON format (default "/etc/pathvector.yml")
+  -c, --config string   YAML configuration file (default "/etc/pathvector.yml")
   -d, --dry-run         Don't modify configuration
   -h, --help            help for pathvector
       --lock string     Lock file (check disabled if empty)

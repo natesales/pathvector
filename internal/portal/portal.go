@@ -2,7 +2,6 @@ package portal
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/natesales/pathvector/internal/bird"
@@ -89,7 +88,6 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", key)
-	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err

@@ -205,6 +205,7 @@ func modifyPref(
 		lpRegex := regexp.MustCompile(`bgp_local_pref = .*; # pathvector:localpref`)
 		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
 
+		//nolint:golint,gosec
 		if err := ioutil.WriteFile(fileName, []byte(modified), 0755); err != nil {
 			log.Fatal(err)
 		} else {

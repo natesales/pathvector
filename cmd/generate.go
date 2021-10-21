@@ -36,6 +36,7 @@ var generateCmd = &cobra.Command{
 			} else if os.IsNotExist(err) {
 				// If the lockfile doesn't exist, create it
 				log.Debugln("Lockfile doesn't exist, creating one")
+				//nolint:golint,gosec
 				if err := ioutil.WriteFile(lockFile, []byte(""), 0755); err != nil {
 					log.Fatalf("Writing lockfile: %v", err)
 				}

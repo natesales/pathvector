@@ -32,6 +32,12 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+
       - name: Setup integration test environment
         run: sudo bash tests/setup.sh
 

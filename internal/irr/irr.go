@@ -22,6 +22,7 @@ func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, 
 	log.Debugf("Running bgpq4 %s", cmdArgs)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
 	defer cancel()
+	//nolint:golint,gosec
 	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
 	stdout, err := cmd.Output()
 	if err != nil {

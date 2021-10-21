@@ -155,6 +155,7 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 			for _, alert := range alerts {
 				log.Debugf("[Optimizer] %s", alert)
 				if o.AlertScript != "" {
+					//nolint:golint,gosec
 					birdCmd := exec.Command(o.AlertScript, alert)
 					birdCmd.Stdout = os.Stdout
 					birdCmd.Stderr = os.Stderr

@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/internal/config"
-	"github.com/natesales/pathvector/internal/util"
 	"io/ioutil"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
+
+	"github.com/natesales/pathvector/internal/process"
+	"github.com/natesales/pathvector/internal/util"
 )
 
 var (
@@ -31,7 +32,7 @@ var dumpCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}
-		c, err := config.Load(configFile)
+		c, err := process.Load(configFile)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -1,12 +1,13 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 
-	"github.com/natesales/pathvector/internal/config"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+
 	"github.com/natesales/pathvector/internal/portal"
+	"github.com/natesales/pathvector/internal/process"
 )
 
 func init() {
@@ -23,7 +24,7 @@ var portalCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}
-		c, err := config.Load(configFile)
+		c, err := process.Load(configFile)
 		if err != nil {
 			log.Fatal(err)
 		}

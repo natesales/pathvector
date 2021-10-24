@@ -13,6 +13,7 @@ var (
 	date    = "unknown"
 )
 
+//go:generate ./plugins/generate.sh
 //go:generate ./docs/generate.sh
 
 func main() {

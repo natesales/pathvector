@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/internal/bird"
-	"github.com/natesales/pathvector/internal/config"
 	"github.com/natesales/pathvector/internal/embed"
 	"github.com/natesales/pathvector/internal/irr"
 	"github.com/natesales/pathvector/internal/peeringdb"
 	"github.com/natesales/pathvector/internal/portal"
+	"github.com/natesales/pathvector/internal/process"
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
 )
@@ -53,7 +53,7 @@ var generateCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}
-		c, err := config.Load(configFile)
+		c, err := process.Load(configFile)
 		if err != nil {
 			log.Fatal(err)
 		}

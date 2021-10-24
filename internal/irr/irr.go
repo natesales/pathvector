@@ -9,7 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 // PrefixSet uses bgpq4 to generate a prefix filter and return only the filter lines

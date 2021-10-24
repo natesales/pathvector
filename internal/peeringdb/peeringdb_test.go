@@ -1,8 +1,8 @@
 package peeringdb
 
 import (
-	"github.com/natesales/pathvector/internal/config"
 	"github.com/natesales/pathvector/internal/util"
+	"github.com/natesales/pathvector/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"

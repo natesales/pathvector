@@ -2,7 +2,7 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -15,8 +15,8 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/internal/bird"
-	"github.com/natesales/pathvector/internal/config"
 	"github.com/natesales/pathvector/internal/util"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 // Delimiter is an arbitrary delimiter used to split ASN from peerName

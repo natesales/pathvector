@@ -3,8 +3,8 @@ package templating
 import (
 	"testing"
 
-	"github.com/natesales/pathvector/internal/config"
 	"github.com/natesales/pathvector/internal/embed"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 func TestLoadTemplates(t *testing.T) {

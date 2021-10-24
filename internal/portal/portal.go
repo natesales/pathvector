@@ -13,7 +13,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 // session stores a portal BGP session

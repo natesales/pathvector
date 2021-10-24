@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/natesales/pathvector/internal/config"
+	"github.com/natesales/pathvector/pkg/config"
 	"github.com/spf13/cobra"
 )
 

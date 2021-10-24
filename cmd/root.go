@@ -25,7 +25,7 @@ var (
 // CLI Commands
 var rootCmd = &cobra.Command{
 	Use:   "pathvector",
-	Short: "Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.",
+	Short: "Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.",
 }
 
 func init() {

@@ -23,7 +23,7 @@ function HomepageHeader() {
                 />
 
                 <p style={{fontSize: "1.25em"}}>
-                    Pathvector is a declarative BGP routing platform that automates route optimization and control
+                    Pathvector is a declarative edge routing platform that automates route optimization and control
                     plane configuration with secure and repeatable routing policy.</p>
                 <div className={styles.buttons}>
                     <Link
@@ -41,7 +41,7 @@ export default function Home() {
     return (
         <Layout
             title={`Pathvector | Edge Routing Platform`}
-            description="Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.">
+            description="Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.">
             <HomepageHeader/>
             <main>
                 <HomepageFeatures/>

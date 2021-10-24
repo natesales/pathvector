@@ -2,7 +2,7 @@ descriptor-schema-version: "2.4"
 
 info:
   name: Pathvector
-  description: Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
+  description: Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
   version: "pathvector:version"
   author-link: "https://pathvector.io"
   author-name: "Nate Sales"

@@ -29,7 +29,7 @@ nfpms:
     vendor: Nate Sales
     homepage: https://pathvector.io
     maintainer: Nate Sales <nate@natesales.net>
-    description: Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
+    description: Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
     license: GNU GPL-3.0
     section: utils
     priority: extra

@@ -4,7 +4,7 @@ sidebar_position: 4
 ---
 ## Usage
 ```
-Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
+Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
 
 Usage:
   pathvector [command]

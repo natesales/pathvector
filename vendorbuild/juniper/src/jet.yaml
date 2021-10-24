@@ -1,6 +1,6 @@
 ---
 basename: "pathvector"
-comment: Pathvector is a declarative BGP routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
+comment: Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
 arch: "x86"
 abi: "64"
 files:

@@ -11,6 +11,5 @@ Pathvector is a declarative edge routing platform that automates route optimizat
 
 * Robust BGP route filtering with RPKI, IRR, and import limits automatically configured from PeeringDB.
 * Automatic route optimization by enriching the standard set of BGP attributes with latency and packet loss metrics.
-* Single YAML configuration file: Want to track your changes? Just commit your file to version control.
+* Declarative configuration model: Want to track your changes? Just commit your file to version control.
 * Data-plane Agnostic: Pathvector works on servers, network switches, embedded devices, etc.
-* Built on Open Source: In addition to Pathvector itself, it's dependencies such as [bird](https://gitlab.nic.cz/labs/bird/), [keepalived](https://github.com/acassen/keepalived), [gortr](https://github.com/cloudflare/gortr) and [bgpq4](https://github.com/bgp/bgpq4) are open source and free to use.

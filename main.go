@@ -13,7 +13,7 @@ var (
 	date    = "unknown"
 )
 
-//go:generate ./generate.sh
+//go:generate ./docs/generate.sh
 
 func main() {
 	if err := cmd.Execute(version, commit, date); err != nil {

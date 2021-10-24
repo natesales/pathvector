@@ -44,7 +44,6 @@ sidebar_position: 3
 | optimizer | [Optimizer](#optimizer) |  |  | Route optimizer options |
 
 ## BFDInstance
-
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
 | neighbor | string |  |  | Neighbor IP address |
@@ -53,7 +52,6 @@ sidebar_position: 3
 | multiplier | uint | 10 |  | Number of missed packets for the state to be declared down |
 
 ## Peer
-
 | Option | Type | Default | Validation | Description |
 |--------|------|---------|------------|-------------|
 | template | string |  |  | Configuration template |

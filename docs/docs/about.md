@@ -9,9 +9,8 @@ Pathvector is a declarative BGP routing platform that automates route optimizati
 
 [![Docs](https://img.shields.io/static/v1?label=docs&message=pathvector.io&color=9407cd&style=for-the-badge)](https://pathvector.io)
 [![Go Report](https://goreportcard.com/badge/github.com/natesales/pathvector?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/pathvector)
-[![License](https://img.shields.io/github/license/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/blob/main/LICENSE)
-[![Release](https://img.shields.io/github/v/release/natesales/pathvector?style=for-the-badge)](https://github.com/natesales/pathvector/releases)
 [![Codecov](https://img.shields.io/codecov/c/github/natesales/pathvector?style=for-the-badge)](https://app.codecov.io/gh/natesales/pathvector)
+[![CII Best Practices](https://img.shields.io/static/v1?label=CII%20Best%20Practices&message=passing&color=green&style=for-the-badge)](https://bestpractices.coreinfrastructure.org/projects/5328)
 
 ## Features
 

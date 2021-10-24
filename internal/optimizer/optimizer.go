@@ -52,7 +52,6 @@ func sendPing(source string, target string, count int, timeout int, udp bool) (*
 	pinger.Count = count
 	pinger.Timeout = time.Duration(timeout) * time.Second
 	pinger.Source = source
-	pinger.SetNetwork("ip") // TODO: Is this needed?
 	pinger.SetPrivileged(!udp)
 
 	// Run the ping

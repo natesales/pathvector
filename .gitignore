@@ -21,6 +21,7 @@ vendorbuild/juniper/bird/bird-*.tgz
 vendorbuild/juniper/bird/.build/
 vendorbuild/juniper/bird/jetez/
 vendorbuild/cisco/ioxclient
+vendorbuild/mikrotik/docker-buildx
 
 # Testing
 test-cache/

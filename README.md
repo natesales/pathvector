@@ -1,4 +1,4 @@
-![Banner](https://pathvector.io/img/black-border.svg)
+<img alt="Pathvector Logo" src="https://pathvector.io/img/black-border.svg" height="200" />
 
 Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
 

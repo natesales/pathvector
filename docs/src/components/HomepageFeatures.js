@@ -1,36 +1,52 @@
 import React from 'react';
 import clsx from 'clsx';
 import styles from './HomepageFeatures.module.css';
+import Translate, {translate} from "@docusaurus/core/lib/client/exports/Translate";
 
 const FeatureList = [
     {
-        title: 'Secure Routing Policy',
+        title: translate({
+            message: 'Secure Routing Policy',
+            description: 'Secure routing policy feature header',
+        }),
         Svg: require('../../static/img/undraw_security.svg').default,
         description: (
-            <>
-                Generate secure routing policy by default by enforcing RPKI, IRR, import limits, Tier 1 ASN filters,
-                next hop address & ASN restriction and more.
-            </>
+            <Translate
+                id="homepage.securityFeature"
+                description="Security feature"
+            >
+                {'Generate secure routing policy by default by enforcing RPKI, IRR, import limits, Tier 1 ASN filters, next hop address & ASN restriction and more.'}
+            </Translate>
         ),
     },
     {
-        title: 'Route Optimization',
+        title: translate({
+            message: 'Route Optimization',
+            description: 'BGP optimization feature header',
+        }),
         Svg: require('../../static/img/undraw_cycle.svg').default,
         description: (
-            <>
-                Enrich the BGP route selection process with latency and packet loss metrics. Optimization
-                routines only affect outbound traffic and never modify the AS path.
-            </>
+            <Translate
+                id="homepage.optimizationFeature"
+                description="BGP optimization feature"
+            >
+                {'Enrich the BGP route selection process with latency and packet loss metrics. Optimization routines only affect outbound traffic and never modify the AS path.'}
+            </Translate>
         ),
     },
     {
-        title: 'Repeatable and Extensible',
+        title: translate({
+            message: 'Repeatable and Extensible',
+            description: 'Repeatable feature header',
+        }),
         Svg: require('../../static/img/undraw_code.svg').default,
         description: (
-            <>
-                Create templates and code snippets to avoid duplicate configuration. Write a policy once and reuse it as
-                many times as you like.
-            </>
+            <Translate
+                id="homepage.repeatableFeature"
+                description="Repeatable feature"
+            >
+                {'Create templates and code snippets to avoid duplicate configuration. Write a policy once and reuse it as many times as you like.'}
+            </Translate>
         ),
     },
 ];

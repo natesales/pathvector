@@ -5,6 +5,7 @@ import styles from './index.module.css';
 import HomepageFeatures from '../components/HomepageFeatures';
 import ThemedImage from '@theme/ThemedImage';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import {translate} from "@docusaurus/core/lib/client/exports/Translate";
 
 function HomepageHeader() {
     return (
@@ -23,13 +24,19 @@ function HomepageHeader() {
                 />
 
                 <p style={{fontSize: "1.25em"}}>
-                    Pathvector is a declarative edge routing platform that automates route optimization and control
-                    plane configuration with secure and repeatable routing policy.</p>
+                    {translate({
+                        message: 'Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.',
+                        description: 'Hero text',
+                    })}
+                </p>
                 <div className={styles.buttons}>
                     <Link
                         className="button button--secondary button--lg"
                         to="/docs/about">
-                        Learn More
+                        {translate({
+                            message: 'Learn More',
+                            description: 'Learn more button',
+                        })}
                     </Link>
                 </div>
             </div>

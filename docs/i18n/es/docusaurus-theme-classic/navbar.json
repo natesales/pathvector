@@ -1,0 +1,18 @@
+{
+  "title": {
+    "message": "Pathvector",
+    "description": "The title in the navbar"
+  },
+  "item.label.Docs": {
+    "message": "Docs",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.Installation": {
+    "message": "Installation",
+    "description": "Navbar item with label Installation"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

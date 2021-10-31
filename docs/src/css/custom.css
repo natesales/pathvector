@@ -7,7 +7,7 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #9407cd;
+  --ifm-color-primary: #b30bf7;
   --ifm-color-primary-dark: rgb(33, 175, 144);
   --ifm-color-primary-darker: rgb(31, 165, 136);
   --ifm-color-primary-darkest: rgb(26, 136, 112);
@@ -23,7 +23,7 @@
   --ifm-footer-background-color: #000000 !important;
 }
 
-.codeBlockLines_node_modules-\@docusaurus-theme-classic-lib-next-theme-CodeBlock-[data-theme='dark'] {
+.codeBlockLines_node_modules-\@docusaurus-theme-classic-lib-next-theme-CodeBlock- {
   background-color: rgb(25, 25, 25) !important;
 }
 

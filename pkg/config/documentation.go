@@ -19,7 +19,8 @@ func sanitizeConfigName(s string) string {
 
 func addLink(s string) string {
 	if unicode.IsUpper(rune(s[0])) {
-		return fmt.Sprintf("[%s](#%s)", s, strings.ToLower(s))
+		// Add -1 suffix to link to the subsequent hash
+		return fmt.Sprintf("[%s](#%s-1)", s, strings.ToLower(s))
 	}
 	return s
 }
@@ -40,8 +41,6 @@ func (s byReflectType) Less(i, j int) bool {
 func documentConfigTypes(t reflect.Type) {
 	childTypesSet := map[reflect.Type]bool{}
 	fmt.Println("## " + sanitizeConfigName(t.String()))
-	fmt.Println("| Option | Type | Default | Validation | Description |")
-	fmt.Println("|--------|------|---------|------------|-------------|")
 	// Handle pointer types
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -66,7 +65,16 @@ func documentConfigTypes(t reflect.Type) {
 					childTypesSet[field.Type] = true
 				}
 			}
-			fmt.Printf("| %s | %s | %s | %s | %s |\n", key, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation, description)
+			fmt.Printf(`### `+"`"+`%s`+"`"+`
+
+%s
+
+| Type | Default | Validation |
+|------|---------|------------|
+| %s   | %s      | %s         |
+
+`, key, description, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation)
+			//fmt.Printf("| %s | %s | %s | %s | %s |\n", key, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation, description)
 		}
 	}
 	fmt.Println()

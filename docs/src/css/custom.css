@@ -22,18 +22,3 @@
   --ifm-background-surface-color: #000000 !important;
   --ifm-footer-background-color: #000000 !important;
 }
-
-.codeBlockLines_node_modules-\@docusaurus-theme-classic-lib-next-theme-CodeBlock- {
-  background-color: rgb(25, 25, 25) !important;
-}
-
-.docusaurus-highlight-code-line {
-  background-color: rgba(0, 0, 0, 0.1);
-  display: block;
-  margin: 0 calc(-1 * var(--ifm-pre-padding));
-  padding: 0 var(--ifm-pre-padding);
-}
-
-html[data-theme='dark'] .docusaurus-highlight-code-line {
-  background-color: rgba(0, 0, 0, 0.3);
-}

@@ -52,7 +52,6 @@ const lightCodeTheme = {
     }]
 };
 
-
 let darkCodeTheme = {
     plain: {
         color: "#F8F8F2",
@@ -107,7 +106,6 @@ let darkCodeTheme = {
     }]
 };
 
-
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 module.exports = {
     title: 'Pathvector',
@@ -119,6 +117,10 @@ module.exports = {
     favicon: 'img/icon-white.png',
     organizationName: 'natesales', // Usually your GitHub org/user name.
     projectName: 'pathvector', // Usually your repo name.
+    i18n: {
+        defaultLocale: 'en',
+        locales: ['en', 'es'],
+    },
     themeConfig: {
         // announcementBar: {
         //   content: 'We are looking to revamp our docs, please fill <a target="_blank" rel="noopener noreferrer" href="#">this survey</a>',
@@ -149,6 +151,9 @@ module.exports = {
                 {
                     href: 'https://github.com/natesales/pathvector',
                     label: 'GitHub',
+                    position: 'right',
+                }, {
+                    type: 'localeDropdown',
                     position: 'right',
                 },
             ],

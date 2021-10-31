@@ -17,6 +17,16 @@
   --ifm-code-font-size: 95%;
 }
 
+:root[data-theme='dark'] {
+  --ifm-background-color: black !important;
+  --ifm-background-surface-color: #000000 !important;
+  --ifm-footer-background-color: #000000 !important;
+}
+
+.codeBlockLines_node_modules-\@docusaurus-theme-classic-lib-next-theme-CodeBlock-[data-theme='dark'] {
+  background-color: rgb(25, 25, 25) !important;
+}
+
 .docusaurus-highlight-code-line {
   background-color: rgba(0, 0, 0, 0.1);
   display: block;

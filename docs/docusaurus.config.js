@@ -13,6 +13,12 @@ module.exports = {
   organizationName: 'natesales', // Usually your GitHub org/user name.
   projectName: 'pathvector', // Usually your repo name.
   themeConfig: {
+    // announcementBar: {
+    //   content: 'We are looking to revamp our docs, please fill <a target="_blank" rel="noopener noreferrer" href="#">this survey</a>',
+    //   backgroundColor: '#b30bf7',
+    //   textColor: '#fff',
+    //   isCloseable: false,
+    // },
     navbar: {
       title: 'Pathvector',
       // logo: {

@@ -72,7 +72,7 @@ Desde el EOS CLI:
 2. Instalar la extensión: `extension pathvector-arista.swix`
 3. Marque la extensión a instalar en el arranque: `copy installed-extensions boot-extensions`
 4. Añade el alias pathvector: `alias pathvector "bash pathvector"`
-5. Añadir Pathvector al programador (opcional): `schedule pathvector interval 720 max-log-files 1 command pathvector -c /mnt/flash/pathvector.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
+5. Añadir Pathvector al planificador (opcional): `schedule pathvector interval 720 max-log-files 1 command pathvector -c /mnt/flash/pathvector.yml -o /mnt/flash/bird/ -s /run/bird.ctl`
 6. Guarda los cambios: `wr mem`
 
 ## Juniper JunOS

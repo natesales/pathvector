@@ -312,11 +312,11 @@ function reject_long_as_paths() {
 function reject_rpki_invalid() {
   {{ if .RPKIEnable }}
   if (net.type = NET_IP4) then {
-    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
 
   if (net.type = NET_IP6) then {
-    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
+    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) = ROA_INVALID) then _reject("RPKI invalid");
   }
   {{ end }}
 }
@@ -324,11 +324,11 @@ function reject_rpki_invalid() {
 function force_rpki_strict() {
   {{ if .RPKIEnable }}
   if (net.type = NET_IP4) then {
-    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
+    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
   }
 
   if (net.type = NET_IP6) then {
-    if (roa_check(rpki4, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
+    if (roa_check(rpki6, net, bgp_path.last_nonaggregated) != ROA_VALID) then _reject("RPKI != ROA_VALID");
   }
   {{ end }}
 }

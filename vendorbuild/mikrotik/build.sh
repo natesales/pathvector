@@ -5,7 +5,7 @@ version=$(git describe --tags "$(git rev-list --tags --max-count=1)" | cut -c2-)
 
 # Download docker-buildx if it doesn't already exist
 docker_buildx="../vendorbuild/mikrotik/docker-buildx"
-if [ ! -d "$docker_buildx" ]; then
+if [ ! -f "$docker_buildx" ]; then
   curl -L https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.linux-amd64 -o $docker_buildx
   chmod +x $docker_buildx
 fi

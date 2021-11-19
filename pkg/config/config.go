@@ -200,7 +200,7 @@ type Config struct {
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`
 	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be added to the bogon list?" default:"false"`
+	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
 	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
 	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
 

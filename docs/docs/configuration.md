@@ -4,7 +4,6 @@ sidebar_position: 3
 ---
 
 ## Config
-
 ### `peeringdb-query-timeout`
 
 PeeringDB query timeout in seconds
@@ -223,7 +222,7 @@ Add a default route
 
 ### `accept-default`
 
-Should default routes be added to the bogon list?
+Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list.
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -293,8 +292,8 @@ Route optimizer options
 |------|---------|------------|
 | [Optimizer](#optimizer-1)   |       |          |
 
-## BFDInstance
 
+## BFDInstance
 ### `neighbor`
 
 Neighbor IP address
@@ -327,8 +326,8 @@ Number of missed packets for the state to be declared down
 |------|---------|------------|
 | uint   | 10      |          |
 
-## Peer
 
+## Peer
 ### `template`
 
 Configuration template
@@ -865,8 +864,8 @@ Should the optimizer modify inbound policy?
 |------|---------|------------|
 | bool   | false      |          |
 
-## VRRPInstance
 
+## VRRPInstance
 ### `state`
 
 VRRP instance state ('primary' or 'backup')
@@ -907,8 +906,8 @@ List of virtual IPs
 |------|---------|------------|
 | []string   |       | required,cidr         |
 
-## Augments
 
+## Augments
 ### `accept4`
 
 List of BIRD protocols to import into the IPv4 table
@@ -957,8 +956,8 @@ List of communities to filter routes exported to kernel (if list is not empty, a
 |------|---------|------------|
 | []string   |       |          |
 
-## Optimizer
 
+## Optimizer
 ### `targets`
 
 List of probe targets

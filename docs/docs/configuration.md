@@ -568,6 +568,14 @@ RFC 5082 Generalized TTL Security Mechanism
 |------|---------|------------|
 | bool   | false      |          |
 
+### `interpret-communities`
+
+Should well-known BGP communities be interpreted by their intended action?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
 ### `import-communities`
 
 List of communities to add to all imported routes

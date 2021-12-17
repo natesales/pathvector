@@ -384,6 +384,14 @@ BGP local preference
 |------|---------|------------|
 | int   | 100      |          |
 
+### `set-local-pref`
+
+Should an explicit local pref be set?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
 ### `multihop`
 
 Should BGP multihop be enabled? (255 max hops)

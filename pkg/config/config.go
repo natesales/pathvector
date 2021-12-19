@@ -14,6 +14,7 @@ type Peer struct {
 	NeighborIPs          *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
 	Prepends             *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
 	LocalPref            *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	SetLocalPref         *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set?" default:"true"`
 	Multihop             *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen4              *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`
 	Listen6              *string   `yaml:"listen6" description:"IPv6 BGP listen address" default:"-"`

@@ -182,9 +182,7 @@ type Config struct {
 	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
 
-	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
-	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
-	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
+	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`

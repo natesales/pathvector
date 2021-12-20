@@ -16,6 +16,12 @@ import (
 	"github.com/natesales/pathvector/pkg/config"
 )
 
+type portalConfig struct {
+	Host     string    `yaml:"host" description:"Peering portal host (disabled if empty)" default:""`
+	Key      string    `yaml:"key" description:"Peering portal API key" default:""`
+	Sessions []session `json:"sessions"`
+}
+
 // session stores a portal BGP session
 type session struct {
 	Name       string `json:"name"`

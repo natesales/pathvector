@@ -45,7 +45,8 @@ func init() {
 
 func (Plugin) Execute(c *config.Config) error {
 	if _, contains := c.Plugins["portal"]; !contains {
-		return fmt.Errorf("config has no portal key")
+		log.Warn("config has no portal key")
+		return nil
 	}
 
 	var conf portalConfig

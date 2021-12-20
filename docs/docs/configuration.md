@@ -292,6 +292,14 @@ Route optimizer options
 |------|---------|------------|
 | [Optimizer](#optimizer-1)   |       |          |
 
+### `plugins`
+
+Plugin-specific configuration
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
+
 
 ## BFDInstance
 ### `neighbor`

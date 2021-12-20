@@ -212,6 +212,7 @@ type Config struct {
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
 	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
 	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
+	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`

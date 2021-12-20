@@ -24,9 +24,9 @@ rm /tmp/pathvector
 
 # Add plugin readmes
 rm docs/docs/plugins/*.md
-for p in plugins/*/; do
-  plugin=$(echo "$p" | cut -d "/" -f 2)
-  cp "plugins/$plugin/README.md" "docs/docs/plugins/$plugin.md"
+for p in internal/plugins/*/; do
+  plugin=$(echo "$p" | cut -d "/" -f 3)
+  cp "internal/plugins/$plugin/README.md" "docs/docs/plugins/$plugin.md"
 done
 
 echo "done"

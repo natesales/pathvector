@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/natesales/pathvector/internal/bird"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,6 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/natesales/pathvector/internal/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 
@@ -96,8 +96,8 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		defer resp.Body.Close()
 		return fmt.Errorf("portal server: %s", respText)
 	}
 

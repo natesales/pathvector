@@ -12,7 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/natesales/pathvector/internal/bird"
+	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

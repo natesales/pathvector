@@ -14,8 +14,8 @@ import (
 	"github.com/go-ping/ping"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/natesales/pathvector/internal/bird"
 	"github.com/natesales/pathvector/internal/util"
+	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

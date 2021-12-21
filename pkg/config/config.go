@@ -39,6 +39,7 @@ type Peer struct {
 	ConfederationMember  *bool     `yaml:"confederation-member" description:"Should this peer be a member of the local confederation?" default:"false"`
 	TTLSecurity          *bool     `yaml:"ttl-security" description:"RFC 5082 Generalized TTL Security Mechanism" default:"false"`
 	InterpretCommunities *bool     `yaml:"interpret-communities" description:"Should well-known BGP communities be interpreted by their intended action?" default:"true"`
+	DefaultLocalPref     *int      `yaml:"default-local-pref" description:"Default value for local preference" default:"-"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`

@@ -39,6 +39,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     {{ if BoolDeref $peer.ConfederationMember }}confederation member yes;{{ end }}
     {{ if not (BoolDeref $peer.InterpretCommunities) }}interpret communities off;{{ end }}
     {{ if IntDeref $peer.Confederation }}confederation {{ IntDeref $peer.Confederation }};{{ end }}
+    {{ if IntDeref $peer.DefaultLocalPref }}default bgp_local_pref {{ IntDeref $peer.DefaultLocalPref }};{{ end }}
     {{ StrDeref $peer.SessionGlobal }}
     {{ $protocols := MakeSlice }}
     {{ if BoolDeref $peer.MPUnicast46 }}
@@ -87,9 +88,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
-
+            {{ if not (IntDeref $peer.DefaultLocalPref) }}
             {{ if BoolDeref $peer.SetLocalPref }}bgp_local_pref = {{ $peer.LocalPref }}; # pathvector:localpref{{ end }}
-
+            {{ end }}
             {{ if BoolDeref $peer.HonorGracefulShutdown }}honor_graceful_shutdown();{{ end }}
 
             {{ range $i, $community := StringSliceIter $peer.ImportStandardCommunities }}

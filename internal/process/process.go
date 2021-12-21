@@ -196,6 +196,37 @@ func Load(configBlob []byte) (*config.Config, error) {
 				log.Debugf("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
+
+		// Append snippet files
+		if peerData.PreImportFile != nil {
+			content, err := os.ReadFile(*peerData.PreImportFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-import-file: %s", err)
+			}
+			*peerData.PreImport += "\n" + string(content)
+		}
+		if peerData.PreExportFile != nil {
+			content, err := os.ReadFile(*peerData.PreExportFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-export-file: %s", err)
+			}
+			*peerData.PreExport += "\n" + string(content)
+		}
+
+		if peerData.PreImportFinalFile != nil {
+			content, err := os.ReadFile(*peerData.PreImportFinalFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-import-final-file: %s", err)
+			}
+			*peerData.PreImportFinal += "\n" + string(content)
+		}
+		if peerData.PreExportFinalFile != nil {
+			content, err := os.ReadFile(*peerData.PreExportFinalFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-export-final-file: %s", err)
+			}
+			*peerData.PreExportFinal += "\n" + string(content)
+		}
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family

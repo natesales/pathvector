@@ -22,15 +22,11 @@ sidebar_position: 1
 cat README.md >>docs/docs/about.md
 rm /tmp/pathvector
 
-# Add peering portal readme page
-curl -s https://raw.githubusercontent.com/natesales/pathvector-portal/main/README.md >docs/docs/portal.md
-sed -i 's/# Pathvector Peering Portal/# Peering Portal/' docs/docs/portal.md
-
 # Add plugin readmes
 rm docs/docs/plugins/*.md
-for p in plugins/*/; do
-  plugin=$(echo "$p" | cut -d "/" -f 2)
-  cp "plugins/$plugin/README.md" "docs/docs/plugins/$plugin.md"
+for p in internal/plugins/*/; do
+  plugin=$(echo "$p" | cut -d "/" -f 3)
+  cp "internal/plugins/$plugin/README.md" "docs/docs/plugins/$plugin.md"
 done
 
 echo "done"

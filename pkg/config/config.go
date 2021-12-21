@@ -182,29 +182,28 @@ type Config struct {
 	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
 
-	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
-	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
-	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
+	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
 	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
-	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
-	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
-	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	KernelLearn   bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
-	KernelExport  bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
-	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4       string `yaml:"source4" description:"Source IPv4 address"`
-	Source6       string `yaml:"source6" description:"Source IPv6 address"`
-	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
-	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
+	RouterID              string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer             string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer             string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs              string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	KeepFiltered          bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	KernelLearn           bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
+	KernelExport          bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
+	KernelRejectConnected bool   `yaml:"kernel-reject-connected" description:"Don't export connected routes (RTS_DEVICE) to kernel?'" default:"false"`
+	MergePaths            bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
+	Source4               string `yaml:"source4" description:"Source IPv4 address"`
+	Source6               string `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute          bool   `yaml:"default-route" description:"Add a default route" default:"true"`
+	AcceptDefault         bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	KernelTable           int    `yaml:"kernel-table" description:"Kernel table"`
+	RPKIEnable            bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
 
 	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
@@ -212,6 +211,7 @@ type Config struct {
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
 	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
 	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
+	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`

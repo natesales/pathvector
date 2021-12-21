@@ -76,22 +76,6 @@ Log file location
 |------|---------|------------|
 | string   | syslog      |          |
 
-### `portal-host`
-
-Peering portal host (disabled if empty)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `portal-key`
-
-Peering portal API key
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
 ### `hostname`
 
 Router hostname (default system hostname)
@@ -187,6 +171,14 @@ Export routes to kernel routing table
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | true      |          |
+
+### `kernel-reject-connected`
+
+Don't export connected routes (RTS_DEVICE) to kernel?'
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 ### `merge-paths`
 
@@ -291,6 +283,14 @@ Route optimizer options
 | Type | Default | Validation |
 |------|---------|------------|
 | [Optimizer](#optimizer-1)   |       |          |
+
+### `plugins`
+
+Plugin-specific configuration
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
 
 
 ## BFDInstance

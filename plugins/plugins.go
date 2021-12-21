@@ -2,8 +2,10 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/pkg/config"
+
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 var plugins = make(map[string]Plugin)

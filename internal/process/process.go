@@ -238,12 +238,20 @@ func Load(configBlob []byte) (*config.Config, error) {
 
 	// Parse static routes
 	for prefix, nexthop := range c.Augments.Statics {
+		// Handle interface suffix
+		var rawNexthop string
+		if strings.Contains(nexthop, "%") {
+			rawNexthop = strings.Split(nexthop, "%")[0]
+		} else {
+			rawNexthop = nexthop
+		}
+
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("Invalid static prefix: " + prefix)
 		}
-		if net.ParseIP(nexthop) == nil {
-			return nil, errors.New("Invalid static nexthop: " + nexthop)
+		if net.ParseIP(rawNexthop) == nil {
+			return nil, errors.New("Invalid static nexthop: " + rawNexthop)
 		}
 
 		if pfx.To4() == nil { // If IPv6

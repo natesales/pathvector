@@ -10,6 +10,6 @@ import (" >"$pluginloader"
 grep -v '^#\|^\s*$' plugin.cfg | while read -r line; do
   plugin_name=$(echo "$line" | cut -d ":" -f 1)
   plugin_path=$(echo "$line" | cut -d ":" -f 2)
-  echo "  _ \"$plugin_path\"" >>"$pluginloader"
+  echo "	_ \"$plugin_path\"" >>"$pluginloader"
 done
 echo ")" >>"$pluginloader"

@@ -336,6 +336,8 @@ function force_rpki_strict() {
 }
 
 function reject_out_of_bounds_routes() {
+  {{ if .AcceptDefault -}}if (net.len = 0) then return 0;{{ end }}
+
   if (net.type = NET_IP4) then {
     if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
   }

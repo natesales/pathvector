@@ -864,6 +864,38 @@ Configuration to add immediately before the final accept/reject on export
 |------|---------|------------|
 | string   |       |          |
 
+### `pre-import-file`
+
+Configuration file to append to pre-import
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-export-file`
+
+Configuration file to append to pre-export
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-import-final-file`
+
+Configuration file to append to pre-import-final
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-export-final-file`
+
+Configuration file to append to pre-export-final
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
 ### `probe-sources`
 
 Optimizer probe source addresses

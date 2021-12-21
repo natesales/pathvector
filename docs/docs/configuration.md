@@ -172,6 +172,14 @@ Export routes to kernel routing table
 |------|---------|------------|
 | bool   | true      |          |
 
+### `kernel-reject-connected`
+
+Don't export connected routes (RTS_DEVICE) to kernel?'
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `merge-paths`
 
 Should best and equivalent non-best routes be imported to build ECMP routes?

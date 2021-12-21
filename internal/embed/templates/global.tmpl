@@ -69,6 +69,7 @@ protocol kernel {
   ipv4 {
     export filter {
       {{ if .KernelExport }}
+      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
@@ -109,6 +110,7 @@ protocol kernel {
   ipv6 {
     export filter {
       {{ if .KernelExport }}
+      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept6 }}
       if (proto = "{{ $rule }}") then accept;

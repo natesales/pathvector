@@ -105,6 +105,17 @@ func Load(configBlob []byte) (*config.Config, error) {
 		c.Hostname = hostname
 	}
 
+	if c.Stun {
+		c.NoAnnounce = true
+		c.NoAccept = true
+	}
+	if c.NoAnnounce {
+		log.Warn("DANGER: no-announce is set, no routes will be announced to any peer")
+	}
+	if c.NoAccept {
+		log.Warn("DANGER: no-accept is set, no routes will be accepted from any peer")
+	}
+
 	for peerName, peerData := range c.Peers {
 		// Set sanitized peer name
 		peerData.ProtocolName = util.Sanitize(peerName)

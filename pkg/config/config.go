@@ -212,6 +212,10 @@ type Config struct {
 	KernelTable           int    `yaml:"kernel-table" description:"Kernel table"`
 	RPKIEnable            bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
 
+	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
+	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`
+	Stun       bool `yaml:"stun" description:"Don't accept or announce any routes from any peer (sets no-announce and no-accept)" default:"false"`
+
 	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`

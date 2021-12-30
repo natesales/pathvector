@@ -236,6 +236,30 @@ Enable RPKI RTR session
 |------|---------|------------|
 | bool   | true      |          |
 
+### `no-announce`
+
+Don't announce any routes to any peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `no-accept`
+
+Don't accept any routes from any peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `stun`
+
+Don't accept or announce any routes from any peer (sets no-announce and no-accept)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `peers`
 
 BGP peer configuration
@@ -383,14 +407,6 @@ BGP local preference
 | Type | Default | Validation |
 |------|---------|------------|
 | int   | 100      |          |
-
-### 'default-local-pref'
-
-BGP default local preferance
-
-| Type | Default | Validation |
-|------|-------|------------|
-| int   |       |          |
 
 ### `set-local-pref`
 
@@ -591,6 +607,14 @@ Should well-known BGP communities be interpreted by their intended action?
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | true      |          |
+
+### `default-local-pref`
+
+Default value for local preference
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   |       |          |
 
 ### `import-communities`
 

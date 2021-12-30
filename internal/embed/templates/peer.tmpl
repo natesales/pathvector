@@ -55,7 +55,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
         import filter {
-            {{ if .NoAccept }}reject;{{ end }}
+            {{ if $global.NoAccept }}reject;{{ end }}
 
             {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
@@ -110,7 +110,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         };
 
         export filter {
-            {{ if .NoAnnounce }}reject;{{ end }}
+            {{ if $global.NoAnnounce }}reject;{{ end }}
 
             {{ StrDeref $peer.PreExport }}
 

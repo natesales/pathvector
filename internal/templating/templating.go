@@ -147,7 +147,7 @@ var funcMap = template.FuncMap{
 				protocolNames = append(protocolNames, protoName)
 				return protoName
 			}
-			protoName = fmt.Sprintf("%sv%s_%d", *s, af, i)
+			protoName = fmt.Sprintf("%s_AS%d_v%s_%d", *s, *asn, af, i)
 			i++
 		}
 	},

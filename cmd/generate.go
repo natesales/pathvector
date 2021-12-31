@@ -19,7 +19,12 @@ import (
 	"github.com/natesales/pathvector/pkg/bird"
 )
 
+var (
+	withdraw bool
+)
+
 func init() {
+	generateCmd.Flags().BoolVarP(&withdraw, "withdraw", "w", false, "Withdraw all routes")
 	rootCmd.AddCommand(generateCmd)
 }
 
@@ -105,8 +110,16 @@ var generateCmd = &cobra.Command{
 		// Print global config
 		util.PrintStructInfo("pathvector.global", c)
 
+		if withdraw {
+			log.Warn("DANGER: withdraw flag is set, withdrawing all routes")
+		}
+
 		// Iterate over peers
 		for peerName, peerData := range c.Peers {
+			if withdraw {
+				c.NoAnnounce = true
+			}
+
 			log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
 
 			// If a PeeringDB query is required

@@ -11,17 +11,10 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/plugins"
 )
-
-type portalConfig struct {
-	Host string `yaml:"host" description:"Peering portal host (disabled if empty)" default:""`
-	Key  string `yaml:"key" description:"Peering portal API key" default:""`
-}
 
 // session stores a portal BGP session
 type session struct {
@@ -33,33 +26,8 @@ type session struct {
 	State      string `json:"state"`
 }
 
-type Plugin struct{}
-
-func (Plugin) Description() string {
-	return "Peering portal"
-}
-
-func init() {
-	plugins.Register("portal", Plugin{})
-}
-
-func (Plugin) Execute(c *config.Config) error {
-	if _, contains := c.Plugins["portal"]; !contains {
-		log.Warn("config has no portal key")
-		return nil
-	}
-
-	var conf portalConfig
-	if err := yaml.UnmarshalStrict([]byte(c.Plugins["portal"]), &conf); err != nil {
-		return fmt.Errorf("YAML unmarshal: %s", err)
-	}
-
-	// Record sessions
-	return record(conf.Host, conf.Key, c.Hostname, c.Peers, c.BIRDSocket)
-}
-
-// record records peer sessions to the peering portal server
-func record(host string, key string, routerHostname string, peers map[string]*config.Peer, birdSocket string) error {
+// Record records a peer session to the peering portal server
+func Record(host string, key string, routerHostname string, peers map[string]*config.Peer, birdSocket string) error {
 	// Get protocols
 	protocols, err := bird.RunCommand("show protocols", birdSocket)
 	if err != nil {
@@ -128,8 +96,8 @@ func record(host string, key string, routerHostname string, peers map[string]*co
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
+		defer resp.Body.Close()
 		return fmt.Errorf("portal server: %s", respText)
 	}
 

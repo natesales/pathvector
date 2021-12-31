@@ -76,6 +76,22 @@ Log file location
 |------|---------|------------|
 | string   | syslog      |          |
 
+### `portal-host`
+
+Peering portal host (disabled if empty)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `portal-key`
+
+Peering portal API key
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
 ### `hostname`
 
 Router hostname (default system hostname)

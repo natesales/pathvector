@@ -2,6 +2,4 @@
 
 package process
 
-import (
-	_ "github.com/natesales/pathvector/internal/plugins/portal"
-)
+import ()

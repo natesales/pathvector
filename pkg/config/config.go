@@ -193,10 +193,8 @@ type Config struct {
 	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
 	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
-	ASN              int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
-	Prefixes         []string `yaml:"prefixes" description:"List of prefixes to announce"`
-	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
-	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
+	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
+	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`
 
 	RouterID              string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
 	IRRServer             string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`

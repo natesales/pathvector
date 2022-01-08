@@ -116,22 +116,6 @@ List of prefixes to announce
 |------|---------|------------|
 | []string   |       |          |
 
-### `communities`
-
-List of RFC1997 BGP communities
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `large-communities`
-
-List of RFC8092 large BGP communities
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
 ### `router-id`
 
 Router ID (dotted quad notation)

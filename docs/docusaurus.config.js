@@ -122,12 +122,12 @@ module.exports = {
         locales: ['en', 'es'],
     },
     themeConfig: {
-        // announcementBar: {
-        //   content: 'We are looking to revamp our docs, please fill <a target="_blank" rel="noopener noreferrer" href="#">this survey</a>',
-        //   backgroundColor: '#b30bf7',
-        //   textColor: '#fff',
-        //   isCloseable: false,
-        // },
+        announcementBar: {
+          content: "We're interested in hearing how you're using Pathvector and how we can improve. Your feedback on <a target='_blank' href='https://forms.gle/uAHVSMcPKiMmenSm9'>this survey</a> would be greatly appreciated!",
+          backgroundColor: '#b30bf7',
+          textColor: '#fff',
+          isCloseable: false,
+        },
         navbar: {
             title: 'Pathvector',
             // logo: {

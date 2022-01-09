@@ -1,7 +1,6 @@
 # Peering Portal
 
 [![Docs](https://img.shields.io/static/v1?label=ABOUT&message=pathvector.io&color=9407cd&style=for-the-badge)](https://pathvector.io)
-[![Docker](https://img.shields.io/docker/v/natesales/pathvector-portal?style=for-the-badge)](https://hub.docker.com/r/natesales/pathvector-portal)
 [![Go Report](https://goreportcard.com/badge/github.com/natesales/pathvector-portal?style=for-the-badge)](https://goreportcard.com/report/github.com/natesales/pathvector-portal)
 [![License](https://img.shields.io/github/license/natesales/pathvector-portal?style=for-the-badge)](https://github.com/natesales/pathvector-portal/blob/main/LICENSE)
 

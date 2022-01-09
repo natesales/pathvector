@@ -12,6 +12,8 @@ augments:
   srd-communities:
     - 65530,1
     - 65530:65530:1
+  statics:
+    "192.0.2.0/24": "203.0.113.1%eth0"
 
 vrrp:
   VRRP 1:

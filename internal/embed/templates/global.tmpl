@@ -69,6 +69,7 @@ protocol kernel {
   ipv4 {
     export filter {
       {{ if .KernelExport }}
+      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
@@ -109,6 +110,7 @@ protocol kernel {
   ipv6 {
     export filter {
       {{ if .KernelExport }}
+      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Augments.Accept6 }}
       if (proto = "{{ $rule }}") then accept;
@@ -334,6 +336,8 @@ function force_rpki_strict() {
 }
 
 function reject_out_of_bounds_routes() {
+  {{ if .AcceptDefault -}}if (net.len = 0) then return 0;{{ end }}
+
   if (net.type = NET_IP4) then {
     if (net.len > 24 || net.len < 8) then _reject("out of bounds (24 > len > 8)");
   }

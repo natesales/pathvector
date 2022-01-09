@@ -188,6 +188,14 @@ Export routes to kernel routing table
 |------|---------|------------|
 | bool   | true      |          |
 
+### `kernel-reject-connected`
+
+Don't export connected routes (RTS_DEVICE) to kernel?'
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `merge-paths`
 
 Should best and equivalent non-best routes be imported to build ECMP routes?
@@ -244,6 +252,30 @@ Enable RPKI RTR session
 |------|---------|------------|
 | bool   | true      |          |
 
+### `no-announce`
+
+Don't announce any routes to any peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `no-accept`
+
+Don't accept any routes from any peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `stun`
+
+Don't accept or announce any routes from any peer (sets no-announce and no-accept)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `peers`
 
 BGP peer configuration
@@ -291,6 +323,14 @@ Route optimizer options
 | Type | Default | Validation |
 |------|---------|------------|
 | [Optimizer](#optimizer-1)   |       |          |
+
+### `plugins`
+
+Plugin-specific configuration
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
 
 
 ## BFDInstance
@@ -584,6 +624,14 @@ Should well-known BGP communities be interpreted by their intended action?
 |------|---------|------------|
 | bool   | true      |          |
 
+### `default-local-pref`
+
+Default value for local preference
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   |       |          |
+
 ### `import-communities`
 
 List of communities to add to all imported routes
@@ -859,6 +907,38 @@ Configuration to add immediately before the final accept/reject on import
 ### `pre-export-final`
 
 Configuration to add immediately before the final accept/reject on export
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-import-file`
+
+Configuration file to append to pre-import
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-export-file`
+
+Configuration file to append to pre-export
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-import-final-file`
+
+Configuration file to append to pre-import-final
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-export-final-file`
+
+Configuration file to append to pre-export-final
 
 | Type | Default | Validation |
 |------|---------|------------|

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/natesales/pathvector/internal/bird"
 	"io"
 	"net/http"
 	"net/url"
@@ -13,6 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

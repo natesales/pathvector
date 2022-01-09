@@ -15,9 +15,13 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/mod/semver"
 
 	"github.com/natesales/pathvector/internal/util"
 )
+
+// Minimum supported BIRD version
+const supportedMin = "2.0.7"
 
 func read(reader io.Reader) (string, error) {
 	// TODO: This buffer isn't a good solution, and might not fit the full response from BIRD
@@ -47,6 +51,12 @@ func RunCommand(command string, socket string) (string, error) {
 		return "", err
 	}
 	log.Debugf("BIRD init response: %s", resp)
+
+	// Check BIRD version
+	birdVersion := strings.Split(resp, " ")[2]
+	if semver.Compare(birdVersion, supportedMin) == -1 {
+		log.Warnf("BIRD version %s older than minimum supported version %s", birdVersion, supportedMin)
+	}
 
 	log.Debugf("Sending BIRD command: %s", command)
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))

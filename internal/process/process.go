@@ -11,12 +11,11 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
-
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/plugins"
+	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -104,6 +103,17 @@ func Load(configBlob []byte) (*config.Config, error) {
 			log.Fatalf("Hostname is not defined and unable to get system hostname: %s", err)
 		}
 		c.Hostname = hostname
+	}
+
+	if c.Stun {
+		c.NoAnnounce = true
+		c.NoAccept = true
+	}
+	if c.NoAnnounce {
+		log.Warn("DANGER: no-announce is set, no routes will be announced to any peer")
+	}
+	if c.NoAccept {
+		log.Warn("DANGER: no-accept is set, no routes will be accepted from any peer")
 	}
 
 	for peerName, peerData := range c.Peers {
@@ -196,6 +206,40 @@ func Load(configBlob []byte) (*config.Config, error) {
 				log.Debugf("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
+
+		// Append snippet files
+		if peerData.PreImportFile != nil {
+			content, err := os.ReadFile(*peerData.PreImportFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-import-file: %s", err)
+			}
+			*peerData.PreImport += "\n" + string(content)
+		}
+		if peerData.PreExportFile != nil {
+			content, err := os.ReadFile(*peerData.PreExportFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-export-file: %s", err)
+			}
+			*peerData.PreExport += "\n" + string(content)
+		}
+
+		if peerData.PreImportFinalFile != nil {
+			content, err := os.ReadFile(*peerData.PreImportFinalFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-import-final-file: %s", err)
+			}
+			*peerData.PreImportFinal += "\n" + string(content)
+		}
+		if peerData.PreExportFinalFile != nil {
+			content, err := os.ReadFile(*peerData.PreExportFinalFile)
+			if err != nil {
+				log.Fatalf("Unable to read pre-export-final-file: %s", err)
+			}
+			*peerData.PreExportFinal += "\n" + string(content)
+		}
+		if peerData.DefaultLocalPref != nil && peerData.OptimizeInbound != nil {
+			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
+		}
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
@@ -238,12 +282,20 @@ func Load(configBlob []byte) (*config.Config, error) {
 
 	// Parse static routes
 	for prefix, nexthop := range c.Augments.Statics {
+		// Handle interface suffix
+		var rawNexthop string
+		if strings.Contains(nexthop, "%") {
+			rawNexthop = strings.Split(nexthop, "%")[0]
+		} else {
+			rawNexthop = nexthop
+		}
+
 		pfx, _, err := net.ParseCIDR(prefix)
 		if err != nil {
 			return nil, errors.New("Invalid static prefix: " + prefix)
 		}
-		if net.ParseIP(nexthop) == nil {
-			return nil, errors.New("Invalid static nexthop: " + nexthop)
+		if net.ParseIP(rawNexthop) == nil {
+			return nil, errors.New("Invalid static nexthop: " + rawNexthop)
 		}
 
 		if pfx.To4() == nil { // If IPv6

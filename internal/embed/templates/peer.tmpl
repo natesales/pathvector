@@ -22,7 +22,7 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
 {{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{ if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
 {{ $neighborNoIface := SplitFirst $neighbor "%" }}
-protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
+protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
     local{{ if eq $af "4" }}{{ if $peer.Listen4 }} {{ $peer.Listen4 }}{{ end }}{{ else }}{{ if $peer.Listen6 }} {{ $peer.Listen6 }}{{ end }}{{ end }} as {{ if IntDeref $peer.LocalASN }}{{ IntDeref $peer.LocalASN }}{{ else }}ASN{{ end }}{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
     {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}
@@ -39,6 +39,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
     {{ if BoolDeref $peer.ConfederationMember }}confederation member yes;{{ end }}
     {{ if not (BoolDeref $peer.InterpretCommunities) }}interpret communities off;{{ end }}
     {{ if IntDeref $peer.Confederation }}confederation {{ IntDeref $peer.Confederation }};{{ end }}
+    {{ if IntDeref $peer.DefaultLocalPref }}default bgp_local_pref {{ IntDeref $peer.DefaultLocalPref }};{{ end }}
     {{ StrDeref $peer.SessionGlobal }}
     {{ $protocols := MakeSlice }}
     {{ if BoolDeref $peer.MPUnicast46 }}
@@ -54,6 +55,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
         import filter {
+            {{ if $global.NoAccept }}reject;{{ end }}
+
             {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
             {{ if BoolDeref $peer.FilterBogonASNs }}reject_bogon_asns();{{ end }}
@@ -87,9 +90,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
             {{ end }}
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
-
+            {{ if not (IntDeref $peer.DefaultLocalPref) }}
             {{ if BoolDeref $peer.SetLocalPref }}bgp_local_pref = {{ $peer.LocalPref }}; # pathvector:localpref{{ end }}
-
+            {{ end }}
             {{ if BoolDeref $peer.HonorGracefulShutdown }}honor_graceful_shutdown();{{ end }}
 
             {{ range $i, $community := StringSliceIter $peer.ImportStandardCommunities }}
@@ -107,6 +110,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af }} {
         };
 
         export filter {
+            {{ if $global.NoAnnounce }}reject;{{ end }}
+
             {{ StrDeref $peer.PreExport }}
 
             {{ range $i, $community := StringSliceIter $peer.ExportStandardCommunities }}

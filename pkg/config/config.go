@@ -39,6 +39,7 @@ type Peer struct {
 	ConfederationMember  *bool     `yaml:"confederation-member" description:"Should this peer be a member of the local confederation?" default:"false"`
 	TTLSecurity          *bool     `yaml:"ttl-security" description:"RFC 5082 Generalized TTL Security Mechanism" default:"false"`
 	InterpretCommunities *bool     `yaml:"interpret-communities" description:"Should well-known BGP communities be interpreted by their intended action?" default:"true"`
+	DefaultLocalPref     *int      `yaml:"default-local-pref" description:"Default value for local preference" default:"-"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
@@ -81,11 +82,17 @@ type Peer struct {
 	AnnounceAll        *bool `yaml:"announce-all" description:"Should all routes be exported to this peer?" default:"false"`
 
 	// Custom daemon configuration
-	SessionGlobal  *string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols" default:"-"`
+	SessionGlobal *string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols" default:"-"`
+
 	PreImport      *string `yaml:"pre-import" description:"Configuration to add at the beginning of the import filter" default:"-"`
 	PreExport      *string `yaml:"pre-export" description:"Configuration to add at the beginning of the export filter" default:"-"`
 	PreImportFinal *string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import" default:"-"`
 	PreExportFinal *string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export" default:"-"`
+
+	PreImportFile      *string `yaml:"pre-import-file" description:"Configuration file to append to pre-import" default:"-"`
+	PreExportFile      *string `yaml:"pre-export-file" description:"Configuration file to append to pre-export" default:"-"`
+	PreImportFinalFile *string `yaml:"pre-import-final-file" description:"Configuration file to append to pre-import-final" default:"-"`
+	PreExportFinalFile *string `yaml:"pre-export-final-file" description:"Configuration file to append to pre-export-final" default:"-"`
 
 	// Optimizer
 	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`
@@ -191,20 +198,25 @@ type Config struct {
 	Communities      []string `yaml:"communities" description:"List of RFC1997 BGP communities"`
 	LargeCommunities []string `yaml:"large-communities" description:"List of RFC8092 large BGP communities"`
 
-	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
-	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
-	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	KernelLearn   bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
-	KernelExport  bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
-	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4       string `yaml:"source4" description:"Source IPv4 address"`
-	Source6       string `yaml:"source6" description:"Source IPv6 address"`
-	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	KernelTable   int    `yaml:"kernel-table" description:"Kernel table"`
-	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
+	RouterID              string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer             string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer             string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs              string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	KeepFiltered          bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	KernelLearn           bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
+	KernelExport          bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
+	KernelRejectConnected bool   `yaml:"kernel-reject-connected" description:"Don't export connected routes (RTS_DEVICE) to kernel?'" default:"false"`
+	MergePaths            bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
+	Source4               string `yaml:"source4" description:"Source IPv4 address"`
+	Source6               string `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute          bool   `yaml:"default-route" description:"Add a default route" default:"true"`
+	AcceptDefault         bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	KernelTable           int    `yaml:"kernel-table" description:"Kernel table"`
+	RPKIEnable            bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
+
+	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
+	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`
+	Stun       bool `yaml:"stun" description:"Don't accept or announce any routes from any peer (sets no-announce and no-accept)" default:"false"`
 
 	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
@@ -212,6 +224,7 @@ type Config struct {
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
 	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
 	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
+	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
 	RTRServerPort int      `yaml:"-" description:"-"`

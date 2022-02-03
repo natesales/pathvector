@@ -39,7 +39,7 @@ const FeatureList = [
             message: 'Repeatable and Extensible',
             description: 'Repeatable feature header',
         }),
-        Svg: require('../../static/img/undraw_code.svg').default,
+        Svg: require('../../static/img/undraw_options.svg').default,
         description: (
             <Translate
                 id="homepage.repeatableFeature"

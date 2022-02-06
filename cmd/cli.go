@@ -50,7 +50,9 @@ var cliCmd = &cobra.Command{
 		read(c)
 
 		if len(args) > 0 {
-			c.Write([]byte(strings.Join(args, " ") + "\r\n"))
+			if _, err := c.Write([]byte(strings.Join(args, " ") + "\r\n")); err != nil {
+				log.Fatalf("Unable to write to BIRD socket: %v", err)
+			}
 			read(c)
 			return
 		}
@@ -61,7 +63,9 @@ var cliCmd = &cobra.Command{
 			cmd, _ := r.ReadString('\n')
 			cmd = strings.Replace(cmd, "\n", "", -1)
 			if cmd != "" {
-				c.Write([]byte(cmd + "\r\n"))
+				if _, err := c.Write([]byte(cmd + "\r\n")); err != nil {
+					log.Fatalf("Unable to write to BIRD socket: %v", err)
+				}
 				read(c)
 			}
 		}

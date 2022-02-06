@@ -23,7 +23,8 @@ import (
 // Minimum supported BIRD version
 const supportedMin = "2.0.7"
 
-func read(reader io.Reader) (string, error) {
+// Read reads from an io.Reader
+func Read(reader io.Reader) (string, error) {
 	// TODO: This buffer isn't a good solution, and might not fit the full response from BIRD
 	buf := make([]byte, 16384)
 	n, err := reader.Read(buf[:])
@@ -46,7 +47,7 @@ func RunCommand(command string, socket string) (string, error) {
 	defer conn.Close()
 
 	log.Println("Connected to BIRD socket")
-	resp, err := read(conn)
+	resp, err := Read(conn)
 	if err != nil {
 		return "", err
 	}
@@ -66,7 +67,7 @@ func RunCommand(command string, socket string) (string, error) {
 	}
 
 	log.Debugln("Reading from socket")
-	resp, err = read(conn)
+	resp, err = Read(conn)
 	if err != nil {
 		return "", err
 	}

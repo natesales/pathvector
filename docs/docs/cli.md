@@ -10,6 +10,7 @@ Usage:
   pathvector [command]
 
 Available Commands:
+  cli           Interactive CLI
   completion    generate the autocompletion script for the specified shell
   dump          Dump configuration
   generate      generate router configuration

@@ -21,3 +21,29 @@ The easiest way to deploy the peering portal is with docker-compose. An example 
 ### Routers
 
 Once you have the portal running, just add the `portal-host`, `portal-key`, and optionally `hostname` fields to your Pathvector config on each router that you want to use. Pathvector will then push BGP session status to the portal server on each run.
+
+## Usage
+
+The portal server exposes the web interface and API on :8080 by default.
+
+## CLI
+
+The `peeringctl` utility provides a quick way to query and manage sessions from the command line. `peeringctl` is available from [GitHub Releases](https://github.com/natesales/pathvector-portal/releases) and the [Pathvector apt repository](https://pathvector.io/docs/installation#package-repository).
+
+#### Usage
+
+Get all sessions:
+
+`peeringctl sessions`
+
+Get all sessions for an ASN, router, or both, optionally filtering by sessions that aren't established:
+
+`peeringctl sessions [--down] 34553`
+
+`peeringctl sessions [--down] edge1.pdx1`
+
+`peeringctl sessions [--down] --asn 34553 --router edge1.pdx1`
+
+Remove all sessions for a router:
+
+`peeringctl clear edge1.pdx1`

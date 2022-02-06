@@ -1,25 +1,32 @@
 #!/bin/bash
 # This script generates documentation from type definitions
 
-echo "Generating documentation..."
+echo Generating documentation
 go build -o /tmp/
+
+echo Generating options page
 echo -e '---
 title: Configuration
 sidebar_position: 3
 ---\n' >docs/docs/configuration.md
 /tmp/pathvector docs >>docs/docs/configuration.md
+
+echo Generating CLI preview
 echo -e '---
 title: CLI
 sidebar_position: 4
 ---\n## Usage\n```' >docs/docs/cli.md
 /tmp/pathvector -h >>docs/docs/cli.md
 echo '```' >>docs/docs/cli.md
+
+echo Copying README to index
 echo -e '---
 title: About
 sidebar_position: 1
 ---
 ' >docs/docs/about.md
 cat README.md >>docs/docs/about.md
+
 rm /tmp/pathvector
 
 # Add peering portal readme page

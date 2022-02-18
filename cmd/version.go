@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"reflect"
+
+	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/plugins"
 )

@@ -1,11 +1,12 @@
 package peeringdb
 
 import (
+	"strings"
+	"testing"
+
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/stretchr/testify/assert"
-	"strings"
-	"testing"
 )
 
 const peeringDbQueryTimeout = 10 // 10 seconds

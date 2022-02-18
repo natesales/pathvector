@@ -1,10 +1,11 @@
 package irr
 
 import (
-	"github.com/natesales/pathvector/internal/util"
-	"github.com/natesales/pathvector/pkg/config"
 	"reflect"
 	"testing"
+
+	"github.com/natesales/pathvector/internal/util"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 const irrQueryTimeout = 10

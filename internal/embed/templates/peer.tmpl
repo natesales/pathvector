@@ -10,12 +10,16 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ $peer.ImportLim
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = [
 {{ BirdSet $peer.PrefixSet4 }}
 ];
+{{ else }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = -empty-;
 {{ end }}
 
 {{ if not (Empty $peer.PrefixSet6) }}
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
 {{ BirdSet $peer.PrefixSet6 }}
 ];
+{{ else }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = -empty-;
 {{ end }}
 {{ end }}
 
@@ -109,6 +113,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ if BoolDeref $peer.FilterIRR }}
             if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { _reject("not in IRR prefix set"); }
             {{ end }}
+
             {{ StrDeref $peer.PreImportFinal }}
             accept;
         };

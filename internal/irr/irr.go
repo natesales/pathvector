@@ -73,7 +73,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs
 	pfx4 := append(*peerData.PrefixSet4, prefixesFromIRR4...)
 	peerData.PrefixSet4 = &pfx4
 	if len(pfx4) == 0 && hasNeighbor4 {
-		return fmt.Errorf("peer has IPv4 session(s) but no IPv4 prefixes")
+		log.Warnf("peer has IPv4 session(s) but no IPv4 prefixes")
 	}
 
 	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout, bgpqArgs)
@@ -86,7 +86,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs
 	pfx6 := append(*peerData.PrefixSet6, prefixesFromIRR6...)
 	peerData.PrefixSet6 = &pfx6
 	if len(pfx6) == 0 && hasNeighbor6 {
-		return fmt.Errorf("peer has IPv6 session(s) but no IPv6 prefixes")
+		log.Warnf("peer has IPv6 session(s) but no IPv6 prefixes")
 	}
 
 	return nil // nil error

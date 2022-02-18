@@ -157,17 +157,20 @@ protocol static null6 {
   route 100::1/128 blackhole;
 }
 
-function process_blackholes() {
-  if ((ASN,1,666) ~ bgp_large_community) then {
-    if (net.type = NET_IP4 && net.len = 32) then {
-      bgp_next_hop = 192.0.2.1;
-      print "Added null route for ", net;
-    }
+function set_blackhole() {
+  if (net.type = NET_IP4) then {
+    bgp_next_hop = 192.0.2.1;
+    print "Added null route for ", net;
+  }
+  if (net.type = NET_IP6) then {
+    bgp_next_hop = 100::1;
+    print "Added null route for ", net;
+  }
+}
 
-    if (net.type = NET_IP6 && net.len = 128) then {
-      bgp_next_hop = 100::1;
-      print "Added null route for ", net;
-    }
+function process_blackholes() {
+  if (((ASN,1,666) ~ bgp_large_community) && ((net.type = NET_IP4 && net.len = 32) || (net.type = NET_IP6 && net.len = 128))) then {
+    set_blackhole();
   }
 }
 

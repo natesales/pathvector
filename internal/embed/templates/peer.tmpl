@@ -102,6 +102,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             bgp_large_community.add(({{ $community }}));
             {{ end }}
 
+            {{ if BoolDeref $peer.BlackholeIn }}
+            set_blackhole();
+            {{ end }}
+
             {{ if BoolDeref $peer.FilterIRR }}
             if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { _reject("not in IRR prefix set"); }
             {{ end }}
@@ -147,6 +151,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ if BoolDeref $peer.AnnounceDefault }}
             # Send default route
             if (proto = "default{{ $af }}") then accept;
+            {{ end }}
+
+            {{ if BoolDeref $peer.BlackholeOut }}
+            set_blackhole();
             {{ end }}
 
             {{ StrDeref $peer.PreExportFinal }}

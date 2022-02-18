@@ -728,6 +728,22 @@ Should this peer be allowed to send routes with the blackhole community?
 |------|---------|------------|
 | bool   | false      |          |
 
+### `blackhole-in`
+
+Should imported routes be blackholed?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `blackhole-out`
+
+Should exported routes be blackholed?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `filter-irr`
 
 Should IRR filtering be applied?

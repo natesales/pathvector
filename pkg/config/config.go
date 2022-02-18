@@ -58,6 +58,8 @@ type Peer struct {
 	ForcePeerNexthop        *bool   `yaml:"force-peer-nexthop" description:"Rewrite nexthop to peer address" default:"false"`
 	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
+	BlackholeIn             *bool   `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
+	BlackholeOut            *bool   `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
 	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
 	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`

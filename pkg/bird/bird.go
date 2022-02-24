@@ -78,6 +78,7 @@ func RunCommand(command string, socket string) (string, error) {
 
 // Validate checks if the cached configuration is syntactically valid
 func Validate(binary string, cacheDir string) {
+	log.Debugf("Validating BIRD config")
 	var outb, errb bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
 	birdCmd.Dir = cacheDir
@@ -132,7 +133,7 @@ func Validate(binary string, cacheDir string) {
 				log.Fatalf("BIRD output file scan: %s", err)
 			}
 		}
-		log.Fatalln(errorMessageToLog)
+		log.Fatalf("BIRD: %s\n", errorMessageToLog)
 	}
 
 	log.Infof("BIRD config validation passed")

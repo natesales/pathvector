@@ -34,6 +34,7 @@ curl -s https://raw.githubusercontent.com/natesales/pathvector-portal/main/READM
 sed -i 's/# Pathvector Peering Portal/# Peering Portal/' docs/docs/portal.md
 
 # Generate PDF documentation
+echo Generating PDF
 
 commit=$(git rev-list --tags --max-count=1)
 version=$(git describe --tags "$commit" | cut -c2-)
@@ -46,6 +47,8 @@ Pathvector Edge Routing Platform version $version commit $commit" > release_full
 for f in docs/docs/installation.md docs/docs/cli.md docs/docs/configuration.md; do
   sed '1 { /^---/ { :a N; /\n---/! ba; d} }' >> release_full.md < $f
 done
+
+echo "Copyright © 2022 Nate Sales" >> release_full.md
 
 pandoc release_full.md \
     -f gfm \

@@ -32,3 +32,27 @@ rm /tmp/pathvector
 # Add peering portal readme page
 curl -s https://raw.githubusercontent.com/natesales/pathvector-portal/main/README.md >docs/docs/portal.md
 sed -i 's/# Pathvector Peering Portal/# Peering Portal/' docs/docs/portal.md
+
+# Generate PDF documentation
+
+commit=$(git rev-list --tags --max-count=1)
+version=$(git describe --tags "$commit" | cut -c2-)
+
+echo "
+# Pathvector
+
+Pathvector Edge Routing Platform version $version commit $commit" > release_full.md
+
+for f in docs/docs/installation.md docs/docs/cli.md docs/docs/configuration.md; do
+  sed '1 { /^---/ { :a N; /\n---/! ba; d} }' >> release_full.md < $f
+done
+
+pandoc release_full.md \
+    -f gfm \
+    -V linkcolor:blue \
+    -V geometry:a4paper \
+    -V geometry:margin=2cm \
+    --pdf-engine=xelatex \
+    -o pathvector-$version-release.pdf
+
+rm release_full.md

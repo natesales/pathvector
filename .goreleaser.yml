@@ -59,3 +59,4 @@ release:
     - glob: dist/pathvector-*juniper*
     - glob: dist/pathvector-*cisco*
     - glob: dist/pathvector-*mikrotik*
+    - glob: pathvector-*-release.pdf

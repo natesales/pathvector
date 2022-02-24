@@ -19,7 +19,9 @@ jobs:
           go-version: 1.17
 
       - name: Install PDF generation dependencies
-        run: sudo apt install -y pandoc texlive-xetex
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex
 
       - name: Store signing files
         run: |

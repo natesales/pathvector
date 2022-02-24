@@ -3,6 +3,7 @@ title: Configuration
 sidebar_position: 3
 ---
 
+# Configuration
 ## Config
 ### `peeringdb-query-timeout`
 

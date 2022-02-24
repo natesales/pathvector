@@ -2,7 +2,7 @@
 title: CLI
 sidebar_position: 4
 ---
-## Usage
+# Usage
 ```
 Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
 

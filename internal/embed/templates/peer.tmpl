@@ -73,7 +73,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
             {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighborNoIface }};{{ end }}
 
-            {{ if StrDeref $peer.ImportNextHop }}bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};{{ end }}
+            {{ if StrDeref $peer.ImportNextHop }}
+            bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};
+            gw = {{ StrDeref $peer.ImportNextHop }};
+            {{ end }}
 
             {{ range $i, $pattern := StringSliceIter $peer.RemoveStandardCommunities }}
             bgp_community.delete([({{ $pattern }})]);

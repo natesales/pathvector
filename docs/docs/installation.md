@@ -86,10 +86,11 @@ Pathvector can run on Juniper devices by installing a signed JunOS extension pac
 Juniper release, either to your local machine and SCP it over to the Juniper router/switch, or pull it directly in
 the `request system software` command by replacing the filename with the URL to the file.
 
-```shell
-junos# set system extensions providers pathvector license-type customer deployment-scope commercial
-junos> request system software add pathvector-juniper.tgz
-```
+Add the Pathvector extension provider:
+`set system extensions providers pathvector license-type customer deployment-scope commercial`
+
+Install the Pathvector package:
+`request system software add pathvector-juniper.tgz` or `request vmhost software add pathvector-juniper.tgz`
 
 ## Cisco IOx
 

@@ -117,10 +117,6 @@ module.exports = {
     favicon: 'img/icon-white.png',
     organizationName: 'natesales', // Usually your GitHub org/user name.
     projectName: 'pathvector', // Usually your repo name.
-    i18n: {
-        defaultLocale: 'en',
-        locales: ['en', 'es'],
-    },
     themeConfig: {
         announcementBar: {
           content: "We're interested in hearing how you're using Pathvector and how we can improve. Your feedback on <a target='_blank' href='https://forms.gle/uAHVSMcPKiMmenSm9'>this survey</a> would be greatly appreciated!",
@@ -151,9 +147,6 @@ module.exports = {
                 {
                     href: 'https://github.com/natesales/pathvector',
                     label: 'GitHub',
-                    position: 'right',
-                }, {
-                    type: 'localeDropdown',
                     position: 'right',
                 },
             ],

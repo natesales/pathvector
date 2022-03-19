@@ -5,7 +5,7 @@ set -e
 # Clone jetez if it doesn't already exist
 if [ ! -d ../vendorbuild/juniper/jetez ]; then
   git clone https://github.com/Juniper/jetez ../vendorbuild/juniper/jetez
-  cd ../vendorbuild/juniper/jetez && sudo python3 setup.py install && cd -
+  cd ../vendorbuild/juniper/jetez && rm -rf .git && sudo python3 setup.py install && cd -
 fi
 
 # Link xorrisofs

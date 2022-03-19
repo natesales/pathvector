@@ -82,14 +82,6 @@ var funcMap = template.FuncMap{
 		return []string{}
 	},
 
-	// TODO: this doesn't work
-	//"GenericDeref": func[T any](p *T) T {
-	//	if p != nil {
-	//		return *p
-	//	}
-	//	return reflect.Zero(reflect.TypeOf(p)).Interface().(T)
-	//},
-
 	"StrDeref": func(i *string) string {
 		if i != nil {
 			return *i

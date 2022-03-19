@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,9 +73,11 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		Update(&config.Peer{
-			ASN:              &tc.asn,
-			AutoImportLimits: &tc.auto,
-			AutoASSet:        &tc.auto,
+			ASN:              util.IntPtr(tc.asn),
+			AutoImportLimits: util.BoolPtr(tc.auto),
+			AutoASSet:        util.BoolPtr(tc.auto),
+			ImportLimit4:     util.IntPtr(0),
+			ImportLimit6:     util.IntPtr(0),
 		}, peeringDbQueryTimeout)
 	}
 }

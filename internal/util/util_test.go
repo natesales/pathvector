@@ -82,12 +82,11 @@ func TestPrintTable(t *testing.T) {
 	PrintTable([]string{"foo", "bar", "baz"}, [][]string{{"foo", "bar", "baz"}, {"foo", "bar", "baz"}})
 }
 
-func TestDeref(t *testing.T) {
+func TestStrDeref(t *testing.T) {
 	if out := StrDeref(nil); out != "" {
 		t.Errorf("strDeref failed. expected '' got '%s'", out)
 	}
-	s := "foo"
-	if out := StrDeref(&s); out != "foo" {
+	if out := StrDeref(StrPtr("foo")); out != "foo" {
 		t.Errorf("strDeref failed. expected 'foo' got '%s'", out)
 	}
 }

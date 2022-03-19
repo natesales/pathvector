@@ -1,6 +1,6 @@
 module github.com/natesales/pathvector
 
-go 1.18
+go 1.17
 
 require (
 	github.com/creasty/defaults v1.5.2

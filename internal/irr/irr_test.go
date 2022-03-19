@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 )
 
@@ -46,7 +47,7 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 		{"", []string{}, []string{}, true}, // Empty as-set
 	}
 	for _, tc := range testCases {
-		peer := config.Peer{ASSet: &tc.asSet}
+		peer := config.Peer{ASSet: util.StrPtr(tc.asSet)}
 		err := Update(&peer, "rr.ntt.net", irrQueryTimeout, "")
 		if err != nil && tc.shouldError {
 			return

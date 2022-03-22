@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/natesales/pathvector/internal/api"
 	"io/ioutil"
 	"os"
 	"path"
@@ -63,6 +64,10 @@ var generateCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		log.Debugln("Finished loading config")
+
+		if c.Analytics {
+			api.SendVersionAndLicense(c.License, version)
+		}
 
 		// Run NVRS query
 		if c.QueryNVRS {

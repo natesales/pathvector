@@ -194,6 +194,8 @@ type Config struct {
 	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
 	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
 	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
+	License    string `yaml:"license" description:"License key" default:""`
+	Analytics  bool   `yaml:"analytics" description:"Should the Pathvector version and license key be send for analytics? (No other information is sent)" default:"true"`
 
 	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`

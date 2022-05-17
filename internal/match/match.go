@@ -70,7 +70,7 @@ func peeringDbIxLans(asn uint, peeringDbQueryTimeout uint) ([]peeringDbIxLanData
 }
 
 // CommonIXs gets common IXPs from PeeringDB
-func CommonIXs(a uint, b uint, yamlFormat bool, queryTimeout uint) string {
+func CommonIXs(a uint, b uint, yamlFormat bool, queryTimeout uint, apiKey string) string {
 	networkA, err := peeringDbIxLans(a, queryTimeout)
 	if err != nil {
 		log.Fatalf("AS%d: %v", a, err)
@@ -80,7 +80,7 @@ func CommonIXs(a uint, b uint, yamlFormat bool, queryTimeout uint) string {
 		log.Fatalf("AS%d: %v", a, err)
 	}
 
-	networkBInfo, err := peeringdb.NetworkInfo(b, queryTimeout)
+	networkBInfo, err := peeringdb.NetworkInfo(b, queryTimeout, apiKey)
 	if err != nil {
 		log.Fatalf("AS%d: %v", b, err)
 	}

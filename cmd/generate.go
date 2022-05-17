@@ -64,6 +64,7 @@ var generateCmd = &cobra.Command{
 		}
 		log.Debugln("Finished loading config")
 
+		peeringdb.InitAPIKey(c.PeeringDBAPIKey)
 		// Run NVRS query
 		if c.QueryNVRS {
 			var err error

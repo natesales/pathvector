@@ -28,10 +28,23 @@ type Data struct {
 	ImportLimit6 int    `json:"info_prefixes6"`
 }
 
+var apiKey = ""
+
+func InitAPIKey(key string) {
+	if key != "" {
+		apiKey = key
+	}
+}
+
 // NetworkInfo returns PeeringDB for an ASN
 func NetworkInfo(asn uint, queryTimeout uint) (*Data, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/net?asn=%d", asn), nil)
+
+	if apiKey != "" {
+		req.Header.Add("AUTHORIZATION", fmt.Sprintf("Api-Key %s", apiKey))
+	}
+
 	if err != nil {
 		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
 	}

@@ -67,7 +67,7 @@ var generateCmd = &cobra.Command{
 		// Run NVRS query
 		if c.QueryNVRS {
 			var err error
-			c.NVRSASNs, err = peeringdb.NeverViaRouteServers(c.PeeringDBQueryTimeout)
+			c.NVRSASNs, err = peeringdb.NeverViaRouteServers(c.PeeringDBQueryTimeout, c.PeeringDBAPIKey)
 			if err != nil {
 				log.Fatalf("PeeringDB NVRS query: %s", err)
 			}
@@ -127,7 +127,7 @@ var generateCmd = &cobra.Command{
 			if *peerData.AutoImportLimits || *peerData.AutoASSet {
 				log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-				peeringdb.Update(peerData, c.PeeringDBQueryTimeout)
+				peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey)
 			} // end peeringdb query enabled
 
 			// Build IRR prefix sets

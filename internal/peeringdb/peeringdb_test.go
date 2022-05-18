@@ -26,7 +26,7 @@ func TestPeeringDbQuery(t *testing.T) {
 		{65530, "RIPE::RS-KROOT RIPE::RS-KROOT-V6", "RIPE NCC K-Root Operations", 5, 5, true}, // Private ASN, no PeeringDB page
 	}
 	for _, tc := range testCases {
-		pDbData, err := NetworkInfo(uint(tc.asn), peeringDbQueryTimeout)
+		pDbData, err := NetworkInfo(uint(tc.asn), peeringDbQueryTimeout, "")
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		}
@@ -57,7 +57,7 @@ func TestPeeringDbQuery(t *testing.T) {
 }
 
 func TestPeeringDbNoPage(t *testing.T) {
-	_, err := NetworkInfo(65530, peeringDbQueryTimeout)
+	_, err := NetworkInfo(65530, peeringDbQueryTimeout, "")
 	if err == nil || !strings.Contains(err.Error(), "doesn't have a PeeringDB page") {
 		t.Errorf("expected PeeringDB page not exist error, got %v", err)
 	}
@@ -78,12 +78,12 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 			AutoASSet:        util.BoolPtr(tc.auto),
 			ImportLimit4:     util.IntPtr(0),
 			ImportLimit6:     util.IntPtr(0),
-		}, peeringDbQueryTimeout)
+		}, peeringDbQueryTimeout, "")
 	}
 }
 
 func TestPeeringNeverViaRouteServers(t *testing.T) {
-	asns, err := NeverViaRouteServers(peeringDbQueryTimeout)
+	asns, err := NeverViaRouteServers(peeringDbQueryTimeout, "")
 	assert.Nil(t, err)
 	assert.Greater(t, len(asns), 100)
 }

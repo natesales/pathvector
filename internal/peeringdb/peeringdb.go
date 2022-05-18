@@ -29,9 +29,14 @@ type Data struct {
 }
 
 // NetworkInfo returns PeeringDB for an ASN
-func NetworkInfo(asn uint, queryTimeout uint) (*Data, error) {
+func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/net?asn=%d", asn), nil)
+
+	if apiKey != "" {
+		req.Header.Add("AUTHORIZATION", fmt.Sprintf("Api-Key %s", apiKey))
+	}
+
 	if err != nil {
 		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
 	}
@@ -64,8 +69,8 @@ func NetworkInfo(asn uint, queryTimeout uint) (*Data, error) {
 }
 
 // Update updates peer values from PeeringDB
-func Update(peerData *config.Peer, queryTimeout uint) {
-	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout)
+func Update(peerData *config.Peer, queryTimeout uint, apiKey string) {
+	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout, "")
 	if err != nil {
 		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}
@@ -97,9 +102,14 @@ func Update(peerData *config.Peer, queryTimeout uint) {
 }
 
 // NeverViaRouteServers gets a list of networks that report should never be reachable via route servers
-func NeverViaRouteServers(queryTimeout uint) ([]uint32, error) {
+func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?info_never_via_route_servers=1", nil)
+
+	if apiKey != "" {
+		req.Header.Add("AUTHORIZATION", fmt.Sprintf("Api-Key %s", apiKey))
+	}
+
 	if err != nil {
 		return nil, errors.New("PeeringDB GET: " + err.Error())
 	}

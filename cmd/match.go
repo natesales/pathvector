@@ -27,20 +27,22 @@ var matchCmd = &cobra.Command{
 	Use:   "match ASN",
 	Short: "Find common IXPs for a given ASN",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		// Load the config file from config file
+		log.Debugf("Loading config from %s", configFile)
+		configFile, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			log.Fatal("Reading config file: " + err.Error())
+		}
+		c, err := process.Load(configFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Debugln("Finished loading config")
+
 		var peeringDbTimeout uint
 		peeringDbTimeout = 10
 		if matchLocalASN == 0 {
-			// Load the config file from config file
-			log.Debugf("Loading config from %s", configFile)
-			configFile, err := ioutil.ReadFile(configFile)
-			if err != nil {
-				log.Fatal("Reading config file: " + err.Error())
-			}
-			c, err := process.Load(configFile)
-			if err != nil {
-				log.Fatal(err)
-			}
-			log.Debugln("Finished loading config")
 			matchLocalASN = uint(c.ASN)
 			peeringDbTimeout = c.PeeringDBQueryTimeout
 		}
@@ -54,6 +56,6 @@ var matchCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println(match.CommonIXs(matchLocalASN, uint(peerASN), yamlFormat, peeringDbTimeout))
+		fmt.Println(match.CommonIXs(matchLocalASN, uint(peerASN), yamlFormat, peeringDbTimeout, c.PeeringDBAPIKey))
 	},
 }

@@ -11,6 +11,8 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
@@ -55,7 +57,7 @@ func Record(host string, key string, routerHostname string, peers map[string]*co
 				if strings.Contains(line, *peer.ProtocolName) {
 					line = strings.Split(line, "BGP ")[1]
 					line = strings.ReplaceAll(line, "---", "")
-					line = strings.Title(line)
+					line = cases.Title(language.Und).String(line)
 					space := regexp.MustCompile(`\s+`)
 					state = space.ReplaceAllString(line, " ")
 					break

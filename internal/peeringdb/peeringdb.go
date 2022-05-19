@@ -46,6 +46,10 @@ func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
 		return nil, errors.New("PeeringDB GET request: " + err.Error())
 	}
 
+	if res.StatusCode != 200 {
+		return nil, errors.New("PeeringDB GET request expected 200, got " + res.Status)
+	}
+
 	if res.Body != nil {
 		//noinspection GoUnhandledErrorResult
 		defer res.Body.Close()
@@ -70,7 +74,7 @@ func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
 
 // Update updates peer values from PeeringDB
 func Update(peerData *config.Peer, queryTimeout uint, apiKey string) {
-	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout, "")
+	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout, apiKey)
 	if err != nil {
 		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}

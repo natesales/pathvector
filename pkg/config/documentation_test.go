@@ -1,10 +1,12 @@
 package config
 
-import "testing"
+import (
+	"testing"
+)
 
 // TODO: lint the resulting markdown files
 func TestDocumentConfig(t *testing.T) {
-	DocumentConfig()
+	DocumentConfig(false)
 }
 
 func TestSanitizeConfigName(t *testing.T) {

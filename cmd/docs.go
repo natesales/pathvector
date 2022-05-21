@@ -14,6 +14,6 @@ var docsCmd = &cobra.Command{
 	Short:  "Generate documentation",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.DocumentConfig()
+		config.DocumentConfig(true)
 	},
 }

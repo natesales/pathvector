@@ -7,6 +7,10 @@ import (
 )
 
 func TestDumpTable(t *testing.T) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
+
 	// Make temporary cache directory
 	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
@@ -34,9 +38,16 @@ func TestDumpTable(t *testing.T) {
 			t.Error(err)
 		}
 	}
+
+	w.Close()
+	os.Stdout = old
 }
 
 func TestDumpYAML(t *testing.T) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
+
 	// Make temporary cache directory
 	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
@@ -65,4 +76,7 @@ func TestDumpYAML(t *testing.T) {
 			t.Error(err)
 		}
 	}
+
+	w.Close()
+	os.Stdout = old
 }

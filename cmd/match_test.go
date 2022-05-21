@@ -2,10 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func TestMatch(t *testing.T) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
 	baseArgs := []string{
 		"match",
 		"--verbose",
@@ -37,4 +41,6 @@ func TestMatch(t *testing.T) {
 			t.Error(err)
 		}
 	}
+	w.Close()
+	os.Stdout = old
 }

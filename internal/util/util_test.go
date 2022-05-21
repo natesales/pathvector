@@ -79,7 +79,12 @@ func TestMoveFile(t *testing.T) {
 }
 
 func TestPrintTable(t *testing.T) {
+	old := os.Stdout
+	_, w, _ := os.Pipe()
+	os.Stdout = w
 	PrintTable([]string{"foo", "bar", "baz"}, [][]string{{"foo", "bar", "baz"}, {"foo", "bar", "baz"}})
+	w.Close()
+	os.Stdout = old
 }
 
 func TestStrDeref(t *testing.T) {

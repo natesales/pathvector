@@ -37,7 +37,7 @@ jobs:
       - name: Setup integration test environment
         run: sudo bash tests/setup.sh
 
-      - run: go test -race -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
+      - run: PATHVECTOR_PEERINGDB_API_KEY=${{ secrets.PATHVECTOR_TEST_PEERINGDB_API_KEY }} go test -race -coverprofile=coverage.txt -covermode=atomic ./internal/... ./cmd/...
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1

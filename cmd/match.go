@@ -56,6 +56,6 @@ var matchCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println(match.CommonIXs(matchLocalASN, uint(peerASN), yamlFormat, peeringDbTimeout, c.PeeringDBAPIKey))
+		fmt.Println(match.CommonIXs(uint32(matchLocalASN), uint32(peerASN), yamlFormat, peeringDbTimeout, c.PeeringDBAPIKey))
 	},
 }

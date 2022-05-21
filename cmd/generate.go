@@ -127,7 +127,7 @@ var generateCmd = &cobra.Command{
 			if *peerData.AutoImportLimits || *peerData.AutoASSet {
 				log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-				peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey)
+				peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, true)
 			} // end peeringdb query enabled
 
 			// Build IRR prefix sets

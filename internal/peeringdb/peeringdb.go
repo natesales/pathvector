@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -13,6 +14,28 @@ import (
 
 	"github.com/natesales/pathvector/pkg/config"
 )
+
+type IxLanResponse struct {
+	Data []IxLanData `json:"data"`
+}
+
+type IxLanData struct {
+	Id          int       `json:"id"`
+	NetId       int       `json:"net_id"`
+	IxId        int       `json:"ix_id"`
+	Name        string    `json:"name"`
+	IxlanId     int       `json:"ixlan_id"`
+	Notes       string    `json:"notes"`
+	Speed       int       `json:"speed"`
+	Asn         uint32    `json:"asn"`
+	Ipaddr4     string    `json:"ipaddr4"`
+	Ipaddr6     string    `json:"ipaddr6"`
+	IsRsPeer    bool      `json:"is_rs_peer"`
+	Operational bool      `json:"operational"`
+	Created     time.Time `json:"created"`
+	Updated     time.Time `json:"updated"`
+	Status      string    `json:"status"`
+}
 
 // Response contains the response from a PeeringDB query
 type Response struct {
@@ -28,13 +51,19 @@ type Data struct {
 	ImportLimit6 int    `json:"info_prefixes6"`
 }
 
-// NetworkInfo returns PeeringDB for an ASN
-func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
+var cache map[uint32]*Data
+
+// networkInfo returns PeeringDB for an ASN
+func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/net?asn=%d", asn), nil)
 
 	if apiKey != "" {
-		req.Header.Add("AUTHORIZATION", fmt.Sprintf("Api-Key %s", apiKey))
+		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
+	} else {
+		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		}
 	}
 
 	if err != nil {
@@ -44,6 +73,10 @@ func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, errors.New("PeeringDB GET request: " + err.Error())
+	}
+
+	if res.StatusCode == 404 {
+		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page", asn)
 	}
 
 	if res.StatusCode != 200 {
@@ -72,9 +105,29 @@ func NetworkInfo(asn uint, queryTimeout uint, apiKey string) (*Data, error) {
 	return &pDbResponse.Data[0], nil // nil error
 }
 
+// NetworkInfo gets the PeeringDB info for an ASN optionally from the cache
+func NetworkInfo(asn uint32, queryTimeout uint, apiKey string, useCache bool) (*Data, error) {
+	if !useCache {
+		return networkInfo(asn, queryTimeout, apiKey)
+	} else {
+		if cache == nil {
+			cache = make(map[uint32]*Data)
+		}
+		if _, ok := cache[asn]; !ok {
+			d, err := networkInfo(asn, queryTimeout, apiKey)
+			if err != nil {
+				return nil, err
+			}
+			cache[asn] = d
+		}
+
+		return cache[asn], nil
+	}
+}
+
 // Update updates peer values from PeeringDB
-func Update(peerData *config.Peer, queryTimeout uint, apiKey string) {
-	pDbData, err := NetworkInfo(uint(*peerData.ASN), queryTimeout, apiKey)
+func Update(peerData *config.Peer, queryTimeout uint, apiKey string, useCache bool) {
+	pDbData, err := NetworkInfo(uint32(*peerData.ASN), queryTimeout, apiKey, useCache)
 	if err != nil {
 		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}
@@ -109,17 +162,24 @@ func Update(peerData *config.Peer, queryTimeout uint, apiKey string) {
 func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?info_never_via_route_servers=1", nil)
-
-	if apiKey != "" {
-		req.Header.Add("AUTHORIZATION", fmt.Sprintf("Api-Key %s", apiKey))
-	}
-
 	if err != nil {
 		return nil, errors.New("PeeringDB GET: " + err.Error())
 	}
+
+	if apiKey != "" {
+		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
+	} else {
+		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		}
+	}
+
 	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, errors.New("PeeringDB GET request: " + err.Error())
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("PeeringDB GET request expected 200, got " + res.Status)
 	}
 	if res.Body != nil {
 		//noinspection GoUnhandledErrorResult
@@ -142,6 +202,51 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	}
 
 	return asns, nil // nil error
+}
+
+// IXLANs gets PeeringDB IX LANs for an ASN
+func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData, error) {
+	httpClient := http.Client{Timeout: time.Second * time.Duration(peeringDbQueryTimeout)}
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://peeringdb.com/api/netixlan?asn=%d", asn), nil)
+	if err != nil {
+		return nil, fmt.Errorf("PeeringDB GET (This peer might not have a PeeringDB page): %s", err)
+	}
+
+	if apiKey != "" {
+		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
+	} else {
+		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		}
+	}
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("PeeringDB GET request: %s", err)
+	}
+	if res.StatusCode != 200 {
+		return nil, errors.New("PeeringDB GET request expected 200, got " + res.Status)
+	}
+	if res.Body != nil {
+		//noinspection GoUnhandledErrorResult
+		defer res.Body.Close()
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("PeeringDB read: %s", err)
+	}
+
+	var pDbResponse IxLanResponse
+	if err := json.Unmarshal(body, &pDbResponse); err != nil {
+		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
+	}
+
+	if len(pDbResponse.Data) < 1 {
+		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page or IXPs documented", asn)
+	}
+
+	return pDbResponse.Data, nil // nil error
 }
 
 // sanitizeASSet removes an IRRDB prefix from an AS set and picks the first one if there are multiple

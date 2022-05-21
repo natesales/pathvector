@@ -170,19 +170,19 @@ func Load(configBlob []byte) (*config.Config, error) {
 			if defaultString == "" {
 				log.Fatalf("Code error: field %s has no default value", fieldName)
 			} else if defaultString != "-" {
-				log.Debugf("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
+				log.Tracef("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
 				if fieldValue.IsNil() {
 					elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
 					switch elemToSwitch {
 					case reflect.String:
-						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultString)
+						log.Tracef("[%s] setting field %s to value %+v", peerName, fieldName, defaultString)
 						fieldValue.Set(reflect.ValueOf(&defaultString))
 					case reflect.Int:
 						defaultValueInt, err := strconv.Atoi(defaultString)
 						if err != nil {
 							log.Fatalf("Can't convert '%s' to uint", defaultString)
 						}
-						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultValueInt)
+						log.Tracef("[%s] setting field %s to value %+v", peerName, fieldName, defaultValueInt)
 						fieldValue.Set(reflect.ValueOf(&defaultValueInt))
 					case reflect.Bool:
 						var err error // explicit declaration used to avoid scope issues of defaultValue
@@ -190,7 +190,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 						if err != nil {
 							log.Fatalf("Can't parse bool %s", defaultString)
 						}
-						log.Debugf("[%s] setting field %s to value %+v", peerName, fieldName, defaultBool)
+						log.Tracef("[%s] setting field %s to value %+v", peerName, fieldName, defaultBool)
 						fieldValue.Set(reflect.ValueOf(&defaultBool))
 					case reflect.Struct, reflect.Slice:
 						// Ignore structs and slices
@@ -204,7 +204,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 					}
 				}
 			} else {
-				log.Debugf("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
+				log.Tracef("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
 

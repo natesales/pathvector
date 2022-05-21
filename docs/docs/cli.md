@@ -26,6 +26,7 @@ Flags:
   -h, --help            help for pathvector
       --lock string     Lock file (check disabled if empty)
   -n, --no-configure    Don't configure BIRD
+  -t, --trace           Show trace log messages
   -v, --verbose         Show verbose log messages
 
 Use "pathvector [command] --help" for more information about a command.

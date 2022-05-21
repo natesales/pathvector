@@ -13,6 +13,22 @@ PeeringDB query timeout in seconds
 |------|---------|------------|
 | uint   | 10      |          |
 
+### `peeringdb-api-key`
+
+PeeringDB API key
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `peeringdb-cache`
+
+Cache PeeringDB results
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
 ### `irr-query-timeout`
 
 IRR query timeout in seconds

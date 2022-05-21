@@ -91,7 +91,7 @@ func PrintStructInfo(label string, instance interface{}) {
 		if !(Contains(excludedFields, attrName)) {
 			v := reflect.Indirect(s.Field(i))
 			if v.IsValid() {
-				log.Debugf("[%s] field %s = %v\n", label, attrName, v)
+				log.Tracef("[%s] field %s = %v\n", label, attrName, v)
 			}
 		}
 	}

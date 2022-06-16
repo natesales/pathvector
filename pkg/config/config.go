@@ -1,6 +1,9 @@
 package config
 
-import "github.com/go-ping/ping"
+import (
+	"github.com/creasty/defaults"
+	"github.com/go-ping/ping"
+)
 
 // Peer stores a single peer config
 type Peer struct {
@@ -224,8 +227,8 @@ type Config struct {
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
-	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
+	Augments      *Augments                `yaml:"augments" description:"Custom configuration options"`
+	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
@@ -234,4 +237,12 @@ type Config struct {
 	Prefixes6     []string `yaml:"-" description:"-"`
 	QueryNVRS     bool     `yaml:"-" description:"-"`
 	NVRSASNs      []uint32 `yaml:"-" description:"-"`
+}
+
+// Init initializes a Config with default values. This is needed over the standard defaults.Set because child structs are nil
+func (c *Config) Init() error {
+	c.Augments = &Augments{}
+	c.Optimizer = &Optimizer{}
+	// Set global config defaults
+	return defaults.Set(c)
 }

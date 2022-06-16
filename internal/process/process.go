@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -76,10 +75,7 @@ func categorizeCommunity(input string) string {
 // Load loads a configuration file from a YAML file
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
-	// Set global config defaults
-	if err := defaults.Set(&c); err != nil {
-		log.Fatal(err)
-	}
+	c.Init()
 
 	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
 		return nil, errors.New("YAML unmarshal: " + err.Error())

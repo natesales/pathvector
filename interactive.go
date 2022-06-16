@@ -3,61 +3,14 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/chzyer/readline"
 	"github.com/creasty/defaults"
 	"github.com/natesales/pathvector/pkg/config"
-)
-
-// Function constructor - constructs new function for listing given directory
-func listFiles(path string) func(string) []string {
-	return func(line string) []string {
-		names := make([]string, 0)
-		files, _ := ioutil.ReadDir(path)
-		for _, f := range files {
-			names = append(names, f.Name())
-		}
-		return names
-	}
-}
-
-var completer = readline.NewPrefixCompleter(
-	readline.PcItem("mode",
-		readline.PcItem("vi"),
-		readline.PcItem("emacs"),
-	),
-	readline.PcItem("login"),
-	readline.PcItem("say",
-		readline.PcItemDynamic(listFiles("./"),
-			readline.PcItem("with",
-				readline.PcItem("following"),
-				readline.PcItem("items"),
-			),
-		),
-		readline.PcItem("hello"),
-		readline.PcItem("bye"),
-	),
-	readline.PcItem("setprompt"),
-	readline.PcItem("setpassword"),
-	readline.PcItem("bye"),
-	readline.PcItem("help"),
-	readline.PcItem("go",
-		readline.PcItem("build", readline.PcItem("-o"), readline.PcItem("-v")),
-		readline.PcItem("install",
-			readline.PcItem("-v"),
-			readline.PcItem("-vv"),
-			readline.PcItem("-vvv"),
-		),
-		readline.PcItem("test"),
-	),
-	readline.PcItem("sleep"),
 )
 
 type nestedMapContainer struct {
@@ -125,15 +78,6 @@ func printTreeRec(node *nestedMapContainer, indent int) {
 	}
 }
 
-func filterInput(r rune) (rune, bool) {
-	switch r {
-	// block CtrlZ feature
-	case readline.CharCtrlZ:
-		return r, false
-	}
-	return r, true
-}
-
 // completeNode gets a list of prefix completer items for a given node
 func completeNode(node *nestedMapContainer) []readline.PrefixCompleterInterface {
 	var l []readline.PrefixCompleterInterface
@@ -154,7 +98,7 @@ func main() {
 	//printTree(&root)
 
 	topLevel := completeNode(&root)
-	completer = readline.NewPrefixCompleter(
+	completer := readline.NewPrefixCompleter(
 		readline.PcItem("show", topLevel...),
 		readline.PcItem("set", topLevel...),
 		readline.PcItem("delete", topLevel...),
@@ -172,20 +116,18 @@ func main() {
 		InterruptPrompt: "^C",
 		EOFPrompt:       "exit",
 
-		HistorySearchFold:   true,
-		FuncFilterInputRune: filterInput,
+		HistorySearchFold: true,
+		FuncFilterInputRune: func(r rune) (rune, bool) { // Block Ctrl+Z
+			if r == readline.CharCtrlZ {
+				return r, false
+			}
+			return r, true
+		},
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer l.Close()
-
-	setPasswordCfg := l.GenPasswordConfig()
-	setPasswordCfg.SetListener(func(line []rune, pos int, key rune) (newLine []rune, newPos int, ok bool) {
-		l.SetPrompt(fmt.Sprintf("Enter password(%v): ", len(line)))
-		l.Refresh()
-		return nil, 0, false
-	})
 
 	log.SetOutput(l.Stderr())
 	for {
@@ -211,45 +153,10 @@ func main() {
 			default:
 				println("invalid mode:", line[5:])
 			}
-		case line == "mode":
-			if l.IsVimMode() {
-				println("current mode: vim")
-			} else {
-				println("current mode: emacs")
-			}
-		case line == "login":
-			pswd, err := l.ReadPassword("please enter your password: ")
-			if err != nil {
-				break
-			}
-			println("you enter:", strconv.Quote(string(pswd)))
-		case line == "setpassword":
-			pswd, err := l.ReadPasswordWithConfig(setPasswordCfg)
-			if err == nil {
-				println("you set:", strconv.Quote(string(pswd)))
-			}
-		case strings.HasPrefix(line, "setprompt"):
-			if len(line) <= 10 {
-				log.Println("setprompt <prompt>")
-				break
-			}
-			l.SetPrompt(line[10:])
-		case strings.HasPrefix(line, "say"):
-			line := strings.TrimSpace(line[3:])
-			if len(line) == 0 {
-				log.Println("say what?")
-				break
-			}
-			go func() {
-				for range time.Tick(time.Second) {
-					log.Println(line)
-				}
-			}()
+		case strings.HasPrefix(line, "set"):
+			fmt.Println("Setting!")
 		case line == "exit" || line == "quit":
 			os.Exit(0)
-		case line == "sleep":
-			log.Println("sleep 4 second")
-			time.Sleep(4 * time.Second)
 		case line == "":
 		default:
 			fmt.Println("% Unknown command: " + line)

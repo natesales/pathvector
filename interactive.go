@@ -134,6 +134,14 @@ func setConfigValue(c any, item string) {
 					case reflect.String:
 						targetValAsString := fmt.Sprintf("%v", targetValue)
 						f.SetString(targetValAsString)
+					case reflect.Bool:
+						if targetValue == "true" {
+							f.SetBool(true)
+						} else if targetValue == "false" {
+							f.SetBool(false)
+						} else {
+							log.Fatalf("%% Unable parse value '%s' as bool", targetValue)
+						}
 					default:
 						log.Fatalf("%% Unable to set '%s' of type '%s'", item, f.Kind())
 					}

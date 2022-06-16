@@ -239,10 +239,19 @@ type Config struct {
 	NVRSASNs      []uint32 `yaml:"-" description:"-"`
 }
 
-// Init initializes a Config with default values. This is needed over the standard defaults.Set because child structs are nil
-func (c *Config) Init() error {
+// Init initializes a Config with embedded structs prior to calling config.Default
+func (c *Config) Init() {
+	c.Peers = map[string]*Peer{}
+	c.Templates = map[string]*Peer{}
+	c.VRRPInstances = map[string]*VRRPInstance{}
+	c.BFDInstances = map[string]*BFDInstance{}
 	c.Augments = &Augments{}
 	c.Optimizer = &Optimizer{}
+	c.Plugins = map[string]string{}
+}
+
+// Default sets a Config's default values
+func (c *Config) Default() error {
 	// Set global config defaults
 	return defaults.Set(c)
 }

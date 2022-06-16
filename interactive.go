@@ -26,7 +26,7 @@ type nestedMapContainer struct {
 	m map[string]interface{}
 }
 
-func completeType(t reflect.Type, node *nestedMapContainer) {
+func completeType(c any, node *nestedMapContainer, target string) {
 	if node == nil {
 		node = &nestedMapContainer{m: map[string]interface{}{}}
 	}
@@ -34,33 +34,40 @@ func completeType(t reflect.Type, node *nestedMapContainer) {
 		node.m = map[string]interface{}{}
 	}
 
-	if t.Kind() == reflect.Ptr { // Dereference pointer types
-		t = t.Elem()
+	v := reflect.ValueOf(c)
+	if v.Kind() == reflect.Ptr { // Dereference pointer types
+		v = v.Elem()
 	}
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		description := field.Tag.Get("description")
+	if target != "" {
+		completeType(c, &nestedMapContainer{m: node.m[target].(map[string]interface{})}, "")
+		return
+	}
+	vType := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		field := vType.Field(i)
 		key := field.Tag.Get("yaml")
-		//validation := field.Tag.Get("validate")
+		description := field.Tag.Get("description")
 		defaultValue := field.Tag.Get("default")
 		if defaultValue == "-" {
 			defaultValue = ""
 		}
 
 		if description == "" {
-			log.Fatalf("Code error: %s doesn't have a description", field.Name)
+			log.Fatalf("%% Code error: %s in %s doesn't have a description: %+v", field.Name, vType.String(), c)
 		} else if description != "-" { // Ignore descriptions that are -
 			node.m[key] = map[string]interface{}{}
 			if strings.Contains(field.Type.String(), "config.") { // If the type is a config struct
-				if field.Type.Kind() == reflect.Map { // Extract the element if the type is a map or slice
-					//log.Infof("Completing child struct type %s key %s", field.Type, key)
-					// TODO: Handle this by reading the current map items and setting their completions
-					//childTypesSet[field.Type.Elem()] = true
-				} else {
-					completeType(field.Type, &nestedMapContainer{m: node.m[key].(map[string]interface{})})
+				if field.Type.Kind() == reflect.Map {
+					newContainer := &nestedMapContainer{m: node.m[key].(map[string]interface{})}
+					for _, k := range v.Field(i).MapKeys() {
+						log.Debugf("Completing child struct type %s key %s[%s]", field.Type, key, k)
+						newContainer.m[k.String()] = map[string]interface{}{}
+						completeType(v.Field(i).MapIndex(k).Interface(), newContainer, k.String())
+					}
+				} else { // If not a map type, insert and recurse
+					completeType(v.Field(i).Interface(), &nestedMapContainer{m: node.m[key].(map[string]interface{})}, "")
 				}
 			}
-			//fmt.Printf("config key %s (%s) default: %s validation: %s", key, description, defaultValue, validation)
 		}
 	}
 }
@@ -151,6 +158,30 @@ func setConfigValue(c any, item string) {
 	}
 }
 
+func printTree(root *nestedMapContainer) {
+	fmt.Println("{")
+	printTreeRec(root, 1)
+	fmt.Println("}")
+}
+
+// printTreeRec is the recursive function for printing the tree
+func printTreeRec(node *nestedMapContainer, indent int) {
+	for k, v := range node.m {
+		val := v.(map[string]interface{})
+
+		term := "{},"
+		if len(val) > 0 { // has children
+			term = "{"
+		}
+
+		fmt.Printf("%s\"%s\": %s\n", strings.Repeat("  ", indent), k, term)
+		printTreeRec(&nestedMapContainer{m: val}, indent+1)
+		if term == "{" {
+			fmt.Printf(strings.Repeat("  ", indent) + "},\n")
+		}
+	}
+}
+
 func prettyPrint(a any) {
 	o, err := yaml.Marshal(a)
 	if err != nil {
@@ -216,21 +247,24 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	if err := conf.Init(); err != nil {
+	conf.Init()
+	conf.Peers["test-peer"] = &config.Peer{}
+	if err := conf.Default(); err != nil {
 		log.Fatal(err)
 	}
 
 	var root nestedMapContainer
-	completeType(reflect.TypeOf(config.Config{}), &root)
-	//printTree(&root)
+	completeType(&conf, &root, "")
+	printTree(&root)
 
-	topLevel := completeNode(&root)
+	topLevelSet := completeNode(&root)
 	completer := readline.NewPrefixCompleter(
 		readline.PcItem("enable"),
 		readline.PcItem("disable"),
-		readline.PcItem("show", append(topLevel, readline.PcItem("version"))...),
-		readline.PcItem("set", topLevel...),
-		readline.PcItem("delete", topLevel...),
+		readline.PcItem("show", append(topLevelSet, readline.PcItem("version"))...),
+		readline.PcItem("set", topLevelSet...),
+		readline.PcItem("delete", topLevelSet...),
+		//readline.PcItem("create", topLevelCreate...)
 	)
 
 	var err error

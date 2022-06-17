@@ -2,24 +2,25 @@ package main
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/internal/util"
 	"io"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
 
+	"github.com/anmitsu/go-shlex"
 	"github.com/chzyer/readline"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
+	"github.com/natesales/pathvector/internal/process"
 	"github.com/natesales/pathvector/pkg/config"
 )
 
 var (
 	verbose = true
 	enable  = false
-	conf    config.Config
+	conf    *config.Config
 	rline   *readline.Instance
 )
 
@@ -36,7 +37,8 @@ func completeType(c any, node *nestedMapContainer, target string) {
 	}
 
 	v := reflect.ValueOf(c)
-	if v.Kind() == reflect.Ptr { // Dereference pointer types
+	log.Tracef("Attempting to complete type %s", v.Type())
+	for v.Kind() == reflect.Ptr { // Dereference pointer types
 		v = v.Elem()
 	}
 	if target != "" {
@@ -61,9 +63,10 @@ func completeType(c any, node *nestedMapContainer, target string) {
 				if field.Type.Kind() == reflect.Map {
 					newContainer := &nestedMapContainer{m: node.m[key].(map[string]interface{})}
 					for _, k := range v.Field(i).MapKeys() {
-						log.Debugf("Completing child struct type %s key %s[%s]", field.Type, key, k)
-						newContainer.m[k.String()] = map[string]interface{}{}
-						completeType(v.Field(i).MapIndex(k).Interface(), newContainer, k.String())
+						log.Tracef("Completing child struct type %s key %s[%s]", field.Type, key, k)
+						kNoSpace := strings.ReplaceAll(k.String(), " ", `\ `)
+						newContainer.m[kNoSpace] = map[string]interface{}{}
+						completeType(v.Field(i).MapIndex(k).Interface(), newContainer, kNoSpace)
 					}
 				} else { // If not a map type, insert and recurse
 					completeType(v.Field(i).Interface(), &nestedMapContainer{m: node.m[key].(map[string]interface{})}, "")
@@ -73,67 +76,85 @@ func completeType(c any, node *nestedMapContainer, target string) {
 	}
 }
 
-func getConfigValue(c any, item string) (interface{}, error) {
-	item = strings.TrimSpace(item)
-	log.Debugf("Showing '%s'", item)
+func getConfigValue(c any, namespace []string) (interface{}, error) {
+	namespaceStr := "['" + strings.Join(namespace, `', '`) + `']`
+	log.Debugln("Showing " + namespaceStr)
 
-	if item == "" { // Global
+	if len(namespace) == 0 { // Global
 		return c, nil
 	}
 
-	itemSplit := strings.Split(item, " ")
 	v := reflect.ValueOf(c)
-	if v.Kind() == reflect.Ptr { // Dereference pointer types
+	for v.Kind() == reflect.Ptr { // Dereference pointer types
 		v = v.Elem()
-	} else if v.Kind() == reflect.Map {
+	}
+
+	if v.Kind() == reflect.Map {
 		for _, k := range v.MapKeys() {
-			if k.String() == itemSplit[0] {
-				return getConfigValue(v.MapIndex(k).Interface(), strings.Join(itemSplit[1:], " "))
+			if k.String() == namespace[0] {
+				return getConfigValue(v.MapIndex(k).Interface(), namespace[1:])
 			}
 		}
-		return nil, fmt.Errorf("%% Configuration item '%s' not found map", item)
+		return nil, fmt.Errorf("%% Configuration item %+v not found map", namespaceStr)
 	}
 	vType := v.Type()
 	for i := 0; i < v.NumField(); i++ {
 		key := vType.Field(i).Tag.Get("yaml")
 		value := v.Field(i).Interface()
-		if item == key { // Exact match
-			return value, nil
-		} else if itemSplit[0] == key {
-			return getConfigValue(value, strings.Join(itemSplit[1:], " "))
+		if namespace[0] == key {
+			if len(namespace) == 1 { // Exact match
+				return value, nil
+			} else {
+				return getConfigValue(value, namespace[1:])
+			}
 		}
 	}
 
-	return nil, fmt.Errorf("%% Configuration item '%s' not found", item)
+	return nil, fmt.Errorf("%% Configuration item '%+v' not found", namespace)
 }
 
-func setConfigValue(c any, item string) {
-	item = strings.TrimSpace(item)
-	itemSplit := strings.Split(item, " ")
-	targetKey := itemSplit[:len(itemSplit)-1]
-	targetValue := itemSplit[len(itemSplit)-1]
-	log.Debugf("Attempting to set '%s' to '%s'", targetKey, targetValue)
+func setConfigValue(c any, namespace []string, targetValue string) {
+	namespaceStr := "['" + strings.Join(namespace, `', '`) + `']`
+	log.Debugf("Attempting to set '%s' to '%s'", namespaceStr, targetValue)
 
 	v := reflect.ValueOf(c)
-	if v.Kind() == reflect.Ptr { // Dereference pointer types
+	for v.Kind() == reflect.Ptr { // Dereference pointer types
 		v = v.Elem()
 	}
+
+	if v.Kind() == reflect.Map {
+		for _, k := range v.MapKeys() {
+			if k.String() == namespace[0] {
+				log.Debugf("Found map element with key %s, recursing to set '%s' to %s", k.String(), namespace[1:], targetValue)
+				setConfigValue(v.MapIndex(k).Interface(), namespace[1:], targetValue)
+				return
+			}
+		}
+		log.Printf("%% Configuration item %+v not found map", namespaceStr)
+		return
+	}
+
 	vType := v.Type()
+	log.Debugf("Iterating over type %s", vType)
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)
+		for f.Kind() == reflect.Ptr { // Dereference pointer types
+			f = f.Elem()
+		}
 		key := vType.Field(i).Tag.Get("yaml")
-		value := f.Interface()
-		if targetKey[0] == key {
-			if len(targetKey) > 1 {
-				setConfigValue(value, strings.TrimPrefix(item, targetKey[0]))
+		if namespace[0] == key {
+			if len(namespace) > 1 {
+				log.Debugf("Namespace still has more recursing to go, recursing with %s", namespace[1:])
+				setConfigValue(f.Interface(), namespace[1:], targetValue)
 			} else { // Exact match
-				log.Debugf("Matched. Setting '%s' to '%s'", targetKey, targetValue)
+				log.Debugf("Matched. Setting '%s' to '%s' with type %s", namespaceStr, targetValue, f.Kind())
 				if f.IsValid() && f.CanSet() {
 					switch f.Kind() {
 					case reflect.Int, reflect.Int64:
 						targetValAsInt, err := strconv.ParseInt(targetValue, 10, 64)
 						if err != nil {
-							log.Fatalf("%% Unable parse value '%s' as int: %s", targetValue, err)
+							log.Printf("%% Unable parse value '%s' as int: %s", targetValue, err)
+							return
 						}
 						if !f.OverflowInt(targetValAsInt) {
 							f.SetInt(targetValAsInt)
@@ -141,7 +162,8 @@ func setConfigValue(c any, item string) {
 					case reflect.Uint, reflect.Uint32:
 						targetValAsUint, err := strconv.ParseUint(targetValue, 10, 64)
 						if err != nil {
-							log.Fatalf("%% Unable parse value '%s' as uint: %s", targetValue, err)
+							log.Printf("%% Unable parse value '%s' as uint: %s", targetValue, err)
+							return
 						}
 						if !f.OverflowUint(targetValAsUint) {
 							f.SetUint(targetValAsUint)
@@ -155,10 +177,12 @@ func setConfigValue(c any, item string) {
 						} else if targetValue == "false" {
 							f.SetBool(false)
 						} else {
-							log.Fatalf("%% Unable parse value '%s' as bool", targetValue)
+							log.Printf("%% Unable parse value '%s' as bool", targetValue)
+							return
 						}
 					default:
-						log.Fatalf("%% Unable to set '%s' of type '%s'", item, f.Kind())
+						log.Printf("%% Unable to set '%s' of type '%s'", namespaceStr, f.Kind())
+						return
 					}
 				}
 			}
@@ -167,9 +191,7 @@ func setConfigValue(c any, item string) {
 }
 
 func printTree(root *nestedMapContainer) {
-	fmt.Println("{")
-	printTreeRec(root, 1)
-	fmt.Println("}")
+	printTreeRec(root, 0)
 }
 
 // printTreeRec is the recursive function for printing the tree
@@ -177,15 +199,15 @@ func printTreeRec(node *nestedMapContainer, indent int) {
 	for k, v := range node.m {
 		val := v.(map[string]interface{})
 
-		term := "{},"
+		term := ";"
 		if len(val) > 0 { // has children
-			term = "{"
+			term = " {"
 		}
 
-		fmt.Printf("%s\"%s\": %s\n", strings.Repeat("  ", indent), k, term)
+		log.Printf("%s%s%s\n", strings.Repeat("  ", indent), k, term)
 		printTreeRec(&nestedMapContainer{m: val}, indent+1)
-		if term == "{" {
-			fmt.Printf(strings.Repeat("  ", indent) + "},\n")
+		if term == " {" {
+			log.Printf(strings.Repeat("  ", indent) + "}\n")
 		}
 	}
 }
@@ -195,7 +217,7 @@ func prettyPrint(a any) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(strings.TrimSpace(string(o)))
+	log.Println(strings.TrimSpace(string(o)))
 }
 
 // completeNode gets a list of prefix completer items for a given node
@@ -222,7 +244,7 @@ func prompt(enable bool) string {
 
 func runCommand(line string) {
 	line = strings.TrimSpace(line)
-	log.Debugf("Processing command '%s'", line)
+	log.Tracef("Processing command '%s'", line)
 	switch {
 	case line == "enable":
 		enable = true
@@ -233,20 +255,27 @@ func runCommand(line string) {
 	case line == "show version":
 		log.Debugf("Caught command show version")
 	case strings.HasPrefix(line, "show"):
-		query := strings.TrimPrefix(line, "show")
-		item, err := getConfigValue(&conf, query)
+		words, err := shlex.Split(strings.TrimPrefix(line, "show"), true)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
+		}
+		item, err := getConfigValue(&conf, words)
+		if err != nil {
+			log.Println(err)
 		} else {
 			prettyPrint(item)
 		}
 	case strings.HasPrefix(line, "set"):
-		setConfigValue(&conf, strings.TrimPrefix(line, "set"))
+		words, err := shlex.Split(strings.TrimPrefix(line, "set"), true)
+		if err != nil {
+			log.Fatal(err)
+		}
+		setConfigValue(&conf, words[:len(words)-1], words[len(words)-1])
 	case line == "exit" || line == "quit":
 		os.Exit(0)
 	case line == "":
 	default:
-		fmt.Println("% Unknown command: " + line)
+		log.Println("% Unknown command: " + line)
 	}
 }
 
@@ -255,16 +284,18 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	conf.Init()
-	conf.Peers["test-peer"] = &config.Peer{ASN: util.IntPtr(3455)}
-	conf.Templates["test-template"] = &config.Peer{}
-	if err := conf.Default(); err != nil {
+	configFile, err := os.ReadFile("./pvec.yml")
+	if err != nil {
+		log.Fatal("Reading config file: " + err.Error())
+	}
+	conf, err = process.Load(configFile)
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	var root nestedMapContainer
-	completeType(&conf, &root, "")
-	printTree(&root)
+	completeType(conf, &root, "")
+	//printTree(&root)
 
 	topLevelSet := completeNode(&root)
 	completer := readline.NewPrefixCompleter(
@@ -273,10 +304,9 @@ func main() {
 		readline.PcItem("show", append(topLevelSet, readline.PcItem("version"))...),
 		readline.PcItem("set", topLevelSet...),
 		readline.PcItem("delete", topLevelSet...),
-		//readline.PcItem("create", topLevelCreate...)
+		//readline.PcItem("create", topLevelCreate...) // TODO
 	)
 
-	var err error
 	rline, err = readline.NewEx(&readline.Config{
 		Prompt:            prompt(enable),
 		HistoryFile:       "/tmp/pathvector.cli-history",

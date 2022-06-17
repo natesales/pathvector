@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -76,6 +77,7 @@ func categorizeCommunity(input string) string {
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
 	c.Init()
+	defaults.MustSet(&c)
 
 	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
 		return nil, errors.New("YAML unmarshal: " + err.Error())
@@ -151,7 +153,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 						peerFieldValue.Set(templateValue.Field(i))
 					}
 
-					log.Debugf("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
+					log.Tracef("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
 				}
 			}
 		} // end peer template processor

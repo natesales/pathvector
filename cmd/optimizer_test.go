@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -39,7 +39,7 @@ func TestOptimizer(t *testing.T) {
 		}
 
 		// Check if local pref is lowered
-		checkFile, err := ioutil.ReadFile("test-cache/AS65510_EXAMPLE.conf")
+		checkFile, err := os.ReadFile("test-cache/AS65510_EXAMPLE.conf")
 		if err != nil {
 			t.Error(err)
 		}

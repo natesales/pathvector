@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -42,7 +41,7 @@ var generateCmd = &cobra.Command{
 				// If the lockfile doesn't exist, create it
 				log.Debugln("Lockfile doesn't exist, creating one")
 				//nolint:golint,gosec
-				if err := ioutil.WriteFile(lockFile, []byte(""), 0755); err != nil {
+				if err := os.WriteFile(lockFile, []byte(""), 0755); err != nil {
 					log.Fatalf("Writing lockfile: %v", err)
 				}
 			} else {
@@ -54,7 +53,7 @@ var generateCmd = &cobra.Command{
 
 		// Load the config file from config file
 		log.Debugf("Loading config from %s", configFile)
-		configFile, err := ioutil.ReadFile(configFile)
+		configFile, err := os.ReadFile(configFile)
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -88,7 +88,7 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.New("PeeringDB read: " + err.Error())
 	}
@@ -186,7 +186,7 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, errors.New("PeeringDB read: " + err.Error())
 	}
@@ -232,7 +232,7 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}

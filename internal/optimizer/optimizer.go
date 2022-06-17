@@ -2,7 +2,6 @@ package optimizer
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -190,7 +189,7 @@ func modifyPref(
 ) {
 	peerASN, peerName := parsePeerDelimiter(peerPair)
 	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
-	peerFile, err := ioutil.ReadFile(fileName)
+	peerFile, err := os.ReadFile(fileName)
 	if err != nil {
 		log.Fatal("reading peer file: " + err.Error())
 	}
@@ -205,7 +204,7 @@ func modifyPref(
 		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
 
 		//nolint:golint,gosec
-		if err := ioutil.WriteFile(fileName, []byte(modified), 0755); err != nil {
+		if err := os.WriteFile(fileName, []byte(modified), 0755); err != nil {
 			log.Fatal(err)
 		} else {
 			log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)

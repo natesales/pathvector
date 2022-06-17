@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -28,7 +28,7 @@ var dumpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Load the config file from config file
 		log.Debugf("Loading config from %s", configFile)
-		configFile, err := ioutil.ReadFile(configFile)
+		configFile, err := os.ReadFile(configFile)
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}

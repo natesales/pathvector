@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 
 	"github.com/natesales/pathvector/internal/optimizer"
 	"github.com/natesales/pathvector/internal/process"
@@ -20,7 +19,7 @@ var optimizerCmd = &cobra.Command{
 	Short: "Start optimization daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Debugf("Loading config from %s", configFile)
-		configFile, err := ioutil.ReadFile(configFile)
+		configFile, err := os.ReadFile(configFile)
 		if err != nil {
 			log.Fatal("Reading config file: " + err.Error())
 		}

@@ -368,9 +368,9 @@ var interactiveCmd = &cobra.Command{
 		defer rline.Close()
 		log.SetOutput(rline.Stderr())
 
-		if len(args) > 1 {
+		if len(args) > 0 {
 			enable = true
-			runCommand(strings.Join(args[1:], " "))
+			runCommand(strings.Join(args, " "))
 		} else {
 			for {
 				line, err := rline.Readline()

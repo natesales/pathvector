@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ import (
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 var (
@@ -26,6 +28,50 @@ var (
 func init() {
 	generateCmd.Flags().BoolVarP(&withdraw, "withdraw", "w", false, "Withdraw all routes")
 	rootCmd.AddCommand(generateCmd)
+}
+
+func processPeer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
+
+	// If a PeeringDB query is required
+	if *peerData.AutoImportLimits || *peerData.AutoASSet {
+		log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
+
+		peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, true)
+	} // end peeringdb query enabled
+
+	// Build IRR prefix sets
+	if *peerData.FilterIRR {
+		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	util.PrintStructInfo(peerName, peerData)
+
+	// Create peer file
+	peerFileName := path.Join(c.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *util.Sanitize(peerName)))
+	peerSpecificFile, err := os.Create(peerFileName)
+	if err != nil {
+		log.Fatalf("Create peer specific output file: %v", err)
+	}
+
+	// Render the template and write to buffer
+	var b bytes.Buffer
+	log.Debugf("[%s] Writing config", peerName)
+	err = templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{Name: peerName, Peer: *peerData, Config: *c})
+	if err != nil {
+		log.Fatalf("Execute template: %v", err)
+	}
+
+	// Reformat config and write template to file
+	if _, err := peerSpecificFile.Write([]byte(bird.Reformat(b.String()))); err != nil {
+		log.Fatalf("Write template to file: %v", err)
+	}
+
+	log.Debugf("[%s] Wrote config", peerName)
 }
 
 var generateCmd = &cobra.Command{
@@ -112,55 +158,16 @@ var generateCmd = &cobra.Command{
 
 		if withdraw {
 			log.Warn("DANGER: withdraw flag is set, withdrawing all routes")
+			c.NoAnnounce = true
 		}
 
 		// Iterate over peers
+		wg := new(sync.WaitGroup)
 		for peerName, peerData := range c.Peers {
-			if withdraw {
-				c.NoAnnounce = true
-			}
-
-			log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
-
-			// If a PeeringDB query is required
-			if *peerData.AutoImportLimits || *peerData.AutoASSet {
-				log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
-
-				peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, true)
-			} // end peeringdb query enabled
-
-			// Build IRR prefix sets
-			if *peerData.FilterIRR {
-				if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
-					log.Fatal(err)
-				}
-			}
-
-			util.PrintStructInfo(peerName, peerData)
-
-			// Create peer file
-			peerFileName := path.Join(c.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *util.Sanitize(peerName)))
-			peerSpecificFile, err := os.Create(peerFileName)
-			if err != nil {
-				log.Fatalf("Create peer specific output file: %v", err)
-			}
-
-			// Render the template and write to buffer
-			var b bytes.Buffer
-			log.Debugf("[%s] Writing config", peerName)
-			err = templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{Name: peerName, Peer: *peerData, Config: *c})
-			if err != nil {
-				log.Fatalf("Execute template: %v", err)
-			}
-
-			// Reformat config and write template to file
-			if _, err := peerSpecificFile.Write([]byte(bird.Reformat(b.String()))); err != nil {
-				log.Fatalf("Write template to file: %v", err)
-			}
-
-			log.Debugf("[%s] Wrote config", peerName)
-
+			wg.Add(1)
+			go processPeer(peerName, peerData, c, wg)
 		} // end peer loop
+		wg.Wait()
 
 		// Run BIRD config validation
 		bird.Validate(c.BIRDBinary, c.CacheDirectory)

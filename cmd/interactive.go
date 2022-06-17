@@ -241,9 +241,8 @@ func prompt(enable bool) string {
 		suffix = "# "
 	}
 	p := "pathvector " + suffix
-	hostname, err := os.Hostname()
-	if err == nil {
-		p = "pathvector (" + hostname + ") " + suffix
+	if conf.Hostname != "" {
+		p = "pathvector (" + conf.Hostname + ") " + suffix
 	}
 	return p
 }

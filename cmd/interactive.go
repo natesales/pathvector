@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	enable = false
+	enable bool
 	conf   *config.Config
 	rline  *readline.Instance
 	root   nestedMapContainer
@@ -306,25 +306,29 @@ func initRline() {
 	completeType(conf, &root, "")
 	configCompletions := completeNode(&root)
 	var completer *readline.PrefixCompleter
+	universalPcItems := []readline.PrefixCompleterInterface{ // Commands available in both enable and operational modes
+		readline.PcItem("show",
+			append(
+				configCompletions,
+				readline.PcItem("version"),
+				readline.PcItem("config-structure"),
+			)...,
+		),
+		readline.PcItem("bird"),
+	}
 	if enable {
-		completer = readline.NewPrefixCompleter(
+		completer = readline.NewPrefixCompleter(append(
+			universalPcItems,
 			readline.PcItem("disable"),
-			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
 			readline.PcItem("set", configCompletions...),
 			readline.PcItem("delete", configCompletions...),
 			//readline.PcItem("create", topLevelCreate...) // TODO
-		)
+		)...)
 	} else {
-		completer = readline.NewPrefixCompleter(
+		completer = readline.NewPrefixCompleter(append(
+			universalPcItems,
 			readline.PcItem("enable"),
-			readline.PcItem("show",
-				append(
-					configCompletions,
-					readline.PcItem("version"),
-					readline.PcItem("config-structure"),
-				)...,
-			),
-		)
+		)...)
 	}
 
 	var err error

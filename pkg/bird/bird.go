@@ -36,6 +36,22 @@ func Read(reader io.Reader) (string, error) {
 	return string(buf[:n]), nil // nil error
 }
 
+// ReadClean reads from the provided reader and trims unneeded whitespace and bird 4 digit numbers
+func ReadClean(r io.Reader) {
+	resp, err := Read(r)
+	if err != nil {
+		return
+	}
+
+	reg := regexp.MustCompile(`[0-9]{4}-? ?`)
+	resp = reg.ReplaceAllString(resp, "")
+	resp = strings.ReplaceAll(resp, "\n ", "\n")
+	resp = strings.ReplaceAll(resp, "\n\n", "\n")
+	resp = strings.TrimSuffix(resp, "\n")
+
+	fmt.Println(resp)
+}
+
 // RunCommand runs a BIRD command
 func RunCommand(command string, socket string) (string, error) {
 	log.Debugln("Connecting to BIRD socket")

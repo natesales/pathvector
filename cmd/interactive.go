@@ -261,7 +261,7 @@ func runCommand(line string) {
 		initRline()
 		rline.SetPrompt(prompt(false))
 	case line == "show version":
-		fmt.Printf("Pathvector version %s\n", version)
+		versionBanner()
 	case line == "show config-structure":
 		printTree(&root)
 	case strings.HasPrefix(line, "show"):

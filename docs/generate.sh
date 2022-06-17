@@ -29,9 +29,9 @@ cat README.md >>docs/docs/about.md
 
 rm /tmp/pathvector
 
-# Add peering portal readme page
-curl -s https://raw.githubusercontent.com/natesales/pathvector-portal/main/README.md >docs/docs/portal.md
-sed -i 's/# Pathvector Peering Portal/# Peering Portal/' docs/docs/portal.md
+## Add peering portal readme page
+#curl -s https://raw.githubusercontent.com/natesales/pathvector-portal/main/README.md >docs/docs/portal.md
+#sed -i 's/# Pathvector Peering Portal/# Peering Portal/' docs/docs/portal.md
 
 # Generate PDF documentation
 echo Generating PDF

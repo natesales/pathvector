@@ -334,6 +334,56 @@ Plugin-specific configuration
 | map[string]string   |       |          |
 
 
+## Augments
+### `accept4`
+
+List of BIRD protocols to import into the IPv4 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `accept6`
+
+List of BIRD protocols to import into the IPv6 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `reject4`
+
+List of BIRD protocols to not import into the IPv4 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `reject6`
+
+List of BIRD protocols to not import into the IPv6 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `statics`
+
+List of static routes to include in BIRD
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
+
+### `srd-communities`
+
+List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+
 ## BFDInstance
 ### `neighbor`
 
@@ -366,6 +416,96 @@ Number of missed packets for the state to be declared down
 | Type | Default | Validation |
 |------|---------|------------|
 | uint   | 10      |          |
+
+
+## Optimizer
+### `targets`
+
+List of probe targets
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `latency-threshold`
+
+Maximum allowable latency in milliseconds
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 100      |          |
+
+### `packet-loss-threshold`
+
+Maximum allowable packet loss (percent)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| float64   | 0.5      |          |
+
+### `modifier`
+
+Amount to lower local pref by for depreferred peers
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 20      |          |
+
+### `probe-count`
+
+Number of pings to send in each run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 5      |          |
+
+### `probe-timeout`
+
+Number of seconds to wait before considering the ICMP message unanswered
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 1      |          |
+
+### `probe-interval`
+
+Number of seconds wait between each optimizer run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 120      |          |
+
+### `cache-size`
+
+Number of probe results to store per peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 15      |          |
+
+### `probe-udp`
+
+Use UDP probe (else ICMP)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `alert-script`
+
+Script to call on optimizer event
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `exit-on-cache-full`
+
+Exit optimizer on cache full
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 
 ## Peer
@@ -1018,145 +1158,5 @@ List of virtual IPs
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       | required,cidr         |
-
-
-## Augments
-### `accept4`
-
-List of BIRD protocols to import into the IPv4 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `accept6`
-
-List of BIRD protocols to import into the IPv6 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `reject4`
-
-List of BIRD protocols to not import into the IPv4 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `reject6`
-
-List of BIRD protocols to not import into the IPv6 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `statics`
-
-List of static routes to include in BIRD
-
-| Type | Default | Validation |
-|------|---------|------------|
-| map[string]string   |       |          |
-
-### `srd-communities`
-
-List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-
-## Optimizer
-### `targets`
-
-List of probe targets
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `latency-threshold`
-
-Maximum allowable latency in milliseconds
-
-| Type | Default | Validation |
-|------|---------|------------|
-| uint   | 100      |          |
-
-### `packet-loss-threshold`
-
-Maximum allowable packet loss (percent)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| float64   | 0.5      |          |
-
-### `modifier`
-
-Amount to lower local pref by for depreferred peers
-
-| Type | Default | Validation |
-|------|---------|------------|
-| uint   | 20      |          |
-
-### `probe-count`
-
-Number of pings to send in each run
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 5      |          |
-
-### `probe-timeout`
-
-Number of seconds to wait before considering the ICMP message unanswered
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 1      |          |
-
-### `probe-interval`
-
-Number of seconds wait between each optimizer run
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 120      |          |
-
-### `cache-size`
-
-Number of probe results to store per peer
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 15      |          |
-
-### `probe-udp`
-
-Use UDP probe (else ICMP)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
-
-### `alert-script`
-
-Script to call on optimizer event
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `exit-on-cache-full`
-
-Exit optimizer on cache full
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
 
 

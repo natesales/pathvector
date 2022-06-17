@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -22,6 +23,10 @@ var (
 	enable = false
 	conf   *config.Config
 	rline  *readline.Instance
+)
+
+var (
+	errEnableRequired = errors.New("% Access denied (enable required)")
 )
 
 type nestedMapContainer struct {
@@ -248,9 +253,11 @@ func runCommand(line string) {
 	switch {
 	case line == "enable":
 		enable = true
+		initRline()
 		rline.SetPrompt(prompt(true))
 	case line == "disable":
 		enable = false
+		initRline()
 		rline.SetPrompt(prompt(false))
 	case line == "show version":
 		fmt.Printf("Pathvector version %s\n", version)
@@ -266,6 +273,10 @@ func runCommand(line string) {
 			prettyPrint(item)
 		}
 	case strings.HasPrefix(line, "set"):
+		if !enable {
+			fmt.Println(errEnableRequired)
+			return
+		}
 		words, err := shlex.Split(strings.TrimPrefix(line, "set"), true)
 		if err != nil {
 			log.Fatal(err)
@@ -276,6 +287,45 @@ func runCommand(line string) {
 	case line == "":
 	default:
 		fmt.Println("% Unknown command: " + line)
+	}
+}
+
+func completer() *readline.PrefixCompleter {
+	var root nestedMapContainer
+	completeType(conf, &root, "")
+	//printTree(&root)
+
+	configCompletions := completeNode(&root)
+	var c *readline.PrefixCompleter
+	if enable {
+		c = readline.NewPrefixCompleter(
+			readline.PcItem("disable"),
+			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
+			readline.PcItem("set", configCompletions...),
+			readline.PcItem("delete", configCompletions...),
+			//readline.PcItem("create", topLevelCreate...) // TODO
+		)
+	} else {
+		c = readline.NewPrefixCompleter(
+			readline.PcItem("enable"),
+			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
+		)
+	}
+	return c
+}
+
+func initRline() {
+	var err error
+	rline, err = readline.NewEx(&readline.Config{
+		Prompt:            prompt(enable),
+		HistoryFile:       "/tmp/pathvector.cli-history",
+		AutoComplete:      completer(),
+		InterruptPrompt:   "^C",
+		EOFPrompt:         "exit",
+		HistorySearchFold: true,
+	})
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -296,35 +346,12 @@ var interactiveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		var root nestedMapContainer
-		completeType(conf, &root, "")
-		//printTree(&root)
-
-		topLevelSet := completeNode(&root)
-		completer := readline.NewPrefixCompleter(
-			readline.PcItem("enable"),
-			readline.PcItem("disable"),
-			readline.PcItem("show", append(topLevelSet, readline.PcItem("version"))...),
-			readline.PcItem("set", topLevelSet...),
-			readline.PcItem("delete", topLevelSet...),
-			//readline.PcItem("create", topLevelCreate...) // TODO
-		)
-
-		rline, err = readline.NewEx(&readline.Config{
-			Prompt:            prompt(enable),
-			HistoryFile:       "/tmp/pathvector.cli-history",
-			AutoComplete:      completer,
-			InterruptPrompt:   "^C",
-			EOFPrompt:         "exit",
-			HistorySearchFold: true,
-		})
-		if err != nil {
-			log.Fatal(err)
-		}
+		initRline()
 		defer rline.Close()
 		log.SetOutput(rline.Stderr())
 
 		if len(args) > 1 {
+			enable = true
 			runCommand(strings.Join(args[1:], " "))
 		} else {
 			for {

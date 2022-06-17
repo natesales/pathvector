@@ -61,8 +61,8 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 
@@ -169,8 +169,8 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 
@@ -215,8 +215,8 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 

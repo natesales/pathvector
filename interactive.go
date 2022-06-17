@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/internal/util"
 	"io"
 	"os"
 	"reflect"
@@ -84,6 +85,13 @@ func getConfigValue(c any, item string) (interface{}, error) {
 	v := reflect.ValueOf(c)
 	if v.Kind() == reflect.Ptr { // Dereference pointer types
 		v = v.Elem()
+	} else if v.Kind() == reflect.Map {
+		for _, k := range v.MapKeys() {
+			if k.String() == itemSplit[0] {
+				return getConfigValue(v.MapIndex(k).Interface(), strings.Join(itemSplit[1:], " "))
+			}
+		}
+		return nil, fmt.Errorf("%% Configuration item '%s' not found map", item)
 	}
 	vType := v.Type()
 	for i := 0; i < v.NumField(); i++ {
@@ -248,7 +256,8 @@ func main() {
 	}
 
 	conf.Init()
-	conf.Peers["test-peer"] = &config.Peer{}
+	conf.Peers["test-peer"] = &config.Peer{ASN: util.IntPtr(3455)}
+	conf.Templates["test-template"] = &config.Peer{}
 	if err := conf.Default(); err != nil {
 		log.Fatal(err)
 	}

@@ -23,6 +23,7 @@ var (
 	enable = false
 	conf   *config.Config
 	rline  *readline.Instance
+	root   nestedMapContainer
 )
 
 var (
@@ -261,6 +262,8 @@ func runCommand(line string) {
 		rline.SetPrompt(prompt(false))
 	case line == "show version":
 		fmt.Printf("Pathvector version %s\n", version)
+	case line == "show config-structure":
+		printTree(&root)
 	case strings.HasPrefix(line, "show"):
 		words, err := shlex.Split(strings.TrimPrefix(line, "show"), true)
 		if err != nil {
@@ -291,10 +294,7 @@ func runCommand(line string) {
 }
 
 func initRline() {
-	var root nestedMapContainer
 	completeType(conf, &root, "")
-	//printTree(&root)
-
 	configCompletions := completeNode(&root)
 	var completer *readline.PrefixCompleter
 	if enable {
@@ -308,7 +308,13 @@ func initRline() {
 	} else {
 		completer = readline.NewPrefixCompleter(
 			readline.PcItem("enable"),
-			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
+			readline.PcItem("show",
+				append(
+					configCompletions,
+					readline.PcItem("version"),
+					readline.PcItem("config-structure"),
+				)...,
+			),
 		)
 	}
 
@@ -327,6 +333,7 @@ func initRline() {
 }
 
 func init() {
+	interactiveCmd.Flags().BoolVarP(&enable, "enable", "e", false, "Enter enable mode")
 	rootCmd.AddCommand(interactiveCmd)
 }
 

@@ -28,6 +28,7 @@ var (
 
 var (
 	errEnableRequired = errors.New("% Access denied (enable required)")
+	errInvalidSyntax  = errors.New("% Syntax Error")
 )
 
 type nestedMapContainer struct {
@@ -101,7 +102,7 @@ func getConfigValue(c any, namespace []string) (interface{}, error) {
 				return getConfigValue(v.MapIndex(k).Interface(), namespace[1:])
 			}
 		}
-		return nil, fmt.Errorf("%% Configuration item %+v not found map", namespaceStr)
+		return nil, fmt.Errorf("%% Configuration item %+v not found map", strings.Join(namespace, " "))
 	}
 	vType := v.Type()
 	for i := 0; i < v.NumField(); i++ {
@@ -116,10 +117,15 @@ func getConfigValue(c any, namespace []string) (interface{}, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("%% Configuration item '%+v' not found", namespace)
+	return nil, fmt.Errorf("%% Configuration item '%+v' not found", strings.Join(namespace, " "))
 }
 
 func setConfigValue(c any, namespace []string, targetValue string) {
+	if len(namespace) == 0 {
+		fmt.Println(errInvalidSyntax)
+		return
+	}
+
 	namespaceStr := "['" + strings.Join(namespace, `', '`) + `']`
 	log.Debugf("Attempting to set '%s' to '%s'", namespaceStr, targetValue)
 
@@ -282,6 +288,10 @@ func runCommand(line string) {
 		words, err := shlex.Split(strings.TrimPrefix(line, "set"), true)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if len(words) == 0 {
+			fmt.Println(errInvalidSyntax)
+			return
 		}
 		setConfigValue(&conf, words[:len(words)-1], words[len(words)-1])
 	case line == "exit" || line == "quit":

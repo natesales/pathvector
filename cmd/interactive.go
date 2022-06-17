@@ -351,8 +351,9 @@ func init() {
 }
 
 var interactiveCmd = &cobra.Command{
-	Use:   "interactive",
-	Short: "Interactive CLI",
+	Use:     "interactive",
+	Short:   "Interactive CLI",
+	Aliases: []string{"cli", "i"},
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := os.ReadFile(configFile)
 		if err != nil {

@@ -290,15 +290,15 @@ func runCommand(line string) {
 	}
 }
 
-func completer() *readline.PrefixCompleter {
+func initRline() {
 	var root nestedMapContainer
 	completeType(conf, &root, "")
 	//printTree(&root)
 
 	configCompletions := completeNode(&root)
-	var c *readline.PrefixCompleter
+	var completer *readline.PrefixCompleter
 	if enable {
-		c = readline.NewPrefixCompleter(
+		completer = readline.NewPrefixCompleter(
 			readline.PcItem("disable"),
 			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
 			readline.PcItem("set", configCompletions...),
@@ -306,20 +306,17 @@ func completer() *readline.PrefixCompleter {
 			//readline.PcItem("create", topLevelCreate...) // TODO
 		)
 	} else {
-		c = readline.NewPrefixCompleter(
+		completer = readline.NewPrefixCompleter(
 			readline.PcItem("enable"),
 			readline.PcItem("show", append(configCompletions, readline.PcItem("version"))...),
 		)
 	}
-	return c
-}
 
-func initRline() {
 	var err error
 	rline, err = readline.NewEx(&readline.Config{
 		Prompt:            prompt(enable),
 		HistoryFile:       "/tmp/pathvector.cli-history",
-		AutoComplete:      completer(),
+		AutoComplete:      completer,
 		InterruptPrompt:   "^C",
 		EOFPrompt:         "exit",
 		HistorySearchFold: true,
@@ -339,7 +336,7 @@ var interactiveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := os.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Reading config file: " + err.Error())
+			log.Fatalf("Reading config file: %s", err)
 		}
 		conf, err = process.Load(configFile)
 		if err != nil {

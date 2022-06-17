@@ -41,7 +41,7 @@ var optimizerCmd = &cobra.Command{
 		if len(sourceMap) == 0 {
 			log.Fatal("No peers have optimization enabled, exiting now")
 		}
-		if err := optimizer.StartProbe(&c.Optimizer, sourceMap, c, noConfigure, dryRun); err != nil {
+		if err := optimizer.StartProbe(c.Optimizer, sourceMap, c, noConfigure, dryRun); err != nil {
 			log.Fatal(err)
 		}
 	},

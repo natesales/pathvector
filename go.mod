@@ -1,6 +1,6 @@
 module github.com/natesales/pathvector
 
-go 1.17
+go 1.18
 
 require (
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/mod v0.4.2
 	golang.org/x/text v0.3.6
+	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 

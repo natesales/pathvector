@@ -2,8 +2,10 @@
 
 # {{ .Name }} AS{{ $peer.ASN }}
 
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ $peer.ImportLimit4 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ $peer.ImportLimit6 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v4 = {{ $peer.ImportLimit4 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v6 = {{ $peer.ImportLimit6 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v4 = {{ $peer.ExportLimit4 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v6 = {{ $peer.ExportLimit6 }};
 
 {{ if BoolDeref $peer.FilterIRR }}
 {{ if not (Empty $peer.PrefixSet4) }}
@@ -60,7 +62,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
     {{ range $i, $af := $protocols }}
     ipv{{ $af }} {
         {{ if BoolDeref $global.KeepFiltered }}import keep filtered;{{ end }}
-        import limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPrefixTripAction }};
+        import limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v{{ $af }} action {{ $peer.ImportLimitTripAction }};
+        export limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v{{ $af }} action {{ $peer.ExportLimitTripAction }};
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}

@@ -144,6 +144,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}
+            {{ range $i := Uint32SliceDeref $peer.PrependPath }}
+            bgp_path.prepend({{ $i }});
+            {{ end }}
 
             {{ if StrDeref $peer.ExportNextHop }}bgp_next_hop = {{ StrDeref $peer.ExportNextHop }};{{ end }}
 

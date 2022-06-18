@@ -82,6 +82,13 @@ var funcMap = template.FuncMap{
 		return []string{}
 	},
 
+	"Uint32SliceDeref": func(slice *[]uint32) []uint32 {
+		if slice != nil {
+			return *slice
+		}
+		return []uint32{}
+	},
+
 	"StrDeref": func(i *string) string {
 		if i != nil {
 			return *i

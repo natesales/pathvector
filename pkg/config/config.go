@@ -16,6 +16,7 @@ type Peer struct {
 	ASN                  *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
 	NeighborIPs          *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
 	Prepends             *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	PrependPath          *[]uint32 `yaml:"prepend-path" description:"List of ASNs to prepend" default:"-"`
 	LocalPref            *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	SetLocalPref         *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set?" default:"true"`
 	Multihop             *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`

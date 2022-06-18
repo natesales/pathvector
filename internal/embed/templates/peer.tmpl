@@ -141,6 +141,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             remove_private_asns();
             {{ end }}
 
+            {{ if BoolDeref $peer.ClearPath }}bgp_path = -empty-;{{ end }}
             {{ range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
             {{ end }}

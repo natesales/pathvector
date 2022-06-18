@@ -63,6 +63,7 @@ peers:
     prefixes:
       - 198.51.100.0/24
       - 2001:db8:1::/48
+    clear-path: true
     prepend-path:
       - 1
       - 2

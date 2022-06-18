@@ -23,6 +23,12 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = -empty-;
 {{ end }}
 {{ end }}
 
+{{ if $peer.FilterASSet }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS = [
+{{ BirdASSet $peer.ASSetMembers }}
+];
+{{ end }}
+
 {{ range $i, $neighbor := $peer.NeighborIPs }}
 {{ $af := "4" }}{{ if Contains $neighbor ":" }}{{ $af = "6" }}{{ end }}
 {{ $neighborNoIface := SplitFirst $neighbor "%" }}
@@ -118,6 +124,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
 
             {{ if BoolDeref $peer.FilterIRR }}
             if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { _reject("not in IRR prefix set"); }
+            {{ end }}
+
+            {{ if BoolDeref $peer.FilterASSet }}
+            if (bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { accept; } else { _reject("not in AS set"); }
             {{ end }}
 
             {{ StrDeref $peer.PreImportFinal }}

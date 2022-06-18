@@ -68,3 +68,9 @@ peers:
       - 1
       - 2
       - 3
+    as-set-members:
+      - 65510
+      - 65520
+      - 65530
+      - 65540
+    filter-as-set: true

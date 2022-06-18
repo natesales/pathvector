@@ -48,6 +48,21 @@ func processPeer(peerName string, peerData *config.Peer, c *config.Config, wg *s
 			log.Fatal(err)
 		}
 	}
+	if *peerData.AutoASSetMembers {
+		membersFromIRR, err := irr.ASMembers(*peerData.ASSet, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if peerData.ASSetMembers == nil {
+			peerData.ASSetMembers = &membersFromIRR
+		} else {
+			newASSetMembers := *peerData.ASSetMembers
+			for _, asn := range membersFromIRR {
+				newASSetMembers = append(newASSetMembers, asn)
+			}
+			peerData.ASSetMembers = &newASSetMembers
+		}
+	}
 
 	util.PrintStructInfo(peerName, peerData)
 

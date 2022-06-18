@@ -1047,6 +1047,14 @@ Should routes containing an ASN reported in PeeringDB to never be reachable via 
 |------|---------|------------|
 | bool   | false      |          |
 
+### `filter-as-set`
+
+Reject routes that aren't originated by an ASN within this peer's AS set
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `auto-import-limits`
 
 Get import limits automatically from PeeringDB?
@@ -1058,6 +1066,14 @@ Get import limits automatically from PeeringDB?
 ### `auto-as-set`
 
 Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead.
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `auto-as-set-members`
+
+Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1078,6 +1094,14 @@ Prefixes to accept
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       |          |
+
+### `as-set-members`
+
+AS set members (For filter-as-set)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []uint32   |       |          |
 
 ### `announce-default`
 

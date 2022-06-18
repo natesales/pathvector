@@ -69,6 +69,7 @@ type Peer struct {
 	BlackholeIn             *bool   `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
 	BlackholeOut            *bool   `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
+	// Filtering
 	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
 	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
 	StrictRPKI                 *bool `yaml:"strict-rpki" description:"Should only RPKI valids be accepted?" default:"false"`
@@ -78,13 +79,16 @@ type Peer struct {
 	FilterTransitASNs          *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
 	FilterPrefixLength         *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
 	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
+	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`
+	AutoASSetMembers *bool `yaml:"auto-as-set-members" description:"Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)" default:"false"`
 
 	HonorGracefulShutdown *bool `yaml:"honor-graceful-shutdown" description:"Should RFC8326 graceful shutdown be enabled?" default:"true"`
 
-	Prefixes *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
+	Prefixes     *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
+	ASSetMembers *[]uint32 `yaml:"as-set-members" description:"AS set members (For filter-as-set)" default:"-"`
 
 	// Export options
 	AnnounceDefault    *bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`

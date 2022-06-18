@@ -54,6 +54,19 @@ var funcMap = template.FuncMap{
 		return output
 	},
 
+	"BirdASSet": func(asns []uint32) string {
+		// Build a formatted BIRD AS set
+		output := ""
+		for i, prefix := range asns {
+			output += fmt.Sprintf("  %d", prefix)
+			if i != len(asns)-1 {
+				output += ",\n"
+			}
+		}
+
+		return output
+	},
+
 	"Empty": func(arr *[]string) bool {
 		// Is `arr` empty?
 		return arr == nil || len(*arr) == 0

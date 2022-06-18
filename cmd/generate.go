@@ -63,6 +63,9 @@ func processPeer(peerName string, peerData *config.Peer, c *config.Config, wg *s
 			peerData.ASSetMembers = &newASSetMembers
 		}
 	}
+	if *peerData.FilterASSet && len(*peerData.ASSetMembers) < 1 {
+		log.Fatalf("Peer has filter-as-set enabled but no members in it's as-set")
+	}
 
 	util.PrintStructInfo(peerName, peerData)
 

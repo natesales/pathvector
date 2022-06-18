@@ -5,7 +5,7 @@
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ $peer.ImportLimit4 }};
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ $peer.ImportLimit6 }};
 
-{{ if $peer.FilterIRR }}
+{{ if BoolDeref $peer.FilterIRR }}
 {{ if not (Empty $peer.PrefixSet4) }}
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = [
 {{ BirdSet $peer.PrefixSet4 }}
@@ -23,7 +23,7 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = -empty-;
 {{ end }}
 {{ end }}
 
-{{ if $peer.FilterASSet }}
+{{ if BoolDeref $peer.FilterASSet }}
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS = [
 {{ BirdASSet $peer.ASSetMembers }}
 ];
@@ -69,6 +69,12 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject;{{ end }}
+
+            {{ if not (Empty $peer.DontAnnounce) }}
+            if (net ~ [
+            {{ BirdSet $peer.DontAnnounce }}
+            ]) then _reject("prefix in dont-announce list");
+            {{ end }}
 
             {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}

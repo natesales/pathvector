@@ -2,37 +2,87 @@ package plugins
 
 import (
 	"fmt"
+	"os/exec"
+	"path"
+	"path/filepath"
+	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/hashicorp/go-hclog"
+	"github.com/hashicorp/go-plugin"
 
 	"github.com/natesales/pathvector/pkg/config"
 )
 
-var plugins = make(map[string]Plugin)
-
-// Plugin defines an interface for plugins to implement
-type Plugin interface {
-	Description() string
-	Execute(c *config.Config) error
+var hsConfig = plugin.HandshakeConfig{
+	ProtocolVersion:  1,
+	MagicCookieKey:   "PATHVECTOR",
+	MagicCookieValue: "core",
 }
 
-// Register registers a plugin
-func Register(name string, plugin Plugin) {
-	plugins[name] = plugin
+var all = map[string]Plug{}
+
+var pluginMap = map[string]plugin.Plugin{
+	"plugin": &PlugPlugin{},
 }
 
-// All runs all plugins
-func All(c *config.Config) error {
-	for name, plugin := range plugins {
-		log.Debugf("running plugin %s", name)
-		if err := plugin.Execute(c); err != nil {
+// Load loads plugins from a directory
+func Load(dir string) error {
+	files, err := filepath.Glob(path.Join(dir, "/*.pvec"))
+	if err != nil {
+		return err
+	}
+
+	logger := hclog.New(&hclog.LoggerOptions{
+		Level:  hclog.Info,
+		Output: hclog.DefaultOutput,
+	})
+
+	for _, file := range files {
+		fileNoPrefix := strings.TrimPrefix(file, path.Join(dir, "/")+"/")
+
+		client := plugin.NewClient(&plugin.ClientConfig{
+			HandshakeConfig: hsConfig,
+			Plugins:         pluginMap,
+			Cmd:             exec.Command(file),
+			Logger:          logger,
+		})
+
+		rpcClient, err := client.Client()
+		if err != nil {
+			return fmt.Errorf("connecting to %s: %s", fileNoPrefix, err)
+		}
+
+		raw, err := rpcClient.Dispense("plugin")
+		if err != nil {
+			return fmt.Errorf("dispensing from %s: %s", fileNoPrefix, err)
+		}
+
+		all[fileNoPrefix] = raw.(Plug)
+	}
+	return nil
+}
+
+// Register registers a plugin with the core
+func Register(p Plug) {
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: hsConfig,
+		Plugins: map[string]plugin.Plugin{
+			"plugin": &PlugPlugin{Impl: p},
+		},
+	})
+}
+
+// ApplyConfig runs the config through each plugin
+func ApplyConfig(c *config.Config) error {
+	for name, p := range all {
+		if err := p.Modify(c); err != nil {
 			return fmt.Errorf("[plugin %s]: %s", name, err)
 		}
 	}
 	return nil
 }
 
-// Get returns the plugins map
-func Get() map[string]Plugin {
-	return plugins
+// All returns all plugins
+func All() map[string]Plug {
+	return all
 }

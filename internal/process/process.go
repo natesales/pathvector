@@ -462,7 +462,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 	} // end peer loop
 
 	// Run plugins
-	if err := plugins.All(&c); err != nil {
+	if err := plugins.ApplyConfig(&c); err != nil {
 		log.Fatal(err)
 	}
 

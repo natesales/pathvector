@@ -137,13 +137,13 @@ module.exports = {
                     position: 'left',
                     label: 'Docs',
                 },
-                {
-                    type: 'doc',
-                    docId: 'installation',
-                    position: 'left',
-                    label: 'Installation',
-                },
-                // {to: '/blog', label: 'Blog', position: 'left'},
+                // {
+                //     type: 'doc',
+                //     docId: 'installation',
+                //     position: 'left',
+                //     label: 'Installation',
+                // },
+                {to: '/blog', label: 'Blog', position: 'left'},
                 {
                     href: 'https://github.com/natesales/pathvector',
                     label: 'GitHub',

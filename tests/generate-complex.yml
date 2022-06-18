@@ -8,7 +8,7 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 
-augments:
+kernel:
   srd-communities:
     - 65530,1
     - 65530:65530:1

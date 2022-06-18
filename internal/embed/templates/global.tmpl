@@ -8,13 +8,13 @@ define LOCALv4 = [
 {{ BirdSet .Prefixes4 }}
 ];
 {{- end }}
-{{ if or .Prefixes4 .Augments.Statics4 }}
+{{ if or .Prefixes4 .Kernel.Statics4 }}
 protocol static static4 {
   ipv4;
   {{- range $i, $prefix := .Prefixes4 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := MapDeref .Augments.Statics4 }}
+  {{- range $prefix, $nexthop := MapDeref .Kernel.Statics4 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
@@ -25,13 +25,13 @@ define LOCALv6 = [
 {{ BirdSet .Prefixes6 }}
 ];
 {{- end }}
-{{ if or .Prefixes6 .Augments.Statics6 }}
+{{ if or .Prefixes6 .Kernel.Statics6 }}
 protocol static static6 {
   ipv6;
   {{- range $i, $prefix := .Prefixes6 }}
   route {{ $prefix }} reject;
   {{- end }}
-  {{- range $prefix, $nexthop := .Augments.Statics6 }}
+  {{- range $prefix, $nexthop := .Kernel.Statics6 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
@@ -70,11 +70,11 @@ protocol kernel {
     export filter {
       {{ if .KernelExport }}
       {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
-      {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
-      {{- range $i, $rule := .Augments.Accept4 }}
+      {{ $length := len .Kernel.SRDCommunities }}{{ if eq $length 0 }}
+      {{- range $i, $rule := .Kernel.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
-      {{- range $i, $rule := .Augments.Reject4 }}
+      {{- range $i, $rule := .Kernel.Reject4 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
       {{ if .Source4 -}}
@@ -89,10 +89,10 @@ protocol kernel {
       accept;
       {{ end }}
       {{ else }}
-      {{ range $i, $community := StringSliceIter .Augments.SRDStandardCommunities }}
+      {{ range $i, $community := StringSliceIter .Kernel.SRDStandardCommunities }}
       if (({{ $community }}) ~ bgp_community) then accept;
       {{ end }}
-      {{ range $i, $community := StringSliceIter .Augments.SRDLargeCommunities }}
+      {{ range $i, $community := StringSliceIter .Kernel.SRDLargeCommunities }}
       if (({{ $community }}) ~ bgp_large_community) then accept;
       {{ end }}
       reject;
@@ -111,11 +111,11 @@ protocol kernel {
     export filter {
       {{ if .KernelExport }}
       {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
-      {{ $length := len .Augments.SRDCommunities }}{{ if eq $length 0 }}
-      {{- range $i, $rule := .Augments.Accept6 }}
+      {{ $length := len .Kernel.SRDCommunities }}{{ if eq $length 0 }}
+      {{- range $i, $rule := .Kernel.Accept6 }}
       if (proto = "{{ $rule }}") then accept;
       {{- end }}
-      {{- range $i, $rule := .Augments.Reject6 }}
+      {{- range $i, $rule := .Kernel.Reject6 }}
       if (proto = "{{ $rule }}") then reject;
       {{- end }}
       {{ if .Source6 -}}
@@ -131,10 +131,10 @@ protocol kernel {
       accept;
       {{ end }}
       {{ else }}
-      {{ range $i, $community := StringSliceIter .Augments.SRDStandardCommunities }}
+      {{ range $i, $community := StringSliceIter .Kernel.SRDStandardCommunities }}
       if (({{ $community }}) ~ bgp_community) then accept;
       {{ end }}
-      {{ range $i, $community := StringSliceIter .Augments.SRDLargeCommunities }}
+      {{ range $i, $community := StringSliceIter .Kernel.SRDLargeCommunities }}
       if (({{ $community }}) ~ bgp_large_community) then accept;
       {{ end }}
       reject;

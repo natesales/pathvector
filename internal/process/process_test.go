@@ -49,7 +49,7 @@ router-id: 192.0.2.1
 prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48
-augments:
+kernel:
   statics:
     "203.0.113.0/24" : "192.0.2.10"
     "2001:db8:2::/64" : "2001:db8::1"
@@ -138,7 +138,7 @@ func TestLoadConfigInvalidStaticPrefix(t *testing.T) {
 	configFile := `
 asn: 34553
 router-id: 192.0.2.1
-augments:
+kernel:
   statics:
     "foo/24" : "192.0.2.10"
     "2001:db8:2::/64" : "2001:db8::1"

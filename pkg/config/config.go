@@ -152,8 +152,8 @@ type MRTInstance struct {
 	Table    *string `yaml:"table" description:"Routing table to read from" default:"-"`
 }
 
-// Augments store BIRD specific options
-type Augments struct {
+// Kernel stores options that relate to the OS kernel
+type Kernel struct {
 	Accept4        []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
 	Accept6        []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
 	Reject4        []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
@@ -240,7 +240,7 @@ type Config struct {
 	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
 	MRTInstances  map[string]*MRTInstance  `yaml:"mrt" description:"MRT instances"`
-	Augments      *Augments                `yaml:"augments" description:"Custom configuration options"`
+	Kernel        *Kernel                  `yaml:"kernel" description:"Kernel routing configuration options"`
 	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
@@ -259,7 +259,7 @@ func (c *Config) Init() {
 	c.VRRPInstances = map[string]*VRRPInstance{}
 	c.BFDInstances = map[string]*BFDInstance{}
 	c.MRTInstances = map[string]*MRTInstance{}
-	c.Augments = &Augments{}
+	c.Kernel = &Kernel{}
 	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}
 }

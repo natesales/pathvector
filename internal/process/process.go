@@ -256,23 +256,23 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 
 	// Initialize static maps
-	c.Augments.Statics4 = map[string]string{}
-	c.Augments.Statics6 = map[string]string{}
+	c.Kernel.Statics4 = map[string]string{}
+	c.Kernel.Statics6 = map[string]string{}
 
 	// Categorize communities
-	if c.Augments.SRDCommunities != nil {
-		for _, community := range c.Augments.SRDCommunities {
+	if c.Kernel.SRDCommunities != nil {
+		for _, community := range c.Kernel.SRDCommunities {
 			communityType := categorizeCommunity(community)
 			if communityType == "standard" {
-				if c.Augments.SRDStandardCommunities == nil {
-					c.Augments.SRDStandardCommunities = []string{}
+				if c.Kernel.SRDStandardCommunities == nil {
+					c.Kernel.SRDStandardCommunities = []string{}
 				}
-				c.Augments.SRDStandardCommunities = append(c.Augments.SRDStandardCommunities, community)
+				c.Kernel.SRDStandardCommunities = append(c.Kernel.SRDStandardCommunities, community)
 			} else if communityType == "large" {
-				if c.Augments.SRDLargeCommunities == nil {
-					c.Augments.SRDLargeCommunities = []string{}
+				if c.Kernel.SRDLargeCommunities == nil {
+					c.Kernel.SRDLargeCommunities = []string{}
 				}
-				c.Augments.SRDLargeCommunities = append(c.Augments.SRDLargeCommunities, strings.ReplaceAll(community, ":", ","))
+				c.Kernel.SRDLargeCommunities = append(c.Kernel.SRDLargeCommunities, strings.ReplaceAll(community, ":", ","))
 			} else {
 				return nil, errors.New("Invalid SRD community: " + community)
 			}
@@ -280,7 +280,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 
 	// Parse static routes
-	for prefix, nexthop := range c.Augments.Statics {
+	for prefix, nexthop := range c.Kernel.Statics {
 		// Handle interface suffix
 		var rawNexthop string
 		if strings.Contains(nexthop, "%") {
@@ -298,9 +298,9 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		if pfx.To4() == nil { // If IPv6
-			c.Augments.Statics6[prefix] = nexthop
+			c.Kernel.Statics6[prefix] = nexthop
 		} else { // If IPv4
-			c.Augments.Statics4[prefix] = nexthop
+			c.Kernel.Statics4[prefix] = nexthop
 		}
 	}
 

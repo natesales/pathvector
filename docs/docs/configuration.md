@@ -309,13 +309,21 @@ BFD instances
 |------|---------|------------|
 | map[string]BFDInstance   |       |          |
 
-### `augments`
+### `mrt`
 
-Custom configuration options
+MRT instances
 
 | Type | Default | Validation |
 |------|---------|------------|
-| [Augments](#augments-1)   |       |          |
+| map[string]MRTInstance   |       |          |
+
+### `kernel`
+
+Kernel routing configuration options
+
+| Type | Default | Validation |
+|------|---------|------------|
+| [Kernel](#kernel-1)   |       |          |
 
 ### `optimizer`
 
@@ -334,7 +342,41 @@ Plugin-specific configuration
 | map[string]string   |       |          |
 
 
-## Augments
+## BFDInstance
+### `neighbor`
+
+Neighbor IP address
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `interface`
+
+Interface (pattern accepted)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `interval`
+
+RX and TX interval
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 200      |          |
+
+### `multiplier`
+
+Number of missed packets for the state to be declared down
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 10      |          |
+
+
+## Kernel
 ### `accept4`
 
 List of BIRD protocols to import into the IPv4 table
@@ -384,38 +426,30 @@ List of communities to filter routes exported to kernel (if list is not empty, a
 | []string   |       |          |
 
 
-## BFDInstance
-### `neighbor`
+## MRTInstance
+### `file`
 
-Neighbor IP address
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `interface`
-
-Interface (pattern accepted)
+File to store MRT dumps (supports strftime replacements and %N as table name)
 
 | Type | Default | Validation |
 |------|---------|------------|
-| string   |       |          |
+| string   | /var/log/bird/%N_%F_%T.mrt      |          |
 
 ### `interval`
 
-RX and TX interval
+Number of seconds between dumps
 
 | Type | Default | Validation |
 |------|---------|------------|
-| uint   | 200      |          |
+| uint   | 300      |          |
 
-### `multiplier`
+### `table`
 
-Number of missed packets for the state to be declared down
+Routing table to read from
 
 | Type | Default | Validation |
 |------|---------|------------|
-| uint   | 10      |          |
+| string   |       |          |
 
 
 ## Optimizer
@@ -556,6 +590,22 @@ Number of times to prepend local AS on export
 | Type | Default | Validation |
 |------|---------|------------|
 | int   | 0      |          |
+
+### `prepend-path`
+
+List of ASNs to prepend
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []uint32   |       |          |
+
+### `clear-path`
+
+Remove all ASNs from path (before prepends and prepend-path)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 ### `local-pref`
 
@@ -772,6 +822,30 @@ Default value for local preference
 | Type | Default | Validation |
 |------|---------|------------|
 | int   |       |          |
+
+### `advertise-hostname`
+
+Advertise hostname capability
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `disable-after-error`
+
+Disable peer after error
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `prefer-older-routes`
+
+Prefer older routes instead of comparing router IDs (RFC 5004)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 ### `import-communities`
 

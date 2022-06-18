@@ -43,6 +43,9 @@ type Peer struct {
 	TTLSecurity          *bool     `yaml:"ttl-security" description:"RFC 5082 Generalized TTL Security Mechanism" default:"false"`
 	InterpretCommunities *bool     `yaml:"interpret-communities" description:"Should well-known BGP communities be interpreted by their intended action?" default:"true"`
 	DefaultLocalPref     *int      `yaml:"default-local-pref" description:"Default value for local preference" default:"-"`
+	AdvertiseHostname    *bool     `yaml:"advertise-hostname" description:"Advertise hostname capability" default:"false"`
+	DisableAfterError    *bool     `yaml:"disable-after-error" description:"Disable peer after error" default:"false"`
+	PreferOlderRoutes    *bool     `yaml:"prefer-older-routes" description:"Prefer older routes instead of comparing router IDs (RFC 5004)" default:"false"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`

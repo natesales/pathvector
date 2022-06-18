@@ -58,6 +58,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
+        {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}
+        {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
+        {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject;{{ end }}
 

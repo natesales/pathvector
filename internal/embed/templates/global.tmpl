@@ -404,6 +404,15 @@ protocol bfd {{ StrDeref $instance.ProtocolName }} {
   };
 }
 {{ end }}
+
+# ---- MRT ----
+{{ range $i, $instance := .MRTInstances }}
+protocol mrt {{ StrDeref $instance.ProtocolName }} {
+  filename "{{ StrDeref $instance.File }}";
+  period "{{ UintDeref $instance.Interval }}";
+  {{ if $instance.Table }}table "{{ StrDeref $instance.Table }}";{{ end }}
+}
+{{ end }}
 # ---- Peers ----
 
 include "manual*.conf";

@@ -140,6 +140,13 @@ type BFDInstance struct {
 	ProtocolName *string `yaml:"-" description:"-" default:"-"`
 }
 
+// MRTInstance stores a single MRT instance
+type MRTInstance struct {
+	File     *string `yaml:"file" description:"File to store MRT dumps (supports strftime replacements and %N as table name)" default:"/var/log/bird/%N_%F_%T.mrt"`
+	Interval *uint   `yaml:"interval" description:"Number of seconds between dumps" default:"300"`
+	Table    *string `yaml:"table" description:"Routing table to read from" default:"-"`
+}
+
 // Augments store BIRD specific options
 type Augments struct {
 	Accept4        []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
@@ -227,6 +234,7 @@ type Config struct {
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
+	MRTInstances  map[string]*MRTInstance  `yaml:"mrt" description:"MRT instances"`
 	Augments      *Augments                `yaml:"augments" description:"Custom configuration options"`
 	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
@@ -245,6 +253,7 @@ func (c *Config) Init() {
 	c.Templates = map[string]*Peer{}
 	c.VRRPInstances = map[string]*VRRPInstance{}
 	c.BFDInstances = map[string]*BFDInstance{}
+	c.MRTInstances = map[string]*MRTInstance{}
 	c.Augments = &Augments{}
 	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}

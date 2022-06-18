@@ -30,7 +30,7 @@ nfpms:
     homepage: https://pathvector.io
     maintainer: Nate Sales <nate@natesales.net>
     description: Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.
-    license: GNU GPL-3.0
+    license: MIT
     section: utils
     priority: extra
     builds:

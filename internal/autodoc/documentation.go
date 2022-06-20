@@ -1,4 +1,4 @@
-package config
+package autodoc
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 	"unicode"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/natesales/pathvector/pkg/config"
 )
 
 func sanitizeConfigName(s string) string {
@@ -102,5 +104,5 @@ func DocumentConfig(output bool) {
 	if output {
 		fmt.Println("# Configuration")
 	}
-	documentConfigTypes(reflect.TypeOf(Config{}), output)
+	documentConfigTypes(reflect.TypeOf(config.Config{}), output)
 }

@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/spf13/cobra"
 
-	"github.com/natesales/pathvector/plugins"
+	"github.com/natesales/pathvector/pkg/plugin"
 )
 
 func init() {
@@ -15,10 +17,10 @@ func versionBanner() {
 	fmt.Printf(`Pathvector %s
 Built %s on %s
 Plugins: `, version, commit, date)
-	if len(plugins.All()) > 0 {
+	if len(plugin.Get()) > 0 {
 		fmt.Println("")
-		for name, plugin := range plugins.All() {
-			fmt.Printf("  %s [%s] - %s\n", name, plugin.Version(), plugin.Description())
+		for name, p := range plugin.Get() {
+			fmt.Printf("  %s - %s [%s]\n", name, p.Description(), reflect.TypeOf(p).PkgPath())
 		}
 	} else {
 		fmt.Println("(none)")

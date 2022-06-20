@@ -14,7 +14,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/internal/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

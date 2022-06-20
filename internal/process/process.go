@@ -16,7 +16,7 @@ import (
 
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/plugins"
+	"github.com/natesales/pathvector/pkg/plugin"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -462,7 +462,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 	} // end peer loop
 
 	// Run plugins
-	if err := plugins.ApplyConfig(&c); err != nil {
+	if err := plugin.ModifyAll(&c); err != nil {
 		log.Fatal(err)
 	}
 

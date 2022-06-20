@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/natesales/pathvector/pkg/config"
 	"github.com/spf13/cobra"
+
+	"github.com/natesales/pathvector/internal/autodoc"
 )
 
 func init() {
@@ -14,6 +15,6 @@ var docsCmd = &cobra.Command{
 	Short:  "Generate documentation",
 	Hidden: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		config.DocumentConfig(true)
+		autodoc.DocumentConfig(true)
 	},
 }

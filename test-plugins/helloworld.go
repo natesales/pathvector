@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/plugins"
+	"github.com/natesales/pathvector/pkg/plugin"
 )
 
 type HelloWorld struct{}
@@ -35,5 +35,5 @@ func (g *HelloWorld) Modify(c *config.Config) error {
 }
 
 func main() {
-	plugins.Register(&HelloWorld{})
+	plugin.Register("helloworld", &HelloWorld{})
 }

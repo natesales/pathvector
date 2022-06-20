@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/natesales/pathvector/internal/bird"
 	"github.com/natesales/pathvector/internal/embed"
 	"github.com/natesales/pathvector/internal/irr"
 	"github.com/natesales/pathvector/internal/peeringdb"
@@ -17,7 +18,6 @@ import (
 	"github.com/natesales/pathvector/internal/process"
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
-	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

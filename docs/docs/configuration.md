@@ -309,13 +309,21 @@ BFD instances
 |------|---------|------------|
 | map[string]BFDInstance   |       |          |
 
-### `augments`
+### `mrt`
 
-Custom configuration options
+MRT instances
 
 | Type | Default | Validation |
 |------|---------|------------|
-| [Augments](#augments-1)   |       |          |
+| map[string]MRTInstance   |       |          |
+
+### `kernel`
+
+Kernel routing configuration options
+
+| Type | Default | Validation |
+|------|---------|------------|
+| [Kernel](#kernel-1)   |       |          |
 
 ### `optimizer`
 
@@ -368,6 +376,172 @@ Number of missed packets for the state to be declared down
 | uint   | 10      |          |
 
 
+## Kernel
+### `accept4`
+
+List of BIRD protocols to import into the IPv4 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `accept6`
+
+List of BIRD protocols to import into the IPv6 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `reject4`
+
+List of BIRD protocols to not import into the IPv4 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `reject6`
+
+List of BIRD protocols to not import into the IPv6 table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `statics`
+
+List of static routes to include in BIRD
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
+
+### `srd-communities`
+
+List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+
+## MRTInstance
+### `file`
+
+File to store MRT dumps (supports strftime replacements and %N as table name)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | /var/log/bird/%N_%F_%T.mrt      |          |
+
+### `interval`
+
+Number of seconds between dumps
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 300      |          |
+
+### `table`
+
+Routing table to read from
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+
+## Optimizer
+### `targets`
+
+List of probe targets
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `latency-threshold`
+
+Maximum allowable latency in milliseconds
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 100      |          |
+
+### `packet-loss-threshold`
+
+Maximum allowable packet loss (percent)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| float64   | 0.5      |          |
+
+### `modifier`
+
+Amount to lower local pref by for depreferred peers
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 20      |          |
+
+### `probe-count`
+
+Number of pings to send in each run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 5      |          |
+
+### `probe-timeout`
+
+Number of seconds to wait before considering the ICMP message unanswered
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 1      |          |
+
+### `probe-interval`
+
+Number of seconds wait between each optimizer run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 120      |          |
+
+### `cache-size`
+
+Number of probe results to store per peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 15      |          |
+
+### `probe-udp`
+
+Use UDP probe (else ICMP)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `alert-script`
+
+Script to call on optimizer event
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `exit-on-cache-full`
+
+Exit optimizer on cache full
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+
 ## Peer
 ### `template`
 
@@ -416,6 +590,22 @@ Number of times to prepend local AS on export
 | Type | Default | Validation |
 |------|---------|------------|
 | int   | 0      |          |
+
+### `prepend-path`
+
+List of ASNs to prepend
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []uint32   |       |          |
+
+### `clear-path`
+
+Remove all ASNs from path (before prepends and prepend-path)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 ### `local-pref`
 
@@ -633,6 +823,30 @@ Default value for local preference
 |------|---------|------------|
 | int   |       |          |
 
+### `advertise-hostname`
+
+Advertise hostname capability
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `disable-after-error`
+
+Disable peer after error
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `prefer-older-routes`
+
+Prefer older routes instead of comparing router IDs (RFC 5004)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `import-communities`
 
 List of communities to add to all imported routes
@@ -833,6 +1047,14 @@ Should routes containing an ASN reported in PeeringDB to never be reachable via 
 |------|---------|------------|
 | bool   | false      |          |
 
+### `filter-as-set`
+
+Reject routes that aren't originated by an ASN within this peer's AS set
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `auto-import-limits`
 
 Get import limits automatically from PeeringDB?
@@ -844,6 +1066,14 @@ Get import limits automatically from PeeringDB?
 ### `auto-as-set`
 
 Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead.
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `auto-as-set-members`
+
+Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -864,6 +1094,14 @@ Prefixes to accept
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       |          |
+
+### `as-set-members`
+
+AS set members (For filter-as-set)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []uint32   |       |          |
 
 ### `announce-default`
 
@@ -1018,145 +1256,5 @@ List of virtual IPs
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       | required,cidr         |
-
-
-## Augments
-### `accept4`
-
-List of BIRD protocols to import into the IPv4 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `accept6`
-
-List of BIRD protocols to import into the IPv6 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `reject4`
-
-List of BIRD protocols to not import into the IPv4 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `reject6`
-
-List of BIRD protocols to not import into the IPv6 table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `statics`
-
-List of static routes to include in BIRD
-
-| Type | Default | Validation |
-|------|---------|------------|
-| map[string]string   |       |          |
-
-### `srd-communities`
-
-List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-
-## Optimizer
-### `targets`
-
-List of probe targets
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string   |       |          |
-
-### `latency-threshold`
-
-Maximum allowable latency in milliseconds
-
-| Type | Default | Validation |
-|------|---------|------------|
-| uint   | 100      |          |
-
-### `packet-loss-threshold`
-
-Maximum allowable packet loss (percent)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| float64   | 0.5      |          |
-
-### `modifier`
-
-Amount to lower local pref by for depreferred peers
-
-| Type | Default | Validation |
-|------|---------|------------|
-| uint   | 20      |          |
-
-### `probe-count`
-
-Number of pings to send in each run
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 5      |          |
-
-### `probe-timeout`
-
-Number of seconds to wait before considering the ICMP message unanswered
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 1      |          |
-
-### `probe-interval`
-
-Number of seconds wait between each optimizer run
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 120      |          |
-
-### `cache-size`
-
-Number of probe results to store per peer
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 15      |          |
-
-### `probe-udp`
-
-Use UDP probe (else ICMP)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
-
-### `alert-script`
-
-Script to call on optimizer event
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `exit-on-cache-full`
-
-Exit optimizer on cache full
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
 
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -61,18 +61,18 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 
 	if err != nil {
-		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET (This peer might not have a PeeringDB page): %s", err)
 	}
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET request: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET request: %s", err)
 	}
 
 	if res.StatusCode == 404 {
@@ -88,14 +88,14 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.New("PeeringDB read: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
 	}
 
 	if len(pDbResponse.Data) < 1 {
@@ -163,20 +163,20 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?info_never_via_route_servers=1", nil)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET: %s", err)
 	}
 
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET request: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET request: %s", err)
 	}
 	if res.StatusCode != 200 {
 		return nil, errors.New("PeeringDB GET request expected 200, got " + res.Status)
@@ -186,14 +186,14 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.New("PeeringDB read: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
 	}
 
 	var asns []uint32 // ASNs that are reportedly never reachable via route servers
@@ -215,8 +215,8 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
 	} else {
-		if os.Getenv("PATHVECTOR_PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PATHVECTOR_PEERINGDB_API_KEY"))
+		if os.Getenv("PEERINGDB_API_KEY") != "" {
+			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 		}
 	}
 
@@ -232,7 +232,7 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 		defer res.Body.Close()
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}

@@ -1,6 +1,7 @@
 package irr
 
 import (
+	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 
@@ -63,5 +64,28 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 		if !reflect.DeepEqual(tc.prefixSet6, *peer.PrefixSet6) {
 			t.Errorf("as-set %s IPv6 prefix set expected %v got %v", tc.asSet, tc.prefixSet6, peer.PrefixSet6)
 		}
+	}
+}
+
+func TestIRRASMembers(t *testing.T) {
+	testCases := []struct {
+		asSet       string
+		asMembers   []uint32
+		shouldError bool
+	}{
+		{"AS34553:AS-PACKETFRAME", []uint32{112, 34553}, false},
+		{"", []uint32{}, true}, // Empty as-set
+	}
+	for _, tc := range testCases {
+		members, err := ASMembers(tc.asSet, "rr.ntt.net", irrQueryTimeout, "")
+		if tc.shouldError {
+			assert.NotNil(t, err)
+			continue
+		} else {
+			assert.Nil(t, err)
+		}
+		assert.Equal(t, 2, len(members))
+		assert.Equal(t, members[0], uint32(112))
+		assert.Equal(t, members[1], uint32(34553))
 	}
 }

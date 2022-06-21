@@ -1,11 +1,11 @@
 import React from 'react';
-import Layout from '@theme/Layout';
 import Link from '@docusaurus/Link';
-import styles from './index.module.css';
-import HomepageFeatures from '../components/HomepageFeatures';
+import Layout from '@theme/Layout';
 import ThemedImage from '@theme/ThemedImage';
 import useBaseUrl from '@docusaurus/useBaseUrl';
-import {translate} from "@docusaurus/core/lib/client/exports/Translate";
+import HomepageFeatures from '@site/src/components/HomepageFeatures';
+
+import styles from './index.module.css';
 
 function HomepageHeader() {
     return (
@@ -24,25 +24,21 @@ function HomepageHeader() {
                 />
 
                 <p style={{fontSize: "1.25em"}}>
-                    {translate({
-                        message: 'Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.',
-                        description: 'Hero text',
-                    })}
+                    Pathvector is a declarative edge routing platform that automates route optimization and control
+                    plane configuration with secure and repeatable routing policy.
                 </p>
                 <div className={styles.buttons}>
                     <Link
                         className="button button--secondary button--lg"
                         to="/docs/about">
-                        {translate({
-                            message: 'Learn More',
-                            description: 'Learn more button',
-                        })}
+                        Learn More
                     </Link>
                 </div>
             </div>
         </header>
     );
 }
+
 
 export default function Home() {
     return (
@@ -51,6 +47,8 @@ export default function Home() {
             description="Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.">
             <HomepageHeader/>
             <main>
+                <div>
+                </div>
                 <HomepageFeatures/>
             </main>
         </Layout>

@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"os"
 
 	"github.com/natesales/pathvector/internal/optimizer"
 	"github.com/natesales/pathvector/internal/process"
@@ -20,9 +19,9 @@ var optimizerCmd = &cobra.Command{
 	Short: "Start optimization daemon",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Debugf("Loading config from %s", configFile)
-		configFile, err := ioutil.ReadFile(configFile)
+		configFile, err := os.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Reading config file: " + err.Error())
+			log.Fatal("Reading config file: %s", err)
 		}
 		c, err := process.Load(configFile)
 		if err != nil {
@@ -31,7 +30,7 @@ var optimizerCmd = &cobra.Command{
 		log.Debugln("Finished loading config")
 
 		log.Infof("Starting optimizer")
-		sourceMap := map[string][]string{} // Peer name to list of source addresses
+		sourceMap := map[string][]string{} // peer name to list of source addresses
 		for peerName, peerData := range c.Peers {
 			if peerData.OptimizerProbeSources != nil && len(*peerData.OptimizerProbeSources) > 0 {
 				sourceMap[fmt.Sprintf("%d%s%s", *peerData.ASN, optimizer.Delimiter, peerName)] = *peerData.OptimizerProbeSources
@@ -41,7 +40,7 @@ var optimizerCmd = &cobra.Command{
 		if len(sourceMap) == 0 {
 			log.Fatal("No peers have optimization enabled, exiting now")
 		}
-		if err := optimizer.StartProbe(&c.Optimizer, sourceMap, c, noConfigure, dryRun); err != nil {
+		if err := optimizer.StartProbe(c.Optimizer, sourceMap, c, noConfigure, dryRun); err != nil {
 			log.Fatal(err)
 		}
 	},

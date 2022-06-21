@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,6 +43,46 @@ func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, 
 	}
 
 	return prefixes, nil
+}
+
+// ASMembers uses bgpq4 to generate an AS member set
+func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs string) ([]uint32, error) {
+	// Run bgpq4 for BIRD format with aggregation enabled
+	cmdArgs := fmt.Sprintf("-h %s -tb %s", irrServer, asSet)
+	if bgpqArgs != "" {
+		cmdArgs = bgpqArgs + " " + cmdArgs
+	}
+	log.Debugf("Running bgpq4 %s", cmdArgs)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
+	defer cancel()
+	//nolint:golint,gosec
+	cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
+	stdout, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	var ases []uint32
+	for i, line := range strings.Split(string(stdout), "\n") {
+		if i == 0 { // Skip first line, as it is the definition line
+			continue
+		}
+		if strings.Contains(line, "];") { // Skip last line and return
+			break
+		}
+		// Trim whitespace and remove the comma, then append to the ases slice
+		line = strings.ReplaceAll(line, " ", "")
+		line = strings.TrimSuffix(line, ",")
+		for _, as := range strings.Split(line, ",") {
+			asNum, err := strconv.Atoi(as)
+			if err != nil {
+				return nil, err
+			}
+			ases = append(ases, uint32(asNum))
+		}
+	}
+
+	return ases, nil
 }
 
 // Update updates a peer's IRR prefix set

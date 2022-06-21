@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
@@ -30,9 +30,9 @@ var matchCmd = &cobra.Command{
 
 		// Load the config file from config file
 		log.Debugf("Loading config from %s", configFile)
-		configFile, err := ioutil.ReadFile(configFile)
+		configFile, err := os.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Reading config file: " + err.Error())
+			log.Fatal("Reading config file: %s", err)
 		}
 		c, err := process.Load(configFile)
 		if err != nil {

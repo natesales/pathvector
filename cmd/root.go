@@ -3,6 +3,8 @@ package cmd
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/natesales/pathvector/pkg/plugin"
 )
 
 // Build process flags
@@ -44,6 +46,14 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "trace", "t", false, "Show trace log messages")
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Don't modify configuration")
 	rootCmd.PersistentFlags().BoolVarP(&noConfigure, "no-configure", "n", false, "Don't configure BIRD")
+
+	// RegisterCommands registers each command plugin
+	for _, p := range plugin.Get() {
+		pluginCommand := p.Command()
+		if pluginCommand != nil {
+			rootCmd.AddCommand(p.Command())
+		}
+	}
 }
 
 func Execute(v string, c string, d string) error {

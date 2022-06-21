@@ -10,11 +10,12 @@ Usage:
   pathvector [command]
 
 Available Commands:
-  cli           Interactive CLI
+  birdsh        Lightweight BIRD shell
   completion    generate the autocompletion script for the specified shell
   dump          Dump configuration
   generate      generate router configuration
   help          Help about any command
+  interactive   Interactive CLI
   match         Find common IXPs for a given ASN
   optimizer     Start optimization daemon
   portal-update Update portal status

@@ -1,7 +1,6 @@
 package util
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -51,7 +50,7 @@ func TestMoveFile(t *testing.T) {
 	inputString := "Test File"
 
 	//nolint:golint,gosec
-	if err := ioutil.WriteFile("test-cache/source.txt", []byte(inputString), 0755); err != nil {
+	if err := os.WriteFile("test-cache/source.txt", []byte(inputString), 0755); err != nil {
 		t.Error(err)
 	}
 
@@ -67,7 +66,7 @@ func TestMoveFile(t *testing.T) {
 		t.Errorf("file text-cache/source.txt exists but shouldn't")
 	}
 
-	if contents, err := ioutil.ReadFile("test-cache/dest.txt"); err != nil {
+	if contents, err := os.ReadFile("test-cache/dest.txt"); err != nil {
 		if string(contents) != inputString {
 			t.Errorf("expected %s got %s", inputString, contents)
 		}

@@ -1,6 +1,9 @@
 package config
 
-import "github.com/go-ping/ping"
+import (
+	"github.com/creasty/defaults"
+	"github.com/go-ping/ping"
+)
 
 // Peer stores a single peer config
 type Peer struct {
@@ -13,6 +16,8 @@ type Peer struct {
 	ASN                  *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
 	NeighborIPs          *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`
 	Prepends             *int      `yaml:"prepends" description:"Number of times to prepend local AS on export" default:"0"`
+	PrependPath          *[]uint32 `yaml:"prepend-path" description:"List of ASNs to prepend" default:"-"`
+	ClearPath            *bool     `yaml:"clear-path" description:"Remove all ASNs from path (before prepends and prepend-path)" default:"false"`
 	LocalPref            *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	SetLocalPref         *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set?" default:"true"`
 	Multihop             *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
@@ -40,6 +45,9 @@ type Peer struct {
 	TTLSecurity          *bool     `yaml:"ttl-security" description:"RFC 5082 Generalized TTL Security Mechanism" default:"false"`
 	InterpretCommunities *bool     `yaml:"interpret-communities" description:"Should well-known BGP communities be interpreted by their intended action?" default:"true"`
 	DefaultLocalPref     *int      `yaml:"default-local-pref" description:"Default value for local preference" default:"-"`
+	AdvertiseHostname    *bool     `yaml:"advertise-hostname" description:"Advertise hostname capability" default:"false"`
+	DisableAfterError    *bool     `yaml:"disable-after-error" description:"Disable peer after error" default:"false"`
+	PreferOlderRoutes    *bool     `yaml:"prefer-older-routes" description:"Prefer older routes instead of comparing router IDs (RFC 5004)" default:"false"`
 
 	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
@@ -53,14 +61,18 @@ type Peer struct {
 	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
 	ImportLimit4            *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
 	ImportLimit6            *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"200000"`
+	ExportLimit4            *int    `yaml:"export-limit4" description:"Maximum number of IPv4 prefixes to export" default:"1000000"`
+	ExportLimit6            *int    `yaml:"export-limit6" description:"Maximum number of IPv6 prefixes to export" default:"200000"`
 	EnforceFirstAS          *bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
 	EnforcePeerNexthop      *bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
 	ForcePeerNexthop        *bool   `yaml:"force-peer-nexthop" description:"Rewrite nexthop to peer address" default:"false"`
-	MaxPrefixTripAction     *string `yaml:"max-prefix-action" description:"What action should be taken when the max prefix limit is tripped?" default:"disable"`
+	ImportLimitTripAction   *string `yaml:"import-limit-violation" description:"What action should be taken when the import limit is tripped?" default:"disable"`
+	ExportLimitTripAction   *string `yaml:"export-limit-violation" description:"What action should be taken when the export limit is tripped?" default:"disable"`
 	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
 	BlackholeIn             *bool   `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
 	BlackholeOut            *bool   `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
+	// Filtering
 	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
 	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
 	StrictRPKI                 *bool `yaml:"strict-rpki" description:"Should only RPKI valids be accepted?" default:"false"`
@@ -70,13 +82,18 @@ type Peer struct {
 	FilterTransitASNs          *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
 	FilterPrefixLength         *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
 	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
+	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
+
+	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer" default:"-"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`
+	AutoASSetMembers *bool `yaml:"auto-as-set-members" description:"Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)" default:"false"`
 
 	HonorGracefulShutdown *bool `yaml:"honor-graceful-shutdown" description:"Should RFC8326 graceful shutdown be enabled?" default:"true"`
 
-	Prefixes *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
+	Prefixes     *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
+	ASSetMembers *[]uint32 `yaml:"as-set-members" description:"AS set members (For filter-as-set)" default:"-"`
 
 	// Export options
 	AnnounceDefault    *bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
@@ -137,8 +154,15 @@ type BFDInstance struct {
 	ProtocolName *string `yaml:"-" description:"-" default:"-"`
 }
 
-// Augments store BIRD specific options
-type Augments struct {
+// MRTInstance stores a single MRT instance
+type MRTInstance struct {
+	File     *string `yaml:"file" description:"File to store MRT dumps (supports strftime replacements and %N as table name)" default:"/var/log/bird/%N_%F_%T.mrt"`
+	Interval *uint   `yaml:"interval" description:"Number of seconds between dumps" default:"300"`
+	Table    *string `yaml:"table" description:"Routing table to read from" default:"-"`
+}
+
+// Kernel stores options that relate to the OS kernel
+type Kernel struct {
 	Accept4        []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
 	Accept6        []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
 	Reject4        []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
@@ -224,8 +248,9 @@ type Config struct {
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`
 	VRRPInstances map[string]*VRRPInstance `yaml:"vrrp" description:"List of VRRP instances"`
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
-	Augments      Augments                 `yaml:"augments" description:"Custom configuration options"`
-	Optimizer     Optimizer                `yaml:"optimizer" description:"Route optimizer options"`
+	MRTInstances  map[string]*MRTInstance  `yaml:"mrt" description:"MRT instances"`
+	Kernel        *Kernel                  `yaml:"kernel" description:"Kernel routing configuration options"`
+	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost string   `yaml:"-" description:"-"`
@@ -234,4 +259,22 @@ type Config struct {
 	Prefixes6     []string `yaml:"-" description:"-"`
 	QueryNVRS     bool     `yaml:"-" description:"-"`
 	NVRSASNs      []uint32 `yaml:"-" description:"-"`
+}
+
+// Init initializes a Config with embedded structs prior to calling config.Default
+func (c *Config) Init() {
+	c.Peers = map[string]*Peer{}
+	c.Templates = map[string]*Peer{}
+	c.VRRPInstances = map[string]*VRRPInstance{}
+	c.BFDInstances = map[string]*BFDInstance{}
+	c.MRTInstances = map[string]*MRTInstance{}
+	c.Kernel = &Kernel{}
+	c.Optimizer = &Optimizer{}
+	c.Plugins = map[string]string{}
+}
+
+// Default sets a Config's default values
+func (c *Config) Default() error {
+	// Set global config defaults
+	return defaults.Set(c)
 }

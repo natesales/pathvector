@@ -2,10 +2,12 @@
 
 # {{ .Name }} AS{{ $peer.ASN }}
 
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v4 = {{ $peer.ImportLimit4 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v6 = {{ $peer.ImportLimit6 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v4 = {{ $peer.ImportLimit4 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v6 = {{ $peer.ImportLimit6 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v4 = {{ $peer.ExportLimit4 }};
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v6 = {{ $peer.ExportLimit6 }};
 
-{{ if $peer.FilterIRR }}
+{{ if BoolDeref $peer.FilterIRR }}
 {{ if not (Empty $peer.PrefixSet4) }}
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v4 = [
 {{ BirdSet $peer.PrefixSet4 }}
@@ -21,6 +23,12 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = [
 {{ else }}
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v6 = -empty-;
 {{ end }}
+{{ end }}
+
+{{ if BoolDeref $peer.FilterASSet }}
+define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS = [
+{{ BirdASSet $peer.ASSetMembers }}
+];
 {{ end }}
 
 {{ range $i, $neighbor := $peer.NeighborIPs }}
@@ -54,12 +62,22 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
     {{ range $i, $af := $protocols }}
     ipv{{ $af }} {
         {{ if BoolDeref $global.KeepFiltered }}import keep filtered;{{ end }}
-        import limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_MAXPFX_v{{ $af }} action {{ $peer.MaxPrefixTripAction }};
+        import limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v{{ $af }} action {{ $peer.ImportLimitTripAction }};
+        export limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v{{ $af }} action {{ $peer.ExportLimitTripAction }};
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
+        {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}
+        {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
+        {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject;{{ end }}
+
+            {{ if not (Empty $peer.DontAnnounce) }}
+            if (net ~ [
+            {{ BirdSet $peer.DontAnnounce }}
+            ]) then _reject("prefix in dont-announce list");
+            {{ end }}
 
             {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
@@ -117,6 +135,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { _reject("not in IRR prefix set"); }
             {{ end }}
 
+            {{ if BoolDeref $peer.FilterASSet }}
+            if (bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { accept; } else { _reject("not in AS set"); }
+            {{ end }}
+
             {{ StrDeref $peer.PreImportFinal }}
             accept;
         };
@@ -138,8 +160,12 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             remove_private_asns();
             {{ end }}
 
+            {{ if BoolDeref $peer.ClearPath }}bgp_path = -empty-;{{ end }}
             {{ range $i := Iterate $peer.Prepends }}
             bgp_path.prepend(ASN);
+            {{ end }}
+            {{ range $i := Uint32SliceDeref $peer.PrependPath }}
+            bgp_path.prepend({{ $i }});
             {{ end }}
 
             {{ if StrDeref $peer.ExportNextHop }}bgp_next_hop = {{ StrDeref $peer.ExportNextHop }};{{ end }}

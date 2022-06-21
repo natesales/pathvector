@@ -16,9 +16,9 @@ Pathvector config to suit your needs. Here's an example of using BGP communities
 | 65510,14           | 65510:0:14      | Learned from peer         |
 | 65510,15           | 65510:0:15      | Learned from downstream   |
 
-## Config File (pathvector.yml)
+## Config File
 
-```yaml
+```yaml title="/etc/pathvector.yml"
 asn: 65510
 router-id: 192.0.2.1
 source4: 192.0.2.1

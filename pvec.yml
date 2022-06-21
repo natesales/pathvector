@@ -1,0 +1,543 @@
+cache-directory: test-cache
+
+asn: 34553
+router-id: 23.141.112.1
+source4: 23.141.112.1
+source6: "2602:809:3009::1"
+rtr-server: 127.0.0.1:8282
+keep-filtered: true
+hostname: core1.fmt2
+portal-host: https://peering.as34553.net
+portal-key: loQ8LF9ryjr8bjR2PiNGpdUyrNTUjJ3uxLwG
+peeringdb-api-key: rex33o5V.eoQ2jN3xJo1zDZtWWmnWXdxAb3LE10iL
+prefixes:
+  - 23.141.112.0/24
+  - 44.26.163.0/24
+  - 2602:809:3009::/48
+
+templates:
+  remote-routeserver:
+    #    allow-local-as: true
+    filter-transit-asns: true
+    auto-import-limits: true
+    enforce-peer-nexthop: false
+    enforce-first-as: false
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 50
+    prepends: 2
+    import-communities: [ "34553,10" ]
+
+  remote-upstream:
+    #    allow-local-as: true
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 55
+    prepends: 2
+    import-communities: [ "34553,12" ]
+
+  remote-peer:
+    filter-irr: true
+    filter-transit-asns: true
+    auto-import-limits: true
+    auto-as-set: true
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 60
+    prepends: 2
+    import-communities: [ "34553,11" ]
+
+  upstream:
+    allow-local-as: true
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 80
+    import-communities: [ "34553,12" ]
+
+  routeserver:
+    allow-local-as: true
+    filter-transit-asns: true
+    auto-import-limits: true
+    enforce-peer-nexthop: false
+    enforce-first-as: false
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 90
+    import-communities: [ "34553,13" ]
+
+  peer:
+    filter-irr: true
+    filter-transit-asns: true
+    auto-import-limits: true
+    auto-as-set: true
+    announce-communities: [ "34553,15" ]
+    remove-all-communities: 34553
+    local-pref: 100
+    import-communities: [ "34553,14" ]
+
+  downstream:
+    allow-local-as: true
+    filter-irr: true
+    allow-blackhole-community: true
+    filter-transit-asns: true
+    auto-import-limits: true
+    auto-as-set: true
+    remove-all-communities: 34553
+    local-pref: 200
+    import-communities: [ "34553,15" ]
+    announce-communities: [ "34553,10", "34553,11", "34553,12", "34553,13", "34553,14", "34553,15" ]
+
+  collector-client:
+    multihop: true
+    mp-unicast-46: true
+    add-path-tx: true
+    pre-import: reject;
+    announce-communities: [ "34553,10", "34553,11", "34553,12", "34553,13", "34553,14", "34553,15" ]
+
+peers:
+  Collector:
+    asn: 34553
+    template: collector-client
+    listen4: 23.141.112.1
+    neighbors: ["147.75.35.135"]
+
+  # Transit
+
+  Hurricane Electric Transit:
+    asn: 6939
+    template: upstream
+    listen4: 216.218.192.66
+    listen6: 2001:470:1:76a::2
+    pre-export: |
+      if (34553,0,6939) ~ bgp_large_community then reject;
+    neighbors:
+      - 216.218.192.65
+      - 2001:470:1:76a::1
+
+#  Mythic Beasts Transit:
+#    asn: 60011
+#    template: upstream
+#    local-pref: 79
+#    listen4: 185.101.99.28
+#    listen6: "2a04:ad80:2:fe01::4"
+#    neighbors:
+#      - 185.101.99.25
+#      - 185.101.99.26
+#      - 2a04:ad80:2:fe01::1
+#      - 2a04:ad80:2:fe01::2
+#
+#  # FCIX Peers
+#
+#  Emerald Onion FCIX:
+#    asn: 396507
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.80
+#      - 2001:504:91::80
+#
+#  WIDE M Root FCIX:
+#    asn: 7500
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.38
+#      - 2001:504:91::38
+#
+#  Null Route Networks FCIX:
+#    asn: 13925
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.4
+#      - 2001:504:91::4
+#
+#  Minnesota VoIP FCIX:
+#    asn: 32621
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.46
+#      - 2001:504:91::46
+#
+#  EricNet FCIX:
+#    asn: 206628
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.76
+#      - 2001:504:91::76
+#
+#  Jacob Slater FCIX:
+#    asn: 42615
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.75
+#      - 2001:504:91::75
+#
+#  #  Endless FCIX:
+#  #    asn: 42847
+#  #    template: peer
+#  #    listen4: 206.80.238.77
+#  #    listen6: "2001:504:91::77"
+#  #    neighbors:
+#  #      - 206.80.238.85
+#  #      - 2001:504:91::85
+#
+#  FCIX Route Servers:
+#    asn: 33495
+#    template: routeserver
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.253
+#      - 2001:504:91::253
+#      - 206.80.238.254
+#      - 2001:504:91::254
+#
+#  Ido Rosen FCIX:
+#    asn: 54364
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.122
+#      - 2001:504:91::122
+#
+#  Hurricane FCIX:
+#    asn: 6939
+#    template: upstream
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.9
+#      - 2001:504:91::9
+#
+#  Netnod FCIX:
+#    asn: 8674
+#    template: peer
+#    listen4: 206.80.238.77
+#    listen6: "2001:504:91::77"
+#    neighbors:
+#      - 206.80.238.114
+#      - 2001:504:91::114
+#
+#  # ARIX
+#
+#  ARIX RS:
+#    asn: 47192
+#    template: routeserver
+#    listen4: "44.190.42.3"
+#    listen6: "2602:801:30ff::3"
+#    neighbors:
+#      - 44.190.42.253
+#      - 2602:801:30ff::253
+#      - 44.190.42.254
+#      - 2602:801:30ff::254
+#
+#  # SIX
+#
+#  SIX Route Servers:
+#    asn: 33108
+#    template: remote-routeserver
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.2
+#      - 2001:504:16::2
+#      - 206.81.80.3
+#      - 2001:504:16::3
+#
+#  SIX Route Servers (Jumbo):
+#    asn: 33108
+#    template: remote-routeserver
+#    listen4: 206.81.82.97
+#    listen6: 2001:504:16:1::86f9
+#    neighbors:
+#      - 206.81.82.2
+#      - 2001:504:16:1::2
+#      - 206.81.82.3
+#      - 2001:504:16:1::3
+#
+#  Altopia SIX:
+#    asn: 6456
+#    template: remote-peer
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.10
+#      - 2001:504:16::1938
+#      - 206.81.81.41
+#      - 2001:504:16::297:0:1938
+#
+#  Cloudflare SIX:
+#    asn: 13335
+#    template: remote-peer
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.81.10
+#      - 2001:504:16::3417
+#
+#  AEBC (CipherKey) SIX:
+#    asn: 25668
+#    template: remote-peer
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.103
+#      - 2001:504:16::6444
+#
+#  SpaceX Starlink:
+#    asn: 14593
+#    template: remote-peer
+#    as-set: AS14593  # As of July 4, 2021 they don't have any prefixes in their as-set AS14593:AS-ALL
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.81.239
+#      - 2001:504:16::3901
+#
+#  SpaceX Starlink (Jumbo):
+#    asn: 14593
+#    template: remote-peer
+#    as-set: AS14593
+#    listen4: 206.81.82.97
+#    listen6: "2001:504:16:1::86f9"
+#    neighbors:
+#      - 206.81.83.239
+#      - 2001:504:16:1::3901
+#
+#  Hurricane Electric SIX:
+#    asn: 6939
+#    template: remote-upstream
+#    filter-irr: false
+#    prepends: 3
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    import-limit4: 1000000
+#    import-limit6: 200000
+#    auto-import-limits: false
+#    neighbors:
+#      - 206.81.80.40
+#      - 2001:504:16::1b1b
+#
+#  Netnod SIX Seattle:
+#    asn: 8674
+#    template: remote-peer
+#    prepends: 3
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.120
+#      - 2001:504:16::21e2
+#
+#  Apple SIX:
+#    asn: 714
+#    template: remote-peer
+#    prepends: 3
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.204
+#      - 206.81.80.205
+#      - 2001:504:16::2ca
+#      - 2001:504:16::205:0:2ca
+#
+#  PCH SIX:
+#    asn: 42
+#    template: remote-peer
+#    prepends: 3
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.80
+#      - 2001:504:16::2a
+#
+#  PCH Research SIX:
+#    asn: 3856
+#    template: remote-peer
+#    prepends: 3
+#    listen4: "206.81.80.97"
+#    listen6: "2001:504:16::86f9"
+#    neighbors:
+#      - 206.81.80.81
+#      - 2001:504:16::f10
+#
+#  # KCIX
+#
+#  Facebook KCIX:
+#    asn: 63293
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.108
+#      - 2001:504:1b:1::108
+#
+#  Cloudflare KCIX:
+#    asn: 13335
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.34
+#      - 2001:504:1b:1::34
+#
+#  KCIX Route Server:
+#    asn: 40542
+#    template: remote-routeserver
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.126
+#      - 2001:504:1b:1::126
+#
+#  Hurricane KCIX:
+#    asn: 6939
+#    template: remote-upstream
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.5
+#      - 2001:504:1b:1::5
+#
+#  Netnod KCIX:
+#    asn: 8674
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.33
+#      - 2001:504:1b:1::33
+#
+#  PCH KCIX:
+#    asn: 42
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.73
+#      - 2001:504:1b:1::73
+#
+#  PCH Research KCIX:
+#    asn: 3856
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.74
+#      - 2001:504:1b:1::74
+#
+#  AndrewNet KCIX:
+#    asn: 211562
+#    template: remote-peer
+#    listen4: "206.51.7.39"
+#    listen6: "2001:504:1b:1::39"
+#    neighbors:
+#      - 206.51.7.153
+#      - 2001:504:1b:1::153
+#
+#  # QCIX
+#
+#  QCIX RS:
+#    asn: 397806
+#    template: remote-routeserver
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.1
+#      - 2001:504:9b::1
+#      - 206.83.43.2
+#      - 2001:504:9b::2
+#
+#  Hurricane QCIX:
+#    asn: 6939
+#    template: remote-upstream
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.30
+#      - 2001:504:9b::30
+#
+#  Netnod QCIX:
+#    asn: 8674
+#    template: remote-peer
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.29
+#      - 2001:504:9b::29
+#
+#  Facebook QCIX:
+#    asn: 63293
+#    template: remote-peer
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.37
+#      - 2001:504:9b::37
+#
+#  PCH QCIX:
+#    asn: 42
+#    template: remote-peer
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.9
+#      - 2001:504:9b::9
+#
+#  PCH Research QCIX:
+#    asn: 3856
+#    template: remote-peer
+#    listen4: "206.83.43.27"
+#    listen6: "2001:504:9b::27"
+#    neighbors:
+#      - 206.83.43.10
+#      - 2001:504:9b::10
+#
+#  # Downstreams
+#
+#  Airgapped Direct:
+#    asn: 6556
+#    template: downstream
+#    listen4: 100.66.0.2
+#    neighbors:
+#      - 100.66.0.1
+#
+#  Packetframe FMT2:
+#    asn: 34553
+#    template: downstream
+#    enforce-first-as: false
+#    listen4: 23.141.112.1
+#    listen6: 2602:809:3009::1
+#    next-hop-self: true
+#    neighbors:
+#      - 23.141.112.8
+#      - 2602:809:3009::8
+#
+#  FMT2 AS112:
+#    asn: 112
+#    template: downstream
+#    listen4: 23.141.112.1
+#    listen6: 2602:809:3009::1
+#    neighbors:
+#      - 23.141.112.13
+#      - 2602:809:3009::13
+#
+#  SteveYi Transit:
+#    asn: 7480
+#    template: downstream
+#    listen4: "44.190.42.3"
+#    listen6: "2602:801:30ff::3"
+#    blackhole-in: true
+#    neighbors:
+#      - 44.190.42.14
+#      - 2602:801:30ff::14

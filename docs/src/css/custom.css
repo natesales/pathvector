@@ -7,18 +7,86 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #b30bf7;
-  --ifm-color-primary-dark: rgb(33, 175, 144);
-  --ifm-color-primary-darker: rgb(31, 165, 136);
-  --ifm-color-primary-darkest: rgb(26, 136, 112);
-  --ifm-color-primary-light: rgb(70, 203, 174);
-  --ifm-color-primary-lighter: rgb(102, 212, 189);
-  --ifm-color-primary-lightest: rgb(146, 224, 208);
-  --ifm-code-font-size: 95%;
+    --ifm-color-primary: #b30bf7;
+    --ifm-color-primary-dark: rgb(33, 175, 144);
+    --ifm-color-primary-darker: rgb(31, 165, 136);
+    --ifm-color-primary-darkest: rgb(26, 136, 112);
+    --ifm-color-primary-light: rgb(70, 203, 174);
+    --ifm-color-primary-lighter: rgb(102, 212, 189);
+    --ifm-color-primary-lightest: rgb(146, 224, 208);
+    --ifm-code-font-size: 95%;
+
+    --ifm-alert-background-color: white;
+    --ifm-color-contrast-background: white;
+    --ifm-color-secondary-contrast-background: white;
+}
+
+.alert {
+    --ifm-alert-border-color: var(--ifm-color-primary) !important;
 }
 
 :root[data-theme='dark'] {
-  --ifm-background-color: black !important;
-  --ifm-background-surface-color: #000000 !important;
-  --ifm-footer-background-color: #000000 !important;
+    --ifm-alert-background-color: black;
+    --ifm-color-contrast-background: black;
+    --ifm-color-secondary-contrast-background: black;
+
+    --ifm-alert-border-color: var(--ifm-color-primary) !important;
+    --ifm-background-color: black !important;
+    --ifm-background-surface-color: #000000 !important;
+    --ifm-footer-background-color: #000000 !important;
+}
+
+.download-form select,
+.download-form button {
+    background: transparent;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    /* --ifm-color-emphasis-300 */
+    border-radius: var(--ifm-pagination-nav-border-radius);
+    line-height: var(--ifm-heading-line-height);
+    padding: 5px 10px;
+    transition: border-color var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}
+
+.download-form select {
+    margin-left: 7px;
+}
+
+.download-form label {
+    font-size: var(--ifm-h4-font-size);
+    font-weight: var(--ifm-heading-font-weight);
+}
+
+.download-form {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.download-col {
+    display: flex;
+    flex-direction: row;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.download-col button {
+    border: 1px solid var(--ifm-color-primary);
+}
+
+.plugin-select {
+    background: transparent;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: var(--ifm-pagination-nav-border-radius);
+    line-height: var(--ifm-heading-line-height);
+    padding: 10px 15px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    transition: border-color var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+    font-size: var(--ifm-h4-font-size);
+}
+
+.plugin-select.active {
+    border: 2px solid var(--ifm-color-primary) !important;
 }

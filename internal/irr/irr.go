@@ -2,9 +2,9 @@ package irr
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -48,7 +48,7 @@ func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, 
 // ASMembers uses bgpq4 to generate an AS member set
 func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs string) ([]uint32, error) {
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmdArgs := fmt.Sprintf("-h %s -tb %s", irrServer, asSet)
+	cmdArgs := fmt.Sprintf("-h %s -tj %s", irrServer, asSet)
 	if bgpqArgs != "" {
 		cmdArgs = bgpqArgs + " " + cmdArgs
 	}
@@ -61,31 +61,13 @@ func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs strin
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("bgpq4 output:\n%s", stdout)
 
-	var ases []uint32
-	for i, line := range strings.Split(string(stdout), "\n") {
-		if i == 0 { // Skip first line, as it is the definition line
-			continue
-		}
-		if strings.Contains(line, "];") { // Skip last line and return
-			break
-		}
-		// Trim whitespace and remove the comma, then append to the ases slice
-		line = strings.ReplaceAll(line, " ", "")
-		line = strings.TrimSuffix(line, ",")
-		for _, as := range strings.Split(line, ",") {
-			if line != "" {
-				asNum, err := strconv.Atoi(as)
-				if err != nil {
-					return nil, fmt.Errorf("parsing line %s: %s", line, err)
-				}
-				ases = append(ases, uint32(asNum))
-			}
-		}
+	var r map[string][]uint32
+	if err := json.Unmarshal(stdout, &r); err != nil {
+		return nil, fmt.Errorf("bgpq4 JSON Unmarshal: %s", err)
 	}
 
-	return ases, nil
+	return r["NN"], nil
 }
 
 // Update updates a peer's IRR prefix set

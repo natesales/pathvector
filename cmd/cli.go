@@ -22,11 +22,12 @@ import (
 )
 
 var (
-	enable bool
-	empty  bool
-	conf   *config.Config
-	rline  *readline.Instance
-	root   nestedMapContainer
+	enable   bool
+	empty    bool
+	restrict bool // Prevent enabling
+	conf     *config.Config
+	rline    *readline.Instance
+	root     nestedMapContainer
 )
 
 var (
@@ -428,6 +429,10 @@ func runCommand(line string) {
 	log.Tracef("Processing command '%s'", line)
 	switch {
 	case line == "enable":
+		if restrict {
+			fmt.Println("% Enable mode restricted")
+			return
+		}
 		enable = true
 		initRline()
 		rline.SetPrompt(prompt(true))
@@ -573,6 +578,7 @@ router-id: %s
 
 func init() {
 	interactiveCmd.Flags().BoolVarP(&enable, "enable", "e", false, "Enter enable mode")
+	interactiveCmd.Flags().BoolVarP(&restrict, "restrict", "r", false, "Prevent enable")
 	rootCmd.AddCommand(interactiveCmd)
 }
 
@@ -581,6 +587,10 @@ var interactiveCmd = &cobra.Command{
 	Short:   "Interactive CLI",
 	Aliases: []string{"c"},
 	Run: func(cmd *cobra.Command, args []string) {
+		if enable && restrict {
+			log.Fatal("Enable and restrict are mutually exclusive")
+		}
+
 		configFile, err := os.ReadFile(configFile)
 		if err == nil {
 			conf, err = process.Load(configFile)
@@ -594,7 +604,9 @@ var interactiveCmd = &cobra.Command{
 		}
 
 		if len(args) > 0 {
-			enable = true
+			if !restrict {
+				enable = true
+			}
 			runCommand(strings.Join(args, " "))
 			return
 		}

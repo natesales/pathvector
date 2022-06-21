@@ -61,6 +61,7 @@ func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs strin
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("bgpq4 output:\n%s", stdout)
 
 	var ases []uint32
 	for i, line := range strings.Split(string(stdout), "\n") {

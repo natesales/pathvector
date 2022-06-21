@@ -74,11 +74,13 @@ func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs strin
 		line = strings.ReplaceAll(line, " ", "")
 		line = strings.TrimSuffix(line, ",")
 		for _, as := range strings.Split(line, ",") {
-			asNum, err := strconv.Atoi(as)
-			if err != nil {
-				return nil, fmt.Errorf("parsing line %s: %s", line, err)
+			if line != "" {
+				asNum, err := strconv.Atoi(as)
+				if err != nil {
+					return nil, fmt.Errorf("parsing line %s: %s", line, err)
+				}
+				ases = append(ases, uint32(asNum))
 			}
-			ases = append(ases, uint32(asNum))
 		}
 	}
 

@@ -1,10 +1,4 @@
----
-slug: ddos-mitigation-with-fastnetmon
-title: DDoS mitigation with FastNetMon
-authors: [nate]
-date: 2021-07-19
-tags: [Integrations]
----
+# DDoS mitigation with FastNetMon
 
 [FastNetMon](https://fastnetmon.com) is a software-based DoS/DDoS detection tool that analyzes flows and signals a mitigation action over BGP such as traffic redirection or selective destination blackholes.
 

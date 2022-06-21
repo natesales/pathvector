@@ -919,6 +919,22 @@ Maximum number of IPv6 prefixes to import
 |------|---------|------------|
 | int   | 200000      |          |
 
+### `export-limit4`
+
+Maximum number of IPv4 prefixes to export
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 1000000      |          |
+
+### `export-limit6`
+
+Maximum number of IPv6 prefixes to export
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 200000      |          |
+
 ### `enforce-first-as`
 
 Should we only accept routes who's first AS is equal to the configured peer address?
@@ -943,9 +959,17 @@ Rewrite nexthop to peer address
 |------|---------|------------|
 | bool   | false      |          |
 
-### `max-prefix-action`
+### `import-limit-violation`
 
-What action should be taken when the max prefix limit is tripped?
+What action should be taken when the import limit is tripped?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | disable      |          |
+
+### `export-limit-violation`
+
+What action should be taken when the export limit is tripped?
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1054,6 +1078,14 @@ Reject routes that aren't originated by an ASN within this peer's AS set
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | false      |          |
+
+### `dont-announce`
+
+Don't announce these prefixes to the peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
 
 ### `auto-import-limits`
 

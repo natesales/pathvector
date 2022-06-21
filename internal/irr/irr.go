@@ -76,7 +76,7 @@ func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs strin
 		for _, as := range strings.Split(line, ",") {
 			asNum, err := strconv.Atoi(as)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("parsing line %s: %s", line, err)
 			}
 			ases = append(ases, uint32(asNum))
 		}

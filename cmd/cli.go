@@ -58,12 +58,6 @@ func completeType(c any, node *nestedMapContainer, target string) {
 		field := vType.Field(i)
 		key := field.Tag.Get("yaml")
 		description := field.Tag.Get("description")
-		defaultValue := field.Tag.Get("default")
-		if defaultValue == "-" {
-			//nolint:golint,ineffassign
-			defaultValue = ""
-		}
-
 		if description == "" {
 			log.Fatalf("%% Code error: %s in %s doesn't have a description: %+v", field.Name, vType.String(), c)
 		} else if description != "-" { // Ignore descriptions that are -

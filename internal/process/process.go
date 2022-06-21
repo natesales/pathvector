@@ -506,9 +506,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 			peerData.ASSetMembers = &membersFromIRR
 		} else {
 			newASSetMembers := *peerData.ASSetMembers
-			for _, asn := range membersFromIRR {
-				newASSetMembers = append(newASSetMembers, asn)
-			}
+			newASSetMembers = append(newASSetMembers, membersFromIRR...)
 			peerData.ASSetMembers = &newASSetMembers
 		}
 	}

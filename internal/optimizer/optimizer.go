@@ -191,7 +191,7 @@ func modifyPref(
 	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
 	peerFile, err := os.ReadFile(fileName)
 	if err != nil {
-		log.Fatal("reading peer file: %s", err)
+		log.Fatalf("reading peer file: %s", err)
 	}
 
 	peerData := peers[peerName]

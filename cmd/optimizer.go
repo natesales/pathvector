@@ -21,7 +21,7 @@ var optimizerCmd = &cobra.Command{
 		log.Debugf("Loading config from %s", configFile)
 		configFile, err := os.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Reading config file: %s", err)
+			log.Fatalf("Reading config file: %s", err)
 		}
 		c, err := process.Load(configFile)
 		if err != nil {

@@ -17,11 +17,13 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/natesales/pathvector/internal/process"
+	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 )
 
 var (
 	enable bool
+	empty  bool
 	conf   *config.Config
 	rline  *readline.Instance
 	root   nestedMapContainer
@@ -30,6 +32,7 @@ var (
 var (
 	errEnableRequired = errors.New("% Access denied (enable required)")
 	errInvalidSyntax  = errors.New("% Syntax Error")
+	errConfigEmpty    = errors.New("% Configuration is empty. Create a new base config with 'new'")
 )
 
 type nestedMapContainer struct {
@@ -309,17 +312,28 @@ func prompt(enable bool) string {
 	if enable {
 		suffix = "# "
 	}
+	if empty {
+		suffix = "[empty] " + suffix
+	}
 	p := "pathvector " + suffix
-	if conf.Hostname != "" {
+	if conf != nil && conf.Hostname != "" {
 		p = "pathvector (" + conf.Hostname + ") " + suffix
 	}
 	return p
 }
 
 func initRline() {
-	completeType(conf, &root, "")
-	configCompletions := completeNode(&root)
 	var completer *readline.PrefixCompleter
+	var configCompletions []readline.PrefixCompleterInterface
+
+	if conf != nil {
+		empty = false
+	}
+
+	if !empty {
+		completeType(conf, &root, "")
+		configCompletions = completeNode(&root)
+	}
 
 	universalPcItems := []readline.PrefixCompleterInterface{ // Commands available in both enable and operational modes
 		readline.PcItem("show",
@@ -332,31 +346,36 @@ func initRline() {
 		readline.PcItem("bird"),
 	}
 
-	runCompletions := []readline.PrefixCompleterInterface{
-		readline.PcItem("withdraw",
-			readline.PcItem("dry", readline.PcItem("no-configure")),
-			readline.PcItem("no-configure", readline.PcItem("dry")),
-		),
-		readline.PcItem("dry",
-			readline.PcItem("withdraw", readline.PcItem("no-configure")),
-			readline.PcItem("no-configure", readline.PcItem("withdraw")),
-		),
-		readline.PcItem("no-configure",
-			readline.PcItem("dry", readline.PcItem("withdraw")),
-			readline.PcItem("withdraw", readline.PcItem("dry")),
-		),
-	}
-
 	if enable {
-		completer = readline.NewPrefixCompleter(append(
-			universalPcItems,
-			readline.PcItem("disable"),
-			readline.PcItem("set", configCompletions...),
-			readline.PcItem("delete", configCompletions...),
-			readline.PcItem("create"),
-			readline.PcItem("run", runCompletions...),
-			readline.PcItem("commit"),
-		)...)
+		if empty {
+			completer = readline.NewPrefixCompleter(append(
+				universalPcItems,
+				readline.PcItem("disable"),
+				readline.PcItem("new"),
+			)...)
+		} else {
+			completer = readline.NewPrefixCompleter(append(
+				universalPcItems,
+				readline.PcItem("disable"),
+				readline.PcItem("set", configCompletions...),
+				readline.PcItem("delete", configCompletions...),
+				readline.PcItem("create"),
+				readline.PcItem("run", readline.PcItem("withdraw",
+					readline.PcItem("dry", readline.PcItem("no-configure")),
+					readline.PcItem("no-configure", readline.PcItem("dry")),
+				),
+					readline.PcItem("dry",
+						readline.PcItem("withdraw", readline.PcItem("no-configure")),
+						readline.PcItem("no-configure", readline.PcItem("withdraw")),
+					),
+					readline.PcItem("no-configure",
+						readline.PcItem("dry", readline.PcItem("withdraw")),
+						readline.PcItem("withdraw", readline.PcItem("dry")),
+					)),
+				readline.PcItem("new"),
+				readline.PcItem("commit"),
+			)...)
+		}
 	} else {
 		completer = readline.NewPrefixCompleter(append(
 			universalPcItems,
@@ -376,6 +395,13 @@ func initRline() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func confirm(prompt string) bool {
+	fmt.Printf("%s [y/N] ", prompt)
+	var response string
+	fmt.Scanln(&response)
+	return util.Contains([]string{"y", "Y", "yes", "Yes", "YES"}, response)
 }
 
 func runCommand(line string) {
@@ -410,6 +436,10 @@ func runCommand(line string) {
 			fmt.Println(errEnableRequired)
 			return
 		}
+		if empty {
+			fmt.Println(errConfigEmpty)
+			return
+		}
 		words, err := shlex.Split(strings.TrimPrefix(line, "set"), true)
 		if err != nil {
 			log.Fatal(err)
@@ -424,6 +454,10 @@ func runCommand(line string) {
 			fmt.Println(errEnableRequired)
 			return
 		}
+		if empty {
+			fmt.Println(errConfigEmpty)
+			return
+		}
 		words, err := shlex.Split(strings.TrimPrefix(line, "create"), true)
 		if err != nil {
 			log.Fatal(err)
@@ -434,6 +468,14 @@ func runCommand(line string) {
 		}
 		createMapEntry(&conf, words[:len(words)-1], words[len(words)-1])
 	case strings.HasPrefix(line, "run"):
+		if !enable {
+			fmt.Println(errEnableRequired)
+			return
+		}
+		if empty {
+			fmt.Println(errConfigEmpty)
+			return
+		}
 		process.Run(
 			configFile,
 			lockFile,
@@ -443,6 +485,14 @@ func runCommand(line string) {
 			strings.Contains(line, "withdraw"),
 		)
 	case line == "commit":
+		if !enable {
+			fmt.Println(errEnableRequired)
+			return
+		}
+		if empty {
+			fmt.Println(errConfigEmpty)
+			return
+		}
 		yamlBytes, err := yaml.Marshal(&conf)
 		if err != nil {
 			fmt.Printf("%% Unable to marshal config as YAML: %s", err)
@@ -453,6 +503,47 @@ func runCommand(line string) {
 			fmt.Printf("%% Unable write config file: %s", err)
 			return
 		}
+	case strings.HasPrefix(line, "new"):
+		if !enable {
+			fmt.Println(errEnableRequired)
+			return
+		}
+		if !empty {
+			fmt.Println("% Config is not empty, be careful!")
+		}
+		parts := strings.Split(line, " ")
+		if len(parts) != 3 {
+			fmt.Println("% Usage: new <asn> <router-id>")
+			return
+		}
+		asn, err := strconv.Atoi(strings.TrimPrefix(strings.ToLower(parts[1]), "as"))
+		if err != nil {
+			fmt.Printf("%% Invalid ASN %s\n", parts[1])
+			return
+		}
+		routerId := parts[2]
+		if confirm(fmt.Sprintf("Are you sure you want to create a new config with AS%d (%s)?", asn, routerId)) {
+			//nolint:golint,gosec
+			if err := os.WriteFile(configFile, []byte(fmt.Sprintf(`asn: %d
+router-id: %s
+`, asn, routerId)), 0755); err != nil {
+				fmt.Printf("%% Unable write config file: %s", err)
+				return
+			}
+			fmt.Println("Config created")
+			cfg, err := os.ReadFile(configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			conf, err = process.Load(cfg)
+			if err != nil {
+				log.Fatal(err)
+			}
+			initRline()
+		} else {
+			fmt.Println("Cancelled")
+		}
+		return
 	case line == "exit" || line == "quit":
 		os.Exit(0)
 	case line == "":
@@ -472,12 +563,15 @@ var interactiveCmd = &cobra.Command{
 	Aliases: []string{"c"},
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := os.ReadFile(configFile)
-		if err != nil {
+		if err == nil {
+			conf, err = process.Load(configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else if errors.Is(err, os.ErrNotExist) {
+			empty = true
+		} else {
 			log.Fatalf("Reading config file: %s", err)
-		}
-		conf, err = process.Load(configFile)
-		if err != nil {
-			log.Fatal(err)
 		}
 
 		if len(args) > 0 {

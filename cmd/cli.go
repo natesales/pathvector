@@ -60,6 +60,7 @@ func completeType(c any, node *nestedMapContainer, target string) {
 		description := field.Tag.Get("description")
 		defaultValue := field.Tag.Get("default")
 		if defaultValue == "-" {
+			//nolint:golint,ineffassign
 			defaultValue = ""
 		}
 
@@ -453,6 +454,7 @@ func runCommand(line string) {
 			fmt.Printf("%% Unable to marshal config as YAML: %s", err)
 			return
 		}
+		//nolint:golint,gosec
 		if err := os.WriteFile(configFile, yamlBytes, 0755); err != nil {
 			fmt.Printf("%% Unable write config file: %s", err)
 			return

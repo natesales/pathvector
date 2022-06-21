@@ -191,6 +191,25 @@ func setConfigValue(c any, namespace []string, targetValue string) {
 							fmt.Printf("%% Unable parse value '%s' as bool", targetValue)
 							return
 						}
+					case reflect.Slice:
+						switch f.Type().Elem().Kind() {
+						case reflect.String:
+							f.Set(reflect.ValueOf(strings.Split(targetValue, ",")))
+						case reflect.Uint32:
+							var uint32s []uint32
+							for _, u32 := range strings.Split(targetValue, ",") {
+								targetValAsUint, err := strconv.ParseUint(u32, 10, 32)
+								if err != nil {
+									fmt.Printf("%% Unable parse value '%s' as uint: %s", targetValue, err)
+									return
+								}
+								uint32s = append(uint32s, uint32(targetValAsUint))
+							}
+							f.Set(reflect.ValueOf(uint32s))
+						default:
+							fmt.Printf("%% Setting %s slices is not implemented\n", f.Type().Elem().Kind())
+							return
+						}
 					default:
 						fmt.Printf("%% Unable to set '%s' of type '%s'", namespaceStr, f.Kind())
 						return

@@ -32,7 +32,7 @@ var (
 var (
 	errEnableRequired = errors.New("% Access denied (enable required)")
 	errInvalidSyntax  = errors.New("% Syntax Error")
-	errConfigEmpty    = errors.New("% Configuration is empty. Create a new base config with 'new'")
+	errConfigEmpty    = errors.New("% Configuration is empty. Initialize a new base config with 'init'")
 )
 
 type nestedMapContainer struct {
@@ -351,7 +351,7 @@ func initRline() {
 			completer = readline.NewPrefixCompleter(append(
 				universalPcItems,
 				readline.PcItem("disable"),
-				readline.PcItem("new"),
+				readline.PcItem("init"),
 			)...)
 		} else {
 			completer = readline.NewPrefixCompleter(append(
@@ -372,7 +372,7 @@ func initRline() {
 						readline.PcItem("dry", readline.PcItem("withdraw")),
 						readline.PcItem("withdraw", readline.PcItem("dry")),
 					)),
-				readline.PcItem("new"),
+				readline.PcItem("init"),
 				readline.PcItem("commit"),
 			)...)
 		}
@@ -503,7 +503,7 @@ func runCommand(line string) {
 			fmt.Printf("%% Unable write config file: %s", err)
 			return
 		}
-	case strings.HasPrefix(line, "new"):
+	case strings.HasPrefix(line, "init"):
 		if !enable {
 			fmt.Println(errEnableRequired)
 			return
@@ -513,7 +513,7 @@ func runCommand(line string) {
 		}
 		parts := strings.Split(line, " ")
 		if len(parts) != 3 {
-			fmt.Println("% Usage: new <asn> <router-id>")
+			fmt.Println("% Usage: init <asn> <router-id>")
 			return
 		}
 		asn, err := strconv.Atoi(strings.TrimPrefix(strings.ToLower(parts[1]), "as"))

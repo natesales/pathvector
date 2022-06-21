@@ -67,12 +67,12 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	}
 
 	if err != nil {
-		return nil, errors.New("PeeringDB GET (This peer might not have a PeeringDB page): " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET (This peer might not have a PeeringDB page): %s", err)
 	}
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET request: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET request: %s", err)
 	}
 
 	if res.StatusCode == 404 {
@@ -90,12 +90,12 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.New("PeeringDB read: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
 	}
 
 	if len(pDbResponse.Data) < 1 {
@@ -163,7 +163,7 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
 	req, err := http.NewRequest(http.MethodGet, "https://peeringdb.com/api/net?info_never_via_route_servers=1", nil)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET: %s", err)
 	}
 
 	if apiKey != "" {
@@ -176,7 +176,7 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 
 	res, err := httpClient.Do(req)
 	if err != nil {
-		return nil, errors.New("PeeringDB GET request: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB GET request: %s", err)
 	}
 	if res.StatusCode != 200 {
 		return nil, errors.New("PeeringDB GET request expected 200, got " + res.Status)
@@ -188,12 +188,12 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, errors.New("PeeringDB read: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB read: %s", err)
 	}
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, errors.New("PeeringDB JSON Unmarshal: " + err.Error())
+		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
 	}
 
 	var asns []uint32 // ASNs that are reportedly never reachable via route servers

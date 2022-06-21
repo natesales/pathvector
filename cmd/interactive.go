@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/creasty/defaults"
 	"io"
 	"os"
 	"reflect"
@@ -256,6 +257,7 @@ func createMapEntry(c any, namespace []string, targetKey string) {
 					}
 					f.SetMapIndex(reflect.ValueOf(targetKey), reflect.ValueOf(zeroValue))
 					// Reinitialize completions to account for newly created item
+					defaults.MustSet(f.MapIndex(reflect.ValueOf(targetKey)).Interface())
 					initRline()
 					return
 				} else {
@@ -319,6 +321,68 @@ func prompt(enable bool) string {
 	return p
 }
 
+func initRline() {
+	completeType(conf, &root, "")
+	configCompletions := completeNode(&root)
+	var completer *readline.PrefixCompleter
+
+	universalPcItems := []readline.PrefixCompleterInterface{ // Commands available in both enable and operational modes
+		readline.PcItem("show",
+			append(
+				configCompletions,
+				readline.PcItem("version"),
+				readline.PcItem("config-structure"),
+			)...,
+		),
+		readline.PcItem("bird"),
+	}
+
+	runCompletions := []readline.PrefixCompleterInterface{
+		readline.PcItem("withdraw",
+			readline.PcItem("dry", readline.PcItem("no-configure")),
+			readline.PcItem("no-configure", readline.PcItem("dry")),
+		),
+		readline.PcItem("dry",
+			readline.PcItem("withdraw", readline.PcItem("no-configure")),
+			readline.PcItem("no-configure", readline.PcItem("withdraw")),
+		),
+		readline.PcItem("no-configure",
+			readline.PcItem("dry", readline.PcItem("withdraw")),
+			readline.PcItem("withdraw", readline.PcItem("dry")),
+		),
+	}
+
+	if enable {
+		completer = readline.NewPrefixCompleter(append(
+			universalPcItems,
+			readline.PcItem("disable"),
+			readline.PcItem("set", configCompletions...),
+			readline.PcItem("delete", configCompletions...),
+			readline.PcItem("create"),
+			readline.PcItem("run", runCompletions...),
+			readline.PcItem("commit"),
+		)...)
+	} else {
+		completer = readline.NewPrefixCompleter(append(
+			universalPcItems,
+			readline.PcItem("enable"),
+		)...)
+	}
+
+	var err error
+	rline, err = readline.NewEx(&readline.Config{
+		Prompt:            prompt(enable),
+		HistoryFile:       "/tmp/pathvector.cli-history",
+		AutoComplete:      completer,
+		InterruptPrompt:   "^C",
+		EOFPrompt:         "exit",
+		HistorySearchFold: true,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func runCommand(line string) {
 	line = strings.TrimSpace(line)
 	log.Tracef("Processing command '%s'", line)
@@ -374,54 +438,30 @@ func runCommand(line string) {
 			return
 		}
 		createMapEntry(&conf, words[:len(words)-1], words[len(words)-1])
+	case strings.HasPrefix(line, "run"):
+		process.Run(
+			configFile,
+			lockFile,
+			version,
+			strings.Contains(line, "no-configure"),
+			strings.Contains(line, "dry"),
+			strings.Contains(line, "withdraw"),
+		)
+	case line == "commit":
+		yamlBytes, err := yaml.Marshal(&conf)
+		if err != nil {
+			fmt.Printf("%% Unable to marshal config as YAML: %s", err)
+			return
+		}
+		if err := os.WriteFile(configFile, yamlBytes, 0755); err != nil {
+			fmt.Printf("%% Unable write config file: %s", err)
+			return
+		}
 	case line == "exit" || line == "quit":
 		os.Exit(0)
 	case line == "":
 	default:
 		fmt.Println("% Unknown command: " + line)
-	}
-}
-
-func initRline() {
-	completeType(conf, &root, "")
-	configCompletions := completeNode(&root)
-	var completer *readline.PrefixCompleter
-	universalPcItems := []readline.PrefixCompleterInterface{ // Commands available in both enable and operational modes
-		readline.PcItem("show",
-			append(
-				configCompletions,
-				readline.PcItem("version"),
-				readline.PcItem("config-structure"),
-			)...,
-		),
-		readline.PcItem("bird"),
-	}
-	if enable {
-		completer = readline.NewPrefixCompleter(append(
-			universalPcItems,
-			readline.PcItem("disable"),
-			readline.PcItem("set", configCompletions...),
-			readline.PcItem("delete", configCompletions...),
-			readline.PcItem("create"),
-		)...)
-	} else {
-		completer = readline.NewPrefixCompleter(append(
-			universalPcItems,
-			readline.PcItem("enable"),
-		)...)
-	}
-
-	var err error
-	rline, err = readline.NewEx(&readline.Config{
-		Prompt:            prompt(enable),
-		HistoryFile:       "/tmp/pathvector.cli-history",
-		AutoComplete:      completer,
-		InterruptPrompt:   "^C",
-		EOFPrompt:         "exit",
-		HistorySearchFold: true,
-	})
-	if err != nil {
-		log.Fatal(err)
 	}
 }
 

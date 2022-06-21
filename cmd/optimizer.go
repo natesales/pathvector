@@ -21,7 +21,7 @@ var optimizerCmd = &cobra.Command{
 		log.Debugf("Loading config from %s", configFile)
 		configFile, err := os.ReadFile(configFile)
 		if err != nil {
-			log.Fatal("Reading config file: " + err.Error())
+			log.Fatal("Reading config file: %s", err)
 		}
 		c, err := process.Load(configFile)
 		if err != nil {
@@ -30,7 +30,7 @@ var optimizerCmd = &cobra.Command{
 		log.Debugln("Finished loading config")
 
 		log.Infof("Starting optimizer")
-		sourceMap := map[string][]string{} // Peer name to list of source addresses
+		sourceMap := map[string][]string{} // peer name to list of source addresses
 		for peerName, peerData := range c.Peers {
 			if peerData.OptimizerProbeSources != nil && len(*peerData.OptimizerProbeSources) > 0 {
 				sourceMap[fmt.Sprintf("%d%s%s", *peerData.ASN, optimizer.Delimiter, peerName)] = *peerData.OptimizerProbeSources

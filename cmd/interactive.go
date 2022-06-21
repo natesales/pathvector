@@ -196,10 +196,76 @@ func setConfigValue(c any, namespace []string, targetValue string) {
 						fmt.Printf("%% Unable to set '%s' of type '%s'", namespaceStr, f.Kind())
 						return
 					}
+				} else {
+					fmt.Printf("%% Unable to set field %s", key)
+					return
 				}
 			}
 		}
 	}
+}
+
+func createMapEntry(c any, namespace []string, targetKey string) {
+	if len(namespace) == 0 {
+		fmt.Println(errInvalidSyntax)
+		return
+	}
+
+	namespaceStr := "['" + strings.Join(namespace, `', '`) + `']`
+	log.Debugf("Attempting to create map entry '%s'", namespaceStr)
+
+	v := reflect.ValueOf(c)
+	for v.Kind() == reflect.Ptr { // Dereference pointer types
+		v = v.Elem()
+	}
+
+	if v.Kind() == reflect.Map {
+		for _, k := range v.MapKeys() {
+			if k.String() == namespace[0] {
+				log.Debugf("Found map element with key %s, recursing create '%s'", k.String(), namespace[1:])
+				createMapEntry(v.MapIndex(k).Interface(), namespace[1:], targetKey)
+				return
+			}
+		}
+		fmt.Printf("%% Configuration item %+v not found map", namespaceStr)
+		return
+	}
+
+	vType := v.Type()
+	log.Debugf("Iterating over type %s", vType)
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		for f.Kind() == reflect.Ptr { // Dereference pointer types
+			f = f.Elem()
+		}
+		key := vType.Field(i).Tag.Get("yaml")
+		if namespace[0] == key {
+			if len(namespace) > 1 {
+				log.Debugf("Namespace still has more recursing to go, recursing with %s", namespace[1:])
+				createMapEntry(f.Interface(), namespace[1:], targetKey)
+			} else { // Exact match
+				if f.Kind() != reflect.Map {
+					fmt.Printf("%% Can't create %s of type %s (must be a map)\n", strings.Join(namespace, " "), f.Kind())
+				}
+				mapKeyType := reflect.TypeOf(f.Interface()).Elem()
+				log.Debugf("Matched. Creating '%s' with type %s target key %s", namespaceStr, mapKeyType, targetKey)
+				if f.IsValid() && f.CanSet() {
+					zeroValue := reflect.Zero(mapKeyType).Interface()
+					if mapKeyType.Kind() == reflect.Ptr {
+						zeroValue = reflect.New(mapKeyType.Elem()).Interface()
+					}
+					f.SetMapIndex(reflect.ValueOf(targetKey), reflect.ValueOf(zeroValue))
+					// Reinitialize completions to account for newly created item
+					initRline()
+					return
+				} else {
+					fmt.Printf("%% Unable to set field %s for create", key)
+					return
+				}
+			}
+		}
+	}
+	fmt.Printf("%% Configuration item '%+v' not found\n", strings.Join(namespace, " "))
 }
 
 func printTree(root *nestedMapContainer) {
@@ -294,6 +360,20 @@ func runCommand(line string) {
 			return
 		}
 		setConfigValue(&conf, words[:len(words)-1], words[len(words)-1])
+	case strings.HasPrefix(line, "create"):
+		if !enable {
+			fmt.Println(errEnableRequired)
+			return
+		}
+		words, err := shlex.Split(strings.TrimPrefix(line, "create"), true)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if len(words) == 0 {
+			fmt.Println(errInvalidSyntax)
+			return
+		}
+		createMapEntry(&conf, words[:len(words)-1], words[len(words)-1])
 	case line == "exit" || line == "quit":
 		os.Exit(0)
 	case line == "":
@@ -322,7 +402,7 @@ func initRline() {
 			readline.PcItem("disable"),
 			readline.PcItem("set", configCompletions...),
 			readline.PcItem("delete", configCompletions...),
-			//readline.PcItem("create", topLevelCreate...) // TODO
+			readline.PcItem("create"),
 		)...)
 	} else {
 		completer = readline.NewPrefixCompleter(append(
@@ -364,28 +444,29 @@ var interactiveCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		if len(args) > 0 {
+			enable = true
+			runCommand(strings.Join(args, " "))
+			return
+		}
+
 		initRline()
 		defer rline.Close()
 		log.SetOutput(rline.Stderr())
 
-		if len(args) > 0 {
-			enable = true
-			runCommand(strings.Join(args, " "))
-		} else {
-			for {
-				line, err := rline.Readline()
-				if err == readline.ErrInterrupt {
-					if len(line) == 0 {
-						break
-					} else {
-						continue
-					}
-				} else if err == io.EOF {
+		for {
+			line, err := rline.Readline()
+			if err == readline.ErrInterrupt {
+				if len(line) == 0 {
 					break
+				} else {
+					continue
 				}
-
-				runCommand(line)
+			} else if err == io.EOF {
+				break
 			}
+
+			runCommand(line)
 		}
 	},
 }

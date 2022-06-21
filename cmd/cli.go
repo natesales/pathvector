@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/creasty/defaults"
 	"io"
 	"os"
 	"reflect"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/anmitsu/go-shlex"
 	"github.com/chzyer/readline"
+	"github.com/creasty/defaults"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -471,9 +471,9 @@ func init() {
 }
 
 var interactiveCmd = &cobra.Command{
-	Use:     "interactive",
+	Use:     "cli",
 	Short:   "Interactive CLI",
-	Aliases: []string{"cli", "i"},
+	Aliases: []string{"c"},
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := os.ReadFile(configFile)
 		if err != nil {

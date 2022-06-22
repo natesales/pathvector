@@ -164,12 +164,6 @@ const config = {
                 label: 'Docs',
             },
             {
-                type: 'doc',
-                docId: 'download',
-                position: 'left',
-                label: 'Download',
-            },
-            {
                 href: 'https://github.com/natesales/pathvector',
                 label: 'GitHub',
                 position: 'right',

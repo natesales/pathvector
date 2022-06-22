@@ -64,12 +64,12 @@ protocol direct { ipv4; ipv6; }
 
 protocol kernel {
   scan time 10;
-  {{ if .KernelLearn }}learn;{{ end }}
-  {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
+  {{ if .Kernel.Learn }}learn;{{ end }}
+  {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}
   ipv4 {
     export filter {
-      {{ if .KernelExport }}
-      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
+      {{ if .Kernel.Export }}
+      {{ if .Kernel.RejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Kernel.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Kernel.Accept4 }}
       if (proto = "{{ $rule }}") then accept;
@@ -105,12 +105,12 @@ protocol kernel {
 
 protocol kernel {
   scan time 10;
-  {{ if .KernelLearn }}learn;{{ end }}
-  {{ if .KernelTable }}kernel table {{ .KernelTable }};{{ end }}
+  {{ if .Kernel.Learn }}learn;{{ end }}
+  {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}
   ipv6 {
     export filter {
-      {{ if .KernelExport }}
-      {{ if .KernelRejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
+      {{ if .Kernel.Export }}
+      {{ if .Kernel.RejectConnected }}if source = RTS_DEVICE then reject;{{ end }}
       {{ $length := len .Kernel.SRDCommunities }}{{ if eq $length 0 }}
       {{- range $i, $rule := .Kernel.Accept6 }}
       if (proto = "{{ $rule }}") then accept;

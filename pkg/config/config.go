@@ -170,12 +170,16 @@ type MRTInstance struct {
 
 // Kernel stores options that relate to the OS kernel
 type Kernel struct {
-	Accept4        []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
-	Accept6        []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
-	Reject4        []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
-	Reject6        []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
-	Statics        map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
-	SRDCommunities []string          `yaml:"srd-communities" description:"List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)"`
+	Accept4         []string          `yaml:"accept4" description:"List of BIRD protocols to import into the IPv4 table"`
+	Accept6         []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
+	Reject4         []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
+	Reject6         []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
+	Statics         map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+	SRDCommunities  []string          `yaml:"srd-communities" description:"List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)"`
+	Learn           bool              `yaml:"learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
+	Export          bool              `yaml:"export" description:"Export routes to kernel routing table" default:"true"`
+	RejectConnected bool              `yaml:"reject-connected" description:"Don't export connected routes (RTS_DEVICE) to kernel?'" default:"false"`
+	Table           int               `yaml:"table" description:"Kernel table"`
 
 	SRDStandardCommunities []string          `yaml:"-" description:"-"`
 	SRDLargeCommunities    []string          `yaml:"-" description:"-"`
@@ -231,21 +235,17 @@ type Config struct {
 	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`
 
-	RouterID              string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer             string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer             string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
-	BGPQArgs              string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
-	KeepFiltered          bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	KernelLearn           bool   `yaml:"kernel-learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
-	KernelExport          bool   `yaml:"kernel-export" description:"Export routes to kernel routing table" default:"true"`
-	KernelRejectConnected bool   `yaml:"kernel-reject-connected" description:"Don't export connected routes (RTS_DEVICE) to kernel?'" default:"false"`
-	MergePaths            bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4               string `yaml:"source4" description:"Source IPv4 address"`
-	Source6               string `yaml:"source6" description:"Source IPv6 address"`
-	DefaultRoute          bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault         bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	KernelTable           int    `yaml:"kernel-table" description:"Kernel table"`
-	RPKIEnable            bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
+	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
+	Source4       string `yaml:"source4" description:"Source IPv4 address"`
+	Source6       string `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
+	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
 
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`

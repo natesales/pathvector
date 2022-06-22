@@ -173,30 +173,6 @@ Should filtered routes be kept in memory?
 |------|---------|------------|
 | bool   | false      |          |
 
-### `kernel-learn`
-
-Should routes from the kernel be learned into BIRD?
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
-
-### `kernel-export`
-
-Export routes to kernel routing table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | true      |          |
-
-### `kernel-reject-connected`
-
-Don't export connected routes (RTS_DEVICE) to kernel?'
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | false      |          |
-
 ### `merge-paths`
 
 Should best and equivalent non-best routes be imported to build ECMP routes?
@@ -236,14 +212,6 @@ Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to t
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | false      |          |
-
-### `kernel-table`
-
-Kernel table
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   |       |          |
 
 ### `rpki-enable`
 
@@ -424,6 +392,38 @@ List of communities to filter routes exported to kernel (if list is not empty, a
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       |          |
+
+### `learn`
+
+Should routes from the kernel be learned into BIRD?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `export`
+
+Export routes to kernel routing table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
+### `reject-connected`
+
+Don't export connected routes (RTS_DEVICE) to kernel?'
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `table`
+
+Kernel table
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   |       |          |
 
 
 ## MRTInstance

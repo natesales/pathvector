@@ -10,7 +10,7 @@ Pathvector config to suit your needs. Here's an example of using BGP communities
 ## Communities
 
 | Standard Community | Large Community | Meaning                   |
-| :----------------- | :-------------- | :------------------------ |
+|:-------------------|:----------------|:--------------------------|
 | 65510,12           | 65510:0:12      | Learned from upstream     |
 | 65510,13           | 65510:0:13      | Learned from route server |
 | 65510,14           | 65510:0:14      | Learned from peer         |

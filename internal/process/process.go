@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
@@ -482,7 +483,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	log.Printf("Processing AS%d %s", *peerData.ASN, peerName)
+	log.Debugf("Processing AS%d %s", *peerData.ASN, peerName)
 
 	// If a PeeringDB query is required
 	if *peerData.AutoImportLimits || *peerData.AutoASSet {
@@ -557,7 +558,8 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		}
 	}
 
-	log.Debugf("Starting pathvector %s", version)
+	log.Info("Starting Pathvector %s", version)
+	startTime := time.Now()
 
 	// Load the config file from config file
 	log.Debugf("Loading config from %s", configFilename)
@@ -624,6 +626,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 
 	// Iterate over peers
+	log.Debug("Processing peers")
 	wg := new(sync.WaitGroup)
 	for peerName, peerData := range c.Peers {
 		wg.Add(1)
@@ -639,9 +642,8 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		templating.WriteVRRPConfig(c.VRRPInstances, c.KeepalivedConfig)
 
 		if c.WebUIFile != "" {
+			log.Info("Writing web UI")
 			templating.WriteUIFile(c)
-		} else {
-			log.Infof("Web UI is not defined, NOT writing UI")
 		}
 
 		bird.MoveCacheAndReconfigure(c.BIRDDirectory, c.CacheDirectory, c.BIRDSocket, noConfigure)
@@ -661,4 +663,6 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 			log.Fatalf("Removing lockfile: %v", err)
 		}
 	}
+
+	log.Infof("Processed %d peers in %s", len(c.Peers), time.Since(startTime).Round(time.Second))
 }

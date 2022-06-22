@@ -62,7 +62,7 @@ func RunCommand(command string, socket string) (string, error) {
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
 
-	log.Println("Connected to BIRD socket")
+	log.Debug("Connected to BIRD socket")
 	resp, err := Read(conn)
 	if err != nil {
 		return "", err

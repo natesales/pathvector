@@ -256,13 +256,13 @@ func sanitizeASSet(asSet string) string {
 	// If the as-set has a space in it, split and pick the first one
 	if strings.Contains(output, " ") {
 		output = strings.Split(output, " ")[0]
-		log.Warnf("Original as-set %s has a space in it. Selecting first element %s", asSet, output)
+		log.Warnf("Original AS set %s contains a space. Selecting first element %s", asSet, output)
 	}
 
 	// Trim IRRDB prefix
 	if strings.Contains(output, "::") {
 		output = strings.Split(output, "::")[1]
-		log.Warnf("Original as-set %s has an IRRDB prefix in it. Using %s", asSet, output)
+		log.Warnf("Original AS set %s includes an IRRDB prefix. Using %s", asSet, output)
 	}
 
 	return output

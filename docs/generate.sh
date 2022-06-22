@@ -14,7 +14,7 @@ sidebar_position: 3
 echo Generating CLI preview
 echo -e '---
 title: CLI
-sidebar_position: 4
+sidebar_position: 6
 ---\n# Usage\n```' >docs/docs/cli.md
 /tmp/pathvector -h >>docs/docs/cli.md
 echo '```' >>docs/docs/cli.md

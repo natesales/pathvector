@@ -1,8 +1,14 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
 # Installation
+
+<!--
+import {DownloadForm} from "../src/components/DownloadForm";
+
+<DownloadForm/>
+-->
 
 All versions of Pathvector for all supported platforms are available to download from the
 latest [release page](https://github.com/natesales/pathvector/releases).

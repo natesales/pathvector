@@ -527,6 +527,7 @@ func runCommand(line string) {
 			fmt.Printf("%% Unable write config file: %s", err)
 			return
 		}
+		fmt.Println("Persistent configuration updated")
 	case strings.HasPrefix(line, "init"):
 		if !enable {
 			fmt.Println(errEnableRequired)

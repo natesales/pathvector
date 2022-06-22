@@ -12,4 +12,8 @@ pathvector (altair) # set prefixes 192.0.2.0/24,2001:db8::/48
 pathvector (altair) # create peers Example
 pathvector (altair) # set peers Example asn 65510
 pathvector (altair) # set peers Example neighbors 192.0.2.1,2001:db8::1
+pathvector (altair) # commit
+Persistent configuration updated
+pathvector (altair) # run
+Starting Pathvector...<truncated>
 ```

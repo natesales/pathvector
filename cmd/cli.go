@@ -533,7 +533,7 @@ func runCommand(line string) {
 			return
 		}
 		if !empty {
-			fmt.Println("% Config is not empty, be careful!")
+			fmt.Println("Config is not empty, be careful!")
 		}
 		parts := strings.Split(line, " ")
 		if len(parts) != 3 {

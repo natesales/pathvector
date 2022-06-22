@@ -905,7 +905,7 @@ Peer's as-set for filtering
 
 ### `import-limit4`
 
-Maximum number of IPv4 prefixes to import
+Maximum number of IPv4 prefixes to import after filtering
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -913,11 +913,43 @@ Maximum number of IPv4 prefixes to import
 
 ### `import-limit6`
 
-Maximum number of IPv6 prefixes to import
+Maximum number of IPv6 prefixes to import after filtering
 
 | Type | Default | Validation |
 |------|---------|------------|
 | int   | 200000      |          |
+
+### `import-limit-violation`
+
+What action should be taken when the import limit is tripped?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | disable      |          |
+
+### `receive-limit4`
+
+Maximum number of IPv4 prefixes to accept (including filtered routes, requires keep-filtered)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 1000000      |          |
+
+### `receive-limit6`
+
+Maximum number of IPv6 prefixes to accept (including filtered routes, requires keep-filtered)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 200000      |          |
+
+### `receive-limit-violation`
+
+What action should be taken when the receive limit is tripped?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | disable      |          |
 
 ### `export-limit4`
 
@@ -934,6 +966,14 @@ Maximum number of IPv6 prefixes to export
 | Type | Default | Validation |
 |------|---------|------------|
 | int   | 200000      |          |
+
+### `export-limit-violation`
+
+What action should be taken when the export limit is tripped?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | disable      |          |
 
 ### `enforce-first-as`
 
@@ -958,22 +998,6 @@ Rewrite nexthop to peer address
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | false      |          |
-
-### `import-limit-violation`
-
-What action should be taken when the import limit is tripped?
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   | disable      |          |
-
-### `export-limit-violation`
-
-What action should be taken when the export limit is tripped?
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   | disable      |          |
 
 ### `allow-blackhole-community`
 

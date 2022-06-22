@@ -58,19 +58,26 @@ type Peer struct {
 	ASPrefs *map[uint32]uint32 `yaml:"as-prefs" description:"Map of ASN to import local pref (not included in optimizer)" default:"-"`
 
 	// Filtering
-	ASSet                   *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
-	ImportLimit4            *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import" default:"1000000"`
-	ImportLimit6            *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import" default:"200000"`
-	ExportLimit4            *int    `yaml:"export-limit4" description:"Maximum number of IPv4 prefixes to export" default:"1000000"`
-	ExportLimit6            *int    `yaml:"export-limit6" description:"Maximum number of IPv6 prefixes to export" default:"200000"`
-	EnforceFirstAS          *bool   `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
-	EnforcePeerNexthop      *bool   `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
-	ForcePeerNexthop        *bool   `yaml:"force-peer-nexthop" description:"Rewrite nexthop to peer address" default:"false"`
-	ImportLimitTripAction   *string `yaml:"import-limit-violation" description:"What action should be taken when the import limit is tripped?" default:"disable"`
-	ExportLimitTripAction   *string `yaml:"export-limit-violation" description:"What action should be taken when the export limit is tripped?" default:"disable"`
-	AllowBlackholeCommunity *bool   `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
-	BlackholeIn             *bool   `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
-	BlackholeOut            *bool   `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
+	ASSet *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
+
+	ImportLimit4          *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import after filtering" default:"1000000"`
+	ImportLimit6          *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import after filtering" default:"200000"`
+	ImportLimitTripAction *string `yaml:"import-limit-violation" description:"What action should be taken when the import limit is tripped?" default:"disable"`
+
+	ReceiveLimit4          *int    `yaml:"receive-limit4" description:"Maximum number of IPv4 prefixes to accept (including filtered routes, requires keep-filtered)" default:"1000000"`
+	ReceiveLimit6          *int    `yaml:"receive-limit6" description:"Maximum number of IPv6 prefixes to accept (including filtered routes, requires keep-filtered)" default:"200000"`
+	ReceiveLimitTripAction *string `yaml:"receive-limit-violation" description:"What action should be taken when the receive limit is tripped?" default:"disable"`
+
+	ExportLimit4          *int    `yaml:"export-limit4" description:"Maximum number of IPv4 prefixes to export" default:"1000000"`
+	ExportLimit6          *int    `yaml:"export-limit6" description:"Maximum number of IPv6 prefixes to export" default:"200000"`
+	ExportLimitTripAction *string `yaml:"export-limit-violation" description:"What action should be taken when the export limit is tripped?" default:"disable"`
+
+	EnforceFirstAS          *bool `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
+	EnforcePeerNexthop      *bool `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
+	ForcePeerNexthop        *bool `yaml:"force-peer-nexthop" description:"Rewrite nexthop to peer address" default:"false"`
+	AllowBlackholeCommunity *bool `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
+	BlackholeIn             *bool `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
+	BlackholeOut            *bool `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
 	// Filtering
 	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`

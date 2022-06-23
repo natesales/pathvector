@@ -93,6 +93,14 @@ Log file location
 |------|---------|------------|
 | string   | syslog      |          |
 
+### `global-config`
+
+Global BIRD configuration
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
 ### `portal-host`
 
 Peering portal host (disabled if empty)

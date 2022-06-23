@@ -413,7 +413,9 @@ protocol mrt {{ StrDeref $instance.ProtocolName }} {
   {{ if $instance.Table }}table "{{ StrDeref $instance.Table }}";{{ end }}
 }
 {{ end }}
-# ---- Peers ----
+# ---- Custom global config ----
+
+{{ .GlobalConfig }}
 
 include "manual*.conf";
 include "AS*.conf";

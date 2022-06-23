@@ -76,12 +76,6 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         import filter {
             {{ if $global.NoAccept }}reject;{{ end }}
 
-            {{ if not (Empty $peer.DontAnnounce) }}
-            if (net ~ [
-            {{ BirdSet $peer.DontAnnounce }}
-            ]) then _reject("prefix in dont-announce list");
-            {{ end }}
-
             {{ StrDeref $peer.PreImport }}
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
             {{ if BoolDeref $peer.FilterBogonASNs }}reject_bogon_asns();{{ end }}
@@ -148,6 +142,12 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
 
         export filter {
             {{ if $global.NoAnnounce }}reject;{{ end }}
+
+            {{ if not (Empty $peer.DontAnnounce) }}
+            if (net ~ [
+            {{ BirdSet $peer.DontAnnounce }}
+            ]) then _reject("prefix in dont-announce list");
+            {{ end }}
 
             {{ StrDeref $peer.PreExport }}
 

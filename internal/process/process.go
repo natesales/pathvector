@@ -32,13 +32,14 @@ import (
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
 func categorizeCommunity(input string) string {
 	// Test if it fits the criteria for a standard community
-	standardSplit := strings.Split(input, ",")
-	if len(standardSplit) == 2 {
-		firstPart, err := strconv.Atoi(standardSplit[0])
+	input = strings.ReplaceAll(input, ",", ":")
+	split := strings.Split(input, ":")
+	if len(split) == 2 {
+		firstPart, err := strconv.Atoi(split[0])
 		if err != nil {
 			return ""
 		}
-		secondPart, err := strconv.Atoi(standardSplit[1])
+		secondPart, err := strconv.Atoi(split[1])
 		if err != nil {
 			return ""
 		}
@@ -50,20 +51,16 @@ func categorizeCommunity(input string) string {
 			return ""
 		}
 		return "standard"
-	}
-
-	// Test if it fits the criteria for a large community
-	largeSplit := strings.Split(input, ":")
-	if len(largeSplit) == 3 {
-		firstPart, err := strconv.Atoi(largeSplit[0])
+	} else if len(split) == 3 {
+		firstPart, err := strconv.Atoi(split[0])
 		if err != nil {
 			return ""
 		}
-		secondPart, err := strconv.Atoi(largeSplit[1])
+		secondPart, err := strconv.Atoi(split[1])
 		if err != nil {
 			return ""
 		}
-		thirdPart, err := strconv.Atoi(largeSplit[2])
+		thirdPart, err := strconv.Atoi(split[2])
 		if err != nil {
 			return ""
 		}

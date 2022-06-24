@@ -1,7 +1,7 @@
 ---
 title: Snippets
 sidebar_position: 5
---
+---
 
 The `global-config` option can be used to specify a block of global BIRD configuration. Additionally, Pathvector will
 load files that match `manual*.conf` in the BIRD configuration directory.

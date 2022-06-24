@@ -74,3 +74,4 @@ peers:
       - 65530
       - 65540
     filter-as-set: true
+    pre-import: 'print "Hello from <pathvector.asn>";'

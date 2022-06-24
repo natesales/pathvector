@@ -83,6 +83,27 @@ func categorizeCommunity(input string) string {
 	return ""
 }
 
+func templateReplacements(in string, peer *config.Peer) string {
+	v := reflect.ValueOf(peer)
+	for v.Kind() == reflect.Ptr { // Dereference pointer types
+		v = v.Elem()
+	}
+	vType := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		key := vType.Field(i).Tag.Get("yaml")
+		if key != "-" {
+			field := v.Field(i)
+			key = "<pathvector." + key + ">"
+			if !field.IsZero() {
+				val := fmt.Sprintf("%v", field.Elem().Interface())
+				log.Tracef("Replacing %s with %s\n", key, val)
+				in = strings.ReplaceAll(in, key, val)
+			}
+		}
+	}
+	return in
+}
+
 // Load loads a configuration file from a YAML file
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
@@ -246,6 +267,20 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 			*peerData.PreExportFinal += "\n" + string(content)
 		}
+
+		if peerData.PreImport != nil {
+			peerData.PreImport = util.Ptr(templateReplacements(*peerData.PreImport, peerData))
+		}
+		if peerData.PreExport != nil {
+			peerData.PreExport = util.Ptr(templateReplacements(*peerData.PreExport, peerData))
+		}
+		if peerData.PreImportFinal != nil {
+			peerData.PreImportFinal = util.Ptr(templateReplacements(*peerData.PreImportFinal, peerData))
+		}
+		if peerData.PreExportFinal != nil {
+			peerData.PreExportFinal = util.Ptr(templateReplacements(*peerData.PreExportFinal, peerData))
+		}
+
 		if peerData.DefaultLocalPref != nil && peerData.OptimizeInbound != nil {
 			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
 		}

@@ -3,6 +3,8 @@ package util
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestContains(t *testing.T) {
@@ -86,11 +88,7 @@ func TestPrintTable(t *testing.T) {
 	os.Stdout = old
 }
 
-func TestStrDeref(t *testing.T) {
-	if out := StrDeref(nil); out != "" {
-		t.Errorf("strDeref failed. expected '' got '%s'", out)
-	}
-	if out := StrDeref(StrPtr("foo")); out != "foo" {
-		t.Errorf("strDeref failed. expected 'foo' got '%s'", out)
-	}
+func TestUtilPtrDeref(t *testing.T) {
+	assert.Equal(t, "foo", StrDeref(Ptr("foo")))
+	assert.Equal(t, "", StrDeref(nil))
 }

@@ -216,18 +216,19 @@ type Optimizer struct {
 
 // Config stores the global configuration
 type Config struct {
-	PeeringDBQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	PeeringDBAPIKey       string `yaml:"peeringdb-api-key" description:"PeeringDB API key"`
-	PeeringDBCache        bool   `yaml:"peeringdb-cache" description:"Cache PeeringDB results" default:"true"`
-	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
-	BIRDDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BIRDBinary            string `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
-	BIRDSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	CacheDirectory        string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
-	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
-	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
-	GlobalConfig          string `yaml:"global-config" description:"Global BIRD configuration" default:""`
+	PeeringDBQueryTimeout uint     `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	PeeringDBAPIKey       string   `yaml:"peeringdb-api-key" description:"PeeringDB API key"`
+	PeeringDBCache        bool     `yaml:"peeringdb-cache" description:"Cache PeeringDB results" default:"true"`
+	IRRQueryTimeout       uint     `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	BIRDDirectory         string   `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BIRDBinary            string   `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
+	BIRDSocket            string   `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	CacheDirectory        string   `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
+	KeepalivedConfig      string   `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile             string   `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
+	LogFile               string   `yaml:"log-file" description:"Log file location" default:"syslog"`
+	GlobalConfig          string   `yaml:"global-config" description:"Global BIRD configuration" default:""`
+	OriginCommunities     []string `yaml:"origin-communities" description:"List of communities to add to locally originated routes" default:""`
 
 	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
 	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
@@ -261,12 +262,14 @@ type Config struct {
 	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
-	RTRServerHost string   `yaml:"-" description:"-"`
-	RTRServerPort int      `yaml:"-" description:"-"`
-	Prefixes4     []string `yaml:"-" description:"-"`
-	Prefixes6     []string `yaml:"-" description:"-"`
-	QueryNVRS     bool     `yaml:"-" description:"-"`
-	NVRSASNs      []uint32 `yaml:"-" description:"-"`
+	RTRServerHost             string   `yaml:"-" description:"-"`
+	RTRServerPort             int      `yaml:"-" description:"-"`
+	Prefixes4                 []string `yaml:"-" description:"-"`
+	Prefixes6                 []string `yaml:"-" description:"-"`
+	QueryNVRS                 bool     `yaml:"-" description:"-"`
+	NVRSASNs                  []uint32 `yaml:"-" description:"-"`
+	OriginStandardCommunities []string `yaml:"-" description:"-"`
+	OriginLargeCommunities    []string `yaml:"-" description:"-"`
 }
 
 // Init initializes a Config with embedded structs prior to calling config.Default

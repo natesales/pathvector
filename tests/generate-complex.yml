@@ -8,6 +8,10 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 
+origin-communities:
+  - 34553:10
+  - 34553:10:1
+
 kernel:
   srd-communities:
     - 65530,1

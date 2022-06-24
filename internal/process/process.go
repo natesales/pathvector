@@ -324,6 +324,25 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 	}
 
+	if c.OriginCommunities != nil {
+		for _, community := range c.OriginCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				if c.OriginStandardCommunities == nil {
+					c.OriginStandardCommunities = []string{}
+				}
+				c.OriginStandardCommunities = append(c.OriginStandardCommunities, community)
+			} else if communityType == "large" {
+				if c.OriginLargeCommunities == nil {
+					c.OriginLargeCommunities = []string{}
+				}
+				c.OriginLargeCommunities = append(c.OriginLargeCommunities, strings.ReplaceAll(community, ":", ","))
+			} else {
+				return nil, errors.New("Invalid origin community: " + community)
+			}
+		}
+	}
+
 	// Parse static routes
 	for prefix, nexthop := range c.Kernel.Statics {
 		// Handle interface suffix

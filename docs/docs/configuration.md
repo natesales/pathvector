@@ -101,6 +101,14 @@ Global BIRD configuration
 |------|---------|------------|
 | string   |       |          |
 
+### `origin-communities`
+
+List of communities to add to locally originated routes
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `portal-host`
 
 Peering portal host (disabled if empty)

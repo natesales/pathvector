@@ -73,11 +73,11 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		Update(&config.Peer{
-			ASN:              util.IntPtr(tc.asn),
-			AutoImportLimits: util.BoolPtr(tc.auto),
-			AutoASSet:        util.BoolPtr(tc.auto),
-			ImportLimit4:     util.IntPtr(0),
-			ImportLimit6:     util.IntPtr(0),
+			ASN:              util.Ptr(tc.asn),
+			AutoImportLimits: util.Ptr(tc.auto),
+			AutoASSet:        util.Ptr(tc.auto),
+			ImportLimit4:     util.Ptr(0),
+			ImportLimit6:     util.Ptr(0),
 		}, peeringDbQueryTimeout, "", true)
 	}
 }

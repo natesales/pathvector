@@ -139,17 +139,6 @@ func StrDeref(s *string) string {
 	return *s
 }
 
-// StrPtr returns a pointer to a string
-func StrPtr(s string) *string {
-	return &s
-}
-
-// IntPtr returns a pointer to an int
-func IntPtr(i int) *int {
-	return &i
-}
-
-// BoolPtr returns a pointer to a boolean
-func BoolPtr(b bool) *bool {
-	return &b
+func Ptr[T any](a T) *T {
+	return &a
 }

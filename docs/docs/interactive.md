@@ -1,4 +1,7 @@
-# Interactive CLI
+---
+title: Interactive CLI
+sidebar_position: 7
+---
 
 Pathvector supports an interactive CLI for configuration.
 

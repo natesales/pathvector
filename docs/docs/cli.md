@@ -1,5 +1,5 @@
 ---
-title: CLI
+title: CLI Usage
 sidebar_position: 6
 ---
 # Usage

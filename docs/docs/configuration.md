@@ -855,7 +855,7 @@ Prefer older routes instead of comparing router IDs (RFC 5004)
 |------|---------|------------|
 | bool   | false      |          |
 
-### `import-communities`
+### `add-on-import`
 
 List of communities to add to all imported routes
 
@@ -863,7 +863,7 @@ List of communities to add to all imported routes
 |------|---------|------------|
 | []string   |       |          |
 
-### `export-communities`
+### `add-on-export`
 
 List of communities to add to all exported routes
 
@@ -871,7 +871,7 @@ List of communities to add to all exported routes
 |------|---------|------------|
 | []string   |       |          |
 
-### `announce-communities`
+### `announce`
 
 Announce all routes matching these communities to the peer
 

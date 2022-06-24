@@ -49,9 +49,9 @@ type Peer struct {
 	DisableAfterError    *bool     `yaml:"disable-after-error" description:"Disable peer after error" default:"false"`
 	PreferOlderRoutes    *bool     `yaml:"prefer-older-routes" description:"Prefer older routes instead of comparing router IDs (RFC 5004)" default:"false"`
 
-	ImportCommunities    *[]string `yaml:"import-communities" description:"List of communities to add to all imported routes" default:"-"`
-	ExportCommunities    *[]string `yaml:"export-communities" description:"List of communities to add to all exported routes" default:"-"`
-	AnnounceCommunities  *[]string `yaml:"announce-communities" description:"Announce all routes matching these communities to the peer" default:"-"`
+	ImportCommunities    *[]string `yaml:"add-on-import" description:"List of communities to add to all imported routes" default:"-"`
+	ExportCommunities    *[]string `yaml:"add-on-export" description:"List of communities to add to all exported routes" default:"-"`
+	AnnounceCommunities  *[]string `yaml:"announce" description:"Announce all routes matching these communities to the peer" default:"-"`
 	RemoveCommunities    *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
 	RemoveAllCommunities *int      `yaml:"remove-all-communities" description:"Remove all standard and large communities beginning with this value" default:"-"`
 

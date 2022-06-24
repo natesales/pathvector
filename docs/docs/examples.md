@@ -30,30 +30,30 @@ prefixes:
 templates:
   upstream:
     allow-local-as: true
-    announce-communities: [ "65510,15", "65510:0:15" ]
+    announce: [ "65510,15", "65510:0:15" ]
     remove-all-communities: 65510
     local-pref: 80
-    import-communities: [ "65510,12", "65510:0:12" ]
+    add-on-import: [ "65510,12", "65510:0:12" ]
 
   routeserver:
     filter-transit-asns: true
     auto-import-limits: true
     enforce-peer-nexthop: false
     enforce-first-as: false
-    announce-communities: [ "65510,15", "65510:0:15" ]
+    announce: [ "65510,15", "65510:0:15" ]
     remove-all-communities: 65510
     local-pref: 90
-    import-communities: [ "65510,13", "65510:0:13" ]
+    add-on-import: [ "65510,13", "65510:0:13" ]
 
   peer:
     filter-irr: true
     filter-transit-asns: true
     auto-import-limits: true
     auto-as-set: true
-    announce-communities: [ "65510,15", "65510:0:15" ]
+    announce: [ "65510,15", "65510:0:15" ]
     remove-all-communities: 65510
     local-pref: 100
-    import-communities: [ "65510,14", "65510:0:14" ]
+    add-on-import: [ "65510,14", "65510:0:14" ]
 
   downstream:
     filter-irr: true
@@ -61,11 +61,11 @@ templates:
     filter-transit-asns: true
     auto-import-limits: true
     auto-as-set: true
-    announce-communities: [ "65510,15", "65510:0:15" ]
+    announce: [ "65510,15", "65510:0:15" ]
     announce-default: true
     remove-all-communities: 65510
     local-pref: 200
-    import-communities: [ "65510,15", "65510:0:15" ]
+    add-on-import: [ "65510,15", "65510:0:15" ]
 
 peers:
   Hurricane Electric:

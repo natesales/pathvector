@@ -45,13 +45,13 @@ peers:
       65510: 10
       65520: 20
       65530: 30
-    import-communities:
+    add-on-import:
       - 65530,1
       - 65530:65530:1
-    export-communities:
+    add-on-export:
       - 65530,2
       - 65530:65530:2
-    announce-communities:
+    announce:
       - 65530,3
       - 65530:65530:3
     remove-communities:

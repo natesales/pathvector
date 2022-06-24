@@ -74,6 +74,6 @@ FastNetMon:
   enforce-peer-nexthop: false  # Peer nexthops will be set to blackhole addresses, not the BGP peer address
   announce-originated: false  # No need to announce anything to FNM. While it does support learning routes over BGP, the implementation requires a cronjob to run the updates: https://fastnetmon.com/docs-fnm-advanced/subnet-collection-from-bgp-peering-session/
   neighbor-port: 1179  # The default BGP port will conflict, so we'll use a different one for FastNetMon
-  import-communities: [ "65530,666" ]  # More communities can be added here for other peers, or added on a per-peer basis
+  add-on-import: [ "65530,666" ]  # More communities can be added here for other peers, or added on a per-peer basis
   mp-unicast-46: true  # FastNetMon will announce both IPv4 and IPv6 routes over this multiprotocol session
 ```

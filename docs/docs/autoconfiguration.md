@@ -12,7 +12,7 @@ Generated YAML output will be indented 2 spaces by default to fit within the YAM
 ```bash
 ~ ▴ grep ^asn /etc/pathvector.yml
 asn: 34553
-~ ▴ pathvector match 13335
+~ ▴ pathvector match 13335 -y
   Cloudflare SIX Seattle:
     asn: 13335
     neighbors:

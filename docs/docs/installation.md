@@ -109,9 +109,7 @@ Nokia SR Linux is based on CentOS, see [CentOS](#centos) for more information.
 
 ## Mikrotik RouterOS
 
-Pathvector can be installed on >= RouterOS v7.1rc3. Check
-the [Mikrotik Product Matrix](https://mikrotik.com/products/matrix) for the most recent hardware listing and
-the [RouterOS Container](https://help.mikrotik.com/docs/display/ROS/Container) reference for installation instructions
+Pathvector has experimental RouterOS support. Mikrotik has discontinued this feature. See the [RouterOS Container](https://help.mikrotik.com/docs/display/ROS/Container) reference for installation instructions
 for the container package.
 
 To build a Docker image for an alternate architecture:

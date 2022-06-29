@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Disabling build
+exit 0
+
 set -e
 version=$(git describe --tags "$(git rev-list --tags --max-count=1)" | cut -c2-)
 

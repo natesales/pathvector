@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -51,7 +52,10 @@ type Data struct {
 	ImportLimit6 int    `json:"info_prefixes6"`
 }
 
-var cache map[uint32]*Data
+var (
+	cache map[uint32]*Data
+	lock  sync.Mutex
+)
 
 // networkInfo returns PeeringDB for an ASN
 func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
@@ -110,6 +114,8 @@ func NetworkInfo(asn uint32, queryTimeout uint, apiKey string, useCache bool) (*
 	if !useCache {
 		return networkInfo(asn, queryTimeout, apiKey)
 	} else {
+		lock.Lock()
+		defer lock.Unlock()
 		if cache == nil {
 			cache = make(map[uint32]*Data)
 		}

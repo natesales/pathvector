@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Disabling build
+exit 0
+
 set -e
 
 # Download ioxclient if it doesn't already exist

@@ -64,12 +64,12 @@ type Peer struct {
 	ImportLimit6          *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import after filtering" default:"200000"`
 	ImportLimitTripAction *string `yaml:"import-limit-violation" description:"What action should be taken when the import limit is tripped?" default:"disable"`
 
-	ReceiveLimit4          *int    `yaml:"receive-limit4" description:"Maximum number of IPv4 prefixes to accept (including filtered routes, requires keep-filtered)" default:"1000000"`
-	ReceiveLimit6          *int    `yaml:"receive-limit6" description:"Maximum number of IPv6 prefixes to accept (including filtered routes, requires keep-filtered)" default:"200000"`
+	ReceiveLimit4          *int    `yaml:"receive-limit4" description:"Maximum number of IPv4 prefixes to accept (including filtered routes, requires keep-filtered)" default:"-"`
+	ReceiveLimit6          *int    `yaml:"receive-limit6" description:"Maximum number of IPv6 prefixes to accept (including filtered routes, requires keep-filtered)" default:"-"`
 	ReceiveLimitTripAction *string `yaml:"receive-limit-violation" description:"What action should be taken when the receive limit is tripped?" default:"disable"`
 
-	ExportLimit4          *int    `yaml:"export-limit4" description:"Maximum number of IPv4 prefixes to export" default:"1000000"`
-	ExportLimit6          *int    `yaml:"export-limit6" description:"Maximum number of IPv6 prefixes to export" default:"200000"`
+	ExportLimit4          *int    `yaml:"export-limit4" description:"Maximum number of IPv4 prefixes to export" default:"-"`
+	ExportLimit6          *int    `yaml:"export-limit6" description:"Maximum number of IPv6 prefixes to export" default:"-"`
 	ExportLimitTripAction *string `yaml:"export-limit-violation" description:"What action should be taken when the export limit is tripped?" default:"disable"`
 
 	EnforceFirstAS          *bool `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`

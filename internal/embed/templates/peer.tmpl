@@ -4,10 +4,11 @@
 
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v4 = {{ $peer.ImportLimit4 }};
 define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v6 = {{ $peer.ImportLimit6 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_RECEIVE_v4 = {{ $peer.ReceiveLimit4 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_RECEIVE_v6 = {{ $peer.ReceiveLimit6 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v4 = {{ $peer.ExportLimit4 }};
-define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v6 = {{ $peer.ExportLimit6 }};
+
+{{ if IntDeref $peer.ReceiveLimit4 }}define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_RECEIVE_v4 = {{ $peer.ReceiveLimit4 }};{{ end }}
+{{ if IntDeref $peer.ReceiveLimit6 }}define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_RECEIVE_v6 = {{ $peer.ReceiveLimit6 }};{{ end }}
+{{ if IntDeref $peer.ExportLimit4 }}define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v4 = {{ $peer.ExportLimit4 }};{{ end }}
+{{ if IntDeref $peer.ExportLimit6 }}define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v6 = {{ $peer.ExportLimit6 }};{{ end }}
 
 {{ if BoolDeref $peer.FilterIRR }}
 {{ if not (Empty $peer.PrefixSet4) }}
@@ -65,8 +66,15 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
     ipv{{ $af }} {
         {{ if BoolDeref $global.KeepFiltered }}import keep filtered;{{ end }}
         import limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_IMPORT_v{{ $af }} action {{ $peer.ImportLimitTripAction }};
+
+        {{ if (or (and (IntDeref $peer.ReceiveLimit4) (eq $af "4")) (and (IntDeref $peer.ReceiveLimit6) (eq $af "6"))) }}
         receive limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_RECEIVE_v{{ $af }} action {{ $peer.ReceiveLimitTripAction }};
+        {{ end }}
+
+        {{ if (or (and (IntDeref $peer.ExportLimit4) (eq $af "4")) (and (IntDeref $peer.ExportLimit6) (eq $af "6"))) }}
         export limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v{{ $af }} action {{ $peer.ExportLimitTripAction }};
+        {{ end }}
+
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}

@@ -949,7 +949,7 @@ Maximum number of IPv4 prefixes to accept (including filtered routes, requires k
 
 | Type | Default | Validation |
 |------|---------|------------|
-| int   | 1000000      |          |
+| int   |       |          |
 
 ### `receive-limit6`
 
@@ -957,7 +957,7 @@ Maximum number of IPv6 prefixes to accept (including filtered routes, requires k
 
 | Type | Default | Validation |
 |------|---------|------------|
-| int   | 200000      |          |
+| int   |       |          |
 
 ### `receive-limit-violation`
 
@@ -973,7 +973,7 @@ Maximum number of IPv4 prefixes to export
 
 | Type | Default | Validation |
 |------|---------|------------|
-| int   | 1000000      |          |
+| int   |       |          |
 
 ### `export-limit6`
 
@@ -981,7 +981,7 @@ Maximum number of IPv6 prefixes to export
 
 | Type | Default | Validation |
 |------|---------|------------|
-| int   | 200000      |          |
+| int   |       |          |
 
 ### `export-limit-violation`
 

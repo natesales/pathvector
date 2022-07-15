@@ -247,7 +247,7 @@ type Config struct {
 	Source6       string `yaml:"source6" description:"Source IPv6 address"`
 	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI RTR session" default:"true"`
+	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
 
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`

@@ -137,11 +137,11 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ end }}
 
             {{ if BoolDeref $peer.FilterIRR }}
-            if (net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { accept; } else { _reject("not in IRR prefix set"); }
+            if !(net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { _reject("not in IRR prefix set"); }
             {{ end }}
 
             {{ if BoolDeref $peer.FilterASSet }}
-            if (bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { accept; } else { _reject("not in AS set"); }
+            if !(bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }
             {{ end }}
 
             {{ StrDeref $peer.PreImportFinal }}

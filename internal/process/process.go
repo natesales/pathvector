@@ -562,7 +562,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 			peerData.ASSetMembers = &newASSetMembers
 		}
 	}
-	if *peerData.FilterASSet && len(*peerData.ASSetMembers) < 1 {
+	if *peerData.FilterASSet && (peerData.ASSetMembers == nil || len(*peerData.ASSetMembers) < 1) {
 		log.Fatalf("peer has filter-as-set enabled but no members in it's as-set")
 	}
 

@@ -10,10 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install bgpq4 and bird2
-        run: |
-          wget http://archive.ubuntu.com/ubuntu/pool/universe/b/bgpq4/bgpq4_1.4-1_amd64.deb
-          sudo dpkg -i bgpq4*.deb
-          sudo apt install -y bird2
+        run: sudo apt install -y bird2 bgpq4
 
       - name: Set up Go
         uses: actions/setup-go@v2

@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Install bgpq4 and bird2
         run: |
-          wget https://mirrors.kernel.org/ubuntu/pool/universe/b/bgpq4/bgpq4_0.0.6-2_amd64.deb
+          wget http://archive.ubuntu.com/ubuntu/pool/universe/b/bgpq4/bgpq4_1.4-1_amd64.deb
           sudo dpkg -i bgpq4*.deb
           sudo apt install -y bird2
 

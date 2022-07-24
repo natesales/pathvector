@@ -110,15 +110,11 @@ type Peer struct {
 	// Custom daemon configuration
 	SessionGlobal *string `yaml:"session-global" description:"Configuration to add to each session before any defined BGP protocols" default:"-"`
 
-	PreImport      *string `yaml:"pre-import" description:"Configuration to add at the beginning of the import filter" default:"-"`
-	PreExport      *string `yaml:"pre-export" description:"Configuration to add at the beginning of the export filter" default:"-"`
-	PreImportFinal *string `yaml:"pre-import-final" description:"Configuration to add immediately before the final accept/reject on import" default:"-"`
-	PreExportFinal *string `yaml:"pre-export-final" description:"Configuration to add immediately before the final accept/reject on export" default:"-"`
-
-	PreImportFile      *string `yaml:"pre-import-file" description:"Configuration file to append to pre-import" default:"-"`
-	PreExportFile      *string `yaml:"pre-export-file" description:"Configuration file to append to pre-export" default:"-"`
-	PreImportFinalFile *string `yaml:"pre-import-final-file" description:"Configuration file to append to pre-import-final" default:"-"`
-	PreExportFinalFile *string `yaml:"pre-export-final-file" description:"Configuration file to append to pre-export-final" default:"-"`
+	PreImportFilter  *string `yaml:"pre-import-filter" description:"Configuration to add before the filtering section of the import policy" default:"-"`
+	PostImportFilter *string `yaml:"post-import-filter" description:"Configuration to add after the filtering section of the import filter" default:"-"`
+	PreImportAccept  *string `yaml:"pre-import-accept" description:"Configuration to add immediately before the final accept term import" default:"-"`
+	PreExport        *string `yaml:"pre-export" description:"Configuration to add before the export policy" default:"-"`
+	PreExportFinal   *string `yaml:"pre-export-final" description:"Configuration to add after the export policy" default:"-"`
 
 	// Optimizer
 	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`

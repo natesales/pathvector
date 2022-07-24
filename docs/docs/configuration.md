@@ -231,7 +231,7 @@ Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to t
 
 ### `rpki-enable`
 
-Enable RPKI RTR session
+Enable RPKI protocol
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1207,9 +1207,25 @@ Configuration to add to each session before any defined BGP protocols
 |------|---------|------------|
 | string   |       |          |
 
-### `pre-import`
+### `pre-import-filter`
 
-Configuration to add at the beginning of the import filter
+Configuration to add before the filtering section of the import policy
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `post-import-filter`
+
+Configuration to add after the filtering section of the import filter
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `pre-import-accept`
+
+Configuration to add immediately before the final accept term import
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1217,15 +1233,7 @@ Configuration to add at the beginning of the import filter
 
 ### `pre-export`
 
-Configuration to add at the beginning of the export filter
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `pre-import-final`
-
-Configuration to add immediately before the final accept/reject on import
+Configuration to add before the export policy
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1233,39 +1241,7 @@ Configuration to add immediately before the final accept/reject on import
 
 ### `pre-export-final`
 
-Configuration to add immediately before the final accept/reject on export
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `pre-import-file`
-
-Configuration file to append to pre-import
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `pre-export-file`
-
-Configuration file to append to pre-export
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `pre-import-final-file`
-
-Configuration file to append to pre-import-final
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `pre-export-final-file`
-
-Configuration file to append to pre-export-final
+Configuration to add after the export policy
 
 | Type | Default | Validation |
 |------|---------|------------|

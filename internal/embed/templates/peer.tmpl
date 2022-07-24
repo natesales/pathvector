@@ -84,7 +84,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
         import filter {
             {{ if $global.NoAccept }}reject;{{ end }}
 
-            {{ StrDeref $peer.PreImport }}
+            {{ StrDeref $peer.PreImportFilter }}
+
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
             {{ if BoolDeref $peer.FilterBogonASNs }}reject_bogon_asns();{{ end }}
             {{ if BoolDeref $peer.FilterPrefixLength }}reject_out_of_bounds_routes();{{ end }}
@@ -94,6 +95,11 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ if BoolDeref $peer.EnforceFirstAS }}enforce_first_as({{ $peer.ASN }});{{ end }}
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighborNoIface }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
+            {{ if BoolDeref $peer.FilterIRR }}if !(net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { _reject("not in IRR prefix set"); }{{ end }}
+            {{ if BoolDeref $peer.FilterASSet }}if !(bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }{{ end }}
+
+            {{ StrDeref $peer.PostImportFilter }}
+
             {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighborNoIface }};{{ end }}
 
             {{ if StrDeref $peer.ImportNextHop }}
@@ -136,15 +142,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             set_blackhole();
             {{ end }}
 
-            {{ if BoolDeref $peer.FilterIRR }}
-            if !(net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { _reject("not in IRR prefix set"); }
-            {{ end }}
-
-            {{ if BoolDeref $peer.FilterASSet }}
-            if !(bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }
-            {{ end }}
-
-            {{ StrDeref $peer.PreImportFinal }}
+            {{ StrDeref $peer.PreImportAccept }}
             accept;
         };
 

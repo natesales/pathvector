@@ -234,45 +234,17 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
-		// Append snippet files
-		if peerData.PreImportFile != nil {
-			content, err := os.ReadFile(*peerData.PreImportFile)
-			if err != nil {
-				log.Fatalf("Unable to read pre-import-file: %s", err)
-			}
-			*peerData.PreImport += "\n" + string(content)
+		if peerData.PreImportFilter != nil {
+			peerData.PreImportFilter = util.Ptr(templateReplacements(*peerData.PreImportFilter, peerData))
 		}
-		if peerData.PreExportFile != nil {
-			content, err := os.ReadFile(*peerData.PreExportFile)
-			if err != nil {
-				log.Fatalf("Unable to read pre-export-file: %s", err)
-			}
-			*peerData.PreExport += "\n" + string(content)
+		if peerData.PostImportFilter != nil {
+			peerData.PostImportFilter = util.Ptr(templateReplacements(*peerData.PostImportFilter, peerData))
 		}
-
-		if peerData.PreImportFinalFile != nil {
-			content, err := os.ReadFile(*peerData.PreImportFinalFile)
-			if err != nil {
-				log.Fatalf("Unable to read pre-import-final-file: %s", err)
-			}
-			*peerData.PreImportFinal += "\n" + string(content)
-		}
-		if peerData.PreExportFinalFile != nil {
-			content, err := os.ReadFile(*peerData.PreExportFinalFile)
-			if err != nil {
-				log.Fatalf("Unable to read pre-export-final-file: %s", err)
-			}
-			*peerData.PreExportFinal += "\n" + string(content)
-		}
-
-		if peerData.PreImport != nil {
-			peerData.PreImport = util.Ptr(templateReplacements(*peerData.PreImport, peerData))
+		if peerData.PreImportAccept != nil {
+			peerData.PreImportAccept = util.Ptr(templateReplacements(*peerData.PreImportAccept, peerData))
 		}
 		if peerData.PreExport != nil {
 			peerData.PreExport = util.Ptr(templateReplacements(*peerData.PreExport, peerData))
-		}
-		if peerData.PreImportFinal != nil {
-			peerData.PreImportFinal = util.Ptr(templateReplacements(*peerData.PreImportFinal, peerData))
 		}
 		if peerData.PreExportFinal != nil {
 			peerData.PreExportFinal = util.Ptr(templateReplacements(*peerData.PreExportFinal, peerData))

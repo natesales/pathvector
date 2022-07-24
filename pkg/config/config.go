@@ -114,7 +114,7 @@ type Peer struct {
 	PostImportFilter *string `yaml:"post-import-filter" description:"Configuration to add after the filtering section of the import filter" default:"-"`
 	PreImportAccept  *string `yaml:"pre-import-accept" description:"Configuration to add immediately before the final accept term import" default:"-"`
 	PreExport        *string `yaml:"pre-export" description:"Configuration to add before the export policy" default:"-"`
-	PreExportFinal   *string `yaml:"pre-export-final" description:"Configuration to add after the export policy" default:"-"`
+	PreExportFinal   *string `yaml:"pre-export-final" description:"Configuration to add after the export policy before the final accept/reject term" default:"-"`
 
 	// Optimizer
 	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`

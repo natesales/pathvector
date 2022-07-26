@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 CONFIG_FILENAME = "plugin.cfg"
-LOADER_FILENAME = "internal/process/pluginloader.go"
+LOADER_FILENAME = "pkg/process/pluginloader.go"
 
 plugins = []
 replacements = ""

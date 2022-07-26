@@ -1,9 +1,8 @@
 package cmd
 
 import (
+	"github.com/natesales/pathvector/pkg/autodoc"
 	"github.com/spf13/cobra"
-
-	"github.com/natesales/pathvector/internal/autodoc"
 )
 
 func init() {

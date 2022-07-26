@@ -2,11 +2,10 @@ package match
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/pkg/peeringdb"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-
-	"github.com/natesales/pathvector/internal/peeringdb"
 )
 
 // CommonIXs gets common IXPs from PeeringDB

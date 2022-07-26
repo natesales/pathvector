@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/pkg/match"
+	"github.com/natesales/pathvector/pkg/process"
 	"os"
 	"strconv"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/natesales/pathvector/internal/match"
-	"github.com/natesales/pathvector/internal/process"
 )
 
 var (

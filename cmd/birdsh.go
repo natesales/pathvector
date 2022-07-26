@@ -3,14 +3,13 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"github.com/natesales/pathvector/pkg/bird"
 	"net"
 	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/natesales/pathvector/internal/bird"
 )
 
 var socket = ""

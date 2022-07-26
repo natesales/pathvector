@@ -1,10 +1,10 @@
 package peeringdb
 
 import (
+	"github.com/natesales/pathvector/pkg/util"
 	"strings"
 	"testing"
 
-	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/stretchr/testify/assert"
 )

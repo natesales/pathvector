@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"github.com/natesales/pathvector/pkg/util"
 	"io"
 	"net"
 	"os"
@@ -16,8 +17,6 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
-
-	"github.com/natesales/pathvector/internal/util"
 )
 
 // Minimum supported BIRD version

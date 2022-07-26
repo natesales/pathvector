@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/pkg/optimizer"
+	"github.com/natesales/pathvector/pkg/process"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
-
-	"github.com/natesales/pathvector/internal/optimizer"
-	"github.com/natesales/pathvector/internal/process"
 )
 
 func init() {

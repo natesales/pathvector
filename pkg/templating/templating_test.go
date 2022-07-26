@@ -1,9 +1,9 @@
 package templating
 
 import (
+	"github.com/natesales/pathvector/pkg/embed"
 	"testing"
 
-	"github.com/natesales/pathvector/internal/embed"
 	"github.com/natesales/pathvector/pkg/config"
 )
 

@@ -160,6 +160,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 		// Assign values from template
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
+			//golint:ignore staticcheck
 			if template == nil {
 				log.Fatalf("Template %s not found", *peerData.Template)
 			}

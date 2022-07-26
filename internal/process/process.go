@@ -160,28 +160,28 @@ func Load(configBlob []byte) (*config.Config, error) {
 		// Assign values from template
 		if peerData.Template != nil && *peerData.Template != "" {
 			template := c.Templates[*peerData.Template]
-			//golint:ignore
 			if template == nil {
 				log.Fatalf("Template %s not found", *peerData.Template)
-			}
-			templateValue := reflect.ValueOf(*template)
-			peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
+			} else {
+				templateValue := reflect.ValueOf(*template)
+				peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
 
-			templateValueType := templateValue.Type()
-			for i := 0; i < templateValueType.NumField(); i++ {
-				fieldName := templateValueType.Field(i).Name
-				peerFieldValue := peerValue.FieldByName(fieldName)
-				if fieldName != "Template" { // Ignore the template field
-					pVal := reflect.Indirect(peerFieldValue)
-					peerHasValueConfigured := pVal.IsValid()
-					tValue := templateValue.Field(i)
-					templateHasValueConfigured := !tValue.IsNil()
-					if templateHasValueConfigured && !peerHasValueConfigured {
-						// Use the template's value
-						peerFieldValue.Set(templateValue.Field(i))
+				templateValueType := templateValue.Type()
+				for i := 0; i < templateValueType.NumField(); i++ {
+					fieldName := templateValueType.Field(i).Name
+					peerFieldValue := peerValue.FieldByName(fieldName)
+					if fieldName != "Template" { // Ignore the template field
+						pVal := reflect.Indirect(peerFieldValue)
+						peerHasValueConfigured := pVal.IsValid()
+						tValue := templateValue.Field(i)
+						templateHasValueConfigured := !tValue.IsNil()
+						if templateHasValueConfigured && !peerHasValueConfigured {
+							// Use the template's value
+							peerFieldValue.Set(templateValue.Field(i))
+						}
+
+						log.Tracef("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
 					}
-
-					log.Tracef("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
 				}
 			}
 		} // end peer template processor

@@ -109,22 +109,6 @@ List of communities to add to locally originated routes
 |------|---------|------------|
 | []string   |       |          |
 
-### `portal-host`
-
-Peering portal host (disabled if empty)
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
-### `portal-key`
-
-Peering portal API key
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
 ### `hostname`
 
 Router hostname (default system hostname)
@@ -1241,7 +1225,7 @@ Configuration to add before the export policy
 
 ### `pre-export-final`
 
-Configuration to add after the export policy
+Configuration to add after the export policy before the final accept/reject term
 
 | Type | Default | Validation |
 |------|---------|------------|

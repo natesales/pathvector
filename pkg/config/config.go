@@ -226,9 +226,7 @@ type Config struct {
 	GlobalConfig          string   `yaml:"global-config" description:"Global BIRD configuration" default:""`
 	OriginCommunities     []string `yaml:"origin-communities" description:"List of communities to add to locally originated routes" default:""`
 
-	PortalHost string `yaml:"portal-host" description:"Peering portal host (disabled if empty)" default:""`
-	PortalKey  string `yaml:"portal-key" description:"Peering portal API key" default:""`
-	Hostname   string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
+	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
 	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`

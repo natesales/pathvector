@@ -22,7 +22,6 @@ import (
 	"github.com/natesales/pathvector/internal/embed"
 	"github.com/natesales/pathvector/internal/irr"
 	"github.com/natesales/pathvector/internal/peeringdb"
-	"github.com/natesales/pathvector/internal/portal"
 	"github.com/natesales/pathvector/internal/templating"
 	"github.com/natesales/pathvector/internal/util"
 	"github.com/natesales/pathvector/pkg/config"
@@ -671,14 +670,6 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 
 		bird.MoveCacheAndReconfigure(c.BIRDDirectory, c.CacheDirectory, c.BIRDSocket, noConfigure)
 	} // end dry run check
-
-	// Update portal
-	if c.PortalHost != "" {
-		log.Infoln("Updating peering portal")
-		if err := portal.Record(c.PortalHost, c.PortalKey, c.Hostname, c.Peers, c.BIRDSocket); err != nil {
-			log.Fatal(err)
-		}
-	}
 
 	// Delete lockfile
 	if lockFile != "" {

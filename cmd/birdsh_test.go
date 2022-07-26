@@ -34,11 +34,5 @@ func TestBirdShell(t *testing.T) {
 	if err != nil {
 		return
 	}
-	defer conn.Close()
-
-	_, err = conn.Write([]byte("0001 Fake BIRD response 1"))
-	assert.Nil(t, err)
-
-	_, err = conn.Write([]byte("0001 Fake BIRD response 2"))
-	assert.Nil(t, err)
+	conn.Close()
 }

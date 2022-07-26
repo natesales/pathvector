@@ -36,6 +36,8 @@ import (
 
 type HelloWorld struct{}
 
+var _ plugin.Plugin = (*Plugin)(nil)
+
 func (g *HelloWorld) Description() string {
 	return "An example plugin"
 }

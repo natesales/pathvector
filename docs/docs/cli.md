@@ -10,16 +10,14 @@ Usage:
   pathvector [command]
 
 Available Commands:
-  birdsh        Lightweight BIRD shell
-  cli           Interactive CLI
-  completion    generate the autocompletion script for the specified shell
-  dump          Dump configuration
-  generate      generate router configuration
-  help          Help about any command
-  match         Find common IXPs for a given ASN
-  optimizer     Start optimization daemon
-  portal-update Update portal status
-  version       Show version information
+  birdsh      Lightweight BIRD shell
+  completion  generate the autocompletion script for the specified shell
+  dump        Dump configuration
+  generate    generate router configuration
+  help        Help about any command
+  match       Find common IXPs for a given ASN
+  optimizer   Start optimization daemon
+  version     Show version information
 
 Flags:
   -c, --config string   YAML configuration file (default "/etc/pathvector.yml")

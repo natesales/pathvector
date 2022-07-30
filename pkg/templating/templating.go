@@ -3,7 +3,6 @@ package templating
 import (
 	"embed"
 	"fmt"
-	"github.com/natesales/pathvector/pkg/util"
 	"os"
 	"strconv"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util"
 )
 
 var protocolNames []string

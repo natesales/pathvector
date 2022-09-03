@@ -635,9 +635,19 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 	log.Debug("Finished writing global config file")
 
+	// Remove old manual configs
+	if err := util.RemoveFileGlob(path.Join(c.CacheDirectory, "manual*.conf")); err != nil {
+		log.Fatalf("Removing old manual config files: %v", err)
+	}
+
+	// Copying manual configs
+	if err := util.CopyFileGlob(path.Join(c.BIRDDirectory, "manual*.conf"), c.CacheDirectory); err != nil {
+		log.Fatalf("Copying manual config files: %v", err)
+	}
+
 	// Remove old peer-specific configs
 	if err := util.RemoveFileGlob(path.Join(c.CacheDirectory, "AS*.conf")); err != nil {
-		log.Fatalf("Removing old config files: %v", err)
+		log.Fatalf("Removing old peer config files: %v", err)
 	}
 
 	// Print global config

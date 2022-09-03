@@ -142,3 +142,54 @@ func StrDeref(s *string) string {
 func Ptr[T any](a T) *T {
 	return &a
 }
+
+// CopyFile copies a file from a source to destination
+func CopyFile(source, destination_dir string) (err error) {
+	_, destination := filepath.Split(source)
+	destination = filepath.Join(destination_dir, destination)
+	src, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+	fi, err := src.Stat()
+	if err != nil {
+		return err
+	}
+	flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+	perm := fi.Mode() & os.ModePerm
+	dst, err := os.OpenFile(destination, flag, perm)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, src)
+	if err != nil {
+		dst.Close()
+		os.Remove(destination)
+		return err
+	}
+	err = dst.Close()
+	if err != nil {
+		return err
+	}
+	err = src.Close()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CopyFileGlob copies files by glob
+func CopyFileGlob(glob, destination_dir string) error {
+	files, err := filepath.Glob(glob)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+		if err := CopyFile(f, destination_dir); err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -418,7 +418,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 					if peerData.ImportStandardCommunities == nil {
 						peerData.ImportStandardCommunities = &[]string{}
 					}
-					*peerData.ImportStandardCommunities = append(*peerData.ImportStandardCommunities, community)
+					*peerData.ImportStandardCommunities = append(*peerData.ImportStandardCommunities, strings.ReplaceAll(community, ":", ","))
 				} else if communityType == "large" {
 					if peerData.ImportLargeCommunities == nil {
 						peerData.ImportLargeCommunities = &[]string{}

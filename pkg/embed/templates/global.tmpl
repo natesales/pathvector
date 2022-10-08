@@ -390,12 +390,24 @@ function accept_local() {
 
   {{ if .Prefixes4 -}}
   if (net ~ LOCALv4) then {
+    {{ range $i, $community := StringSliceIter .LocalStandardCommunities }}
+    bgp_community.add(({{ $community }}));
+    {{ end }}
+    {{ range $i, $community := StringSliceIter .LocalLargeCommunities }}
+    bgp_large_community.add(({{ $community }}));
+    {{ end }}
     accept;
   }
   {{- end }}
 
   {{ if .Prefixes6 -}}
   if (net ~ LOCALv6) then {
+    {{ range $i, $community := StringSliceIter .LocalStandardCommunities }}
+    bgp_community.add(({{ $community }}));
+    {{ end }}
+    {{ range $i, $community := StringSliceIter .LocalLargeCommunities }}
+    bgp_large_community.add(({{ $community }}));
+    {{ end }}
     accept;
   }
   {{- end }}

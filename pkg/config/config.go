@@ -224,7 +224,8 @@ type Config struct {
 	WebUIFile             string   `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 	LogFile               string   `yaml:"log-file" description:"Log file location" default:"syslog"`
 	GlobalConfig          string   `yaml:"global-config" description:"Global BIRD configuration" default:""`
-	OriginCommunities     []string `yaml:"origin-communities" description:"List of communities to add to locally originated routes" default:""`
+	OriginCommunities     []string `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
+	LocalCommunities      []string `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`
 
 	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
@@ -264,6 +265,8 @@ type Config struct {
 	NVRSASNs                  []uint32 `yaml:"-" description:"-"`
 	OriginStandardCommunities []string `yaml:"-" description:"-"`
 	OriginLargeCommunities    []string `yaml:"-" description:"-"`
+	LocalStandardCommunities  []string `yaml:"-" description:"-"`
+	LocalLargeCommunities     []string `yaml:"-" description:"-"`
 }
 
 // Init initializes a Config with embedded structs prior to calling config.Default

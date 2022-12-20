@@ -12,6 +12,10 @@ origin-communities:
   - 34553:10
   - 34553:10:1
 
+local-communities:
+  - 65530:65530
+  - 65530:100:65530
+
 kernel:
   srd-communities:
     - 65530,1

@@ -300,7 +300,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 				if c.OriginStandardCommunities == nil {
 					c.OriginStandardCommunities = []string{}
 				}
-				c.OriginStandardCommunities = append(c.OriginStandardCommunities, community)
+				c.OriginStandardCommunities = append(c.OriginStandardCommunities, strings.ReplaceAll(community, ":", ","))
 			} else if communityType == "large" {
 				if c.OriginLargeCommunities == nil {
 					c.OriginLargeCommunities = []string{}
@@ -308,6 +308,25 @@ func Load(configBlob []byte) (*config.Config, error) {
 				c.OriginLargeCommunities = append(c.OriginLargeCommunities, strings.ReplaceAll(community, ":", ","))
 			} else {
 				return nil, errors.New("Invalid origin community: " + community)
+			}
+		}
+	}
+
+	if c.LocalCommunities != nil {
+		for _, community := range c.LocalCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				if c.LocalStandardCommunities == nil {
+					c.LocalStandardCommunities = []string{}
+				}
+				c.LocalStandardCommunities = append(c.LocalStandardCommunities, strings.ReplaceAll(community, ":", ","))
+			} else if communityType == "large" {
+				if c.LocalLargeCommunities == nil {
+					c.LocalLargeCommunities = []string{}
+				}
+				c.LocalLargeCommunities = append(c.LocalLargeCommunities, strings.ReplaceAll(community, ":", ","))
+			} else {
+				return nil, errors.New("Invalid local community: " + community)
 			}
 		}
 	}

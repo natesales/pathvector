@@ -3,8 +3,6 @@ module github.com/natesales/pathvector
 go 1.18
 
 require (
-	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
-	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/creasty/defaults v1.5.2
 	github.com/go-ping/ping v0.0.0-20211014180314-6e2b003bffdd
 	github.com/go-playground/validator/v10 v10.9.0
@@ -13,7 +11,6 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/mod v0.4.2
-	golang.org/x/text v0.3.6
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
@@ -32,4 +29,5 @@ require (
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210806184541-e5e7981a1069 // indirect
+	golang.org/x/text v0.3.6 // indirect
 )

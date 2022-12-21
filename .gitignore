@@ -27,3 +27,4 @@ vendorbuild/mikrotik/docker-buildx
 # Testing
 test-cache/
 test-conf.yml
+nohup.out

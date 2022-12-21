@@ -33,14 +33,13 @@ jobs:
 
       - run: go generate -x
       - run: go build -v .
-
-      - name: Setup integration test environment
-        run: sudo bash tests/setup.sh
-
-      - run: PEERINGDB_API_KEY=${{ secrets.PEERINGDB_API_KEY }} go test -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
+      - run: make test-setup
+      - run: PEERINGDB_API_KEY=${{ secrets.PEERINGDB_API_KEY }} make test
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
+
+      - run: make test-teardown

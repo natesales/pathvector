@@ -180,14 +180,14 @@ func CopyFile(source, destination_dir string) (err error) {
 	return nil
 }
 
-// CopyFileGlob copies files by glob
-func CopyFileGlob(glob, destination_dir string) error {
+// CopyFileGlob copies files by glob to a destination
+func CopyFileGlob(glob, dest string) error {
 	files, err := filepath.Glob(glob)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, f := range files {
-		if err := CopyFile(f, destination_dir); err != nil {
+		if err := CopyFile(f, dest); err != nil {
 			return err
 		}
 	}

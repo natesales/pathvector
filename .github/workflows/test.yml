@@ -37,7 +37,7 @@ jobs:
       - name: Setup integration test environment
         run: sudo bash tests/setup.sh
 
-      - run: PEERINGDB_API_KEY=${{ secrets.PEERINGDB_API_KEY }} go test -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
+      - run: PEERINGDB_API_KEY=${{ secrets.PEERINGDB_API_KEY }} go test -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v1

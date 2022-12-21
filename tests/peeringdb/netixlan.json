@@ -1,0 +1,56 @@
+{
+  "data": [
+    {
+      "asn": 44977,
+      "created": "2020-08-06T03:57:06Z",
+      "id": 60022,
+      "ipaddr4": "44.190.42.1",
+      "ipaddr6": "2602:801:30ff::1",
+      "is_rs_peer": true,
+      "ix_id": 3069,
+      "ixlan_id": 3069,
+      "name": "ARIX: Primary",
+      "net_id": 22395,
+      "notes": "",
+      "operational": true,
+      "speed": 10000,
+      "status": "ok",
+      "updated": "2021-08-01T05:20:55Z"
+    },
+    {
+      "asn": 112,
+      "created": "2013-09-16T00:00:00Z",
+      "id": 15588,
+      "ipaddr4": "206.108.35.22",
+      "ipaddr6": "2001:504:1a::35:22",
+      "is_rs_peer": false,
+      "ix_id": 24,
+      "ixlan_id": 24,
+      "name": "TorIX",
+      "net_id": 10664,
+      "notes": "",
+      "operational": true,
+      "speed": 1000,
+      "status": "ok",
+      "updated": "2021-03-19T00:00:39Z"
+    },
+    {
+      "asn": 44977,
+      "created": "2020-08-06T03:57:06Z",
+      "id": 60022,
+      "ipaddr4": "44.190.42.1",
+      "ipaddr6": "2602:801:30ff::1",
+      "is_rs_peer": true,
+      "ix_id": 3069,
+      "ixlan_id": 3069,
+      "name": "ARIX: Primary",
+      "net_id": 22395,
+      "notes": "",
+      "operational": true,
+      "speed": 10000,
+      "status": "ok",
+      "updated": "2021-08-01T05:20:55Z"
+    }
+  ],
+  "meta": {}
+}

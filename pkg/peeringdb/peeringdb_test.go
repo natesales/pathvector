@@ -1,12 +1,13 @@
 package peeringdb
 
 import (
-	"github.com/natesales/pathvector/pkg/util"
 	"strings"
 	"testing"
 
-	"github.com/natesales/pathvector/pkg/config"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util"
 )
 
 const peeringDbQueryTimeout = 10 // 10 seconds
@@ -21,9 +22,9 @@ func TestPeeringDbQuery(t *testing.T) {
 		shouldError  bool
 	}{
 		{112, "AS112", "DNS-OARC-112", 2, 2, false},
-		{20144, "AS-LROOT", "l.root-servers.net", 5, 5, false},
-		{25152, "RIPE::RS-KROOT RIPE::RS-KROOT-V6", "RIPE NCC K-Root Operations", 5, 5, false},
-		{65530, "RIPE::RS-KROOT RIPE::RS-KROOT-V6", "RIPE NCC K-Root Operations", 5, 5, true}, // Private ASN, no PeeringDB page
+		{34553, "AS34553:AS-ALL", "Nathan Sales", 10, 20, false},
+		{44977, "AS44977", "ARIX", 10, 10, false},
+		{65530, "", "", 0, 0, true}, // Private ASN, no PeeringDB page
 	}
 	for _, tc := range testCases {
 		pDbData, err := NetworkInfo(uint32(tc.asn), peeringDbQueryTimeout, "", true)
@@ -40,18 +41,10 @@ func TestPeeringDbQuery(t *testing.T) {
 		}
 
 		if err == nil {
-			if pDbData.ASSet != tc.asSet {
-				t.Errorf("expected as-set %s got %s", tc.asSet, pDbData.ASSet)
-			}
-			if pDbData.Name != tc.name {
-				t.Errorf("expected name %s got %s", tc.name, pDbData.Name)
-			}
-			if pDbData.ImportLimit4 != tc.importLimit4 {
-				t.Errorf("expected IPv4 import limit %d got %d", tc.importLimit4, pDbData.ImportLimit4)
-			}
-			if pDbData.ImportLimit6 != tc.importLimit6 {
-				t.Errorf("expected IPv6 import limit %d got %d", tc.importLimit6, pDbData.ImportLimit6)
-			}
+			assert.Equal(t, tc.asSet, pDbData.ASSet)
+			assert.Equal(t, tc.name, pDbData.Name)
+			assert.Equal(t, tc.importLimit4, pDbData.ImportLimit4)
+			assert.Equal(t, tc.importLimit6, pDbData.ImportLimit6)
 		}
 	}
 }
@@ -85,7 +78,7 @@ func TestPeeringDbQueryAndModify(t *testing.T) {
 func TestPeeringNeverViaRouteServers(t *testing.T) {
 	asns, err := NeverViaRouteServers(peeringDbQueryTimeout, "")
 	assert.Nil(t, err)
-	assert.Greater(t, len(asns), 100)
+	assert.Equal(t, len(asns), 3)
 }
 
 func TestSanitizeASSet(t *testing.T) {

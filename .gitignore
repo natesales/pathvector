@@ -28,3 +28,4 @@ vendorbuild/mikrotik/docker-buildx
 test-cache/
 test-conf.yml
 nohup.out
+coverage.txt

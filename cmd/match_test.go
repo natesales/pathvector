@@ -19,8 +19,8 @@ func TestMatch(t *testing.T) {
 		asnA uint
 		asnB uint
 	}{
-		{34553, 13335},
-		{54113, 13335},
+		{34553, 112},
+		{112, 44977},
 	}
 	for _, tc := range testCases {
 		rootCmd.SetArgs(append(baseArgs, []string{

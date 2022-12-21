@@ -1,0 +1,19 @@
+orm:
+  backend: django_peeringdb
+  database:
+    engine: sqlite3
+    host: ''
+    name: peeringdb.sqlite3
+    password: ''
+    port: 0
+    user: ''
+  migrate: true
+  secret_key: ''
+sync:
+  api_key: 'IMRIeEKg.HuOPB7aUrW3yv6rVlDZqbsRXbjBOEuGS'
+  only: []
+  password: ''
+  strip_tz: 1
+  timeout: 0
+  url: https://www.peeringdb.com/api
+  user: ''

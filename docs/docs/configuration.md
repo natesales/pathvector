@@ -103,7 +103,15 @@ Global BIRD configuration
 
 ### `origin-communities`
 
-List of communities to add to locally originated routes
+List of communities to accept as locally originated routes
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `local-communities`
+
+List of communities to add to locally originated prefixes
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -842,6 +850,14 @@ Disable peer after error
 ### `prefer-older-routes`
 
 Prefer older routes instead of comparing router IDs (RFC 5004)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `irr-accept-child-prefixes`
+
+Accept prefixes up to /24 and /48 from covering parent IRR objects
 
 | Type | Default | Validation |
 |------|---------|------------|

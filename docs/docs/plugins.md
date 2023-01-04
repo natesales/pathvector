@@ -34,19 +34,18 @@ import (
 	"github.com/natesales/pathvector/pkg/plugin"
 )
 
-type HelloWorld struct{}
-
+type Plugin struct{}
 var _ plugin.Plugin = (*Plugin)(nil)
 
-func (g *HelloWorld) Description() string {
+func (g *Plugin) Description() string {
 	return "An example plugin"
 }
 
-func (g *HelloWorld) Version() string {
+func (g *Plugin) Version() string {
 	return "1.0.0"
 }
 
-func (g *HelloWorld) Command() *cobra.Command {
+func (g *Plugin) Command() *cobra.Command {
 	return &cobra.Command{
 		Use:   "hello",
 		Short: "Show hello world",
@@ -56,12 +55,12 @@ func (g *HelloWorld) Command() *cobra.Command {
 	}
 }
 
-func (g *HelloWorld) Modify(c *config.Config) error {
+func (g *Plugin) Modify(c *config.Config) error {
 	c.Hostname = "hello-world.example.com"
 	return nil
 }
 
 func main() {
-	plugin.Register("helloworld", &HelloWorld{})
+	plugin.Register("helloworld", &Plugin{})
 }
 ```

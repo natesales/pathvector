@@ -22,7 +22,6 @@ import (
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
 
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/pkg/plugin"
@@ -106,7 +105,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 	c.Init()
 	defaults.MustSet(&c)
 
-	if err := yaml.UnmarshalStrict(configBlob, &c); err != nil {
+	if err := util.YAMLUnmarshalStrict(configBlob, &c); err != nil {
 		return nil, fmt.Errorf("YAML unmarshal: %s", err)
 	}
 

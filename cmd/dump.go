@@ -2,14 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/pkg/process"
-	"github.com/natesales/pathvector/pkg/util"
 	"os"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+
+	"github.com/natesales/pathvector/pkg/process"
+	"github.com/natesales/pathvector/pkg/util"
 )
 
 var (

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 )
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
@@ -192,4 +194,11 @@ func CopyFileGlob(glob, dest string) error {
 		}
 	}
 	return nil
+}
+
+// YAMLUnmarshalStrict unmarshals a YAML file into a struct
+func YAMLUnmarshalStrict(y []byte, v interface{}) error {
+	decoder := yaml.NewDecoder(bytes.NewReader(y))
+	decoder.KnownFields(true)
+	return decoder.Decode(v)
 }

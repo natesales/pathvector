@@ -27,7 +27,7 @@ jobs:
           go-version: 1.18
 
       - name: Generate docs
-        run: go generate
+        run: go generate -x
 
       - name: Build docs
         run: cd docs && npm install && npm run build

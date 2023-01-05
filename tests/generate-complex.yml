@@ -83,3 +83,10 @@ peers:
       - 65540
     filter-as-set: true
     pre-import-accept: 'print "Hello from <pathvector.asn>";'
+    prefix-communities:
+      "192.0.2.0/24":
+        - "123,456"
+        - "123,000"
+        - "1:2:3"
+    dont-announce:
+      - 192.0.2.100/32

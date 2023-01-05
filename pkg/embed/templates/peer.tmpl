@@ -156,6 +156,22 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             ]) then _reject("prefix in dont-announce list");
             {{ end }}
 
+            {{ range $prefix, $communities := StrSliceMapDeref $peer.PrefixStandardCommunities }}
+            if (net = {{ $prefix }}) then {
+                {{ range $i, $community := $communities }}
+                bgp_community.add(({{ $community }}));
+                {{ end }}
+            }
+            {{ end }}
+
+            {{ range $prefix, $communities := StrSliceMapDeref $peer.PrefixLargeCommunities }}
+            if (net = {{ $prefix }}) then {
+                {{ range $i, $community := $communities }}
+                bgp_large_community.add(({{ $community }}));
+                {{ end }}
+            }
+            {{ end }}
+
             {{ StrDeref $peer.PreExport }}
 
             {{ range $i, $community := StringSliceIter $peer.ExportStandardCommunities }}

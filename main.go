@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/cmd"
@@ -16,6 +19,13 @@ var (
 //go:generate ./docs/generate.sh
 
 func main() {
+	if version == "devel" || strings.Contains(version, "SNAPSHOT") {
+		fmt.Println(`*******************************************************************************
+WARNING: This is a development build. It is not recommended for production use.
+Please submit any bugs to https://github.com/natesales/pathvector/issues
+*******************************************************************************`)
+	}
+
 	if err := cmd.Execute(version, commit, date); err != nil {
 		log.Fatal(err)
 	}

@@ -14,10 +14,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: ben-z/actions-comment-on-issue@1.0.2
+      - name: Add start comment
+        uses: peter-evans/create-or-update-comment@v2
         with:
-          message: "Starting snapshot\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            "Starting snapshot release: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - run: echo "hello world" >> test.txt
       - run: echo "hello world 2" >> test2.txt
@@ -29,10 +31,12 @@ jobs:
             test.txt
             test2.txt
 
-      - uses: ben-z/actions-comment-on-issue@1.0.2
+      - name: Add start comment
+        uses: peter-evans/create-or-update-comment@v2
         with:
-          message: "Snapshot created. Assets available at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            "Snapshot release complete: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
 #      - name: Set up Go
 #        uses: actions/setup-go@v3

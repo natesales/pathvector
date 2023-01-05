@@ -14,27 +14,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Add start comment
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: "Starting snapshot release: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-
-      - run: echo "hello world" >> test.txt
-      - run: echo "hello world 2" >> test2.txt
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: snapshot
-          path: |
-            test.txt
-            test2.txt
+      - name: Get snapshot ID
+        id: snapshot_id
+        run: |
+          echo SNAPSHOT_ID=pathvector_$(git describe --tags "$(git rev-list --tags --max-count=1)" | cut -c2-)-SNAPSHOT-$(git rev-parse --short HEAD) >> $GITHUB_OUTPUT
 
       - name: Add start comment
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.issue.number }}
-          body: "Snapshot release complete: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: |
+            Starting [`${{ steps.snapshot_id.outputs.SNAPSHOT_ID }}`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) release
 
 #      - name: Set up Go
 #        uses: actions/setup-go@v3
@@ -60,10 +50,16 @@ jobs:
 #
 #      - uses: actions/upload-artifact@v3
 #        with:
-#          name: snapshot
 #          path: |
 #            dist/pathvector*.deb
 #            dist/pathvector*.rpm
 #            dist/pathvector*checksums.txt
 #            dist/pathvector*.tar.gz
 #            pathvector*.pdf
+
+      - name: Post end comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            [`${{ steps.snapshot_id.outputs.SNAPSHOT_ID }}`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) finished

@@ -5,7 +5,7 @@ on:
     types: [created, edited, deleted]
 
 jobs:
-  if: ${{ github.event.issue.pull_request }} && contains(github.event.comment.body, '@snapshot')
+  if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '@snapshot') }}
   Snapshot:
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,57 @@
+name: Snapshot
+
+on:
+  issue_comment:
+    types: [created, edited, deleted]
+
+jobs:
+  if: ${{ github.event.issue.pull_request }} && contains(github.event.comment.body, '@snapshot')
+  Snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - run: echo "hello world" >> test.txt
+      - run: echo "hello world 2" >> test2.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: snapshot
+          path: |
+            test.txt
+            test2.txt
+
+#      - name: Set up Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version: 1.18
+#
+#      - name: Install PDF generation dependencies
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y pandoc texlive-xetex
+#
+#      - run: go generate -x
+#      - run: mv pathvector*.pdf pathvector-$(git describe --tags "$(git rev-list --tags --max-count=1)" | cut -c2-)-SNAPSHOT-$(git rev-parse --short HEAD).pdf
+#
+#      - name: Run GoReleaser
+#        uses: goreleaser/goreleaser-action@v2
+#        with:
+#          version: latest
+#          args: release --snapshot --rm-dist --release-header distrib/snapshot-header.md
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          FURY_TOKEN: ${{ secrets.FURY_TOKEN }}
+#
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: snapshot
+#          path: |
+#            dist/pathvector*.deb
+#            dist/pathvector*.rpm
+#            dist/pathvector*checksums.txt
+#            dist/pathvector*.tar.gz
+#            pathvector*.pdf

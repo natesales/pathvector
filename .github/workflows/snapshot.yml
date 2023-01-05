@@ -6,7 +6,7 @@ on:
 
 jobs:
   Snapshot:
-    if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '/snapshot') }}
+    if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '/snapshot') }} && ${{ github.event.comment.user.login == 'natesales' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -18,8 +18,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.issue.number }}
-          body: |
-            "Starting snapshot release: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: "Starting snapshot release: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
       - run: echo "hello world" >> test.txt
       - run: echo "hello world 2" >> test2.txt
@@ -35,8 +34,7 @@ jobs:
         uses: peter-evans/create-or-update-comment@v2
         with:
           issue-number: ${{ github.event.issue.number }}
-          body: |
-            "Snapshot release complete: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          body: "Snapshot release complete: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
 #      - name: Set up Go
 #        uses: actions/setup-go@v3

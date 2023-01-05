@@ -5,8 +5,8 @@ on:
     types: [created, edited, deleted]
 
 jobs:
-  if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '@snapshot') }}
   Snapshot:
+    if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '@snapshot') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

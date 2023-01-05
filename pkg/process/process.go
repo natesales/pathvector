@@ -252,6 +252,10 @@ func Load(configBlob []byte) (*config.Config, error) {
 		if peerData.DefaultLocalPref != nil && peerData.OptimizeInbound != nil {
 			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
 		}
+
+		if peerData.OnlyAnnounce != nil && peerData.AnnounceAll != nil {
+			log.Fatalf("[%s] only-announce and announce-all cannot both be set", peerName)
+		}
 	}
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family

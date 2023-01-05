@@ -1127,6 +1127,14 @@ Don't announce these prefixes to the peer
 |------|---------|------------|
 | []string   |       |          |
 
+### `only-announce`
+
+Only announce these prefixes to the peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `auto-import-limits`
 
 Get import limits automatically from PeeringDB?

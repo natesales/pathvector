@@ -92,6 +92,7 @@ type Peer struct {
 	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
 
 	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer" default:"-"`
+	OnlyAnnounce *[]string `yaml:"only-announce" description:"Only announce these prefixes to the peer" default:"-"`
 
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`

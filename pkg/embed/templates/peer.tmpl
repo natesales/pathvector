@@ -201,6 +201,12 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             set_blackhole();
             {{ end }}
 
+            {{ if not (Empty $peer.OnlyAnnounce) }}
+            if (!net ~ [
+            {{ BirdSet $peer.OnlyAnnounce }}
+            ]) then _reject("prefix not in only-announce list");
+            {{ end }}
+
             {{ StrDeref $peer.PreExportFinal }}
             {{ if BoolDeref $peer.AnnounceAll }}
             accept;

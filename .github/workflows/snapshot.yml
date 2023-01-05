@@ -50,6 +50,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
+          name: ${{ steps.snapshot_id.outputs.SNAPSHOT_ID }} snapshot release
           path: |
             dist/pathvector*.deb
             dist/pathvector*.rpm

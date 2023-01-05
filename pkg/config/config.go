@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/creasty/defaults"
 	"github.com/go-ping/ping"
 )
 
@@ -280,10 +279,4 @@ func (c *Config) Init() {
 	c.Kernel = &Kernel{}
 	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}
-}
-
-// Default sets a Config's default values
-func (c *Config) Default() error {
-	// Set global config defaults
-	return defaults.Set(c)
 }

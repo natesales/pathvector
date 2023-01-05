@@ -2,11 +2,11 @@ name: Snapshot
 
 on:
   issue_comment:
-    types: [created, edited, deleted]
+    types: [created, edited]
 
 jobs:
   Snapshot:
-    if: ${{ github.event.issue.pull_request }} && ${{ contains(github.event.comment.body, '/snapshot') }} && ${{ github.event.comment.user.login == 'natesales' }}
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/snapshot') && github.event.comment.user.login == 'natesales' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

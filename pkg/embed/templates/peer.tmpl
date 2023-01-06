@@ -98,6 +98,18 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ if BoolDeref $peer.FilterIRR }}if !(net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { _reject("not in IRR prefix set"); }{{ end }}
             {{ if BoolDeref $peer.FilterASSet }}if !(bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }{{ end }}
 
+            {{/* Transit Locking */}}
+            {{ if StrSliceDeref $peer.TransitLock }}
+            if !((bgp_path ~ [= {{ $peer.ASN }}+ =]) || {{$transits := len (StrSliceDeref $peer.TransitLock)}}{{ range $i, $provider := StrSliceDeref $peer.TransitLock }}bgp_path ~ [= * {{ $provider }} {{ $peer.ASN }} * =]{{ if not (Last $i $transits) }} || {{end}}{{ end }}) then {
+                _reject("not in transit lock list");
+            }
+            {{ end }}
+
+            {{/* ASPA */}}
+            {{ if (and (BoolDeref $peer.FilterASPA) (Uint32SliceMapDeref $global.AuthorizedProviders) (U32MapContains $peer.ASN $global.AuthorizedProviders)) }}
+            {{ ASPAFilter $peer.ASN $global.AuthorizedProviders }}
+            {{ end }}
+
             {{ StrDeref $peer.PostImportFilter }}
 
             {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighborNoIface }};{{ end }}

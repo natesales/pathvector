@@ -90,6 +90,9 @@ type Peer struct {
 	FilterPrefixLength         *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
 	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
 	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
+	FilterASPA                 *bool `yaml:"filter-aspa" description:"Reject routes that aren't originated by an ASN within the authorized-providers map" default:"false"`
+
+	TransitLock *[]string `yaml:"transit-lock" description:"Reject routes that aren't transited by an AS in this list" default:"-"`
 
 	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer" default:"-"`
 	OnlyAnnounce *[]string `yaml:"only-announce" description:"Only announce these prefixes to the peer" default:"-"`
@@ -252,6 +255,8 @@ type Config struct {
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`
 	Stun       bool `yaml:"stun" description:"Don't accept or announce any routes from any peer (sets no-announce and no-accept)" default:"false"`
+
+	AuthorizedProviders map[uint32][]uint32 `yaml:"authorized-providers" description:"Map of origin ASN to authorized provider ASN list" default:"-"`
 
 	Peers         map[string]*Peer         `yaml:"peers" description:"BGP peer configuration"`
 	Templates     map[string]*Peer         `yaml:"templates" description:"BGP peer templates"`

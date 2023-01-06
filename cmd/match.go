@@ -2,13 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/pkg/match"
-	"github.com/natesales/pathvector/pkg/process"
 	"os"
 	"strconv"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/natesales/pathvector/pkg/match"
+	"github.com/natesales/pathvector/pkg/process"
 )
 
 var (
@@ -23,9 +25,12 @@ func init() {
 }
 
 var matchCmd = &cobra.Command{
-	Use:   "match ASN",
+	Use:   "match [asn]",
 	Short: "Find common IXPs for a given ASN",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			log.Fatal("Usage: pathvector match ASN")
+		}
 
 		// Load the config file from config file
 		log.Debugf("Loading config from %s", configFile)
@@ -46,11 +51,7 @@ var matchCmd = &cobra.Command{
 			peeringDbTimeout = c.PeeringDBQueryTimeout
 		}
 
-		if len(args) != 1 {
-			log.Fatal("Usage: pathvector match ASN")
-		}
-
-		peerASN, err := strconv.Atoi(args[0])
+		peerASN, err := strconv.Atoi(strings.TrimPrefix(strings.ToUpper(args[0]), "AS"))
 		if err != nil {
 			log.Fatal(err)
 		}

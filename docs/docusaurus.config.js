@@ -147,6 +147,13 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      announcementBar: {
+        id: 'announcement',
+        content: 'Has Pathvector helped automate your network? Please consider <a href="https://github.com/sponsors/natesales">supporting the project</a>. A small donation goes a long way to keep Pathvector sustainable and free for everyone.',
+        backgroundColor: '#dd00ff',
+        textColor: '#2d2d2d',
+        isCloseable: false,
+      },
       navbar: {
         title: 'Pathvector',
         // logo: {

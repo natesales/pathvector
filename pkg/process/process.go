@@ -256,7 +256,37 @@ func Load(configBlob []byte) (*config.Config, error) {
 		if peerData.OnlyAnnounce != nil && peerData.AnnounceAll != nil {
 			log.Fatalf("[%s] only-announce and announce-all cannot both be set", peerName)
 		}
-	}
+
+		// Categorize prefix-communities
+		if peerData.PrefixCommunities != nil {
+			// Initialize community maps
+			if peerData.PrefixStandardCommunities == nil {
+				peerData.PrefixStandardCommunities = &map[string][]string{}
+			}
+			if peerData.PrefixLargeCommunities == nil {
+				peerData.PrefixLargeCommunities = &map[string][]string{}
+			}
+
+			for prefix, communities := range *peerData.PrefixCommunities {
+				for _, community := range communities {
+					communityType := categorizeCommunity(community)
+					if communityType == "standard" {
+						if _, ok := (*peerData.PrefixStandardCommunities)[prefix]; !ok {
+							(*peerData.PrefixStandardCommunities)[prefix] = []string{}
+						}
+						(*peerData.PrefixStandardCommunities)[prefix] = append((*peerData.PrefixStandardCommunities)[prefix], community)
+					} else if communityType == "large" {
+						if _, ok := (*peerData.PrefixLargeCommunities)[prefix]; !ok {
+							(*peerData.PrefixLargeCommunities)[prefix] = []string{}
+						}
+						(*peerData.PrefixLargeCommunities)[prefix] = append((*peerData.PrefixLargeCommunities)[prefix], strings.ReplaceAll(community, ":", ","))
+					} else {
+						return nil, errors.New("Invalid prefix community: " + community)
+					}
+				}
+			}
+		}
+	} // end peer list
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family
 	for _, prefix := range c.Prefixes {

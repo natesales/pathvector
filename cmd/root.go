@@ -7,7 +7,7 @@ import (
 	"github.com/natesales/pathvector/pkg/plugin"
 )
 
-// Build process flags
+// These are set indirectly by the build process. The cmd.Execute() function takes these from the main package and sets them in this (cmd) package.
 var (
 	version = "devel"
 	commit  = "unknown"
@@ -56,7 +56,7 @@ func init() {
 	}
 }
 
-func Execute(v string, c string, d string) error {
+func Execute(v, c, d string) error {
 	version = v
 	commit = c
 	date = d

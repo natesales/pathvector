@@ -1119,6 +1119,14 @@ Reject routes that aren't originated by an ASN within this peer's AS set
 |------|---------|------------|
 | bool   | false      |          |
 
+### `authorized-providers`
+
+List of authorized upstream providers
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `dont-announce`
 
 Don't announce these prefixes to the peer

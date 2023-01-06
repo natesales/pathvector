@@ -83,3 +83,6 @@ peers:
       - 65540
     filter-as-set: true
     pre-import-accept: 'print "Hello from <pathvector.asn>";'
+    authorized-providers:
+      - 65510
+      - 65530

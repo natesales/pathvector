@@ -14,5 +14,3 @@ peers:
     neighbors:
       - 203.0.113.12
       - 2001:db8::12
-    dont-announce:
-      - 192.0.2.100/32

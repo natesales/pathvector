@@ -80,16 +80,17 @@ type Peer struct {
 	BlackholeOut            *bool `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
 	// Filtering
-	FilterIRR                  *bool `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
-	FilterRPKI                 *bool `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
-	StrictRPKI                 *bool `yaml:"strict-rpki" description:"Should only RPKI valids be accepted?" default:"false"`
-	FilterMaxPrefix            *bool `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
-	FilterBogonRoutes          *bool `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
-	FilterBogonASNs            *bool `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
-	FilterTransitASNs          *bool `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
-	FilterPrefixLength         *bool `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
-	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
-	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
+	FilterIRR                  *bool     `yaml:"filter-irr" description:"Should IRR filtering be applied?" default:"false"`
+	FilterRPKI                 *bool     `yaml:"filter-rpki" description:"Should RPKI invalids be rejected?" default:"true"`
+	StrictRPKI                 *bool     `yaml:"strict-rpki" description:"Should only RPKI valids be accepted?" default:"false"`
+	FilterMaxPrefix            *bool     `yaml:"filter-max-prefix" description:"Should max prefix filtering be applied?" default:"true"`
+	FilterBogonRoutes          *bool     `yaml:"filter-bogon-routes" description:"Should bogon prefixes be rejected?" default:"true"`
+	FilterBogonASNs            *bool     `yaml:"filter-bogon-asns" description:"Should paths containing a bogon ASN be rejected?" default:"true"`
+	FilterTransitASNs          *bool     `yaml:"filter-transit-asns" description:"Should paths containing transit-free ASNs be rejected? (Peerlock Lite)'" default:"false"`
+	FilterPrefixLength         *bool     `yaml:"filter-prefix-length" description:"Should too large/small prefixes (IPv4 8 > len > 24 and IPv6 12 > len > 48) be rejected?" default:"true"`
+	FilterNeverViaRouteServers *bool     `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
+	FilterASSet                *bool     `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
+	TransitLock                *[]string `yaml:"transit-lock" description:"Reject routes that aren't transited by an AS in this list" default:"-"`
 
 	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer" default:"-"`
 	OnlyAnnounce *[]string `yaml:"only-announce" description:"Only announce these prefixes to the peer" default:"-"`

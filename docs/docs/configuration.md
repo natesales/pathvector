@@ -1119,6 +1119,14 @@ Reject routes that aren't originated by an ASN within this peer's AS set
 |------|---------|------------|
 | bool   | false      |          |
 
+### `transit-lock`
+
+Reject routes that aren't transited by an AS in this list
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `dont-announce`
 
 Don't announce these prefixes to the peer

@@ -27,6 +27,68 @@ var defaultTransitASNs = []uint32{
 	7018, // AT&T
 }
 
+var defaultBogons4 = []string{
+	// {{if not.AcceptDefault -}}0.0.0.0/0, # Default route{{end}}
+	"0.0.0.0/8{8,32}",        // IANA - Local Identification
+	"10.0.0.0/8{8,32}",       // RFC 1918 - Private Use
+	"100.64.0.0/10{10,32}",   // RFC 6598 - Shared Address Space
+	"127.0.0.0/8{8,32}",      // IANA - Loopback
+	"169.254.0.0/16{16,32}",  // RFC 3927 - Link Local
+	"172.16.0.0/12{12,32}",   // RFC 1918 - Private Use
+	"192.0.2.0/24{24,32}",    // RFC 5737 - TEST-NET-1
+	"192.88.99.0/24{24,32}",  // RFC 3068 - 6to4 prefix
+	"192.168.0.0/16{16,32}",  // RFC 1918 - Private Use
+	"198.18.0.0/15{15,32}",   // RFC 2544 - Network Interconnect Device Benchmark Testing
+	"198.51.100.0/24{24,32}", // RFC 5737 - TEST-NET-2
+	"203.0.113.0/24{24,32}",  // RFC 5737 - TEST-NET-3
+	"224.0.0.0/3{3,32}",      // RFC 5771 - Multicast (formerly Class D)
+}
+
+var defaultBogons6 = []string{
+	// {{ if not .AcceptDefault -}}::/0,                     # Default route{{ end }}
+	"::/8{8,128}",              // loopback, unspecified, v4-mapped
+	"64:ff9b::/96{96,128}",     // RFC 6052 - IPv4-IPv6 Translation
+	"100::/8{8,128}",           // RFC 6666 - reserved for Discard-Only Address Block
+	"200::/7{7,128}",           // RFC 4048 - Reserved by IETF
+	"400::/6{6,128}",           // RFC 4291 - Reserved by IETF
+	"800::/5{5,128}",           // RFC 4291 - Reserved by IETF
+	"1000::/4{4,128}",          // RFC 4291 - Reserved by IETF
+	"2001::/33{33,128}",        // RFC 4380 - Teredo prefix
+	"2001:0:8000::/33{33,128}", // RFC 4380 - Teredo prefix
+	"2001:2::/48{48,128}",      // RFC 5180 - Benchmarking
+	"2001:3::/32{32,128}",      // RFC 7450 - Automatic Multicast Tunneling
+	"2001:10::/28{28,128}",     // RFC 4843 - Deprecated ORCHID
+	"2001:20::/28{28,128}",     // RFC 7343 - ORCHIDv2
+	"2001:db8::/32{32,128}",    // RFC 3849 - NON-ROUTABLE range to be used for documentation purpose
+	"2002::/16{16,128}",        // RFC 3068 - 6to4 prefix
+	"3ffe::/16{16,128}",        // RFC 5156 - used for the 6bone but was returned
+	"4000::/3{3,128}",          // RFC 4291 - Reserved by IETF
+	"5f00::/8{8,128}",          // RFC 5156 - used for the 6bone but was returned
+	"6000::/3{3,128}",          // RFC 4291 - Reserved by IETF
+	"8000::/3{3,128}",          // RFC 4291 - Reserved by IETF
+	"a000::/3{3,128}",          // RFC 4291 - Reserved by IETF
+	"c000::/3{3,128}",          // RFC 4291 - Reserved by IETF
+	"e000::/4{4,128}",          // RFC 4291 - Reserved by IETF
+	"f000::/5{5,128}",          // RFC 4291 - Reserved by IETF
+	"f800::/6{6,128}",          // RFC 4291 - Reserved by IETF
+	"fc00::/7{7,128}",          // RFC 4193 - Unique Local Unicast
+	"fe80::/10{10,128}",        // RFC 4291 - Link Local Unicast
+	"fec0::/10{10,128}",        // RFC 4291 - Reserved by IETF
+	"ff00::/8{8,128}",          // RFC 4291 - Multicast
+}
+
+var defaultBogonASNs = []string{
+	"0",                      // Reserved. RFC7607
+	"23456",                  // AS_TRANS. RFC6793
+	"64496..64511",           // Reserved for use in documentation and sample code. RFC5398
+	"64512..65534",           // Reserved for Private Use. RFC6996
+	"65535",                  // Reserved. RFC7300
+	"65536..65551",           // Reserved for use in documentation and sample code. RFC5398
+	"65552..131071",          // Reserved.
+	"4200000000..4294967294", // Reserved for Private Use. [RFC6996]
+	"4294967295",             // Reserved. RFC7300
+}
+
 // Peer stores a single peer config
 type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
@@ -263,18 +325,22 @@ type Config struct {
 	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`
 
-	RouterID      string   `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer     string   `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer     string   `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
-	BGPQArgs      string   `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
-	KeepFiltered  bool     `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	MergePaths    bool     `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4       string   `yaml:"source4" description:"Source IPv4 address"`
-	Source6       string   `yaml:"source6" description:"Source IPv6 address"`
-	DefaultRoute  bool     `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool     `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	RPKIEnable    bool     `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
-	TransitASNs   []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns" default:""`
+	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
+	Source4       string `yaml:"source4" description:"Source IPv4 address"`
+	Source6       string `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
+	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
+
+	TransitASNs []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns (default list in config)" default:""`
+	Bogons4     []string `yaml:"bogons4" description:"List of IPv4 bogons (default list in config)" default:""`
+	Bogons6     []string `yaml:"bogons6" description:"List of IPv6 bogons (default list in config)" default:""`
+	BogonASNs   []string `yaml:"bogon-asns" description:"List of ASNs to consider bogons (default list in config)" default:""`
 
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`
@@ -313,7 +379,17 @@ func (c *Config) Init() {
 	c.Kernel = &Kernel{}
 	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}
+
 	if c.TransitASNs == nil {
 		c.TransitASNs = defaultTransitASNs
+	}
+	if c.Bogons4 == nil {
+		c.Bogons4 = defaultBogons4
+	}
+	if c.Bogons6 == nil {
+		c.Bogons6 = defaultBogons6
+	}
+	if c.BogonASNs == nil {
+		c.BogonASNs = defaultBogonASNs
 	}
 }

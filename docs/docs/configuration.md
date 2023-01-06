@@ -231,11 +231,35 @@ Enable RPKI protocol
 
 ### `transit-asns`
 
-List of ASNs to consider transit providers for filter-transit-asns
+List of ASNs to consider transit providers for filter-transit-asns (default list in config)
 
 | Type | Default | Validation |
 |------|---------|------------|
 | []uint32   |       |          |
+
+### `bogons4`
+
+List of IPv4 bogons (default list in config)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `bogons6`
+
+List of IPv6 bogons (default list in config)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `bogon-asns`
+
+List of ASNs to consider bogons (default list in config)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
 
 ### `no-announce`
 

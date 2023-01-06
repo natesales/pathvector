@@ -212,6 +212,17 @@ var funcMap = template.FuncMap{
 		}
 		return "# CODE ERROR: ASN not in ASPA map. This should never happen."
 	},
+
+	"ASSet": func(asns []uint32) string {
+		out := "["
+		for i, asn := range asns {
+			out += fmt.Sprintf("%d", asn)
+			if i != len(asns)-1 {
+				out += ", "
+			}
+		}
+		return out + "]"
+	},
 }
 
 // Templates

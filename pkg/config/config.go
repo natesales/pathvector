@@ -4,6 +4,29 @@ import (
 	"github.com/go-ping/ping"
 )
 
+var defaultTransitASNs = []uint32{
+	174, // Cogent
+	//  209, // Qwest (HE carries this on IXPs IPv6 (Jul 12 2018))
+	701,  // UUNET
+	702,  // UUNET
+	1239, // Sprint
+	1299, // Telia
+	2914, // NTT Communications
+	3257, // GTT Backbone
+	3320, // Deutsche Telekom AG (DTAG)
+	3356, // Level3 / Lumen
+	3491, // PCCW
+	3549, // Level3
+	3561, // Savvis / CenturyLink
+	4134, // Chinanet
+	5511, // Orange opentransit
+	6453, // Tata Communications
+	6461, // Zayo Bandwidth
+	6762, // Seabone / Telecom Italia
+	6830, // Liberty Global
+	7018, // AT&T
+}
+
 // Peer stores a single peer config
 type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
@@ -240,17 +263,18 @@ type Config struct {
 	ASN      int      `yaml:"asn" description:"Autonomous System Number" validate:"required" default:"0"`
 	Prefixes []string `yaml:"prefixes" description:"List of prefixes to announce"`
 
-	RouterID      string `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
-	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
-	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
-	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
-	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
-	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4       string `yaml:"source4" description:"Source IPv4 address"`
-	Source6       string `yaml:"source6" description:"Source IPv6 address"`
-	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
-	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
+	RouterID      string   `yaml:"router-id" description:"Router ID (dotted quad notation)" validate:"required"`
+	IRRServer     string   `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
+	RTRServer     string   `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
+	BGPQArgs      string   `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	KeepFiltered  bool     `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
+	MergePaths    bool     `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
+	Source4       string   `yaml:"source4" description:"Source IPv4 address"`
+	Source6       string   `yaml:"source6" description:"Source IPv6 address"`
+	DefaultRoute  bool     `yaml:"default-route" description:"Add a default route" default:"true"`
+	AcceptDefault bool     `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	RPKIEnable    bool     `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
+	TransitASNs   []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns" default:""`
 
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`
@@ -289,4 +313,7 @@ func (c *Config) Init() {
 	c.Kernel = &Kernel{}
 	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}
+	if c.TransitASNs == nil {
+		c.TransitASNs = defaultTransitASNs
+	}
 }

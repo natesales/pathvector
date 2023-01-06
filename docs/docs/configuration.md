@@ -229,6 +229,14 @@ Enable RPKI protocol
 |------|---------|------------|
 | bool   | true      |          |
 
+### `transit-asns`
+
+List of ASNs to consider transit providers for filter-transit-asns
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []uint32   |       |          |
+
 ### `no-announce`
 
 Don't announce any routes to any peer
@@ -1158,6 +1166,14 @@ Only announce these prefixes to the peer
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       |          |
+
+### `prefix-communities`
+
+Map of prefix to community list to add to the prefix
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string][]string   |       |          |
 
 ### `auto-import-limits`
 

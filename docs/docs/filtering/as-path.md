@@ -1,6 +1,6 @@
-# AS Path (AS Cone, ASPA, and Transit Locking)
+# AS Path
 
-Pathvector supports downstream AS cone, ASPA (AS Provider Authorization) and Transit Locking.
+Pathvector supports a few types of AS path filtering:
 
 ## Downstream AS Cone
 
@@ -17,6 +17,10 @@ authorized-providers:
 ```
 
 To enable ASPA filtering, set `filter-aspa` on a peer. If a route's origin ASN isn't contained in the peer's authorized providers, then it will be rejected unless the path only contains the peer's ASN (no providers in path).
+
+## Transit ASNs
+
+`filter-transit-asns` enables filtering of known transit ASNs. If a route's path contains a transit ASN, it will be rejected. Pathvector is preloaded with a [default set of transit ASNs](https://github.com/natesales/pathvector/blob/main/pkg/config/config.go), which can be overridden with the global `transit-asns` list.
 
 ## Transit Locking
 

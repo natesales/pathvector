@@ -253,6 +253,14 @@ Don't accept or announce any routes from any peer (sets no-announce and no-accep
 |------|---------|------------|
 | bool   | false      |          |
 
+### `authorized-providers`
+
+Map of origin ASN to authorized provider ASN list
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[uint32][]uint32   |       |          |
+
 ### `peers`
 
 BGP peer configuration
@@ -1114,6 +1122,14 @@ Should routes containing an ASN reported in PeeringDB to never be reachable via 
 ### `filter-as-set`
 
 Reject routes that aren't originated by an ASN within this peer's AS set
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `filter-aspa`
+
+Reject routes that aren't originated by an ASN within the authorized-providers map
 
 | Type | Default | Validation |
 |------|---------|------------|

@@ -144,6 +144,13 @@ var funcMap = template.FuncMap{
 		return map[uint32]uint32{}
 	},
 
+	"Uint32SliceMapDeref": func(m *map[uint32][]uint32) map[uint32][]uint32 {
+		if m != nil {
+			return *m
+		}
+		return map[uint32][]uint32{}
+	},
+
 	"StrSliceDeref": func(s *[]string) []string {
 		if s != nil {
 			return *s
@@ -178,6 +185,25 @@ var funcMap = template.FuncMap{
 
 	"Last": func(index, len int) bool {
 		return index+1 == len
+	},
+
+	"U32MapContains": func(i int, m map[uint32][]uint32) bool {
+		_, ok := m[uint32(i)]
+		return ok
+	},
+
+	"ASPAFilter": func(asn int, aspa map[uint32][]uint32) string {
+		if providers, ok := aspa[uint32(asn)]; ok {
+			var out string
+			for i, provider := range providers {
+				out += fmt.Sprintf("bgp_path ~ [= * %d %d * =]", provider, asn)
+				if i != len(providers)-1 {
+					out += " || "
+				}
+			}
+			return fmt.Sprintf(`if !((bgp_path ~ [= %d+ =]) || (%s)) then _reject("not in authorized providers list");`, asn, out)
+		}
+		return "# CODE ERROR: ASN not in ASPA map. This should never happen."
 	},
 }
 

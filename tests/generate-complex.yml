@@ -40,6 +40,9 @@ bfd:
     interval: 200
     multiplier: 10
 
+authorized-providers:
+  65510: [65520, 65530]
+
 peers:
   Example:
     asn: 65510
@@ -86,3 +89,4 @@ peers:
     transit-lock:
       - 65510
       - 65530
+    filter-aspa: true

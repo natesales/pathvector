@@ -118,7 +118,6 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/icon-white.png',
-
   organizationName: 'natesales', // Usually your GitHub org/user name.
   projectName: 'pathvector', // Usually your repo name.
 
@@ -162,6 +161,18 @@ const config = {
                 docId: 'about',
                 position: 'left',
                 label: 'Docs',
+            },
+            {
+                type: 'doc',
+                docId: 'installation',
+                position: 'left',
+                label: 'Install',
+            },
+            {
+                type: 'doc',
+                docId: 'configuration',
+                position: 'left',
+                label: 'Configuration',
             },
             {
                 href: 'https://github.com/natesales/pathvector',

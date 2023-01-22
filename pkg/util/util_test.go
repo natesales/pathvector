@@ -89,6 +89,10 @@ func TestPrintTable(t *testing.T) {
 }
 
 func TestUtilPtrDeref(t *testing.T) {
+	assert.Equal(t, true, Deref(Ptr(true)))
+	assert.Equal(t, false, Deref(Ptr(false)))
+	assert.Equal(t, false, Deref[bool](nil))
+
 	assert.Equal(t, "foo", StrDeref(Ptr("foo")))
 	assert.Equal(t, "", StrDeref(nil))
 }

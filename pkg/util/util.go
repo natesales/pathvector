@@ -133,12 +133,18 @@ func RemoveFileGlob(glob string) error {
 
 // Pointer helpers used to write cleaner tests
 
+// Deref returns the value of a pointer
+func Deref[T any](p *T) T {
+	if p == nil {
+		var zero T
+		return zero
+	}
+	return *p
+}
+
 // StrDeref returns the value of a pointer to a string
 func StrDeref(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
+	return Deref(s)
 }
 
 func Ptr[T any](a T) *T {

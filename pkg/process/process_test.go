@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/natesales/pathvector/pkg/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -85,6 +86,46 @@ peers:
 	assert.Equal(t, 1, len(globalConfig.Peers))
 	assert.Equal(t, 65530, *globalConfig.Peers["Example"].ASN)
 	assert.Equal(t, []string{"203.0.113.25", "2001:db8:2::25"}, *globalConfig.Peers["Example"].NeighborIPs)
+}
+
+func TestLoadLocalPref(t *testing.T) {
+	configFile := `
+asn: 34553
+router-id: 192.0.2.1
+peers:
+  Peer 10:
+    asn: 65510
+    local-pref: 110
+    neighbors:
+      - 192.0.2.10
+  Peer 20:
+    asn: 65520
+    set-local-pref: false
+    default-local-pref: 120
+    neighbors:
+      - 192.0.2.20
+`
+
+	globalConfig, err := Load([]byte(configFile))
+	assert.NoError(t, err)
+
+	assert.Len(t, globalConfig.Peers, 2)
+	for peerName, peerData := range globalConfig.Peers {
+		switch peerName {
+		case "Peer 10":
+			assert.Equal(t, 65510, util.Deref(peerData.ASN))
+			assert.Equal(t, 110, util.Deref(peerData.LocalPref))
+			assert.True(t, util.Deref(peerData.SetLocalPref))
+			assert.Nil(t, peerData.DefaultLocalPref)
+		case "Peer 20":
+			assert.Equal(t, 65520, util.Deref(peerData.ASN))
+			assert.Equal(t, 100, util.Deref(peerData.LocalPref))
+			assert.False(t, util.Deref(peerData.SetLocalPref))
+			assert.Equal(t, 120, util.Deref(peerData.DefaultLocalPref))
+		default:
+			t.Errorf("peer %s unexpected", peerName)
+		}
+	}
 }
 
 func TestLoadConfigInvalidYAML(t *testing.T) {

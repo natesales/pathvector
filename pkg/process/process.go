@@ -249,7 +249,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 			peerData.PreExportFinal = util.Ptr(templateReplacements(*peerData.PreExportFinal, peerData))
 		}
 
-		if peerData.DefaultLocalPref != nil && peerData.OptimizeInbound != nil {
+		if peerData.DefaultLocalPref != nil && util.Deref(peerData.OptimizeInbound) {
 			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
 		}
 

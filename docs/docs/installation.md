@@ -34,7 +34,7 @@ releases are not signed.
 Pathvector on Linux is available for amd64, aarch64, and mips64 as binaries and deb and rpm packages
 from [releases](https://github.com/natesales/pathvector/releases).
 
-## Debian
+## Debian (Ubuntu, etc.)
 
 ```shell
 curl https://repo.pathvector.io/pgp.asc > /usr/share/keyrings/pathvector.asc
@@ -56,7 +56,7 @@ VyOS is based on Debian, see [Debian](#debian) for more information.
 
 ## TNSR
 
-TNSR is based on CentOS, see [CentOS](#centos) for more information.
+TNSR is based on Ubuntu, see [Debian](#debian) for more information. Past TNSR versions were based on CentOS, see [Netgate's FAQ](https://www.netgate.com/tnsr-centos-to-ubuntu-faq) for more information.
 
 ## FreeBSD
 

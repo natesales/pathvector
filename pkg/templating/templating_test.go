@@ -1,10 +1,10 @@
 package templating
 
 import (
-	"github.com/natesales/pathvector/pkg/embed"
 	"testing"
 
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/embed"
 )
 
 func TestLoadTemplates(t *testing.T) {

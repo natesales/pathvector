@@ -45,9 +45,7 @@ func TestBirdConn(t *testing.T) {
 	buf := make([]byte, 1024)
 	n, err := conn.Read(buf[:])
 	assert.Nil(t, err)
-	if string(buf[:n]) != "bird command test\n" {
-		t.Errorf("expected 'bird command test' got %s", string(buf[:n]))
-	}
+	assert.Equal(t, "bird command test\n", string(buf[:n]))
 
 	_, err = conn.Write([]byte("0001 Fake BIRD response 2"))
 	assert.Nil(t, err)

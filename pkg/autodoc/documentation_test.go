@@ -2,6 +2,8 @@ package autodoc
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TODO: lint the resulting markdown files
@@ -20,8 +22,6 @@ func TestSanitizeConfigName(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		out := sanitizeConfigName(tc.input)
-		if out != tc.expected {
-			t.Errorf("expected %s got %s", tc.expected, tc.input)
-		}
+		assert.Equal(t, tc.expected, out)
 	}
 }

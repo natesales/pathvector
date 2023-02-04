@@ -1,12 +1,13 @@
 package irr
 
 import (
-	"github.com/natesales/pathvector/pkg/util"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util"
 )
 
 const irrQueryTimeout = 10
@@ -31,7 +32,7 @@ func TestGetIRRPrefixSet(t *testing.T) {
 			t.Errorf("as-set %s family %d should error but didn't", tc.asSet, tc.family)
 		}
 		if err == nil && !reflect.DeepEqual(out, tc.expectedOutput) {
-			t.Errorf("as-set %s family %d failed. expected '%s' got '%s'", tc.asSet, tc.family, tc.expectedOutput, out)
+			assert.Equalf(t, tc.expectedOutput, out, "as-set %s family %d failed. expected '%s' got '%s'", tc.asSet, tc.family, tc.expectedOutput, out)
 		}
 	}
 }
@@ -57,12 +58,8 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 		} else if err == nil && tc.shouldError {
 			t.Errorf("as-set %s should error but didn't", tc.asSet)
 		}
-		if !reflect.DeepEqual(tc.prefixSet4, *peer.PrefixSet4) {
-			t.Errorf("as-set %s IPv4 prefix set expected %v got %v", tc.asSet, tc.prefixSet4, peer.PrefixSet4)
-		}
-		if !reflect.DeepEqual(tc.prefixSet6, *peer.PrefixSet6) {
-			t.Errorf("as-set %s IPv6 prefix set expected %v got %v", tc.asSet, tc.prefixSet6, peer.PrefixSet6)
-		}
+		assert.Equal(t, tc.prefixSet4, *peer.PrefixSet4)
+		assert.Equal(t, tc.prefixSet6, *peer.PrefixSet6)
 	}
 }
 

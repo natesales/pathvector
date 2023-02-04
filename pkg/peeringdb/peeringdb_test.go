@@ -91,9 +91,6 @@ func TestSanitizeASSet(t *testing.T) {
 		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "AS-HURRICANE"},
 	}
 	for _, tc := range testCases {
-		out := sanitizeASSet(tc.asSet)
-		if out != tc.expected {
-			t.Errorf("expected %s got %s", tc.expected, out)
-		}
+		assert.Equal(t, tc.expected, sanitizeASSet(tc.asSet))
 	}
 }

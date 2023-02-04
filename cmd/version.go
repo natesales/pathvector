@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/process"
+	log "github.com/sirupsen/logrus"
+	"os"
 	"reflect"
 
 	"github.com/spf13/cobra"
@@ -32,5 +36,22 @@ var versionCmd = &cobra.Command{
 	Short: "Show version information",
 	Run: func(cmd *cobra.Command, args []string) {
 		versionBanner()
+
+		log.Debugf("Loading config from %s", configFile)
+		configFile, err := os.ReadFile(configFile)
+		if err != nil {
+			log.Fatalf("Reading config file: %s", err)
+		}
+		c, err := process.Load(configFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Debugln("Finished loading config")
+
+		_, birdVersion, err := bird.RunCommand("", c.BIRDSocket)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("BIRD: %s\n", birdVersion)
 	},
 }

@@ -36,7 +36,7 @@ func Read(reader io.Reader) (string, error) {
 	return string(buf[:n]), nil // nil error
 }
 
-// ReadClean reads from the provided reader and trims unneeded whitespace and bird 4 digit numbers
+// ReadClean reads from the provided reader and trims unneeded whitespace and bird 4-digit numbers
 func ReadClean(r io.Reader) {
 	resp, err := Read(r)
 	if err != nil {
@@ -52,12 +52,12 @@ func ReadClean(r io.Reader) {
 	fmt.Println(resp)
 }
 
-// RunCommand runs a BIRD command
-func RunCommand(command string, socket string) (string, error) {
+// RunCommand runs a BIRD command and returns the output, version, and error
+func RunCommand(command string, socket string) (string, string, error) {
 	log.Debugln("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	//noinspection GoUnhandledErrorResult
 	defer conn.Close()
@@ -65,7 +65,7 @@ func RunCommand(command string, socket string) (string, error) {
 	log.Debug("Connected to BIRD socket")
 	resp, err := Read(conn)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	log.Debugf("BIRD init response: %s", resp)
 
@@ -79,17 +79,17 @@ func RunCommand(command string, socket string) (string, error) {
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
 	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	log.Debugln("Reading from socket")
 	resp, err = Read(conn)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	log.Debugln("Done reading from socket")
 
-	return resp, nil // nil error
+	return resp, birdVersion, nil // nil error
 }
 
 // Validate checks if the cached configuration is syntactically valid
@@ -186,7 +186,7 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 
 	if !noConfigure {
 		log.Infoln("Reconfiguring BIRD")
-		resp, err := RunCommand("configure", birdSocket)
+		resp, _, err := RunCommand("configure", birdSocket)
 		if err != nil {
 			log.Fatal(err)
 		}

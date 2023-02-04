@@ -19,7 +19,7 @@ func TestBirdConn(t *testing.T) {
 
 	go func() {
 		time.Sleep(time.Millisecond * 10) // Wait for the server to start
-		resp, err := RunCommand("bird command test\n", unixSocket)
+		resp, _, err := RunCommand("bird command test\n", unixSocket)
 		assert.Nil(t, err)
 
 		// Print bird output as multiple lines

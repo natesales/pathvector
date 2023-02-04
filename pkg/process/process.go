@@ -286,6 +286,19 @@ func Load(configBlob []byte) (*config.Config, error) {
 				}
 			}
 		}
+
+		// Validate RFC 9234 BGP role
+		if peerData.Role != nil {
+			peerData.Role = util.Ptr(strings.ReplaceAll(*peerData.Role, "-", "_"))
+			if *peerData.Role != "rs_server" && *peerData.Role != "rs_client" && *peerData.Role != "customer" && *peerData.Role != "peer" {
+				return nil, fmt.Errorf("[%s] Invalid BGP role: %s (must be one of rs-server, rs-client, customer, peer)", *peerData.Role, peerName)
+			}
+		}
+		requireRoles := peerData.RequireRoles != nil && *peerData.RequireRoles
+		if requireRoles && peerData.Role == nil {
+			return nil, fmt.Errorf("[%s] require-roles set but no role specified", peerName)
+		}
+
 	} // end peer list
 
 	// Parse origin routes by assembling OriginIPv{4,6} lists by address family

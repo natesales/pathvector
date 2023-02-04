@@ -97,3 +97,5 @@ peers:
       - 65510
       - 65530
     filter-aspa: true
+    require-roles: true
+    role: peer

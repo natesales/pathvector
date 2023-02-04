@@ -1247,6 +1247,22 @@ AS set members (For filter-as-set)
 |------|---------|------------|
 | []uint32   |       |          |
 
+### `role`
+
+RFC 9234 Local BGP role
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `require-roles`
+
+Require RFC 9234 BGP roles
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `announce-default`
 
 Should a default route be exported to this peer?

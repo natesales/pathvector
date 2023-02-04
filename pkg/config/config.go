@@ -195,6 +195,9 @@ type Peer struct {
 	Prefixes     *[]string `yaml:"prefixes" description:"Prefixes to accept" default:"-"`
 	ASSetMembers *[]uint32 `yaml:"as-set-members" description:"AS set members (For filter-as-set)" default:"-"`
 
+	Role         *string `yaml:"role" description:"RFC 9234 Local BGP role" default:"-"`
+	RequireRoles *bool   `yaml:"require-roles" description:"Require RFC 9234 BGP roles" default:"false"`
+
 	// Export options
 	AnnounceDefault    *bool `yaml:"announce-default" description:"Should a default route be exported to this peer?" default:"false"`
 	AnnounceOriginated *bool `yaml:"announce-originated" description:"Should locally originated routes be announced to this peer?" default:"true"`

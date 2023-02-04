@@ -85,3 +85,17 @@ func TestIRRASMembers(t *testing.T) {
 		assert.Equal(t, members[1], uint32(34553))
 	}
 }
+
+func TestFirstASSet(t *testing.T) {
+	testCases := []struct {
+		asSet    string
+		expected string
+	}{
+		{"AS34553:AS-ALL", "AS34553:AS-ALL"},
+		{"RIPE::AS34553:AS-ALL", "AS34553:AS-ALL"},
+		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "AS-HURRICANE"},
+	}
+	for _, tc := range testCases {
+		assert.Equal(t, tc.expected, FirstASSet(tc.asSet))
+	}
+}

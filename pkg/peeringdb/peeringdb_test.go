@@ -80,17 +80,3 @@ func TestPeeringNeverViaRouteServers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, len(asns), 3)
 }
-
-func TestSanitizeASSet(t *testing.T) {
-	testCases := []struct {
-		asSet    string
-		expected string
-	}{
-		{"AS34553:AS-ALL", "AS34553:AS-ALL"},
-		{"RIPE::AS34553:AS-ALL", "AS34553:AS-ALL"},
-		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "AS-HURRICANE"},
-	}
-	for _, tc := range testCases {
-		assert.Equal(t, tc.expected, sanitizeASSet(tc.asSet))
-	}
-}

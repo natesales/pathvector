@@ -8,13 +8,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/irr"
 )
 
 func endpoint() string {
@@ -168,7 +168,7 @@ func Update(peerData *config.Peer, queryTimeout uint, apiKey string, useCache bo
 		}
 
 		// Used to get address of string
-		asSetOutput := sanitizeASSet(pDbData.ASSet)
+		asSetOutput := irr.FirstASSet(pDbData.ASSet)
 		peerData.ASSet = &asSetOutput
 	}
 }
@@ -262,23 +262,4 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 	}
 
 	return pDbResponse.Data, nil // nil error
-}
-
-// sanitizeASSet removes an IRRDB prefix from an AS set and picks the first one if there are multiple
-func sanitizeASSet(asSet string) string {
-	output := asSet
-
-	// If the as-set has a space in it, split and pick the first one
-	if strings.Contains(output, " ") {
-		output = strings.Split(output, " ")[0]
-		log.Warnf("Original AS set %s contains a space. Selecting first element %s", asSet, output)
-	}
-
-	// Trim IRRDB prefix
-	if strings.Contains(output, "::") {
-		output = strings.Split(output, "::")[1]
-		log.Warnf("Original AS set %s includes an IRRDB prefix. Using %s", asSet, output)
-	}
-
-	return output
 }

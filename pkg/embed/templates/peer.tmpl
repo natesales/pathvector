@@ -52,6 +52,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
     {{ if BoolDeref $peer.AllowLocalAS }}allow local as ASN;{{ end }}
     {{ if BoolDeref $peer.TTLSecurity }}ttl security on;{{ end }}
     {{ if BoolDeref $peer.ConfederationMember }}confederation member yes;{{ end }}
+    {{ if StrDeref $peer.Role }}local role {{ StrDeref $peer.Role }};{{ end }}
+    {{ if BoolDeref $peer.RequireRoles }}require roles;{{ end }}
     {{ if not (BoolDeref $peer.InterpretCommunities) }}interpret communities off;{{ end }}
     {{ if IntDeref $peer.Confederation }}confederation {{ IntDeref $peer.Confederation }};{{ end }}
     {{ if IntDeref $peer.DefaultLocalPref }}default bgp_local_pref {{ IntDeref $peer.DefaultLocalPref }};{{ end }}

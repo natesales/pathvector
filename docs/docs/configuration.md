@@ -117,6 +117,22 @@ List of communities to add to locally originated prefixes
 |------|---------|------------|
 | []string   |       |          |
 
+### `add-on-import`
+
+List of communities to add to all imported routes
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `add-on-export`
+
+List of communities to add to all exported routes
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `hostname`
 
 Router hostname (default system hostname)

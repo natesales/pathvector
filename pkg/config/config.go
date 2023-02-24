@@ -308,20 +308,23 @@ type Optimizer struct {
 
 // Config stores the global configuration
 type Config struct {
-	PeeringDBQueryTimeout uint     `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
-	PeeringDBAPIKey       string   `yaml:"peeringdb-api-key" description:"PeeringDB API key"`
-	PeeringDBCache        bool     `yaml:"peeringdb-cache" description:"Cache PeeringDB results" default:"true"`
-	IRRQueryTimeout       uint     `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
-	BIRDDirectory         string   `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
-	BIRDBinary            string   `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
-	BIRDSocket            string   `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
-	CacheDirectory        string   `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
-	KeepalivedConfig      string   `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
-	WebUIFile             string   `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
-	LogFile               string   `yaml:"log-file" description:"Log file location" default:"syslog"`
-	GlobalConfig          string   `yaml:"global-config" description:"Global BIRD configuration" default:""`
-	OriginCommunities     []string `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
-	LocalCommunities      []string `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`
+	PeeringDBQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
+	PeeringDBAPIKey       string `yaml:"peeringdb-api-key" description:"PeeringDB API key"`
+	PeeringDBCache        bool   `yaml:"peeringdb-cache" description:"Cache PeeringDB results" default:"true"`
+	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
+	BIRDDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
+	BIRDBinary            string `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
+	BIRDSocket            string `yaml:"bird-socket" description:"UNIX control socket for BIRD" default:"/run/bird/bird.ctl"`
+	CacheDirectory        string `yaml:"cache-directory" description:"Directory to store runtime configuration cache" default:"/var/run/pathvector/cache/"`
+	KeepalivedConfig      string `yaml:"keepalived-config" description:"Configuration file for keepalived" default:"/etc/keepalived.conf"`
+	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
+	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
+	GlobalConfig          string `yaml:"global-config" description:"Global BIRD configuration" default:""`
+
+	OriginCommunities []string `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
+	LocalCommunities  []string `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`
+	ImportCommunities []string `yaml:"add-on-import" description:"List of communities to add to all imported routes" default:"-"`
+	ExportCommunities []string `yaml:"add-on-export" description:"List of communities to add to all exported routes" default:"-"`
 
 	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
@@ -370,6 +373,10 @@ type Config struct {
 	OriginLargeCommunities    []string `yaml:"-" description:"-"`
 	LocalStandardCommunities  []string `yaml:"-" description:"-"`
 	LocalLargeCommunities     []string `yaml:"-" description:"-"`
+	ImportStandardCommunities []string `yaml:"-" description:"-" default:"-"`
+	ImportLargeCommunities    []string `yaml:"-" description:"-" default:"-"`
+	ExportStandardCommunities []string `yaml:"-" description:"-" default:"-"`
+	ExportLargeCommunities    []string `yaml:"-" description:"-" default:"-"`
 }
 
 // Init initializes a Config with embedded structs prior to calling config.Default

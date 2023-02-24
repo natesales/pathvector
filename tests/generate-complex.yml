@@ -16,6 +16,14 @@ local-communities:
   - 65530:65530
   - 65530:100:65530
 
+add-on-import:
+  - 65530:1
+  - 65530:65530:1
+
+add-on-export:
+  - 65530:2
+  - 65530:65530:2
+
 kernel:
   srd-communities:
     - 65530,1
@@ -41,7 +49,7 @@ bfd:
     multiplier: 10
 
 authorized-providers:
-  65510: [65520, 65530]
+  65510: [ 65520, 65530 ]
 
 peers:
   Example:

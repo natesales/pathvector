@@ -377,6 +377,44 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 	}
 
+	if c.ImportCommunities != nil {
+		for _, community := range c.ImportCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				if c.ImportStandardCommunities == nil {
+					c.ImportStandardCommunities = []string{}
+				}
+				c.ImportStandardCommunities = append(c.ImportStandardCommunities, strings.ReplaceAll(community, ":", ","))
+			} else if communityType == "large" {
+				if c.ImportLargeCommunities == nil {
+					c.ImportLargeCommunities = []string{}
+				}
+				c.ImportLargeCommunities = append(c.ImportLargeCommunities, strings.ReplaceAll(community, ":", ","))
+			} else {
+				return nil, errors.New("Invalid global import community: " + community)
+			}
+		}
+	}
+
+	if c.ExportCommunities != nil {
+		for _, community := range c.ExportCommunities {
+			communityType := categorizeCommunity(community)
+			if communityType == "standard" {
+				if c.ExportStandardCommunities == nil {
+					c.ExportStandardCommunities = []string{}
+				}
+				c.ExportStandardCommunities = append(c.ExportStandardCommunities, strings.ReplaceAll(community, ":", ","))
+			} else if communityType == "large" {
+				if c.ExportLargeCommunities == nil {
+					c.ExportLargeCommunities = []string{}
+				}
+				c.ExportLargeCommunities = append(c.ExportLargeCommunities, strings.ReplaceAll(community, ":", ","))
+			} else {
+				return nil, errors.New("Invalid global export community: " + community)
+			}
+		}
+	}
+
 	// Parse static routes
 	for prefix, nexthop := range c.Kernel.Statics {
 		// Handle interface suffix

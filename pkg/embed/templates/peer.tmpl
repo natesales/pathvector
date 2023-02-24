@@ -153,6 +153,13 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             bgp_large_community.add(({{ $community }}));
             {{ end }}
 
+            {{ range $i, $community := StringSliceIter $global.ImportStandardCommunities }}
+            bgp_community.add(({{ $community }}));
+            {{ end }}
+            {{ range $i, $community := StringSliceIter $global.ImportLargeCommunities }}
+            bgp_large_community.add(({{ $community }}));
+            {{ end }}
+
             {{ if BoolDeref $peer.BlackholeIn }}
             set_blackhole();
             {{ end }}
@@ -191,8 +198,14 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $af $peer.ASN }} {
             {{ range $i, $community := StringSliceIter $peer.ExportStandardCommunities }}
             bgp_community.add(({{ $community }}));
             {{ end }}
-
             {{ range $i, $community := StringSliceIter $peer.ExportLargeCommunities }}
+            bgp_large_community.add(({{ $community }}));
+            {{ end }}
+
+            {{ range $i, $community := StringSliceIter $global.ExportStandardCommunities }}
+            bgp_community.add(({{ $community }}));
+            {{ end }}
+            {{ range $i, $community := StringSliceIter $global.ExportLargeCommunities }}
             bgp_large_community.add(({{ $community }}));
             {{ end }}
 

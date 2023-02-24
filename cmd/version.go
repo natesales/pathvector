@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/pkg/bird"
-	"github.com/natesales/pathvector/pkg/process"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"reflect"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/plugin"
+	"github.com/natesales/pathvector/pkg/process"
 )
 
 func init() {

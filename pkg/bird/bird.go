@@ -102,6 +102,7 @@ func Validate(binary string, cacheDir string) {
 	birdCmd.Stderr = &errb
 	var errbT string
 	if err := birdCmd.Run(); err != nil {
+		origErr := err
 		errbT = strings.TrimSuffix(errb.String(), "\n")
 
 		// Check for validation error in format:
@@ -148,6 +149,9 @@ func Validate(binary string, cacheDir string) {
 			if err := scanner.Err(); err != nil {
 				log.Fatalf("BIRD output file scan: %s", err)
 			}
+		}
+		if errorMessageToLog == "" {
+			errorMessageToLog = origErr.Error()
 		}
 		log.Fatalf("BIRD: %s\n", errorMessageToLog)
 	}

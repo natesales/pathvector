@@ -7,5 +7,4 @@ assignees: ''
 
 ---
 
-**What feature would you like to see?**
-<!-- Modify this section -->
+<!-- What feature would you like to see? -->

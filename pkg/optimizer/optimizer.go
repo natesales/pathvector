@@ -54,9 +54,8 @@ func sendPing(source string, target string, count int, timeout int, udp bool) (*
 	pinger.SetPrivileged(!udp)
 
 	// Run the ping
-	err = pinger.Run()
-	if err != nil {
-		return &ping.Statistics{}, err
+	if err = pinger.Run(); err != nil {
+		return &ping.Statistics{}, fmt.Errorf("ping: %s", err)
 	}
 
 	return pinger.Statistics(), nil // nil error

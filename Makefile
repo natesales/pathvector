@@ -6,6 +6,7 @@ dummy-iface:
 	sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
 	sudo ip link add dev dummy0 type dummy
 	sudo ip addr add dev dummy0 192.0.2.1/24
+	sudo ip addr add dev dummy0 2001:db8::1/64
 	sudo ip link set dev dummy0 up
 
 peeringdb-test-harness:

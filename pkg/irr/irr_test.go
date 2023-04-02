@@ -92,8 +92,8 @@ func TestFirstASSet(t *testing.T) {
 		expected string
 	}{
 		{"AS34553:AS-ALL", "AS34553:AS-ALL"},
-		{"RIPE::AS34553:AS-ALL", "AS34553:AS-ALL"},
-		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "AS-HURRICANE"},
+		{"AS34553:AS-ALL", "AS34553:AS-ALL"},
+		{"RADB::AS-HURRICANE RADB::AS-HURRICANEV6", "RADB::AS-HURRICANE"},
 	}
 	for _, tc := range testCases {
 		assert.Equal(t, tc.expected, FirstASSet(tc.asSet))

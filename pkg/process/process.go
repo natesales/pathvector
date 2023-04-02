@@ -253,8 +253,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 			log.Fatalf("Both DefaultLocalPref and OptimizeInbound set, Pathvector cannot optimize this peer.")
 		}
 
-		if peerData.OnlyAnnounce != nil && peerData.AnnounceAll != nil {
-			log.Fatalf("[%s] only-announce and announce-all cannot both be set", peerName)
+		if peerData.OnlyAnnounce != nil && util.Deref(peerData.AnnounceAll) {
+			log.Fatalf("[%s] only-announce and announce-all cannot both be true", peerName)
 		}
 
 		// Categorize prefix-communities

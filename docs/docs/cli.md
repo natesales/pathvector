@@ -11,9 +11,10 @@ Usage:
 
 Available Commands:
   birdsh      Lightweight BIRD shell
-  completion  generate the autocompletion script for the specified shell
+  completion  Generate the autocompletion script for the specified shell
+  config      Export configuration, optionally sanitized with logknife
   dump        Dump configuration
-  generate    generate router configuration
+  generate    Generate router configuration
   help        Help about any command
   match       Find common IXPs for a given ASN
   optimizer   Start optimization daemon

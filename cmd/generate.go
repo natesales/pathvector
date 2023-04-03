@@ -16,7 +16,7 @@ func init() {
 
 var generateCmd = &cobra.Command{
 	Use:     "generate",
-	Short:   "generate router configuration",
+	Short:   "Generate router configuration",
 	Aliases: []string{"gen", "g"},
 	Run: func(cmd *cobra.Command, args []string) {
 		process.Run(configFile, lockFile, version, noConfigure, dryRun, withdraw)

@@ -290,7 +290,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 		// Validate RFC 9234 BGP role
 		if peerData.Role != nil {
 			peerData.Role = util.Ptr(strings.ReplaceAll(*peerData.Role, "-", "_"))
-			if *peerData.Role != "provider" && peerData.Role != "rs_server" && *peerData.Role != "rs_client" && *peerData.Role != "customer" && *peerData.Role != "peer" {
+			if *peerData.Role != "provider" && *peerData.Role != "rs_server" && *peerData.Role != "rs_client" && *peerData.Role != "customer" && *peerData.Role != "peer" {
 				return nil, fmt.Errorf("[%s] Invalid BGP role: %s (must be one of provider, rs-server, rs-client, customer, peer)", *peerData.Role, peerName)
 			}
 		}

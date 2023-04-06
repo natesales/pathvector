@@ -3,6 +3,8 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/process"
 	"os"
 	"os/exec"
 	"regexp"
@@ -48,9 +50,23 @@ var configCmd = &cobra.Command{
 		config := string(cf)
 
 		var buf string
+
+		birdVersion := "unknown"
+		c, err := process.Load(cf)
+		if err != nil {
+			buf += fmt.Sprintf("# Error loading config: %s\n", err)
+		} else {
+			log.Debugln("Finished loading config")
+			_, birdVersion, err = bird.RunCommand("", c.BIRDSocket)
+			if err != nil {
+				birdVersion = fmt.Sprintf("error: %s", err)
+			}
+		}
+
 		for _, line := range strings.Split(versionBanner(), "\n") {
 			buf += fmt.Sprintf("# %s\n", line)
 		}
+		buf += "# BIRD " + birdVersion + "\n"
 		buf += fmt.Sprintf("# System %s", uname())
 		if sanitize {
 			buf += "# Sanitized config"

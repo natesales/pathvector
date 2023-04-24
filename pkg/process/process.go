@@ -674,7 +674,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 			log.Fatal("Lockfile exists, exiting")
 		} else if os.IsNotExist(err) {
 			// If the lockfile doesn't exist, create it
-			log.Debugln("Lockfile doesn't exist, creating one")
+			log.Debug("Lockfile doesn't exist, creating one")
 			//nolint:golint,gosec
 			if err := os.WriteFile(lockFile, []byte(""), 0755); err != nil {
 				log.Fatalf("Writing lockfile: %v", err)
@@ -697,7 +697,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Debugln("Finished loading config")
+	log.Debug("Finished loading config")
 
 	// Run NVRS query
 	if c.QueryNVRS {
@@ -709,12 +709,12 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 
 	// Load templates from embedded filesystem
-	log.Debugln("Loading templates from embedded filesystem")
+	log.Debug("Loading templates from embedded filesystem")
 	err = templating.Load(embed.FS)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Debugln("Finished loading templates")
+	log.Debug("Finished loading templates")
 
 	// Create cache directory
 	log.Debugf("Making cache directory %s", c.CacheDirectory)

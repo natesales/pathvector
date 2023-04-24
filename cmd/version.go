@@ -52,7 +52,7 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debugln("Finished loading config")
+		log.Debug("Finished loading config")
 
 		_, birdVersion, err := bird.RunCommand("", c.BIRDSocket)
 		if err != nil {

@@ -28,7 +28,7 @@ var optimizerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debugln("Finished loading config")
+		log.Debug("Finished loading config")
 
 		log.Infof("Starting optimizer")
 		sourceMap := map[string][]string{} // peer name to list of source addresses

@@ -3,8 +3,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/natesales/pathvector/pkg/bird"
-	"github.com/natesales/pathvector/pkg/process"
 	"os"
 	"os/exec"
 	"regexp"
@@ -14,6 +12,9 @@ import (
 	"github.com/natesales/logknife"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/process"
 )
 
 var sensitiveKeys = []string{
@@ -56,7 +57,7 @@ var configCmd = &cobra.Command{
 		if err != nil {
 			buf += fmt.Sprintf("# Error loading config: %s\n", err)
 		} else {
-			log.Debugln("Finished loading config")
+			log.Debug("Finished loading config")
 			_, birdVersion, err = bird.RunCommand("", c.BIRDSocket)
 			if err != nil {
 				birdVersion = fmt.Sprintf("error: %s", err)

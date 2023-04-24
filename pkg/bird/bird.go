@@ -189,7 +189,7 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	}
 
 	if !noConfigure {
-		log.Infoln("Reconfiguring BIRD")
+		log.Info("Reconfiguring BIRD")
 		resp, _, err := RunCommand("configure", birdSocket)
 		if err != nil {
 			log.Fatal(err)

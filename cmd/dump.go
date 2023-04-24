@@ -36,7 +36,7 @@ var dumpCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debugln("Finished loading config")
+		log.Debug("Finished loading config")
 
 		if dumpYaml {
 			yamlBytes, err := yaml.Marshal(&c)

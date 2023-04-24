@@ -42,7 +42,7 @@ var matchCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debugln("Finished loading config")
+		log.Debug("Finished loading config")
 
 		var peeringDbTimeout uint
 		peeringDbTimeout = 10

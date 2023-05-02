@@ -343,10 +343,11 @@ type Config struct {
 	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
 	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
 
-	TransitASNs []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns (default list in config)" default:""`
-	Bogons4     []string `yaml:"bogons4" description:"List of IPv4 bogons (default list in config)" default:""`
-	Bogons6     []string `yaml:"bogons6" description:"List of IPv6 bogons (default list in config)" default:""`
-	BogonASNs   []string `yaml:"bogon-asns" description:"List of ASNs to consider bogons (default list in config)" default:""`
+	TransitASNs        []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns (default list in config)" default:""`
+	Bogons4            []string `yaml:"bogons4" description:"List of IPv4 bogons (default list in config)" default:""`
+	Bogons6            []string `yaml:"bogons6" description:"List of IPv6 bogons (default list in config)" default:""`
+	BogonASNs          []string `yaml:"bogon-asns" description:"List of ASNs to consider bogons (default list in config)" default:""`
+	BlackholeBogonASNs bool     `yaml:"blackhole-bogon-asns" description:"Should routes containing bogon ASNs be blackholed?" default:"false"`
 
 	NoAnnounce bool `yaml:"no-announce" description:"Don't announce any routes to any peer" default:"false"`
 	NoAccept   bool `yaml:"no-accept" description:"Don't accept any routes from any peer" default:"false"`

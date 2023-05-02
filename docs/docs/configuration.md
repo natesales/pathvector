@@ -277,6 +277,14 @@ List of ASNs to consider bogons (default list in config)
 |------|---------|------------|
 | []string   |       |          |
 
+### `blackhole-bogon-asns`
+
+Should routes containing bogon ASNs be blackholed?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `no-announce`
 
 Don't announce any routes to any peer

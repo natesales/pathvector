@@ -236,7 +236,12 @@ function reject_local() {
 }
 
 function reject_bogon_asns() {
-  if (bgp_path ~ BOGON_ASNS) then _reject("bogon ASN in path");
+  if (bgp_path ~ BOGON_ASNS) then {
+    {{ if .BlackholeBogonASNs }}
+    set_blackhole();
+    {{ end }}
+    _reject("bogon ASN in path");
+  }
 }
 
 function reject_long_as_paths() {

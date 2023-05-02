@@ -20,3 +20,6 @@ test:
 test-teardown:
 	pkill -f tests/peeringdb/peeringdb-test-api.py
 	sudo ip link del dev dummy0
+	rm nohup.out
+
+test-sequence: test-setup test test-teardown

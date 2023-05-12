@@ -119,6 +119,7 @@ func Combine(manualBlocklist, blocklistURLs, blocklistFiles []string) []string {
 	// Fetch blocklist URLs
 	for _, url := range blocklistURLs {
 		// Fetch the blocklist
+		//nolint:gosec
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Warnf("Error fetching blocklist from %s: %s", url, err)

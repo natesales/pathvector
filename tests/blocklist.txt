@@ -1,0 +1,11 @@
+# Example ASNs:
+AS65520 # Example ASN
+AS65510 # Other ASN
+
+# Prefixes
+192.0.2.0/24
+10.50.0.0/19
+
+# IP addresses
+192.168.10.2
+172.16.8.1

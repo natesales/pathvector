@@ -212,13 +212,17 @@ define BOGON_ASNS = [
 
 # Blocklist
 
+{{ if gt (len .BlocklistASNs) 0 }}
 define BLOCKLIST_ASNS = [
 {{ BirdASSet .BlocklistASNs }}
 ];
+{{ end }}
 
+{{ if gt (len .BlocklistPrefixes) 0 }}
 define BLOCKLIST_PREFIXES = [
 {{ BirdSet .BlocklistPrefixes }}
 ];
+{{ end }}
 
 # Helper Functions
 
@@ -227,9 +231,8 @@ function _reject(string reason) {
 }
 
 function reject_blocklist() {
-  if (bgp_path ~ BLOCKLIST_ASNS || net ~ BLOCKLIST_PREFIXES) then {
-    _reject("ASN or prefix in blocklist");
-  }
+  {{ if gt (len .BlocklistPrefixes) 0 }}if (net ~ BLOCKLIST_PREFIXES) then { _reject("prefix in blocklist"); }{{ end }}
+  {{ if gt (len .BlocklistASNs) 0 }}if (bgp_path ~ BLOCKLIST_ASNS) then { _reject("ASN in blocklist"); }{{ end }}
 }
 
 # Filtering Functions

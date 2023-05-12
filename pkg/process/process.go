@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/natesales/pathvector/pkg/block"
 	"net"
 	"os"
 	"path"
@@ -596,6 +597,16 @@ func Load(configBlob []byte) (*config.Config, error) {
 			*peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
+
+	// Blocklist
+	blocklist := block.Combine(c.Blocklist, c.BlocklistURLs, c.BlocklistFiles)
+	bASNs, bPrefixes, err := block.Parse(blocklist)
+	if err != nil {
+		log.Fatal(err)
+	}
+	c.BlocklistASNs = bASNs
+	c.BlocklistPrefixes = bPrefixes
+	log.Infof("Loaded %d ASNs and %d prefixes into global blocklist", len(c.BlocklistASNs), len(c.BlocklistPrefixes))
 
 	// Run plugins
 	if err := plugin.ModifyAll(&c); err != nil {

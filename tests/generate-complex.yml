@@ -32,6 +32,10 @@ kernel:
   statics:
     "192.0.2.0/24": "203.0.113.1%eth0"
 
+blocklist: [ "AS65530", "192.0.2.0/24" ]
+blocklist-urls: [ "https://raw.githubusercontent.com/natesales/pathvector/main/tests/blocklist.txt" ]
+blocklist-files: [ "tests/blocklist.txt" ]
+
 vrrp:
   VRRP 1:
     state: primary

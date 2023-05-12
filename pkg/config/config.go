@@ -176,6 +176,7 @@ type Peer struct {
 	FilterNeverViaRouteServers *bool `yaml:"filter-never-via-route-servers" description:"Should routes containing an ASN reported in PeeringDB to never be reachable via route servers be filtered?" default:"false"`
 	FilterASSet                *bool `yaml:"filter-as-set" description:"Reject routes that aren't originated by an ASN within this peer's AS set" default:"false"`
 	FilterASPA                 *bool `yaml:"filter-aspa" description:"Reject routes that aren't originated by an ASN within the authorized-providers map" default:"false"`
+	FilterBlocklist            *bool `yaml:"filter-blocklist" description:"Reject ASNs, prefixes, and IPs in the global blocklist" default:"true"`
 
 	TransitLock *[]string `yaml:"transit-lock" description:"Reject routes that aren't transited by an AS in this list" default:"-"`
 
@@ -321,6 +322,13 @@ type Config struct {
 	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
 	GlobalConfig          string `yaml:"global-config" description:"Global BIRD configuration" default:""`
+
+	Blocklist      []string `yaml:"blocklist" description:"List of ASNs, prefixes, and IP addresses to block" default:""`
+	BlocklistURLs  []string `yaml:"blocklist-urls" description:"List of URLs to fetch blocklists from" default:""`
+	BlocklistFiles []string `yaml:"blocklist-files" description:"List of files to fetch blocklists from" default:""`
+
+	BlocklistASNs     []uint32 `yaml:"-" description:"-"`
+	BlocklistPrefixes []string `yaml:"-" description:"-"`
 
 	OriginCommunities []string `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
 	LocalCommunities  []string `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`

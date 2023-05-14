@@ -18,6 +18,7 @@ Available Commands:
   help        Help about any command
   match       Find common IXPs for a given ASN
   optimizer   Start optimization daemon
+  status      Show protocol status
   version     Show version information
 
 Flags:

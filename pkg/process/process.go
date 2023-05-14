@@ -289,6 +289,29 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
+		// Categorize community-prefs
+		if peerData.CommunityPrefs != nil {
+			// Initialize community maps
+			if peerData.StandardCommunityPrefs == nil {
+				peerData.StandardCommunityPrefs = &map[string]uint32{}
+			}
+			if peerData.LargeCommunityPrefs == nil {
+				peerData.LargeCommunityPrefs = &map[string]uint32{}
+			}
+
+			for community, pref := range *peerData.CommunityPrefs {
+				community = strings.ReplaceAll(community, ":", ",")
+				communityType := categorizeCommunity(community)
+				if communityType == "standard" {
+					(*peerData.StandardCommunityPrefs)[community] = pref
+				} else if communityType == "large" {
+					(*peerData.LargeCommunityPrefs)[community] = pref
+				} else {
+					return nil, errors.New("Invalid community pref: " + community)
+				}
+			}
+		}
+
 		// Validate RFC 9234 BGP role
 		if peerData.Role != nil {
 			peerData.Role = util.Ptr(strings.ReplaceAll(*peerData.Role, "-", "_"))

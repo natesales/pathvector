@@ -114,3 +114,7 @@ peers:
 #    role: peer
     local-pref4: 200
     local-pref6: 300
+    community-prefs:
+      65510,30: 100
+      65510,20: 200
+      65510,20,30: 300

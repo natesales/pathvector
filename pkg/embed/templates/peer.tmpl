@@ -148,6 +148,13 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
             if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
             {{ end }}
 
+            {{ range $community, $pref := StringUint32MapDeref $peer.StandardCommunityPrefs }}
+            if (({{ $community }}) ~ bgp_community) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+            {{ range $community, $pref := StringUint32MapDeref $peer.LargeCommunityPrefs }}
+            if (({{ $community }}) ~ bgp_large_community) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
             {{ if BoolDeref $peer.HonorGracefulShutdown }}honor_graceful_shutdown();{{ end }}
 

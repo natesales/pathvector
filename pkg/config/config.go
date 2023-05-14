@@ -147,6 +147,10 @@ type Peer struct {
 
 	ASPrefs *map[uint32]uint32 `yaml:"as-prefs" description:"Map of ASN to import local pref (not included in optimizer)" default:"-"`
 
+	CommunityPrefs         *map[string]uint32 `yaml:"community-prefs" description:"Map of community to import local pref (not included in optimizer)" default:"-"`
+	StandardCommunityPrefs *map[string]uint32 `yaml:"-" description:"-" default:"-"`
+	LargeCommunityPrefs    *map[string]uint32 `yaml:"-" description:"-" default:"-"`
+
 	// Filtering
 	ASSet *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
 

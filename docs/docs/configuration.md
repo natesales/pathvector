@@ -1039,6 +1039,14 @@ Map of ASN to import local pref (not included in optimizer)
 |------|---------|------------|
 | map[uint32]uint32   |       |          |
 
+### `community-prefs`
+
+Map of community to import local pref (not included in optimizer)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]uint32   |       |          |
+
 ### `as-set`
 
 Peer's as-set for filtering

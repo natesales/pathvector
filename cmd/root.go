@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"os"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/pkg/plugin"
+	"github.com/natesales/pathvector/pkg/process"
 )
 
 // These are set indirectly by the build process. The cmd.Execute() function takes these from the main package and sets them in this (cmd) package.
@@ -29,6 +33,21 @@ var (
 var rootCmd = &cobra.Command{
 	Use:   "pathvector",
 	Short: "Pathvector is a declarative edge routing platform that automates route optimization and control plane configuration with secure and repeatable routing policy.",
+}
+
+func loadConfig() (*config.Config, error) {
+	// Load the config file from config file
+	log.Debugf("Loading config from %s", configFile)
+	configFile, err := os.ReadFile(configFile)
+	if err != nil {
+		log.Fatalf("Reading config file: %s", err)
+	}
+	c, err := process.Load(configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Debug("Finished loading config")
+	return c, nil
 }
 
 func init() {

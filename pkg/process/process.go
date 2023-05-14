@@ -2,9 +2,9 @@ package process
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/natesales/pathvector/pkg/block"
 	"net"
 	"os"
 	"path"
@@ -19,6 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/block"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/pkg/embed"
 	"github.com/natesales/pathvector/pkg/irr"
@@ -606,7 +607,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 	c.BlocklistASNs = bASNs
 	c.BlocklistPrefixes = bPrefixes
-	log.Infof("Loaded %d ASNs and %d prefixes into global blocklist", len(c.BlocklistASNs), len(c.BlocklistPrefixes))
+	log.Debugf("Loaded %d ASNs and %d prefixes into global blocklist", len(c.BlocklistASNs), len(c.BlocklistPrefixes))
 
 	// Run plugins
 	if err := plugin.ModifyAll(&c); err != nil {
@@ -785,6 +786,18 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	bird.Validate(c.BIRDBinary, c.CacheDirectory)
 
 	if !dryRun {
+		// Write protocol name map
+		names := templating.ProtocolNames()
+		j, err := json.Marshal(names)
+		if err != nil {
+			log.Fatalf("Marshalling protocol names: %v", err)
+		}
+		file := path.Join(c.BIRDDirectory, "protocol_names.json")
+		log.Debugf("Writing protocol names to %s", file)
+		if err := os.WriteFile(file, j, 0644); err != nil {
+			log.Fatalf("Writing protocol names: %v", err)
+		}
+
 		// Write VRRP config
 		templating.WriteVRRPConfig(c.VRRPInstances, c.KeepalivedConfig)
 

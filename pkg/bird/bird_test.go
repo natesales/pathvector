@@ -1,13 +1,12 @@
 package bird
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"strings"
 	"testing"
-	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,31 +14,33 @@ func TestBirdConn(t *testing.T) {
 	unixSocket := "test.sock"
 
 	// Delete socket
+	t.Log("Removing existing socket")
 	_ = os.Remove(unixSocket)
 
 	go func() {
-		time.Sleep(time.Millisecond * 10) // Wait for the server to start
+		fmt.Println("Running test command")
 		resp, _, err := RunCommand("bird command test\n", unixSocket)
 		assert.Nil(t, err)
 
 		// Print bird output as multiple lines
 		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-			log.Printf("BIRD response (multiline): %s", line)
+			t.Logf("BIRD response (multiline): %s", line)
 		}
 	}()
 
-	log.Println("Starting fake BIRD socket server")
+	t.Log("Starting fake BIRD socket server")
 	l, err := net.Listen("unix", unixSocket)
 	assert.Nil(t, err)
 
 	defer l.Close()
+	t.Logf("Accepting connection on %s", unixSocket)
 	conn, err := l.Accept()
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 
-	_, err = conn.Write([]byte("0001 Fake BIRD response 1"))
+	_, err = conn.Write([]byte("0001 Fake BIRD response 1\n"))
 	assert.Nil(t, err)
 
 	buf := make([]byte, 1024)
@@ -47,7 +48,7 @@ func TestBirdConn(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "bird command test\n", string(buf[:n]))
 
-	_, err = conn.Write([]byte("0001 Fake BIRD response 2"))
+	_, err = conn.Write([]byte("0001 Fake BIRD response 2\n"))
 	assert.Nil(t, err)
 }
 

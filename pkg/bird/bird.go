@@ -415,7 +415,7 @@ func ParseProtocol(p string) (*ProtocolState, error) {
 	p = tableHeaderRegex.ReplaceAllString(p, "")
 
 	// Remove control characters
-	ccRegex := regexp.MustCompile(`\d\d\d\d-`)
+	ccRegex := regexp.MustCompile(`\d\d\d\d-\w?$`)
 	p = ccRegex.ReplaceAllString(p, "")
 
 	// Remove leading and trailing newlines

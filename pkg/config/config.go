@@ -96,6 +96,9 @@ type Peer struct {
 	Description *string `yaml:"description" description:"Peer description" default:"-"`
 	Disabled    *bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
+	Import *bool `yaml:"import" description:"Import routes from this peer" default:"true"`
+	Export *bool `yaml:"export" description:"Export routes to this peer" default:"true"`
+
 	// BGP Attributes
 	ASN                    *int      `yaml:"asn" description:"Local ASN" validate:"required" default:"0"`
 	NeighborIPs            *[]string `yaml:"neighbors" description:"List of neighbor IPs" validate:"required,ip" default:"-"`

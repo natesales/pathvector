@@ -84,7 +84,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
         {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
         {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
         import filter {
-            {{ if $global.NoAccept }}reject;{{ end }}
+            {{ if $global.NoAccept }}reject; # no-accept: true{{ end }}
+            {{ if (not (BoolDeref $peer.Import)) }}reject; # import: false{{ end }}
 
             {{ StrDeref $peer.PreImportFilter }}
 
@@ -173,7 +174,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
         };
 
         export filter {
-            {{ if $global.NoAnnounce }}reject;{{ end }}
+            {{ if $global.NoAnnounce }}reject; # no-announce: true{{ end }}
+            {{ if (not (BoolDeref $peer.Export)) }}reject; # export: false{{ end }}
 
             {{ if not (Empty $peer.DontAnnounce) }}
             if (net ~ [

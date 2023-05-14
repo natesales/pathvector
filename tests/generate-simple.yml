@@ -10,6 +10,8 @@ cache-directory: test-cache
 
 peers:
   Example:
+    import: false
+    export: false
     asn: 65510
     neighbors:
       - 203.0.113.12

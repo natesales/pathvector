@@ -671,6 +671,22 @@ Should the sessions be disabled?
 |------|---------|------------|
 | bool   | false      |          |
 
+### `import`
+
+Import routes from this peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
+### `export`
+
+Export routes to this peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true      |          |
+
 ### `asn`
 
 Local ASN

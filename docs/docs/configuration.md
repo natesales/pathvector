@@ -737,7 +737,7 @@ BGP local preference
 
 ### `local-pref4`
 
-IPv4 BGP local preference (overrides local-pref)
+IPv4 BGP local preference (overrides local-pref, not included in optimizer)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -745,7 +745,7 @@ IPv4 BGP local preference (overrides local-pref)
 
 ### `local-pref6`
 
-IPv6 BGP local preference (overrides local-pref)
+IPv6 BGP local preference (overrides local-pref, not included in optimizer)
 
 | Type | Default | Validation |
 |------|---------|------------|

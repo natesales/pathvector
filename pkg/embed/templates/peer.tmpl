@@ -224,6 +224,16 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
 
             {{ if StrDeref $peer.ExportNextHop }}bgp_next_hop = {{ StrDeref $peer.ExportNextHop }};{{ end }}
 
+            {{ if BoolDeref $peer.BlackholeOut }}
+            set_blackhole();
+            {{ end }}
+
+            {{ if not (Empty $peer.OnlyAnnounce) }}
+            if !(net ~ [
+            {{ BirdSet $peer.OnlyAnnounce }}
+            ]) then _reject("prefix not in only-announce list");
+            {{ end }}
+
             {{ if BoolDeref $peer.AnnounceOriginated }}
             accept_local();
             {{ end }}
@@ -239,16 +249,6 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
             {{ if BoolDeref $peer.AnnounceDefault }}
             # Send default route
             if (proto = "default{{ $af }}") then accept;
-            {{ end }}
-
-            {{ if BoolDeref $peer.BlackholeOut }}
-            set_blackhole();
-            {{ end }}
-
-            {{ if not (Empty $peer.OnlyAnnounce) }}
-            if !(net ~ [
-            {{ BirdSet $peer.OnlyAnnounce }}
-            ]) then _reject("prefix not in only-announce list");
             {{ end }}
 
             {{ StrDeref $peer.PreExportFinal }}

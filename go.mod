@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/creasty/defaults v1.7.0
+	github.com/fatih/color v1.15.0
 	github.com/go-ping/ping v1.1.0
 	github.com/go-playground/validator/v10 v10.12.0
 	github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b
@@ -22,6 +23,8 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.2.3 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect

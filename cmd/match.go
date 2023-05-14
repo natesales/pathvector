@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/match"
-	"github.com/natesales/pathvector/pkg/process"
 )
 
 var (
@@ -32,17 +30,10 @@ var matchCmd = &cobra.Command{
 			log.Fatal("Usage: pathvector match ASN")
 		}
 
-		// Load the config file from config file
-		log.Debugf("Loading config from %s", configFile)
-		configFile, err := os.ReadFile(configFile)
-		if err != nil {
-			log.Fatalf("Reading config file: %s", err)
-		}
-		c, err := process.Load(configFile)
+		c, err := loadConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debug("Finished loading config")
 
 		var peeringDbTimeout uint
 		peeringDbTimeout = 10

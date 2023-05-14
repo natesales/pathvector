@@ -2,13 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/optimizer"
-	"github.com/natesales/pathvector/pkg/process"
 )
 
 func init() {
@@ -19,16 +17,10 @@ var optimizerCmd = &cobra.Command{
 	Use:   "optimizer",
 	Short: "Start optimization daemon",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Debugf("Loading config from %s", configFile)
-		configFile, err := os.ReadFile(configFile)
-		if err != nil {
-			log.Fatalf("Reading config file: %s", err)
-		}
-		c, err := process.Load(configFile)
+		c, err := loadConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debug("Finished loading config")
 
 		log.Infof("Starting optimizer")
 		sourceMap := map[string][]string{} // peer name to list of source addresses

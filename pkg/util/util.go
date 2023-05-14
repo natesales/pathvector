@@ -111,8 +111,9 @@ func PrintTable(header []string, data [][]string) {
 	table.SetRowSeparator("")
 	table.SetHeaderLine(false)
 	table.SetBorder(false)
-	table.SetTablePadding("\t") // pad with tabs
+	table.SetTablePadding("  ")
 	table.SetNoWhiteSpace(true)
+	table.SetAutoWrapText(false)
 	table.AppendBulk(data)
 	table.Render()
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -15,13 +16,22 @@ import (
 	"github.com/natesales/pathvector/pkg/util"
 )
 
-var protocolNames []string
+var (
+	protocolNames       []string
+	protocolNameMap     = map[string]string{} // bird name:user name
+	protocolNameMapLock = sync.Mutex{}
+)
 
 // Wrapper is passed to the peer template
 type Wrapper struct {
 	Name   string
 	Peer   config.Peer
 	Config config.Config
+}
+
+// ProtocolNames gets a map of protocol names to user defined names
+func ProtocolNames() map[string]string {
+	return protocolNameMap
 }
 
 // Template functions
@@ -173,12 +183,15 @@ var funcMap = template.FuncMap{
 	},
 
 	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
-	"UniqueProtocolName": func(s *string, af string, asn *int) string {
+	"UniqueProtocolName": func(s, userSuppliedName *string, af string, asn *int) string {
 		protoName := fmt.Sprintf("%s_AS%d_v%s", *s, *asn, af)
 		i := 1
 		for {
 			if !util.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
+				protocolNameMapLock.Lock()
+				protocolNameMap[protoName] = *userSuppliedName
+				protocolNameMapLock.Unlock()
 				return protoName
 			}
 			protoName = fmt.Sprintf("%s_AS%d_v%s_%d", *s, *asn, af, i)

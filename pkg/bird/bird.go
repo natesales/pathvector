@@ -23,17 +23,60 @@ import (
 // Minimum supported BIRD version
 const supportedMin = "2.0.7"
 
-// Read reads from an io.Reader
-func Read(reader io.Reader) (string, error) {
-	// TODO: This buffer isn't a good solution, and might not fit the full response from BIRD
-	buf := make([]byte, 16384)
-	n, err := reader.Read(buf[:])
+// isNumeric checks if a byte is character for number
+func isNumeric(b byte) bool {
+	return b >= byte('0') && b <= byte('9')
+}
 
-	if err != nil {
-		return "", fmt.Errorf("BIRD read: %v", err)
+func read(r io.Reader, w io.Writer) bool {
+	// Read from socket byte by byte, until reaching newline character
+	c := make([]byte, 1024)
+	pos := 0
+	for {
+		if pos >= 1024 {
+			break
+		}
+		_, err := r.Read(c[pos : pos+1])
+		if err != nil {
+			panic(err)
+		}
+		if c[pos] == byte('\n') {
+			break
+		}
+		pos++
 	}
 
-	return string(buf[:n]), nil // nil error
+	c = c[:pos+1]
+
+	// Remove preceding status numbers
+	if pos > 4 && isNumeric(c[0]) && isNumeric(c[1]) && isNumeric(c[2]) && isNumeric(c[3]) {
+		// There is a status number at beginning, remove it (first 5 bytes)
+		if w != nil && pos > 6 {
+			pos = 5
+			if _, err := w.Write(c[pos:]); err != nil {
+				panic(err)
+			}
+		}
+		return c[0] != byte('0') && c[0] != byte('8') && c[0] != byte('9')
+	} else {
+		if w != nil {
+			if _, err := w.Write(c[1:]); err != nil {
+				panic(err)
+			}
+		}
+		return true
+	}
+}
+
+// Read reads the full BIRD response as a string
+func Read(r io.Reader) (string, error) {
+	var buf bytes.Buffer
+	for read(r, &buf) {
+	}
+	if r := recover(); r != nil {
+		return "", fmt.Errorf("%s", r)
+	}
+	return buf.String(), nil
 }
 
 // ReadClean reads from the provided reader and trims unneeded whitespace and bird 4-digit numbers
@@ -221,4 +264,226 @@ func Reformat(input string) string {
 		}
 	}
 	return formatted
+}
+
+type Routes struct {
+	Imported  int
+	Filtered  int
+	Exported  int
+	Preferred int
+}
+
+type BGPState struct {
+	NeighborAddress string
+	NeighborAS      int
+	LocalAS         int
+	NeighborID      string
+}
+
+type ProtocolState struct {
+	Name   string
+	Proto  string
+	Table  string
+	State  string
+	Since  string
+	Info   string
+	Routes *Routes
+	BGP    *BGPState
+}
+
+func trimRepeatingSpace(s string) string {
+	space := regexp.MustCompile(`\s+`)
+	return space.ReplaceAllString(s, " ")
+}
+
+// trimDupSpace trims duplicate whitespace
+func trimDupSpace(s string) string {
+	headTailWhitespace := regexp.MustCompile(`^[\s\p{Zs}]+|[\s\p{Zs}]+$`)
+	innerWhitespace := regexp.MustCompile(`[\s\p{Zs}]{2,}`)
+	return innerWhitespace.ReplaceAllString(headTailWhitespace.ReplaceAllString(s, ""), " ")
+}
+
+func parseBGP(s string) (*BGPState, error) {
+	out := &BGPState{
+		NeighborAddress: "",
+		NeighborAS:      -1,
+		LocalAS:         -1,
+		NeighborID:      "",
+	}
+
+	if !strings.Contains(s, "BGP state:") {
+		return nil, nil
+	}
+
+	addressRegex := regexp.MustCompile(`(.*)Neighbor address:(.*)`)
+	address := trimRepeatingSpace(
+		trimDupSpace(
+			addressRegex.FindString(s),
+		),
+	)
+	out.NeighborAddress = strings.Split(address, "Neighbor address: ")[1]
+
+	neighborASRegex := regexp.MustCompile(`(.*)Neighbor AS:(.*)`)
+	neighborAS := trimRepeatingSpace(
+		trimDupSpace(
+			neighborASRegex.FindString(s),
+		),
+	)
+	neighborAS = strings.Split(neighborAS, "Neighbor AS: ")[1]
+	neighborASInt, err := strconv.ParseInt(neighborAS, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	out.NeighborAS = int(neighborASInt)
+
+	localASRegex := regexp.MustCompile(`(.*)Local AS:(.*)`)
+	localAS := trimRepeatingSpace(
+		trimDupSpace(
+			localASRegex.FindString(s),
+		),
+	)
+	localAS = strings.Split(localAS, "Local AS: ")[1]
+	localASInt, err := strconv.ParseInt(localAS, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	out.LocalAS = int(localASInt)
+
+	neighborIDRegex := regexp.MustCompile(`(.*)Neighbor ID:(.*)`)
+	neighborID := trimRepeatingSpace(
+		trimDupSpace(
+			neighborIDRegex.FindString(s),
+		),
+	)
+	neighborIDParts := strings.Split(neighborID, "Neighbor ID: ")
+	if len(neighborIDParts) > 1 {
+		out.NeighborID = neighborIDParts[1]
+	}
+
+	return out, nil
+}
+
+func parseRoutes(s string) (*Routes, error) {
+	out := &Routes{
+		Imported:  -1,
+		Filtered:  -1,
+		Exported:  -1,
+		Preferred: -1,
+	}
+
+	routesRegex := regexp.MustCompile(`(.*)Routes:(.*)`)
+	routes := routesRegex.FindString(s)
+	routes = trimDupSpace(routes)
+	routes = trimRepeatingSpace(routes)
+
+	routeTokens := strings.Split(routes, "Routes: ")
+	if len(routeTokens) < 2 {
+		return out, nil
+	}
+
+	routesParts := strings.Split(routeTokens[1], ", ")
+
+	for r := range routesParts {
+		parts := strings.Split(routesParts[r], " ")
+		num, err := strconv.ParseInt(parts[0], 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		switch parts[1] {
+		case "imported":
+			out.Imported = int(num)
+		case "filtered":
+			out.Filtered = int(num)
+		case "exported":
+			out.Exported = int(num)
+		case "preferred":
+			out.Preferred = int(num)
+		}
+	}
+
+	return out, nil
+}
+
+// ParseProtocol parses a single protocol
+func ParseProtocol(p string) (*ProtocolState, error) {
+	p = noWhitespace(p)
+
+	// Remove lines that start with BIRD
+	birdRegex := regexp.MustCompile(`BIRD.*ready.*`)
+	p = birdRegex.ReplaceAllString(p, "")
+	tableHeaderRegex := regexp.MustCompile(`Name.*Info`)
+	p = tableHeaderRegex.ReplaceAllString(p, "")
+
+	// Remove control characters
+	ccRegex := regexp.MustCompile(`\d\d\d\d-\w?$`)
+	p = ccRegex.ReplaceAllString(p, "")
+
+	// Remove leading and trailing newlines
+	p = strings.Trim(p, "\n")
+	header := strings.Split(p, "\n")[0]
+	header = trimRepeatingSpace(header)
+	headerParts := strings.Split(header, " ")
+
+	if len(headerParts) < 5 {
+		return nil, fmt.Errorf("%s\ninvalid header len %d: %+v (%s)", p, len(headerParts), headerParts, header)
+	}
+
+	// Parse since field - there are multiple possible formats here
+	var since, info string
+	if strings.Contains(headerParts[4], ".") { // Combined time/date
+		since = headerParts[4]
+		info = strings.Join(headerParts[5:], " ")
+	} else { // Split time/date
+		since = headerParts[4] + " " + headerParts[5]
+		info = strings.Join(headerParts[6:], " ")
+	}
+
+	// Parse header
+	protocolState := &ProtocolState{
+		Name:  headerParts[0],
+		Proto: headerParts[1],
+		Table: headerParts[2],
+		State: headerParts[3],
+		Since: since,
+		Info:  trimDupSpace(info),
+	}
+
+	routes, err := parseRoutes(p)
+	if err != nil {
+		return nil, err
+	}
+	protocolState.Routes = routes
+
+	bgp, err := parseBGP(p)
+	if err != nil {
+		return nil, err
+	}
+	protocolState.BGP = bgp
+
+	return protocolState, nil
+}
+
+// noWhitespace removes all leading and trailing whitespace from evey line
+func noWhitespace(p string) string {
+	p = strings.Trim(p, "\n")
+	lines := strings.Split(p, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimSpace(trimRepeatingSpace(line))
+	}
+	return strings.Join(lines, "\n")
+}
+
+// ParseProtocols parses a list of protocols
+func ParseProtocols(p string) ([]*ProtocolState, error) {
+	p = noWhitespace(p)
+	protocols := strings.Split(p, "\n\n")
+	protocolStates := make([]*ProtocolState, len(protocols))
+	for i, protocol := range protocols {
+		protocolState, err := ParseProtocol(protocol)
+		if err != nil {
+			return nil, err
+		}
+		protocolStates[i] = protocolState
+	}
+	return protocolStates, nil
 }

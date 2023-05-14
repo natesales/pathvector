@@ -1,11 +1,11 @@
 package bird
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func TestBirdConn(t *testing.T) {
 	_ = os.Remove(unixSocket)
 
 	go func() {
-		fmt.Println("Running test command")
+		time.Sleep(time.Millisecond * 10) // Wait for the server to start
 		resp, _, err := RunCommand("bird command test\n", unixSocket)
 		assert.Nil(t, err)
 

@@ -794,7 +794,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		}
 		file := path.Join(c.BIRDDirectory, "protocol_names.json")
 		log.Debugf("Writing protocol names to %s", file)
-		if err := os.WriteFile(file, j, 0644); err != nil {
+		if err := os.WriteFile(file, j, 0600); err != nil {
 			log.Fatalf("Writing protocol names: %v", err)
 		}
 

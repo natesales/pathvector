@@ -30,7 +30,7 @@ func isNumeric(b byte) bool {
 
 func read(r io.Reader, w io.Writer) bool {
 	// Read from socket byte by byte, until reaching newline character
-	c := make([]byte, 1024, 1024)
+	c := make([]byte, 1024)
 	pos := 0
 	for {
 		if pos >= 1024 {

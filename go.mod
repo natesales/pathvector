@@ -7,10 +7,8 @@ require (
 	github.com/fatih/color v1.15.0
 	github.com/go-ping/ping v1.1.0
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/natesales/go-bird v0.0.0-20230514051043-9ba1500b8a4d
 	github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/rodaine/table v1.1.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.2

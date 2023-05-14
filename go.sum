@@ -15,8 +15,6 @@ github.com/go-playground/universal-translator v0.18.1 h1:Bcnm0ZwsGyWbCzImXv+pAJn
 github.com/go-playground/universal-translator v0.18.1/go.mod h1:xekY+UJKNuX9WP91TpwSH2VMlDf28Uj24BCp08ZFTUY=
 github.com/go-playground/validator/v10 v10.12.0 h1:E4gtWgxWxp8YSxExrQFv5BpCahla0PVF2oTTEYaWQGI=
 github.com/go-playground/validator/v10 v10.12.0/go.mod h1:hCAPuzYvKdP33pxWa+2+6AIKXEKqjIUyqsNCtbsSJrA=
-github.com/google/go-cmp v0.5.9 h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=
-github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/uuid v1.2.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
@@ -33,16 +31,6 @@ github.com/mattn/go-isatty v0.0.17/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mattn/go-runewidth v0.0.14 h1:+xnbZSEeDbOIg5/mE6JF0w6n9duR1l3/WmbinWVwUuU=
 github.com/mattn/go-runewidth v0.0.14/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
-github.com/natesales/go-bird v0.0.0-20230513085729-670f964b98cd h1:qJPOLUXYGbqa4xw9hd4ukBlWSF/pVOO9Maye6E4ZqBU=
-github.com/natesales/go-bird v0.0.0-20230513085729-670f964b98cd/go.mod h1:FrtZyKrjFJTJLczwUvocYcHZrzFvOmpDO7I5v6Y/nWY=
-github.com/natesales/go-bird v0.0.0-20230513092204-9709f3c41bc2 h1:X2SWpkRfut8eX+I7wlMQ8gfg01eYZRFICEMqz0K372w=
-github.com/natesales/go-bird v0.0.0-20230513092204-9709f3c41bc2/go.mod h1:FrtZyKrjFJTJLczwUvocYcHZrzFvOmpDO7I5v6Y/nWY=
-github.com/natesales/go-bird v0.0.0-20230514000431-e75ddbd968f2 h1:p0eJtodhJkLaSeZVNAZdsNnYOZY0Ot5sni2C6CCwXOs=
-github.com/natesales/go-bird v0.0.0-20230514000431-e75ddbd968f2/go.mod h1:FrtZyKrjFJTJLczwUvocYcHZrzFvOmpDO7I5v6Y/nWY=
-github.com/natesales/go-bird v0.0.0-20230514004501-079f7eb91ad0 h1:J8nxzE9lJO1Gy3H5Waa0zTshCmhjwiuI15mGdl7eiw4=
-github.com/natesales/go-bird v0.0.0-20230514004501-079f7eb91ad0/go.mod h1:FrtZyKrjFJTJLczwUvocYcHZrzFvOmpDO7I5v6Y/nWY=
-github.com/natesales/go-bird v0.0.0-20230514051043-9ba1500b8a4d h1:r6u/Ra21ZgobJuAwikTMiqZWMJdJLKebBPnKqZvFNuA=
-github.com/natesales/go-bird v0.0.0-20230514051043-9ba1500b8a4d/go.mod h1:FrtZyKrjFJTJLczwUvocYcHZrzFvOmpDO7I5v6Y/nWY=
 github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b h1:oDEZbVwq3gZzqimMCrxDUWrn2e9RWws0q48mdsvUz7g=
 github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b/go.mod h1:tQLjEyj4CHMjYpG5icbEKjWtByZxU7b6CU1wEVIdp2k=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
@@ -52,8 +40,6 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.4 h1:8TfxU8dW6PdqD27gjM8MVNuicgxIjxpm4K7x4jp8sis=
 github.com/rivo/uniseg v0.4.4/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
-github.com/rodaine/table v1.1.0 h1:/fUlCSdjamMY8VifdQRIu3VWZXYLY7QHFkVorS8NTr4=
-github.com/rodaine/table v1.1.0/go.mod h1:Qu3q5wi1jTQD6B6HsP6szie/S4w1QUQ8pq22pz9iL8g=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
@@ -67,7 +53,6 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=

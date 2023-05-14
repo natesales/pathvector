@@ -140,6 +140,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN }}
             {{ if BoolDeref $peer.SetLocalPref }}bgp_local_pref = {{ $peer.LocalPref }}; # pathvector:localpref{{ end }}
             {{ end }}
 
+            {{ if IntDeref $peer.LocalPref4 }}if (net.type = NET_IP4) then { bgp_local_pref = {{ $peer.LocalPref4 }}; }{{ end }}
+            {{ if IntDeref $peer.LocalPref6 }}if (net.type = NET_IP6) then { bgp_local_pref = {{ $peer.LocalPref6 }}; }{{ end }}
+
             {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
             if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
             {{ end }}

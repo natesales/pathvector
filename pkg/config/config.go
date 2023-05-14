@@ -103,6 +103,8 @@ type Peer struct {
 	PrependPath            *[]uint32 `yaml:"prepend-path" description:"List of ASNs to prepend" default:"-"`
 	ClearPath              *bool     `yaml:"clear-path" description:"Remove all ASNs from path (before prepends and prepend-path)" default:"false"`
 	LocalPref              *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
+	LocalPref4             *int      `yaml:"local-pref4" description:"IPv4 BGP local preference (overrides local-pref)" default:"-"`
+	LocalPref6             *int      `yaml:"local-pref6" description:"IPv6 BGP local preference (overrides local-pref)" default:"-"`
 	SetLocalPref           *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set?" default:"true"`
 	Multihop               *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
 	Listen4                *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`

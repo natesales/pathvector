@@ -112,3 +112,5 @@ peers:
     filter-aspa: true
 #    require-roles: true
 #    role: peer
+    local-pref4: 200
+    local-pref6: 300

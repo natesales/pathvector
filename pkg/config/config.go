@@ -93,8 +93,9 @@ var defaultBogonASNs = []string{
 type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
 
-	Description *string `yaml:"description" description:"Peer description" default:"-"`
-	Disabled    *bool   `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
+	Description *string   `yaml:"description" description:"Peer description" default:"-"`
+	Tags        *[]string `yaml:"tags" description:"Peer tags" default:"-"`
+	Disabled    *bool     `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 
 	Import *bool `yaml:"import" description:"Import routes from this peer" default:"true"`
 	Export *bool `yaml:"export" description:"Export routes to this peer" default:"true"`

@@ -18,7 +18,7 @@ import (
 
 var (
 	protocolNames       []string
-	protocolNameMap     = map[string]string{} // bird name:user name
+	protocolNameMap     = map[string]*Protocol{} // bird name:protocol
 	protocolNameMapLock = sync.Mutex{}
 )
 
@@ -29,8 +29,13 @@ type Wrapper struct {
 	Config config.Config
 }
 
+type Protocol struct {
+	Name string
+	Tags []string
+}
+
 // ProtocolNames gets a map of protocol names to user defined names
-func ProtocolNames() map[string]string {
+func ProtocolNames() map[string]*Protocol {
 	return protocolNameMap
 }
 
@@ -190,14 +195,21 @@ var funcMap = template.FuncMap{
 	},
 
 	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
-	"UniqueProtocolName": func(s, userSuppliedName *string, af string, asn *int) string {
+	"UniqueProtocolName": func(s, userSuppliedName *string, af string, asn *int, tags *[]string) string {
 		protoName := fmt.Sprintf("%s_AS%d_v%s", *s, *asn, af)
 		i := 1
 		for {
 			if !util.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
+				var t []string
+				if tags != nil {
+					t = *tags
+				}
 				protocolNameMapLock.Lock()
-				protocolNameMap[protoName] = *userSuppliedName
+				protocolNameMap[protoName] = &Protocol{
+					Name: *userSuppliedName,
+					Tags: t,
+				}
 				protocolNameMapLock.Unlock()
 				return protoName
 			}

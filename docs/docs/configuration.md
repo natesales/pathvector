@@ -663,6 +663,14 @@ Peer description
 |------|---------|------------|
 | string   |       |          |
 
+### `tags`
+
+Peer tags
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `disabled`
 
 Should the sessions be disabled?

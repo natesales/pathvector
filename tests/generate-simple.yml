@@ -16,15 +16,3 @@ peers:
     neighbors:
       - 203.0.113.12
       - 2001:db8::12
-    tags:
-      - nwax
-      - ixp
-  Example2:
-    import: false
-    export: false
-    asn: 65510
-    neighbors:
-      - 203.0.113.12
-      - 2001:db8::12
-    tags:
-      - ixp

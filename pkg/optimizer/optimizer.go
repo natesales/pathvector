@@ -203,7 +203,7 @@ func modifyPref(
 		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
 
 		//nolint:golint,gosec
-		if err := os.WriteFile(fileName, []byte(modified), 0755); err != nil {
+		if err := os.WriteFile(fileName, []byte(modified), 0644); err != nil {
 			log.Fatal(err)
 		} else {
 			log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)

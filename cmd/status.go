@@ -49,7 +49,7 @@ var statusCmd = &cobra.Command{
 		// Read protocol names map
 		var protocols map[string]*templating.Protocol
 		if !realProtocolNames {
-			contents, err := os.ReadFile(path.Join("/etc/bird/", "protocol_names.json"))
+			contents, err := os.ReadFile(path.Join("/etc/bird/", "protocols.json"))
 			if err != nil {
 				log.Fatalf("Reading protocol names: %v", err)
 			}

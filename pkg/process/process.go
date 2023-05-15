@@ -721,7 +721,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 			// If the lockfile doesn't exist, create it
 			log.Debug("Lockfile doesn't exist, creating one")
 			//nolint:golint,gosec
-			if err := os.WriteFile(lockFile, []byte(""), 0755); err != nil {
+			if err := os.WriteFile(lockFile, []byte(""), 0644); err != nil {
 				log.Fatalf("Writing lockfile: %v", err)
 			}
 		} else {
@@ -825,9 +825,10 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		if err != nil {
 			log.Fatalf("Marshalling protocol names: %v", err)
 		}
-		file := path.Join(c.BIRDDirectory, "protocol_names.json")
+		file := path.Join(c.BIRDDirectory, "protocols.json")
 		log.Debugf("Writing protocol names to %s", file)
-		if err := os.WriteFile(file, j, 0600); err != nil {
+		//nolint:golint,gosec
+		if err := os.WriteFile(file, j, 0644); err != nil {
 			log.Fatalf("Writing protocol names: %v", err)
 		}
 

@@ -25,6 +25,7 @@ func TestMatch(t *testing.T) {
 	for _, tc := range testCases {
 		rootCmd.SetArgs(append(baseArgs, []string{
 			"-l", fmt.Sprintf("%d", tc.asnA),
+			"-c", "../tests/generate-simple.yml",
 			fmt.Sprintf("%d", tc.asnB),
 		}...))
 		if err := rootCmd.Execute(); err != nil {

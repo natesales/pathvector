@@ -125,6 +125,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 
 	// Set PeeringDB URL
 	peeringdb.Endpoint = c.PeeringDBURL
+	log.Debugf("Setting PeeringDB endpoint to %s", peeringdb.Endpoint)
 
 	// Set hostname if empty
 	if c.Hostname == "" {

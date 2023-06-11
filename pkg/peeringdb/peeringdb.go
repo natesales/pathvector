@@ -3,7 +3,6 @@ package peeringdb
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -17,16 +16,8 @@ import (
 	"github.com/natesales/pathvector/pkg/irr"
 )
 
-func endpoint() string {
-	if flag.Lookup("test.v") == nil {
-		return "https://www.peeringdb.com/api"
-	} else {
-		return "http://localhost:5000/api"
-	}
-}
-
-// Endpoint is a public value to allow overwriting to a cache server
-var Endpoint = endpoint()
+// Endpoint is a public value to allow setting to a cache server
+var Endpoint = ""
 
 type IxLanResponse struct {
 	Data []IxLanData `json:"data"`

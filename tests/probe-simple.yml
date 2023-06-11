@@ -6,6 +6,7 @@ prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48
 cache-directory: test-cache
+peeringdb-url: http://localhost:5000/api
 
 optimizer:
   probe-udp: true

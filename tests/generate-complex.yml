@@ -8,6 +8,7 @@ prefixes:
 web-ui-file: test-cache/ui.html
 cache-directory: test-cache
 blackhole-bogon-asns: true
+peeringdb-url: http://localhost:5000/api
 
 origin-communities:
   - 34553:10

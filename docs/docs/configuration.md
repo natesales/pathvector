@@ -101,6 +101,14 @@ Global BIRD configuration
 |------|---------|------------|
 | string   |       |          |
 
+### `peeringdb-url`
+
+PeeringDB API URL, can be set to a local PeeringDB cache server
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | https://peeringdb.com/api/      |          |
+
 ### `blocklist`
 
 List of ASNs, prefixes, and IP addresses to block

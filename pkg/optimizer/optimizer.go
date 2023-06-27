@@ -139,12 +139,20 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 		var alerts []string
 		peerASN, peerName := parsePeerDelimiter(peer)
 		if p[peer].PacketLoss >= o.PacketLossThreshold {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable packet loss: %f >= %f",
-				peerASN, peerName, p[peer].PacketLoss, o.PacketLossThreshold))
+			alerts = append(
+				alerts,
+				fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable packet loss: %.1f >= %.1f",
+					peerASN, peerName, p[peer].PacketLoss, o.PacketLossThreshold,
+				),
+			)
 		}
 		if p[peer].Latency >= time.Duration(o.LatencyThreshold)*time.Millisecond {
-			alerts = append(alerts, fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v",
-				peerASN, peerName, p[peer].Latency, o.LatencyThreshold))
+			alerts = append(
+				alerts,
+				fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v",
+					peerASN, peerName, p[peer].Latency, o.LatencyThreshold,
+				),
+			)
 		}
 
 		// If there is at least one alert,
@@ -187,7 +195,7 @@ func modifyPref(
 	dryRun bool,
 ) {
 	peerASN, peerName := parsePeerDelimiter(peerPair)
-	fileName := path.Join(cacheDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
+	fileName := path.Join(birdDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
 	peerFile, err := os.ReadFile(fileName)
 	if err != nil {
 		log.Fatalf("reading peer file: %s", err)
@@ -211,7 +219,7 @@ func modifyPref(
 	}
 
 	// Run BIRD config validation
-	bird.Validate(birdBinary, cacheDirectory)
+	bird.Validate(birdBinary, birdDirectory)
 
 	if !dryRun {
 		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)

@@ -109,7 +109,7 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
+		return nil, fmt.Errorf("%s PeeringDB JSON Unmarshal: %s", req.URL, err)
 	}
 
 	if len(pDbResponse.Data) < 1 {
@@ -209,7 +209,7 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 
 	var pDbResponse Response
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
+		return nil, fmt.Errorf("%s PeeringDB JSON Unmarshal: %s", req.URL, err)
 	}
 
 	var asns []uint32 // ASNs that are reportedly never reachable via route servers
@@ -255,7 +255,7 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 
 	var pDbResponse IxLanResponse
 	if err := json.Unmarshal(body, &pDbResponse); err != nil {
-		return nil, fmt.Errorf("PeeringDB JSON Unmarshal: %s", err)
+		return nil, fmt.Errorf("%s PeeringDB JSON Unmarshal: %s", req.URL, err)
 	}
 
 	if len(pDbResponse.Data) < 1 {

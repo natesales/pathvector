@@ -854,5 +854,13 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		}
 	}
 
-	log.Infof("Processed %d peers in %s", len(c.Peers), time.Since(startTime).Round(time.Second))
+	log.Infof("Processed %d sessions over %d peers in %s", countSessions(c.Peers), len(c.Peers), time.Since(startTime).Round(time.Second))
+}
+
+func countSessions(peers map[string]*config.Peer) int {
+	var count int
+	for _, p := range peers {
+		count += len(*p.NeighborIPs)
+	}
+	return count
 }

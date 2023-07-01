@@ -12,7 +12,6 @@ import (
 func TestOptimizer(t *testing.T) {
 	args := []string{
 		"--verbose",
-		"--dry-run",
 	}
 	files, err := filepath.Glob("../tests/probe-*.yml")
 	assert.Nil(t, err)
@@ -21,8 +20,10 @@ func TestOptimizer(t *testing.T) {
 	for _, testFile := range files {
 		// Run pathvector to generate config first, so there is a config to modify
 		rootCmd.SetArgs(append(args, []string{
+			"generate",
 			"--config", testFile,
 		}...))
+		t.Logf("Running pre-optimizer generate: %v", args)
 		assert.Nil(t, rootCmd.Execute())
 
 		args = append(args, []string{

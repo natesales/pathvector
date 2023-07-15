@@ -16,7 +16,7 @@ import (
 var socket = ""
 
 func init() {
-	birdshCmd.Flags().StringVarP(&socket, "socket", "s", "/var/run/bird/bird.ctl", "BIRD socket")
+	birdshCmd.Flags().StringVarP(&socket, "socket", "s", "", "BIRD socket file, will read from bird-socket config option if empty")
 	rootCmd.AddCommand(birdshCmd)
 }
 
@@ -24,6 +24,14 @@ var birdshCmd = &cobra.Command{
 	Use:   "birdsh",
 	Short: "Lightweight BIRD shell",
 	Run: func(cmd *cobra.Command, args []string) {
+		if socket == "" {
+			conf, err := loadConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			socket = conf.BIRDSocket
+		}
+
 		c, err := net.Dial("unix", socket)
 		if err != nil {
 			log.Fatal(err)

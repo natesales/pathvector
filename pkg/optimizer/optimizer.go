@@ -19,7 +19,7 @@ import (
 )
 
 // Delimiter is an arbitrary delimiter used to split ASN from peerName
-var Delimiter = "####"
+const Delimiter = "####"
 
 type peerAvg struct {
 	Latency    time.Duration

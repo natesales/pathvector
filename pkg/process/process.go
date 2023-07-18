@@ -822,6 +822,12 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	// Run BIRD config validation
 	bird.Validate(c.BIRDBinary, c.CacheDirectory)
 
+	// Copy config file
+	log.Debug("Copying Pathvector config file to cache directory")
+	if err := util.CopyFile(configFilename, path.Join(c.CacheDirectory, "pathvector.yml")); err != nil {
+		log.Fatalf("Copying pathvector config file to cache directory: %v", err)
+	}
+
 	if !dryRun {
 		// Write protocol name map
 		names := templating.ProtocolNames()

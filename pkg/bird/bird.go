@@ -231,6 +231,16 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 		}
 	}
 
+	// Move config file
+	log.Debug("Moving Pathvector config file")
+	configFilename := "pathvector.yml"
+	if err := util.MoveFile(
+		path.Join(cacheDirectory, configFilename),
+		path.Join(birdDirectory, configFilename),
+	); err != nil {
+		log.Fatalf("Moving pathvector config file: %v", err)
+	}
+
 	if !noConfigure {
 		log.Info("Reconfiguring BIRD")
 		resp, _, err := RunCommand("configure", birdSocket)

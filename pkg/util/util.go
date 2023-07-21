@@ -153,9 +153,25 @@ func Ptr[T any](a T) *T {
 }
 
 // CopyFile copies a file from a source to destination
-func CopyFile(source, destination_dir string) (err error) {
+func CopyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(out, in)
+	defer out.Close()
+	return err
+}
+
+// CopyFileTo copies a file from a source to destination directory
+func CopyFileTo(source, destinationDir string) (err error) {
 	_, destination := filepath.Split(source)
-	destination = filepath.Join(destination_dir, destination)
+	destination = filepath.Join(destinationDir, destination)
 	src, err := os.Open(source)
 	if err != nil {
 		return err
@@ -189,14 +205,14 @@ func CopyFile(source, destination_dir string) (err error) {
 	return nil
 }
 
-// CopyFileGlob copies files by glob to a destination
-func CopyFileGlob(glob, dest string) error {
+// CopyFileToGlob copies files by glob to a destination
+func CopyFileToGlob(glob, dest string) error {
 	files, err := filepath.Glob(glob)
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, f := range files {
-		if err := CopyFile(f, dest); err != nil {
+		if err := CopyFileTo(f, dest); err != nil {
 			return err
 		}
 	}

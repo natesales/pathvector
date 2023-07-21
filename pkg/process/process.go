@@ -793,7 +793,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 
 	// Copying manual configs
-	if err := util.CopyFileGlob(path.Join(c.BIRDDirectory, "manual*.conf"), c.CacheDirectory); err != nil {
+	if err := util.CopyFileToGlob(path.Join(c.BIRDDirectory, "manual*.conf"), c.CacheDirectory); err != nil {
 		log.Fatalf("Copying manual config files: %v", err)
 	}
 
@@ -825,7 +825,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	// Copy config file
 	log.Debug("Copying Pathvector config file to cache directory")
 	if err := util.CopyFile(configFilename, path.Join(c.CacheDirectory, "pathvector.yml")); err != nil {
-		log.Fatalf("Copying pathvector config file to cache directory: %v", err)
+		log.Fatalf("Copying Pathvector config file to cache directory: %v", err)
 	}
 
 	if !dryRun {

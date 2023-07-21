@@ -50,6 +50,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
     {{ if BoolDeref $peer.AllowLocalAS }}allow local as ASN;{{ end }}
     {{ if BoolDeref $peer.TTLSecurity }}ttl security on;{{ end }}
     {{ if BoolDeref $peer.ConfederationMember }}confederation member yes;{{ end }}
+    {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
     {{ if StrDeref $peer.Role }}local role {{ StrDeref $peer.Role }};{{ end }}
     {{ if BoolDeref $peer.RequireRoles }}require roles;{{ end }}
     {{ if not (BoolDeref $peer.InterpretCommunities) }}interpret communities off;{{ end }}
@@ -80,7 +81,6 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
         {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}
         {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
-        {{ if BoolDeref $peer.PreferOlderRoutes }}prefer older on;{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject; # no-accept: true{{ end }}
             {{ if (not (BoolDeref $peer.Import)) }}reject; # import: false{{ end }}

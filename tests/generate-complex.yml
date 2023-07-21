@@ -66,6 +66,7 @@ peers:
     confederation-member: true
     filter-never-via-route-servers: true
     confederation: 1
+    prefer-older-routes: true
     as-prefs:
       65510: 10
       65520: 20

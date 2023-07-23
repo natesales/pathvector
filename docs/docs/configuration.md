@@ -481,6 +481,14 @@ List of static routes to include in BIRD
 |------|---------|------------|
 | map[string]string   |       |          |
 
+### `kstatics`
+
+List of static routes to include in BIRD and send to the kernel
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
+
 ### `srd-communities`
 
 List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)

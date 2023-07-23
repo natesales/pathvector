@@ -101,6 +101,35 @@ func templateReplacements(in string, peer *config.Peer) string {
 	return in
 }
 
+// parseStatics categorizes a multiprotocol statics map into IPv4 and IPv6 maps
+func parseStatics(all map[string]string, v4 map[string]string, v6 map[string]string) error {
+	for prefix, nexthop := range all {
+		// Handle interface suffix
+		var rawNexthop string
+		if strings.Contains(nexthop, "%") {
+			rawNexthop = strings.Split(nexthop, "%")[0]
+		} else {
+			rawNexthop = nexthop
+		}
+
+		pfx, _, err := net.ParseCIDR(prefix)
+		if err != nil {
+			return errors.New("Invalid static prefix: " + prefix)
+		}
+		if net.ParseIP(rawNexthop) == nil {
+			return errors.New("Invalid static nexthop: " + rawNexthop)
+		}
+
+		if pfx.To4() == nil { // If IPv6
+			v6[prefix] = nexthop
+		} else { // If IPv4
+			v4[prefix] = nexthop
+		}
+	}
+
+	return nil
+}
+
 // Load loads a configuration file from a YAML file
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
@@ -344,6 +373,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 	// Initialize static maps
 	c.Kernel.Statics4 = map[string]string{}
 	c.Kernel.Statics6 = map[string]string{}
+	c.Kernel.KStatics4 = map[string]string{}
+	c.Kernel.KStatics6 = map[string]string{}
 
 	// Categorize communities
 	if c.Kernel.SRDCommunities != nil {
@@ -446,29 +477,11 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 	}
 
-	// Parse static routes
-	for prefix, nexthop := range c.Kernel.Statics {
-		// Handle interface suffix
-		var rawNexthop string
-		if strings.Contains(nexthop, "%") {
-			rawNexthop = strings.Split(nexthop, "%")[0]
-		} else {
-			rawNexthop = nexthop
-		}
-
-		pfx, _, err := net.ParseCIDR(prefix)
-		if err != nil {
-			return nil, errors.New("Invalid static prefix: " + prefix)
-		}
-		if net.ParseIP(rawNexthop) == nil {
-			return nil, errors.New("Invalid static nexthop: " + rawNexthop)
-		}
-
-		if pfx.To4() == nil { // If IPv6
-			c.Kernel.Statics6[prefix] = nexthop
-		} else { // If IPv4
-			c.Kernel.Statics4[prefix] = nexthop
-		}
+	if err := parseStatics(c.Kernel.Statics, c.Kernel.Statics4, c.Kernel.Statics6); err != nil {
+		log.Fatalf("parsing statics: %s", err)
+	}
+	if err := parseStatics(c.Kernel.KStatics, c.Kernel.KStatics4, c.Kernel.KStatics6); err != nil {
+		log.Fatalf("parsing kstatics: %s", err)
 	}
 
 	// Parse BFD configs

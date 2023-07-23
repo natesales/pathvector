@@ -20,6 +20,15 @@ protocol static static4 {
 }
 {{- end }}
 
+{{ if .Kernel.KStatics4 }}
+protocol static kstatic4 {
+  ipv4;
+  {{- range $prefix, $nexthop := MapDeref .Kernel.KStatics4 }}
+  route {{ $prefix }} via {{ $nexthop }};
+  {{- end }}
+}
+{{- end }}
+
 {{ if .Prefixes6 -}}
 define LOCALv6 = [
 {{ BirdSet .Prefixes6 }}
@@ -32,6 +41,15 @@ protocol static static6 {
   route {{ $prefix }} reject;
   {{- end }}
   {{- range $prefix, $nexthop := .Kernel.Statics6 }}
+  route {{ $prefix }} via {{ $nexthop }};
+  {{- end }}
+}
+{{- end }}
+
+{{ if .Kernel.KStatics6 }}
+protocol static kstatic6 {
+  ipv6;
+  {{- range $prefix, $nexthop := MapDeref .Kernel.KStatics6 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }

@@ -16,8 +16,8 @@ import (
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
 
-// Contains runs a linear search on a string array
-func Contains(a []string, x string) bool {
+// Contains runs a linear search on a slice
+func Contains[T comparable](a []T, x T) bool {
 	for _, n := range a {
 		if x == n {
 			return true

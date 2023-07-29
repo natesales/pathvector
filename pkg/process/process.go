@@ -177,8 +177,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 
 	for peerName, peerData := range c.Peers {
-		// Set sanitized peer name
 		peerData.ProtocolName = util.Sanitize(peerName)
+		peerData.UserSpecifiedName = &peerName
 
 		// If any peer has NVRS filtering enabled, mark it for querying.
 		if peerData.FilterNeverViaRouteServers != nil {

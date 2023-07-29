@@ -220,6 +220,7 @@ type Peer struct {
 	PreExportFinal   *string `yaml:"pre-export-final" description:"Configuration to add after the export policy before the final accept/reject term" default:"-"`
 
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
+	UserSpecifiedName           *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet6                  *[]string `yaml:"-" description:"-" default:"-"`

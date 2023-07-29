@@ -225,3 +225,8 @@ func YAMLUnmarshalStrict(y []byte, v interface{}) error {
 	decoder.KnownFields(true)
 	return decoder.Decode(v)
 }
+
+// IsPrivateASN checks if an ASN is private
+func IsPrivateASN(asn uint32) bool {
+	return (asn >= 64512 && asn <= 65535) || (asn >= 4200000000 && asn <= 4294967294)
+}

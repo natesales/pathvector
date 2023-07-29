@@ -96,3 +96,10 @@ func TestUtilPtrDeref(t *testing.T) {
 	assert.Equal(t, "foo", StrDeref(Ptr("foo")))
 	assert.Equal(t, "", StrDeref(nil))
 }
+
+func TestUtilIsPrivateASN(t *testing.T) {
+	assert.True(t, IsPrivateASN(65534))
+	assert.True(t, IsPrivateASN(65535))
+	assert.True(t, IsPrivateASN(4200000000))
+	assert.False(t, IsPrivateASN(112))
+}

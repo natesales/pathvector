@@ -122,3 +122,19 @@ peers:
       65510,20,30: 300
     tags:
       - ixp
+
+  Internal:
+    neighbors:
+    - 192.0.2.3
+    - 2001:db8::3
+    asn: 65530
+    announce-all: true
+    filter-irr: false
+    filter-rpki: false
+    filter-bogon-asns: false
+    filter-bogon-routes: false
+    filter-blocklist: false
+    filter-prefix-length: false
+    enforce-first-as: false
+    enforce-peer-nexthop: false
+    next-hop-self-ebgp: true

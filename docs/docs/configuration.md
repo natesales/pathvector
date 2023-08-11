@@ -847,6 +847,22 @@ Should BGP next-hop-self be enabled?
 |------|---------|------------|
 | bool   | false      |          |
 
+### `next-hop-self-ebgp`
+
+Should BGP next-hop-self for eBGP be enabled?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `next-hop-self-ibgp`
+
+Should BGP next-hop-self for iBGP be enabled?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `bfd`
 
 Should BFD be enabled?

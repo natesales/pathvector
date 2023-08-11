@@ -77,6 +77,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
         {{ end }}
 
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
+        {{ if BoolDeref $peer.NextHopSelfEBGP }}next hop self ebgp;{{ end }}
+        {{ if BoolDeref $peer.NextHopSelfIBGP }}next hop self ibgp;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
         {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}

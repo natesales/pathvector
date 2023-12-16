@@ -25,6 +25,7 @@ var defaultTransitASNs = []uint32{
 	6762, // Seabone / Telecom Italia
 	6830, // Liberty Global
 	7018, // AT&T
+	6939, // Hurricane Electric LLC (ipv6 Tier 1)
 }
 
 var defaultBogons4 = []string{

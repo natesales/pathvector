@@ -629,6 +629,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
+		if peerData.Gateway != nil {
+			peerData.Gateway = util.Ptr(strings.ReplaceAll(*peerData.Gateway, "-", "_"))
+			if *peerData.Gateway != "direct" && *peerData.Gateway != "recursive" {
+				return nil, errors.New("invalid gateway type")
+			}
+		}
 		// Check for no originated prefixes but announce-originated enabled
 		if len(c.Prefixes) < 1 && *peerData.AnnounceOriginated {
 			// No locally originated prefixes are defined, so there's nothing to originate

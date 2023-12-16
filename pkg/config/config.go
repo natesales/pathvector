@@ -141,6 +141,7 @@ type Peer struct {
 	DisableAfterError      *bool     `yaml:"disable-after-error" description:"Disable peer after error" default:"false"`
 	PreferOlderRoutes      *bool     `yaml:"prefer-older-routes" description:"Prefer older routes instead of comparing router IDs (RFC 5004)" default:"false"`
 	IRRAcceptChildPrefixes *bool     `yaml:"irr-accept-child-prefixes" description:"Accept prefixes up to /24 and /48 from covering parent IRR objects" default:"false"`
+	Gateway                *string   `yaml:"gateway" description:"The mode in which the gateway is defined for received routes (direct|recursive)." default:"-"`
 
 	ImportCommunities    *[]string `yaml:"add-on-import" description:"List of communities to add to all imported routes" default:"-"`
 	ExportCommunities    *[]string `yaml:"add-on-export" description:"List of communities to add to all exported routes" default:"-"`

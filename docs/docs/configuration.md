@@ -221,6 +221,14 @@ Additional command line arguments to pass to bgpq4
 |------|---------|------------|
 | string   |       |          |
 
+### `bgpq-bin`
+
+Path to bgpq4 binary
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | bgpq4      |          |
+
 ### `keep-filtered`
 
 Should filtered routes be kept in memory?
@@ -663,7 +671,7 @@ BGP local preference
 
 ### `local-pref4`
 
-IPv4 BGP local preference (overrides local-pref, not included in optimizer)
+IPv4 BGP local preference
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -671,7 +679,7 @@ IPv4 BGP local preference (overrides local-pref, not included in optimizer)
 
 ### `local-pref6`
 
-IPv6 BGP local preference (overrides local-pref, not included in optimizer)
+IPv6 BGP local preference
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -959,7 +967,7 @@ Remove all standard and large communities beginning with this value
 
 ### `as-prefs`
 
-Map of ASN to import local pref (not included in optimizer)
+Map of ASN to import local pref
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -967,7 +975,7 @@ Map of ASN to import local pref (not included in optimizer)
 
 ### `community-prefs`
 
-Map of community to import local pref (not included in optimizer)
+Map of community to import local pref
 
 | Type | Default | Validation |
 |------|---------|------------|

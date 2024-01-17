@@ -678,7 +678,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 
 	// Build IRR prefix sets
 	if *peerData.FilterIRR {
-		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
+		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQBin, c.BGPQArgs); err != nil {
 			log.Fatal(err)
 		}
 	}

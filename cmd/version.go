@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 
 	log "github.com/sirupsen/logrus"
@@ -10,7 +9,6 @@ import (
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/plugin"
-	"github.com/natesales/pathvector/pkg/process"
 )
 
 func init() {
@@ -43,16 +41,10 @@ var versionCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		printVersionBanner()
 
-		log.Debugf("Loading config from %s", configFile)
-		configFile, err := os.ReadFile(configFile)
-		if err != nil {
-			log.Fatalf("Reading config file: %s", err)
-		}
-		c, err := process.Load(configFile)
+		c, err := loadConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Debug("Finished loading config")
 
 		_, birdVersion, err := bird.RunCommand("", c.BIRDSocket)
 		if err != nil {

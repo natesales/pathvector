@@ -1,7 +1,4 @@
 #!/bin/bash
-#for tag in $(ls | grep "^v2.0." | sort -V); do
-#  echo "Testing $tag"
-#done
 
 version=$1
 user=$(whoami)

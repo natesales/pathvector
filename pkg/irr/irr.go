@@ -38,7 +38,7 @@ func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, 
 	defer cancel()
 
 	//nolint:golint,gosec
-	cmd := exec.CommandContext(ctx, "", strings.Split(bgpqBin+" "+cmdArgs, " ")...)
+	cmd := exec.CommandContext(ctx, bgpqBin, strings.Split(cmdArgs, " ")...)
 	stdout, err := cmd.Output()
 	if err != nil {
 		return nil, err

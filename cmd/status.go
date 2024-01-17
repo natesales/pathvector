@@ -40,6 +40,7 @@ var statusCmd = &cobra.Command{
 		if err != nil {
 			log.Warnf("Error loading config, falling back to no-config output parsing: %s", err)
 		}
+		// TODO: Use defaults
 
 		commandOutput, _, err := bird.RunCommand("show protocols all", c.BIRDSocket)
 		if err != nil {
@@ -49,7 +50,7 @@ var statusCmd = &cobra.Command{
 		// Read protocol names map
 		var protocols map[string]*templating.Protocol
 		if !realProtocolNames {
-			contents, err := os.ReadFile(path.Join("/etc/bird/", "protocols.json"))
+			contents, err := os.ReadFile(path.Join(c.BIRDDirectory, "protocols.json"))
 			if err != nil {
 				log.Fatalf("Reading protocol names: %v", err)
 			}

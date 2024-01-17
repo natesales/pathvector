@@ -254,26 +254,98 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	}
 }
 
-// Reformat takes a BIRD config file as a string and outputs a nicely formatted version as a string
-func Reformat(input string) string {
+// noSpace removes all leading/trailing whitespace from every line, and every empty line
+func noSpace(input string) string {
 	formatted := ""
-	for _, line := range strings.Split(input, "\n") {
-		if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") {
-			formatted += "\n"
-		}
+	lines := strings.Split(input, "\n")
 
-		if !func(input string) bool {
-			for _, chr := range input {
-				if string(chr) != " " {
-					return false
-				}
-			}
-			return true
-		}(line) {
-			formatted += line + "\n"
+	for i := range lines {
+		line := lines[i]
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
 		}
+		formatted += line + "\n"
 	}
 	return formatted
+}
+
+// restoreIndent indents a file, one tab per curly brace or bracket
+func restoreIndent(input string) string {
+	formatted := ""
+	lines := strings.Split(input, "\n")
+
+	indent := 0
+	for i := range lines {
+		line := strings.TrimSpace(lines[i])
+
+		if line == "" || line == "\n" {
+			continue
+		} else if strings.HasSuffix(line, "{") && strings.HasPrefix(line, "}") {
+			if indent == 0 {
+				formatted += strings.Repeat("  ", indent) + line + "\n"
+			} else {
+				formatted += strings.Repeat("  ", indent-1) + line + "\n"
+			}
+		} else if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") { // Opening
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+			indent++
+		} else if strings.HasPrefix(line, "}") || strings.HasPrefix(line, "]") {
+			indent--
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+		} else {
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+		}
+	}
+
+	return formatted
+}
+
+// restoreNewlines adds a newline after every comment and after every zero indented curly brace or bracket
+func restoreNewlines(input string) string {
+	out := ""
+	for _, line := range strings.Split(input, "\n") {
+		if strings.HasPrefix(line, "#") {
+			line += "\n"
+		} else if line == "}" || line == "];" {
+			line += "\n"
+		}
+
+		out += line + "\n"
+	}
+	return out
+}
+
+// fixStatementBracket spacing adds a newline between statements and open braces/brackets
+func fixStatementBracketSpacing(input string) string {
+	out := ""
+	lines := strings.Split(input, "\n")
+	for i := range lines {
+		line := lines[i]
+		nextLine := ""
+		if i+1 < len(lines) {
+			nextLine = lines[i+1]
+		}
+		nextLine = strings.TrimSpace(nextLine)
+
+		if (strings.HasSuffix(line, ";") || strings.HasSuffix(line, "}")) &&
+			((strings.HasSuffix(nextLine, "{") && !strings.HasPrefix(nextLine, "}")) || strings.HasSuffix(nextLine, "[")) {
+			line += "\n"
+		}
+
+		out += line + "\n"
+	}
+	return out
+}
+
+// Reformat takes a BIRD config file as a string and outputs a nicely formatted version as a string
+func Reformat(input string) string {
+	input = noSpace(input)
+	input = restoreIndent(input)
+	input = restoreNewlines(input)
+	input = fixStatementBracketSpacing(input)
+	input = strings.TrimRight(input, "\n") + "\n"
+	return input
 }
 
 type Routes struct {

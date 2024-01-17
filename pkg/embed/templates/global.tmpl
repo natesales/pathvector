@@ -245,7 +245,7 @@ define BLOCKLIST_PREFIXES = [
 # Helper Functions
 
 function _reject(string reason) {
-  reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+  reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last, " nexthop ", bgp_next_hop;
 }
 
 function reject_blocklist() {

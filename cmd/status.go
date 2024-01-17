@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/natesales/pathvector/pkg/templating"
 	"strings"
 
 	"github.com/fatih/color"
@@ -43,9 +44,12 @@ var statusCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		protos, err := protocols(c.BIRDDirectory)
-		if err != nil {
-			log.Fatal(err)
+		var protos map[string]*templating.Protocol
+		if !realProtocolNames {
+			protos, err = protocols(c.BIRDDirectory)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		protocolStates, err := bird.ParseProtocols(commandOutput)

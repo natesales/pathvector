@@ -13,16 +13,15 @@ import (
 
 func protocols(birdDirectory string) (map[string]*templating.Protocol, error) {
 	// Read protocol names map
-	protos := map[string]*templating.Protocol{}
-	if !realProtocolNames {
-		contents, err := os.ReadFile(path.Join(birdDirectory, "protocols.json"))
-		if err != nil {
-			return nil, fmt.Errorf("reading protocol names: %v", err)
-		}
-		if err := json.Unmarshal(contents, &protos); err != nil {
-			return nil, fmt.Errorf("unmarshalling protocol names: %v", err)
-		}
+	var protos = map[string]*templating.Protocol{}
+	contents, err := os.ReadFile(path.Join(birdDirectory, "protocols.json"))
+	if err != nil {
+		return nil, fmt.Errorf("reading protocol names: %v", err)
 	}
+	if err := json.Unmarshal(contents, &protos); err != nil {
+		return nil, fmt.Errorf("unmarshalling protocol names: %v", err)
+	}
+
 	return protos, nil
 }
 

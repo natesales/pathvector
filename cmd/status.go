@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
-	"path"
 	"strings"
 
 	"github.com/fatih/color"
@@ -12,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
-	"github.com/natesales/pathvector/pkg/templating"
 	"github.com/natesales/pathvector/pkg/util"
 )
 
@@ -47,16 +43,9 @@ var statusCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		// Read protocol names map
-		var protocols map[string]*templating.Protocol
-		if !realProtocolNames {
-			contents, err := os.ReadFile(path.Join(c.BIRDDirectory, "protocols.json"))
-			if err != nil {
-				log.Fatalf("Reading protocol names: %v", err)
-			}
-			if err := json.Unmarshal(contents, &protocols); err != nil {
-				log.Fatalf("Unmarshalling protocol names: %v", err)
-			}
+		protos, err := protocols(c.BIRDDirectory)
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		protocolStates, err := bird.ParseProtocols(commandOutput)
@@ -81,7 +70,7 @@ var statusCmd = &cobra.Command{
 					// Lookup peer in protocol JSON
 					protocolName := protocolState.Name
 					var tags []string
-					if p, found := protocols[protocolState.Name]; found {
+					if p, found := protos[protocolState.Name]; found {
 						protocolName = p.Name
 						tags = p.Tags
 					}

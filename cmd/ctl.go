@@ -41,10 +41,10 @@ func protocolByQuery(query string, protocols map[string]*templating.Protocol) (s
 	}
 
 	// Expand AFI suffix
-	if strings.HasSuffix(query, " 4") {
-		query = strings.TrimSuffix(query, " 4") + " v4"
-	} else if strings.HasSuffix(query, " 6") {
-		query = strings.TrimSuffix(query, " 6") + " v6"
+	if strings.HasSuffix(query, "4") && !strings.HasSuffix(query, "v4") {
+		query = strings.TrimSuffix(query, "4") + " v4"
+	} else if strings.HasSuffix(query, "6") && !strings.HasSuffix(query, "v6") {
+		query = strings.TrimSuffix(query, "6") + " v6"
 	}
 
 	query = normalize(query)

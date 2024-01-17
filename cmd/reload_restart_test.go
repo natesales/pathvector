@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCtlReloadParseArgs(t *testing.T) {
+func TestCtlReloadResetParseArgs(t *testing.T) {
 	for _, tc := range []struct {
 		args         []string
 		expQuery     string

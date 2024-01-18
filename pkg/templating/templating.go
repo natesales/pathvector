@@ -92,7 +92,7 @@ var funcMap = template.FuncMap{
 		if format == "unix" {
 			return strconv.Itoa(int(time.Now().Unix()))
 		}
-		return time.Now().String()
+		return time.Now().UTC().Format(time.RFC822)
 	},
 
 	"MakeSlice": func(args ...interface{}) []interface{} {

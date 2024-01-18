@@ -789,10 +789,14 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	log.Debug("Finished creating global config file")
 
 	// Render the global template and write to buffer
-	log.Debug("Writing global config file")
-	err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", c)
-	if err != nil {
+	var globalBuffer bytes.Buffer
+	if err := templating.GlobalTemplate.ExecuteTemplate(&globalBuffer, "global.tmpl", c); err != nil {
 		log.Fatalf("Execute global template: %v", err)
+	}
+
+	log.Debug("Writing global config file")
+	if _, err := globalFile.Write([]byte(bird.Reformat(globalBuffer.String()))); err != nil {
+		log.Fatalf("Write global template to file: %v", err)
 	}
 	log.Debug("Finished writing global config file")
 

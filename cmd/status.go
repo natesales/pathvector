@@ -29,7 +29,7 @@ func init() {
 }
 
 var statusCmd = &cobra.Command{
-	Use:     "status",
+	Use:     "status [session]",
 	Aliases: []string{"s", "status"},
 	Short:   "Show protocol status",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -39,66 +39,89 @@ var statusCmd = &cobra.Command{
 		}
 		// TODO: Use defaults
 
-		commandOutput, _, err := bird.RunCommand("show protocols all", c.BIRDSocket)
-		if err != nil {
-			log.Fatal(err)
-		}
+		if len(args) > 0 {
+			query := strings.Join(args, " ")
 
-		var protos map[string]*templating.Protocol
-		if !realProtocolNames {
-			protos, err = protocols(c.BIRDDirectory)
+			// Load protocol names map
+			protos, err := protocols(c.BIRDDirectory)
 			if err != nil {
 				log.Fatal(err)
 			}
-		}
 
-		protocolStates, err := bird.ParseProtocols(commandOutput)
-		if err != nil {
-			log.Fatal(err)
-		}
+			log.Debugf("Looking for protocol for %s", query)
+			birdProtoName, richName := protocolByQuery(query, protos)
+			if birdProtoName == "" {
+				log.Fatalf("no protocol found for query: %s", query)
+			}
 
-		header := []string{"Peer", "AS", "Neighbor", "State", "In", "Out", "Since", "Info"}
-		if showTags {
-			header = append(header, "Tags")
-		}
-		util.PrintTable(header, func() [][]string {
-			var table [][]string
-			for _, protocolState := range protocolStates {
-				if !onlyBGP || protocolState.BGP != nil {
-					neighborAddr, neighborAS := "-", "-"
-					if protocolState.BGP != nil {
-						neighborAS = parseTableInt(protocolState.BGP.NeighborAS)
-						neighborAddr = protocolState.BGP.NeighborAddress
-					}
+			log.Infof("Showing status for %s (%s)", richName, birdProtoName)
+			commandOutput, _, err := bird.RunCommand("show protocols all "+birdProtoName, c.BIRDSocket)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println(commandOutput)
+		} else {
+			commandOutput, _, err := bird.RunCommand("show protocols all", c.BIRDSocket)
+			if err != nil {
+				log.Fatal(err)
+			}
 
-					// Lookup peer in protocol JSON
-					protocolName := protocolState.Name
-					var tags []string
-					if p, found := protos[protocolState.Name]; found {
-						protocolName = p.Name
-						tags = p.Tags
-					}
-
-					if len(tagFilter) == 0 || containsAny(tagFilter, tags) {
-						row := []string{
-							protocolName,
-							neighborAS,
-							neighborAddr,
-							colorStatus(protocolState.State),
-							parseTableInt(protocolState.Routes.Imported),
-							parseTableInt(protocolState.Routes.Exported),
-							protocolState.Since,
-							colorStatus(protocolState.Info),
-						}
-						if showTags {
-							row = append(row, strings.Join(tags, ", "))
-						}
-						table = append(table, row)
-					}
+			var protos map[string]*templating.Protocol
+			if !realProtocolNames {
+				protos, err = protocols(c.BIRDDirectory)
+				if err != nil {
+					log.Fatal(err)
 				}
 			}
-			return table
-		}())
+
+			protocolStates, err := bird.ParseProtocols(commandOutput)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			header := []string{"Peer", "AS", "Neighbor", "State", "In", "Out", "Since", "Info"}
+			if showTags {
+				header = append(header, "Tags")
+			}
+			util.PrintTable(header, func() [][]string {
+				var table [][]string
+				for _, protocolState := range protocolStates {
+					if !onlyBGP || protocolState.BGP != nil {
+						neighborAddr, neighborAS := "-", "-"
+						if protocolState.BGP != nil {
+							neighborAS = parseTableInt(protocolState.BGP.NeighborAS)
+							neighborAddr = protocolState.BGP.NeighborAddress
+						}
+
+						// Lookup peer in protocol JSON
+						protocolName := protocolState.Name
+						var tags []string
+						if p, found := protos[protocolState.Name]; found {
+							protocolName = p.Name
+							tags = p.Tags
+						}
+
+						if len(tagFilter) == 0 || containsAny(tagFilter, tags) {
+							row := []string{
+								protocolName,
+								neighborAS,
+								neighborAddr,
+								colorStatus(protocolState.State),
+								parseTableInt(protocolState.Routes.Imported),
+								parseTableInt(protocolState.Routes.Exported),
+								protocolState.Since,
+								colorStatus(protocolState.Info),
+							}
+							if showTags {
+								row = append(row, strings.Join(tags, ", "))
+							}
+							table = append(table, row)
+						}
+					}
+				}
+				return table
+			}())
+		}
 	},
 }
 

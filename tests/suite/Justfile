@@ -1,0 +1,9 @@
+down:
+    docker-compose down
+    sudo rm -rf *-run
+
+up:
+    BIRD_VERSION=2.14 docker-compose up -d
+
+birdc container:
+    sudo socat - UNIX-CONNECT:./{{ container }}-run/bird.ctl

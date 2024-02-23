@@ -1101,7 +1101,7 @@ Maximum number of IPv6 prefixes to import after filtering
 
 | Type | Default | Validation |
 |------|---------|------------|
-| int   | 200000      |          |
+| int   | 300000      |          |
 
 ### `import-limit-violation`
 

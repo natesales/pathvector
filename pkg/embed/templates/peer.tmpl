@@ -99,7 +99,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ if BoolDeref $peer.EnforcePeerNexthop }}enforce_peer_nexthop({{ $neighborNoIface }});{{ end }}
             {{ if BoolDeref $peer.FilterTransitASNs }}reject_transit_paths();{{ end }}
             {{ if or (not (Empty $peer.PrefixSet4)) (not (Empty $peer.PrefixSet6)) }}if !(net ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_PFX_v{{ $af }}) then { _reject("not in prefix set"); }{{ end }}
-            {{ if BoolDeref $peer.FilterASSet }}if !(bgp_path.first ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }{{ end }}
+            {{ if BoolDeref $peer.FilterASSet }}if !(bgp_path.last ~ AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS) then { _reject("not in AS set"); }{{ end }}
             {{ if BoolDeref $peer.FilterBlocklist }}reject_blocklist();{{ end }}
 
             {{/* Transit Locking */}}

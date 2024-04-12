@@ -53,6 +53,7 @@ define AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_AS_SET_MEMBERS = [
 {{ $neighborNoIface := SplitFirst $neighbor "%" }}
 protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $peer.Tags }} {
     local{{ if eq $af "4" }}{{ if $peer.Listen4 }} {{ $peer.Listen4 }}{{ end }}{{ else }}{{ if $peer.Listen6 }} {{ $peer.Listen6 }}{{ end }}{{ end }} as {{ if IntDeref $peer.LocalASN }}{{ IntDeref $peer.LocalASN }}{{ else }}ASN{{ end }}{{ if $peer.LocalPort }} port {{ $peer.LocalPort }}{{ end }};
+    {{ if StrDeref $peer.Interface }}interface "{{ StrDeref $peer.Interface }}";{{ end }}
     neighbor {{ $neighbor }} as {{ $peer.ASN }}{{ if $peer.NeighborPort }} port {{ $peer.NeighborPort }}{{ end }};
     {{ if StrDeref $peer.Description }}description "{{ StrDeref $peer.Description }}";{{ end }}
     {{ if BoolDeref $peer.Disabled }}disabled;{{ end }}

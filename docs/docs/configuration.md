@@ -791,6 +791,15 @@ Should BGP multihop be enabled? (255 max hops)
 |------|---------|------------|
 | bool   | false      |          |
 
+### `interface`
+
+Interface of BGP listen address
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+
 ### `listen4`
 
 IPv4 BGP listen address

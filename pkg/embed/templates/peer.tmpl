@@ -6,11 +6,13 @@
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-{{ if StrDeref $peer.Comment }}
+{{ if not (Empty $peer.Comments) }}
 #####
 # BGP Session: {{ .Name }} AS{{ $peer.ASN }}
 #
-# {{ StrDeref $peer.Comment }}
+{{ range $i, $comment := $peer.Comments }}
+# {{ StrDeref $comment }}
+{{ end }}
 #
 #####
 {{ else }}

@@ -663,6 +663,14 @@ Configuration template
 |------|---------|------------|
 | string   |       |          |
 
+### `comments`
+
+Extra comments in configuration file
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string |     |            |
+
 ### `description`
 
 Peer description

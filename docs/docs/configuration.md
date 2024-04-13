@@ -783,6 +783,15 @@ Should an explicit local pref be set?
 |------|---------|------------|
 | bool   | true      |          |
 
+### `bgp-med`
+
+BGP default bgp_med
+Value of the Multiple Exit Discriminator to be used during route selection when the MED attribute is missing. Default: 0.
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 0      |          |
+
 ### `multihop`
 
 Should BGP multihop be enabled? (255 max hops)

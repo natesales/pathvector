@@ -94,7 +94,7 @@ type Peer struct {
 	Template *string `yaml:"template" description:"Configuration template" default:"-"`
 
 	Description *string   `yaml:"description" description:"Peer description" default:"-"`
-	Comments    *[]string `yaml:"comments" comment:"Comments in file" default:"-"`
+	Comments    *[]string `yaml:"comments" description:"Comments in file" default:"-"`
 	Tags        *[]string `yaml:"tags" description:"Peer tags" default:"-"`
 	Disabled    *bool     `yaml:"disabled" description:"Should the sessions be disabled?" default:"false"`
 

@@ -165,6 +165,14 @@ List of communities to add to all exported routes
 |------|---------|------------|
 | []string   |       |          |
 
+### `show-warning-message`
+
+Show warning message on autogenrated config files
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | true  |          |
+
 ### `hostname`
 
 Router hostname (default system hostname)

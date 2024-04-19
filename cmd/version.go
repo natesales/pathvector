@@ -58,6 +58,6 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("BIRD: %s %s\n", birdVersion)
+		fmt.Printf("BIRD: %s\n", birdVersion)
 	},
 }

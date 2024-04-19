@@ -1,10 +1,6 @@
 # Binary
 pathvector
 
-# Test Build
-build-test.sh
-pathvector-test
-
 # Output files
 output/*
 
@@ -33,4 +29,3 @@ test-cache/
 test-conf.yml
 nohup.out
 coverage.txt
-tests/bird-matrix/v*

@@ -165,14 +165,6 @@ List of communities to add to all exported routes
 |------|---------|------------|
 | []string   |       |          |
 
-### `show-warning-message`
-
-Show warning message on autogenrated config files
-
-| Type | Default | Validation |
-|------|---------|------------|
-| bool   | true  |          |
-
 ### `hostname`
 
 Router hostname (default system hostname)
@@ -671,14 +663,6 @@ Configuration template
 |------|---------|------------|
 | string   |       |          |
 
-### `comments`
-
-Extra comments in configuration file
-
-| Type | Default | Validation |
-|------|---------|------------|
-| []string |     |            |
-
 ### `description`
 
 Peer description
@@ -791,15 +775,6 @@ Should an explicit local pref be set?
 |------|---------|------------|
 | bool   | true      |          |
 
-### `bgp-med`
-
-BGP default bgp_med
-Value of the Multiple Exit Discriminator to be used during route selection when the MED attribute is missing. Default: 0.
-
-| Type | Default | Validation |
-|------|---------|------------|
-| int   | 0      |          |
-
 ### `multihop`
 
 Should BGP multihop be enabled? (255 max hops)
@@ -807,15 +782,6 @@ Should BGP multihop be enabled? (255 max hops)
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | false      |          |
-
-### `interface`
-
-Interface of BGP listen address
-
-| Type | Default | Validation |
-|------|---------|------------|
-| string   |       |          |
-
 
 ### `listen4`
 

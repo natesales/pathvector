@@ -62,7 +62,7 @@ protocol device {};
 
 protocol direct { ipv4; ipv6; }
 
-protocol kernel {
+protocol kernel kernel4 {
   scan time {{ .Kernel.ScanTime }};
   {{ if .Kernel.Learn }}learn;{{ end }}
   {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}
@@ -104,7 +104,7 @@ protocol kernel {
   {{ if .MergePaths }}merge paths;{{ end }}
 }
 
-protocol kernel {
+protocol kernel kernel6 {
   scan time {{ .Kernel.ScanTime }};
   {{ if .Kernel.Learn }}learn;{{ end }}
   {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}

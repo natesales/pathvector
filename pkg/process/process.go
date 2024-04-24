@@ -80,6 +80,35 @@ func categorizeCommunity(input string) string {
 	return ""
 }
 
+// sortCommunities sorts a mixed list of standard and large communities into two existing community  lists
+func sortCommunities(communities []string) (standard []string, large []string, err error) {
+	for _, community := range communities {
+		community = strings.ReplaceAll(community, ":", ",")
+		switch categorizeCommunity(community) {
+		case "standard":
+			standard = append(standard, community)
+		case "large":
+			if large == nil {
+				large = []string{}
+			}
+			large = append(large, community)
+		default:
+			return nil, nil, errors.New("Invalid import community: " + community)
+		}
+	}
+
+	return standard, large, nil
+}
+
+func sortCommunitiesPtr(communities []string) (*[]string, *[]string, error) {
+	standard, large, err := sortCommunities(communities)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &standard, &large, nil
+}
+
 func templateReplacements(in string, peer *config.Peer) string {
 	v := reflect.ValueOf(peer)
 	for v.Kind() == reflect.Ptr { // Dereference pointer types
@@ -350,104 +379,26 @@ func Load(configBlob []byte) (*config.Config, error) {
 	c.Kernel.Statics6 = map[string]string{}
 
 	// Categorize communities
-	if c.Kernel.SRDCommunities != nil {
-		for _, community := range c.Kernel.SRDCommunities {
-			community = strings.ReplaceAll(community, ":", ",")
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				if c.Kernel.SRDStandardCommunities == nil {
-					c.Kernel.SRDStandardCommunities = []string{}
-				}
-				c.Kernel.SRDStandardCommunities = append(c.Kernel.SRDStandardCommunities, community)
-			} else if communityType == "large" {
-				if c.Kernel.SRDLargeCommunities == nil {
-					c.Kernel.SRDLargeCommunities = []string{}
-				}
-				c.Kernel.SRDLargeCommunities = append(c.Kernel.SRDLargeCommunities, community)
-			} else {
-				return nil, errors.New("Invalid SRD community: " + community)
-			}
-		}
+	var err error
+	c.Kernel.SRDStandardCommunities, c.Kernel.SRDLargeCommunities, err = sortCommunities(c.Kernel.SRDCommunities)
+	if err != nil {
+		return nil, fmt.Errorf("invalid SRD community: %v", err)
 	}
-
-	if c.OriginCommunities != nil {
-		for _, community := range c.OriginCommunities {
-			community = strings.ReplaceAll(community, ":", ",")
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				if c.OriginStandardCommunities == nil {
-					c.OriginStandardCommunities = []string{}
-				}
-				c.OriginStandardCommunities = append(c.OriginStandardCommunities, community)
-			} else if communityType == "large" {
-				if c.OriginLargeCommunities == nil {
-					c.OriginLargeCommunities = []string{}
-				}
-				c.OriginLargeCommunities = append(c.OriginLargeCommunities, community)
-			} else {
-				return nil, errors.New("Invalid origin community: " + community)
-			}
-		}
+	c.OriginStandardCommunities, c.OriginLargeCommunities, err = sortCommunities(c.OriginCommunities)
+	if err != nil {
+		return nil, fmt.Errorf("invalid origin community: %v", err)
 	}
-
-	if c.LocalCommunities != nil {
-		for _, community := range c.LocalCommunities {
-			community = strings.ReplaceAll(community, ":", ",")
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				if c.LocalStandardCommunities == nil {
-					c.LocalStandardCommunities = []string{}
-				}
-				c.LocalStandardCommunities = append(c.LocalStandardCommunities, community)
-			} else if communityType == "large" {
-				if c.LocalLargeCommunities == nil {
-					c.LocalLargeCommunities = []string{}
-				}
-				c.LocalLargeCommunities = append(c.LocalLargeCommunities, community)
-			} else {
-				return nil, errors.New("Invalid local community: " + community)
-			}
-		}
+	c.ImportStandardCommunities, c.ImportLargeCommunities, err = sortCommunities(c.ImportCommunities)
+	if err != nil {
+		return nil, fmt.Errorf("invalid import community: %v", err)
 	}
-
-	if c.ImportCommunities != nil {
-		for _, community := range c.ImportCommunities {
-			community = strings.ReplaceAll(community, ":", ",")
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				if c.ImportStandardCommunities == nil {
-					c.ImportStandardCommunities = []string{}
-				}
-				c.ImportStandardCommunities = append(c.ImportStandardCommunities, community)
-			} else if communityType == "large" {
-				if c.ImportLargeCommunities == nil {
-					c.ImportLargeCommunities = []string{}
-				}
-				c.ImportLargeCommunities = append(c.ImportLargeCommunities, community)
-			} else {
-				return nil, errors.New("Invalid global import community: " + community)
-			}
-		}
+	c.ExportStandardCommunities, c.ExportLargeCommunities, err = sortCommunities(c.ExportCommunities)
+	if err != nil {
+		return nil, fmt.Errorf("invalid export community: %v", err)
 	}
-
-	if c.ExportCommunities != nil {
-		for _, community := range c.ExportCommunities {
-			community = strings.ReplaceAll(community, ":", ",")
-			communityType := categorizeCommunity(community)
-			if communityType == "standard" {
-				if c.ExportStandardCommunities == nil {
-					c.ExportStandardCommunities = []string{}
-				}
-				c.ExportStandardCommunities = append(c.ExportStandardCommunities, community)
-			} else if communityType == "large" {
-				if c.ExportLargeCommunities == nil {
-					c.ExportLargeCommunities = []string{}
-				}
-				c.ExportLargeCommunities = append(c.ExportLargeCommunities, community)
-			} else {
-				return nil, errors.New("Invalid global export community: " + community)
-			}
-		}
+	c.LocalStandardCommunities, c.LocalLargeCommunities, err = sortCommunities(c.LocalCommunities)
+	if err != nil {
+		return nil, fmt.Errorf("invalid local community: %v", err)
 	}
 
 	// Parse static routes
@@ -549,84 +500,21 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Categorize communities
-		if peerData.ImportCommunities != nil {
-			for _, community := range *peerData.ImportCommunities {
-				community = strings.ReplaceAll(community, ":", ",")
-				communityType := categorizeCommunity(community)
-				if communityType == "standard" {
-					if peerData.ImportStandardCommunities == nil {
-						peerData.ImportStandardCommunities = &[]string{}
-					}
-					*peerData.ImportStandardCommunities = append(*peerData.ImportStandardCommunities, community)
-				} else if communityType == "large" {
-					if peerData.ImportLargeCommunities == nil {
-						peerData.ImportLargeCommunities = &[]string{}
-					}
-					*peerData.ImportLargeCommunities = append(*peerData.ImportLargeCommunities, community)
-				} else {
-					return nil, errors.New("Invalid import community: " + community)
-				}
-			}
+		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(*peerData.ImportCommunities)
+		if err != nil {
+			return nil, fmt.Errorf("invalid import community: %v", err)
 		}
-
-		if peerData.ExportCommunities != nil {
-			for _, community := range *peerData.ExportCommunities {
-				community = strings.ReplaceAll(community, ":", ",")
-				communityType := categorizeCommunity(community)
-				if communityType == "standard" {
-					if peerData.ExportStandardCommunities == nil {
-						peerData.ExportStandardCommunities = &[]string{}
-					}
-					*peerData.ExportStandardCommunities = append(*peerData.ExportStandardCommunities, community)
-				} else if communityType == "large" {
-					if peerData.ExportLargeCommunities == nil {
-						peerData.ExportLargeCommunities = &[]string{}
-					}
-					*peerData.ExportLargeCommunities = append(*peerData.ExportLargeCommunities, community)
-				} else {
-					return nil, errors.New("Invalid export community: " + community)
-				}
-			}
+		peerData.ExportStandardCommunities, peerData.ExportLargeCommunities, err = sortCommunitiesPtr(*peerData.ExportCommunities)
+		if err != nil {
+			return nil, fmt.Errorf("invalid export community: %v", err)
 		}
-		if peerData.AnnounceCommunities != nil {
-			for _, community := range *peerData.AnnounceCommunities {
-				community = strings.ReplaceAll(community, ":", ",")
-				communityType := categorizeCommunity(community)
-
-				if communityType == "standard" {
-					if peerData.AnnounceStandardCommunities == nil {
-						peerData.AnnounceStandardCommunities = &[]string{}
-					}
-					*peerData.AnnounceStandardCommunities = append(*peerData.AnnounceStandardCommunities, community)
-				} else if communityType == "large" {
-					if peerData.AnnounceLargeCommunities == nil {
-						peerData.AnnounceLargeCommunities = &[]string{}
-					}
-					*peerData.AnnounceLargeCommunities = append(*peerData.AnnounceLargeCommunities, community)
-				} else {
-					return nil, errors.New("Invalid announce community: " + community)
-				}
-			}
+		peerData.AnnounceStandardCommunities, peerData.AnnounceLargeCommunities, err = sortCommunitiesPtr(*peerData.AnnounceCommunities)
+		if err != nil {
+			return nil, fmt.Errorf("invalid announce community: %v", err)
 		}
-		if peerData.RemoveCommunities != nil {
-			for _, community := range *peerData.RemoveCommunities {
-				community = strings.ReplaceAll(community, ":", ",")
-				communityType := categorizeCommunity(community)
-
-				if communityType == "standard" {
-					if peerData.RemoveStandardCommunities == nil {
-						peerData.RemoveStandardCommunities = &[]string{}
-					}
-					*peerData.RemoveStandardCommunities = append(*peerData.RemoveStandardCommunities, community)
-				} else if communityType == "large" {
-					if peerData.RemoveLargeCommunities == nil {
-						peerData.RemoveLargeCommunities = &[]string{}
-					}
-					*peerData.RemoveLargeCommunities = append(*peerData.RemoveLargeCommunities, community)
-				} else {
-					return nil, errors.New("Invalid remove community: " + community)
-				}
-			}
+		peerData.RemoveStandardCommunities, peerData.RemoveLargeCommunities, err = sortCommunitiesPtr(*peerData.RemoveCommunities)
+		if err != nil {
+			return nil, fmt.Errorf("invalid remove community: %v", err)
 		}
 
 		// Check for no originated prefixes but announce-originated enabled

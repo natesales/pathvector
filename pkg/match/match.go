@@ -34,7 +34,7 @@ func CommonIXs(a uint32, b uint32, yamlFormat bool, queryTimeout uint, apiKey st
   AS%d
   %s
   %s
-  
+
   AS%d
   %s
   %s

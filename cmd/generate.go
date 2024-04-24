@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"github.com/natesales/pathvector/pkg/process"
 	"github.com/spf13/cobra"
+
+	"github.com/natesales/pathvector/pkg/process"
 )
 
 var (

@@ -473,7 +473,7 @@ func ParseProtocol(p string) (*ProtocolState, error) {
 	return protocolState, nil
 }
 
-// noWhitespace removes all leading and trailing whitespace from evey line
+// noWhitespace removes all leading and trailing whitespace from every line
 func noWhitespace(p string) string {
 	p = strings.Trim(p, "\n")
 	lines := strings.Split(p, "\n")

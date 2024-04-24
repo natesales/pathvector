@@ -7,7 +7,7 @@ Pathvector supports an interactive CLI for configuration.
 
 ```
 $ pathvector cli
-pathvector [empty] > enable 
+pathvector [empty] > enable
 pathvector [empty] # init AS65530 192.0.2.1
 Are you sure you want to create a new config with AS65530 (192.0.2.1)? [y/N] y
 Config created

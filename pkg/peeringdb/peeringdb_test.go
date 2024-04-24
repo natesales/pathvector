@@ -33,7 +33,7 @@ func TestPeeringDbQuery(t *testing.T) {
 		}
 
 		if tc.shouldError && err == nil {
-			t.Errorf("asn %d should have errored but didnt", tc.asn)
+			t.Errorf("asn %d should have errored but didn't", tc.asn)
 		}
 
 		if tc.shouldError && err != nil && !strings.Contains(err.Error(), "doesn't have a PeeringDB page") {

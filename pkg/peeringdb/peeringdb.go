@@ -13,7 +13,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/pkg/irr"
 )
 
 // Endpoint is a public value to allow setting to a cache server
@@ -74,10 +73,8 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
-	} else {
-		if os.Getenv("PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
-		}
+	} else if os.Getenv("PEERINGDB_API_KEY") != "" {
+		req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 	}
 
 	if err != nil {
@@ -168,9 +165,7 @@ func Update(peerData *config.Peer, queryTimeout uint, apiKey string, useCache bo
 			pDbData.ASSet = fmt.Sprintf("AS%d", *peerData.ASN)
 		}
 
-		// Used to get address of string
-		asSetOutput := irr.FirstASSet(pDbData.ASSet)
-		peerData.ASSet = &asSetOutput
+		peerData.ASSet = &pDbData.ASSet
 	}
 }
 

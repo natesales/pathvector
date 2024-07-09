@@ -93,7 +93,7 @@ func templateReplacements(in string, peer *config.Peer) string {
 			key = "<pathvector." + key + ">"
 			if !field.IsZero() {
 				val := fmt.Sprintf("%v", field.Elem().Interface())
-				log.Tracef("Replacing %s with %s\n", key, val)
+				log.Tracef("Replacing %s with %s", key, val)
 				in = strings.ReplaceAll(in, key, val)
 			}
 		}

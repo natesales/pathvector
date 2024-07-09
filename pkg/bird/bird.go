@@ -97,7 +97,7 @@ func ReadClean(r io.Reader) {
 
 // RunCommand runs a BIRD command and returns the output, version, and error
 func RunCommand(command string, socket string) (string, string, error) {
-	log.Debugln("Connecting to BIRD socket")
+	log.Debug("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
 		return "", "", err
@@ -125,12 +125,12 @@ func RunCommand(command string, socket string) (string, string, error) {
 		return "", "", err
 	}
 
-	log.Debugln("Reading from socket")
+	log.Debug("Reading from socket")
 	resp, err = Read(conn)
 	if err != nil {
 		return "", "", err
 	}
-	log.Debugln("Done reading from socket")
+	log.Debug("Done reading from socket")
 
 	return resp, birdVersion, nil // nil error
 }
@@ -196,7 +196,7 @@ func Validate(binary string, cacheDir string) {
 		if errorMessageToLog == "" {
 			errorMessageToLog = origErr.Error()
 		}
-		log.Fatalf("BIRD: %s\n", errorMessageToLog)
+		log.Fatalf("BIRD: %s", errorMessageToLog)
 	}
 
 	log.Infof("BIRD config validation passed")
@@ -249,7 +249,7 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 		}
 		// Print bird output as multiple lines
 		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-			log.Printf("BIRD response (multiline): %s", line)
+			log.Infof("BIRD response (multiline): %s", line)
 		}
 	}
 }

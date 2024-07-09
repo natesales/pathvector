@@ -1,0 +1,28 @@
+asn: 65530
+router-id: 192.0.2.1
+source4: 192.0.2.1
+source6: 2001:db8::1
+prefixes:
+  - 192.0.2.0/24
+  - 2001:db8::/48
+cache-directory: test-cache
+peeringdb-url: http://localhost:5000/api
+
+optimizer:
+  probe-udp: true
+  exit-on-cache-full: true
+  probe-interval: 1
+  cache-size: 3
+  targets:
+    - 192.0.2.2
+    - 2001:db8::2
+  alert-script: ../tests/alert-test.sh
+
+peers:
+  Example:
+    asn: 65510
+    neighbors:
+      - 203.0.113.12
+      - 2001:db8::12
+    optimize-inbound: true
+    probe-sources: [ "192.0.2.1", "2001:db8::1" ]

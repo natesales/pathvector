@@ -1,5 +1,9 @@
 package config
 
+import (
+	"github.com/go-ping/ping"
+)
+
 var defaultTransitASNs = []uint32{
 	174, // Cogent
 	//  209, // Qwest (HE carries this on IXPs IPv6 (Jul 12 2018))
@@ -219,6 +223,10 @@ type Peer struct {
 	PreExport        *string `yaml:"pre-export" description:"Configuration to add before the export policy" default:"-"`
 	PreExportFinal   *string `yaml:"pre-export-final" description:"Configuration to add after the export policy before the final accept/reject term" default:"-"`
 
+	// Optimizer
+	OptimizerProbeSources *[]string `yaml:"probe-sources" description:"Optimizer probe source addresses" default:"-"`
+	OptimizeInbound       *bool     `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
+
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
 	UserSpecifiedName           *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
@@ -287,6 +295,33 @@ type Kernel struct {
 	KStatics6              map[string]string `yaml:"-" description:"-"`
 }
 
+// ProbeResult stores a single probe result
+type ProbeResult struct {
+	Time  int64
+	Stats ping.Statistics
+}
+
+// Optimizer stores route optimizer configuration
+type Optimizer struct {
+	Targets             []string `yaml:"targets" description:"List of probe targets"`
+	LatencyThreshold    uint     `yaml:"latency-threshold" description:"Maximum allowable latency in milliseconds" default:"100"`
+	PacketLossThreshold float64  `yaml:"packet-loss-threshold" description:"Maximum allowable packet loss (percent)" default:"0.5"`
+	LocalPrefModifier   uint     `yaml:"modifier" description:"Amount to lower local pref by for depreferred peers" default:"20"`
+
+	PingCount   int `yaml:"probe-count" description:"Number of pings to send in each run" default:"5"`
+	PingTimeout int `yaml:"probe-timeout" description:"Number of seconds to wait before considering the ICMP message unanswered" default:"1"`
+	Interval    int `yaml:"probe-interval" description:"Number of seconds wait between each optimizer run" default:"120"`
+	CacheSize   int `yaml:"cache-size" description:"Number of probe results to store per peer" default:"15"`
+
+	ProbeUDPMode bool `yaml:"probe-udp" description:"Use UDP probe (else ICMP)" default:"false"`
+
+	AlertScript string `yaml:"alert-script" description:"Script to call on optimizer event"`
+
+	ExitOnCacheFull bool `yaml:"exit-on-cache-full" description:"Exit optimizer on cache full" default:"false"`
+
+	Db map[string][]ProbeResult `yaml:"-" description:"-"`
+}
+
 // Config stores the global configuration
 type Config struct {
 	PeeringDBQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
@@ -351,6 +386,7 @@ type Config struct {
 	BFDInstances  map[string]*BFDInstance  `yaml:"bfd" description:"BFD instances"`
 	MRTInstances  map[string]*MRTInstance  `yaml:"mrt" description:"MRT instances"`
 	Kernel        *Kernel                  `yaml:"kernel" description:"Kernel routing configuration options"`
+	Optimizer     *Optimizer               `yaml:"optimizer" description:"Route optimizer options"`
 	Plugins       map[string]string        `yaml:"plugins" description:"Plugin-specific configuration"`
 
 	RTRServerHost             string   `yaml:"-" description:"-"`
@@ -377,6 +413,7 @@ func (c *Config) Init() {
 	c.BFDInstances = map[string]*BFDInstance{}
 	c.MRTInstances = map[string]*MRTInstance{}
 	c.Kernel = &Kernel{}
+	c.Optimizer = &Optimizer{}
 	c.Plugins = map[string]string{}
 
 	if c.TransitASNs == nil {

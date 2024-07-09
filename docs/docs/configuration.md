@@ -405,6 +405,14 @@ Kernel routing configuration options
 |------|---------|------------|
 | [Kernel](#kernel-1)   |       |          |
 
+### `optimizer`
+
+Route optimizer options
+
+| Type | Default | Validation |
+|------|---------|------------|
+| [Optimizer](#optimizer-1)   |       |          |
+
 ### `plugins`
 
 Plugin-specific configuration
@@ -570,6 +578,96 @@ Routing table to read from
 | Type | Default | Validation |
 |------|---------|------------|
 | string   |       |          |
+
+
+## Optimizer
+### `targets`
+
+List of probe targets
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `latency-threshold`
+
+Maximum allowable latency in milliseconds
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 100      |          |
+
+### `packet-loss-threshold`
+
+Maximum allowable packet loss (percent)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| float64   | 0.5      |          |
+
+### `modifier`
+
+Amount to lower local pref by for depreferred peers
+
+| Type | Default | Validation |
+|------|---------|------------|
+| uint   | 20      |          |
+
+### `probe-count`
+
+Number of pings to send in each run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 5      |          |
+
+### `probe-timeout`
+
+Number of seconds to wait before considering the ICMP message unanswered
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 1      |          |
+
+### `probe-interval`
+
+Number of seconds wait between each optimizer run
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 120      |          |
+
+### `cache-size`
+
+Number of probe results to store per peer
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 15      |          |
+
+### `probe-udp`
+
+Use UDP probe (else ICMP)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `alert-script`
+
+Script to call on optimizer event
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `exit-on-cache-full`
+
+Exit optimizer on cache full
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 
 ## Peer
@@ -1372,6 +1470,22 @@ Configuration to add after the export policy before the final accept/reject term
 | Type | Default | Validation |
 |------|---------|------------|
 | string   |       |          |
+
+### `probe-sources`
+
+Optimizer probe source addresses
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
+### `optimize-inbound`
+
+Should the optimizer modify inbound policy?
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
 
 
 ## VRRPInstance

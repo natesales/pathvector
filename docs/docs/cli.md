@@ -20,6 +20,7 @@ Available Commands:
   match       Find common IXPs for a given ASN
   reload      Reload a session
   restart     Restart a session
+  optimizer   Start optimization daemon
   status      Show protocol status
   version     Show version information
 

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -16,21 +17,11 @@ import (
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
 
-// Contains runs a linear search on a slice
-func Contains[T comparable](a []T, x T) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
 // Sanitize limits an input string to only uppercase letters and numbers
 func Sanitize(input string) *string {
 	output := ""
 	for _, chr := range strings.ReplaceAll(strings.ToUpper(input), " ", "_") {
-		if Contains(alphabet, string(chr)) || string(chr) == "_" {
+		if slices.Contains(alphabet, string(chr)) || string(chr) == "_" {
 			output += string(chr)
 		}
 	}
@@ -90,7 +81,7 @@ func PrintStructInfo(label string, instance interface{}) {
 	typeOf := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
-		if !(Contains(excludedFields, attrName)) {
+		if !(slices.Contains(excludedFields, attrName)) {
 			v := reflect.Indirect(s.Field(i))
 			if v.IsValid() {
 				log.Tracef("[%s] field %s = %v", label, attrName, v)

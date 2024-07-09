@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,7 +14,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/pkg/util"
 )
 
 var (
@@ -196,7 +196,7 @@ var funcMap = template.FuncMap{
 		protoName := fmt.Sprintf("%s_AS%d_v%s", *s, *asn, af)
 		i := 1
 		for {
-			if !util.Contains(protocolNames, protoName) {
+			if !slices.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
 				var t []string
 				if tags != nil {

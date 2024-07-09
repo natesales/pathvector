@@ -1,6 +1,6 @@
 module github.com/natesales/pathvector
 
-go 1.18
+go 1.21
 
 require (
 	github.com/charmbracelet/log v0.4.0

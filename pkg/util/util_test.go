@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestContains(t *testing.T) {
 		{[]string{"foo", "bar"}, "baz", false},
 	}
 	for _, tc := range testCases {
-		if out := Contains(tc.array, tc.element); out != tc.expectedOutput {
+		if out := slices.Contains(tc.array, tc.element); out != tc.expectedOutput {
 			t.Errorf("array %+v element %s failed. expected '%v' got '%v'", tc.array, tc.element, tc.expectedOutput, out)
 		}
 	}

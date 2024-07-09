@@ -132,8 +132,8 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 
 		// Calculate average latency and packet loss
 		totalProbes := float64(len(o.Db[peer]))
-		p[peer].PacketLoss = p[peer].PacketLoss / totalProbes
-		p[peer].Latency = p[peer].Latency / time.Duration(totalProbes)
+		p[peer].PacketLoss /= totalProbes
+		p[peer].Latency /= time.Duration(totalProbes)
 
 		// Check thresholds to apply optimizations
 		var alerts []string
@@ -219,7 +219,9 @@ func modifyPref(
 	}
 
 	// Run BIRD config validation
-	bird.Validate(birdBinary, birdDirectory)
+	if err := bird.Validate(birdBinary, birdDirectory); err != nil {
+		log.Fatalf("bird config validation: %v", err)
+	}
 
 	if !dryRun {
 		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)

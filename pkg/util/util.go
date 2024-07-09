@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"unicode"
 
@@ -16,21 +17,11 @@ import (
 
 var alphabet = strings.Split("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "")
 
-// Contains runs a linear search on a string array
-func Contains(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
-}
-
 // Sanitize limits an input string to only uppercase letters and numbers
 func Sanitize(input string) *string {
 	output := ""
 	for _, chr := range strings.ReplaceAll(strings.ToUpper(input), " ", "_") {
-		if Contains(alphabet, string(chr)) || string(chr) == "_" {
+		if slices.Contains(alphabet, string(chr)) || string(chr) == "_" {
 			output += string(chr)
 		}
 	}
@@ -90,10 +81,10 @@ func PrintStructInfo(label string, instance interface{}) {
 	typeOf := s.Type()
 	for i := 0; i < s.NumField(); i++ {
 		attrName := typeOf.Field(i).Name
-		if !(Contains(excludedFields, attrName)) {
+		if !(slices.Contains(excludedFields, attrName)) {
 			v := reflect.Indirect(s.Field(i))
 			if v.IsValid() {
-				log.Tracef("[%s] field %s = %v\n", label, attrName, v)
+				log.Tracef("[%s] field %s = %v", label, attrName, v)
 			}
 		}
 	}
@@ -224,4 +215,9 @@ func YAMLUnmarshalStrict(y []byte, v interface{}) error {
 	decoder := yaml.NewDecoder(bytes.NewReader(y))
 	decoder.KnownFields(true)
 	return decoder.Decode(v)
+}
+
+// IsPrivateASN checks if an ASN is private
+func IsPrivateASN(asn uint32) bool {
+	return (asn >= 64512 && asn <= 65535) || (asn >= 4200000000 && asn <= 4294967294)
 }

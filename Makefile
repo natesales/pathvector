@@ -23,3 +23,6 @@ test-teardown:
 	rm -f nohup.out
 
 test-sequence: test-setup test test-teardown
+
+snapshot:
+	goreleaser --snapshot --clean

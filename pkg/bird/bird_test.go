@@ -44,7 +44,7 @@ func TestBirdConn(t *testing.T) {
 	assert.Nil(t, err)
 
 	buf := make([]byte, 1024)
-	n, err := conn.Read(buf[:])
+	n, err := conn.Read(buf)
 	assert.Nil(t, err)
 	assert.Equal(t, "bird command test\n", string(buf[:n]))
 
@@ -80,7 +80,7 @@ static4    Static     master4    up     2023-03-15 19:18:50
 	assert.Equal(t, 2, p.Routes.Exported)
 	assert.Equal(t, 1, p.Routes.Preferred)
 
-	p, err = ParseProtocol(`EXAMPLE_AS65522_v6 BGP        ---        up     2023-03-26 03:53:56  Established   
+	p, err = ParseProtocol(`EXAMPLE_AS65522_v6 BGP        ---        up     2023-03-26 03:53:56  Established
   BGP state:          Established
     Neighbor address: 2001:db8::1
     Neighbor AS:      65522
@@ -412,9 +412,9 @@ EXAMPLE_AS65522_v6 BGP        ---        up     2023-03-26 03:53:56  Established
 	protocols, err = ParseProtocols(`
 BIRD 2.13 ready.
 Name       Proto      Table      State  Since         Info
-device1    Device     ---        up     21:26:25.230  
+device1    Device     ---        up     21:26:25.230
 
-direct1    Direct     ---        down   21:26:25.230  
+direct1    Direct     ---        down   21:26:25.230
   Channel ipv4
     State:          DOWN
     Table:          master4
@@ -428,7 +428,7 @@ direct1    Direct     ---        down   21:26:25.230
     Input filter:   ACCEPT
     Output filter:  REJECT
 
-kernel1    Kernel     master4    up     21:26:25.230  
+kernel1    Kernel     master4    up     21:26:25.230
   Channel ipv4
     State:          UP
     Table:          master4
@@ -442,7 +442,7 @@ kernel1    Kernel     master4    up     21:26:25.230
       Export updates:              0          0          0        ---          0
       Export withdraws:            0        ---        ---        ---          0
 
-kernel2    Kernel     master6    up     21:26:25.230  
+kernel2    Kernel     master6    up     21:26:25.230
   Channel ipv6
     State:          UP
     Table:          master6
@@ -456,7 +456,7 @@ kernel2    Kernel     master6    up     21:26:25.230
       Export updates:              0          0          0        ---          0
       Export withdraws:            0        ---        ---        ---          0
 
-static1    Static     master4    up     21:26:25.230  
+static1    Static     master4    up     21:26:25.230
   Channel ipv4
     State:          UP
     Table:          master4

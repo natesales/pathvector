@@ -80,7 +80,7 @@ func documentConfigTypes(t reflect.Type, output bool) {
 
 `, key, description, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation)
 			}
-			//fmt.Printf("| %s | %s | %s | %s | %s |\n", key, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation, description)
+			// fmt.Printf("| %s | %s | %s | %s | %s |\n", key, addLink(sanitizeConfigName(field.Type.String())), fDefault, validation, description)
 		}
 	}
 	if output {

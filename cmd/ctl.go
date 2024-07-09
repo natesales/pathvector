@@ -47,6 +47,7 @@ func protocolByQuery(query string, protocols map[string]*templating.Protocol) (s
 		query = strings.TrimSuffix(query, "6") + " v6"
 	}
 
+	// TODO: This doesn't return the same result for an identical query
 	query = normalize(query)
 	for birdProto, meta := range protocols {
 		if fuzzy.Match(query, normalize(birdProto)) || fuzzy.Match(query, normalize(meta.Name)) {

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/natesales/pathvector/pkg/templating"
 	"strings"
 
 	"github.com/fatih/color"
@@ -10,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/templating"
 	"github.com/natesales/pathvector/pkg/util"
 )
 

@@ -1544,5 +1544,3 @@ List of virtual IPs
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       | required,cidr         |
-
-

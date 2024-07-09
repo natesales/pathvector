@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/lithammer/fuzzysearch/fuzzy"
+
 	"github.com/natesales/pathvector/pkg/templating"
 )
 

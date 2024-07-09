@@ -286,11 +286,9 @@ func Load(configBlob []byte) (*config.Config, error) {
 					default:
 						log.Fatalf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
 					}
-				} else {
 					// Add boolean values to the peer's config
-					if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
-						*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
-					}
+				} else if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
+					*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
 				}
 			} else {
 				log.Tracef("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
@@ -335,17 +333,18 @@ func Load(configBlob []byte) (*config.Config, error) {
 				for _, community := range communities {
 					community = strings.ReplaceAll(community, ":", ",")
 					communityType := categorizeCommunity(community)
-					if communityType == "standard" {
+					switch communityType {
+					case "standard":
 						if _, ok := (*peerData.PrefixStandardCommunities)[prefix]; !ok {
 							(*peerData.PrefixStandardCommunities)[prefix] = []string{}
 						}
 						(*peerData.PrefixStandardCommunities)[prefix] = append((*peerData.PrefixStandardCommunities)[prefix], community)
-					} else if communityType == "large" {
+					case "large":
 						if _, ok := (*peerData.PrefixLargeCommunities)[prefix]; !ok {
 							(*peerData.PrefixLargeCommunities)[prefix] = []string{}
 						}
 						(*peerData.PrefixLargeCommunities)[prefix] = append((*peerData.PrefixLargeCommunities)[prefix], community)
-					} else {
+					default:
 						return nil, errors.New("Invalid prefix community: " + community)
 					}
 				}
@@ -365,11 +364,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 			for community, pref := range *peerData.CommunityPrefs {
 				community = strings.ReplaceAll(community, ":", ",")
 				communityType := categorizeCommunity(community)
-				if communityType == "standard" {
+				switch communityType {
+				case "standard":
 					(*peerData.StandardCommunityPrefs)[community] = pref
-				} else if communityType == "large" {
+				case "large":
 					(*peerData.LargeCommunityPrefs)[community] = pref
-				} else {
+				default:
 					return nil, errors.New("Invalid community pref: " + community)
 				}
 			}
@@ -556,7 +556,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 }
 
 // peer processes a single peer
-func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
 	log.Debugf("Processing AS%d %s", *peerData.ASN, peerName)
@@ -571,13 +571,13 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	// Build IRR prefix sets
 	if *peerData.FilterIRR {
 		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQBin, c.BGPQArgs); err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 	if *peerData.AutoASSetMembers {
 		membersFromIRR, err := irr.ASMembers(*peerData.ASSet, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if peerData.ASSetMembers == nil {
 			peerData.ASSetMembers = &membersFromIRR
@@ -588,7 +588,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 		}
 	}
 	if *peerData.FilterASSet && (peerData.ASSetMembers == nil || len(*peerData.ASSetMembers) < 1) {
-		log.Fatalf("peer has filter-as-set enabled but no members in it's as-set")
+		return fmt.Errorf("peer has filter-as-set enabled but no members in it's as-set")
 	}
 
 	util.PrintStructInfo(peerName, peerData)
@@ -597,7 +597,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	peerFileName := path.Join(c.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *util.Sanitize(peerName)))
 	peerSpecificFile, err := os.Create(peerFileName)
 	if err != nil {
-		log.Fatalf("Create peer specific output file: %v", err)
+		return fmt.Errorf("create peer output file: %v", err)
 	}
 
 	// Render the template and write to buffer
@@ -605,15 +605,17 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	log.Debugf("[%s] Writing config", peerName)
 	err = templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{Name: peerName, Peer: *peerData, Config: *c})
 	if err != nil {
-		log.Fatalf("Execute template: %v", err)
+		return fmt.Errorf("execute template: %v", err)
 	}
 
 	// Reformat config and write template to file
 	if _, err := peerSpecificFile.Write([]byte(bird.Reformat(b.String()))); err != nil {
-		log.Fatalf("Write template to file: %v", err)
+		return fmt.Errorf("write template to file: %v", err)
 	}
 
 	log.Debugf("[%s] Wrote config", peerName)
+
+	return nil
 }
 
 // Run runs the full data generation procedure
@@ -720,12 +722,18 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	wg := new(sync.WaitGroup)
 	for peerName, peerData := range c.Peers {
 		wg.Add(1)
-		go peer(peerName, peerData, c, wg)
+		go func(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+			if err := peer(peerName, peerData, c, wg); err != nil {
+				log.Fatal(err)
+			}
+		}(peerName, peerData, c, wg)
 	} // end peer loop
 	wg.Wait()
 
 	// Run BIRD config validation
-	bird.Validate(c.BIRDBinary, c.CacheDirectory)
+	if err := bird.Validate(c.BIRDBinary, c.CacheDirectory); err != nil {
+		log.Fatalf("BIRD config validation: %v", err)
+	}
 
 	// Copy config file
 	log.Debug("Copying Pathvector config file to cache directory")

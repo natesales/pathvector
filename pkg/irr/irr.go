@@ -26,7 +26,37 @@ func FirstASSet(asSet string) string {
 	return output
 }
 
+// withSourceFilter returns the AS set or AS set with the IRR source replaced with the -S SOURCE syntax
+// AS34553 -> AS34553
+// RIPE::AS34553 -> -S RIPE AS34553
+func withSourceFilter(asSet string) string {
+	if strings.Contains(asSet, "::") {
+		log.Debugf("Using IRRDB source from AS set %s", asSet)
+		tokens := strings.Split(asSet, "::")
+		return fmt.Sprintf("-S %s %s", tokens[0], tokens[1])
+	}
+	return asSet
+}
+
 // PrefixSet uses bgpq4 to generate a prefix filter and return only the filter lines
+func PrefixSet(macro string, family uint8, irrServer string, queryTimeout uint, bgpqArgs string) ([]string, error) {
+	var prefixes []string
+
+	for _, asSet := range strings.Split(macro, " ") {
+		// Run bgpq4 for BIRD format with aggregation enabled
+		cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, withSourceFilter(asSet))
+		if bgpqArgs != "" {
+			cmdArgs = bgpqArgs + " " + cmdArgs
+		}
+		log.Debugf("Running bgpq4 %s", cmdArgs)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
+		defer cancel()
+		//nolint:golint,gosec
+		cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
+		stdout, err := cmd.Output()
+		if err != nil {
+			return nil, err
+		}
 func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, bgpqBin, bgpqArgs string) ([]string, error) {
 	// Run bgpq4 for BIRD format with aggregation enabled
 	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, asSet)
@@ -44,16 +74,16 @@ func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, 
 		return nil, err
 	}
 
-	var prefixes []string
-	for i, line := range strings.Split(string(stdout), "\n") {
-		if i == 0 { // Skip first line, as it is the definition line
-			continue
+		for i, line := range strings.Split(string(stdout), "\n") {
+			if i == 0 { // Skip first line, as it is the definition line
+				continue
+			}
+			if strings.Contains(line, "];") { // Skip last line and return
+				break
+			}
+			// Trim whitespace and remove the comma, then append to the prefixes slice
+			prefixes = append(prefixes, strings.TrimSpace(strings.TrimRight(line, ",")))
 		}
-		if strings.Contains(line, "];") { // Skip last line and return
-			break
-		}
-		// Trim whitespace and remove the comma, then append to the prefixes slice
-		prefixes = append(prefixes, strings.TrimSpace(strings.TrimRight(line, ",")))
 	}
 
 	return prefixes, nil

@@ -119,6 +119,8 @@ type Peer struct {
 	Passive                *bool     `yaml:"passive" description:"Should we listen passively?" default:"false"`
 	Direct                 *bool     `yaml:"direct" description:"Specify that the neighbor is directly connected" default:"false"`
 	NextHopSelf            *bool     `yaml:"next-hop-self" description:"Should BGP next-hop-self be enabled?" default:"false"`
+	NextHopSelfEBGP        *bool     `yaml:"next-hop-self-ebgp" description:"Should BGP next-hop-self for eBGP be enabled?" default:"false"`
+	NextHopSelfIBGP        *bool     `yaml:"next-hop-self-ibgp" description:"Should BGP next-hop-self for iBGP be enabled?" default:"false"`
 	BFD                    *bool     `yaml:"bfd" description:"Should BFD be enabled?" default:"false"`
 	Password               *string   `yaml:"password" description:"BGP MD5 password" default:"-"`
 	RSClient               *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
@@ -156,7 +158,7 @@ type Peer struct {
 	ASSet *string `yaml:"as-set" description:"Peer's as-set for filtering" default:"-"`
 
 	ImportLimit4          *int    `yaml:"import-limit4" description:"Maximum number of IPv4 prefixes to import after filtering" default:"1000000"`
-	ImportLimit6          *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import after filtering" default:"200000"`
+	ImportLimit6          *int    `yaml:"import-limit6" description:"Maximum number of IPv6 prefixes to import after filtering" default:"300000"`
 	ImportLimitTripAction *string `yaml:"import-limit-violation" description:"What action should be taken when the import limit is tripped?" default:"disable"`
 
 	ReceiveLimit4          *int    `yaml:"receive-limit4" description:"Maximum number of IPv4 prefixes to accept (including filtered routes, requires keep-filtered)" default:"-"`

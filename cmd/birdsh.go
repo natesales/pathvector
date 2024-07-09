@@ -52,7 +52,7 @@ var birdshCmd = &cobra.Command{
 		for {
 			fmt.Print("bird> ")
 			cmd, _ := r.ReadString('\n')
-			cmd = strings.Replace(cmd, "\n", "", -1)
+			cmd = strings.ReplaceAll(cmd, "\n", "")
 			if cmd != "" {
 				if _, err := c.Write([]byte(cmd + "\r\n")); err != nil {
 					log.Fatalf("Unable to write to BIRD socket: %v", err)

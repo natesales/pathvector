@@ -112,7 +112,7 @@ static4    Static     master4    up     2023-03-15 19:18:50
     Preference:     100
     Input filter:   (unnamed)
     Output filter:  (unnamed)
-    Import limit:   200000
+    Import limit:   300000
       Action:       disable
     Routes:         176493 imported, 0 filtered, 2 exported, 175609 preferred
     Route change stats:     received   rejected   filtered    ignored   accepted
@@ -396,7 +396,7 @@ EXAMPLE_AS65522_v6 BGP        ---        up     2023-03-26 03:53:56  Established
    Preference:     100
    Input filter:   (unnamed)
    Output filter:  (unnamed)
-   Import limit:   200000
+   Import limit:   300000
 	 Action:       disable
    Routes:         176493 imported, 0 filtered, 2 exported, 175609 preferred
    Route change stats:     received   rejected   filtered    ignored   accepted

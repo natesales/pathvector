@@ -18,9 +18,9 @@ Available Commands:
   generate    Generate router configuration
   help        Help about any command
   match       Find common IXPs for a given ASN
+  optimizer   Start optimization daemon
   reload      Reload a session
   restart     Restart a session
-  optimizer   Start optimization daemon
   status      Show protocol status
   version     Show version information
 

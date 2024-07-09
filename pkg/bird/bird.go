@@ -136,7 +136,7 @@ func RunCommand(command string, socket string) (string, string, error) {
 }
 
 // Validate checks if the cached configuration is syntactically valid
-func Validate(binary string, cacheDir string) {
+func Validate(binary string, cacheDir string) error {
 	log.Debugf("Validating BIRD config")
 	var outb, errb bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
@@ -152,7 +152,7 @@ func Validate(binary string, cacheDir string) {
 		// bird: ./AS65530_EXAMPLE.conf:20:43 syntax error, unexpected '%'
 		match, err := regexp.MatchString(`bird:.*:\d+:\d+.*`, errbT)
 		if err != nil {
-			log.Fatalf("BIRD error regex match: %s", err)
+			return fmt.Errorf("BIRD error regex match: %s", err)
 		}
 		errorMessageToLog := errbT
 		if match {
@@ -163,18 +163,18 @@ func Validate(binary string, cacheDir string) {
 			errorFile := respPartsColon[0]
 			errorLine, err := strconv.Atoi(respPartsColon[1])
 			if err != nil {
-				log.Fatalf("BIRD error line int parse: %s", err)
+				return fmt.Errorf("BIRD error line int parse: %s", err)
 			}
 			errorChar, err := strconv.Atoi(respPartsColon[2])
 			if err != nil {
-				log.Fatalf("BIRD error line int parse: %s", err)
+				return fmt.Errorf("BIRD error line int parse: %s", err)
 			}
 			log.Debugf("Found error in %s:%d:%d message %s", errorFile, errorLine, errorChar, errorMessage)
 
 			// Read output file
 			file, err := os.Open(path.Join(cacheDir, errorFile))
 			if err != nil {
-				log.Fatalf("unable to read BIRD output file for error parsing: %s", err)
+				return fmt.Errorf("unable to read BIRD output file for error parsing: %s", err)
 			}
 			defer file.Close()
 
@@ -190,16 +190,17 @@ func Validate(binary string, cacheDir string) {
 				line++
 			}
 			if err := scanner.Err(); err != nil {
-				log.Fatalf("BIRD output file scan: %s", err)
+				return fmt.Errorf("BIRD output file scan: %s", err)
 			}
 		}
 		if errorMessageToLog == "" {
 			errorMessageToLog = origErr.Error()
 		}
-		log.Fatalf("BIRD: %s", errorMessageToLog)
+		return fmt.Errorf("BIRD: %s", errorMessageToLog)
 	}
 
 	log.Infof("BIRD config validation passed")
+	return nil
 }
 
 // MoveCacheAndReconfigure moves cached files to the production BIRD directory and reconfigures

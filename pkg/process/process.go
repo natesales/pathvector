@@ -100,8 +100,12 @@ func sortCommunities(communities []string) (standard []string, large []string, e
 	return standard, large, nil
 }
 
-func sortCommunitiesPtr(communities []string) (*[]string, *[]string, error) {
-	standard, large, err := sortCommunities(communities)
+func sortCommunitiesPtr(communities *[]string) (*[]string, *[]string, error) {
+	if communities == nil {
+		return &[]string{}, &[]string{}, nil
+	}
+
+	standard, large, err := sortCommunities(*communities)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -500,19 +504,19 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Categorize communities
-		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(*peerData.ImportCommunities)
+		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(peerData.ImportCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid import community: %v", err)
 		}
-		peerData.ExportStandardCommunities, peerData.ExportLargeCommunities, err = sortCommunitiesPtr(*peerData.ExportCommunities)
+		peerData.ExportStandardCommunities, peerData.ExportLargeCommunities, err = sortCommunitiesPtr(peerData.ExportCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid export community: %v", err)
 		}
-		peerData.AnnounceStandardCommunities, peerData.AnnounceLargeCommunities, err = sortCommunitiesPtr(*peerData.AnnounceCommunities)
+		peerData.AnnounceStandardCommunities, peerData.AnnounceLargeCommunities, err = sortCommunitiesPtr(peerData.AnnounceCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid announce community: %v", err)
 		}
-		peerData.RemoveStandardCommunities, peerData.RemoveLargeCommunities, err = sortCommunitiesPtr(*peerData.RemoveCommunities)
+		peerData.RemoveStandardCommunities, peerData.RemoveLargeCommunities, err = sortCommunitiesPtr(peerData.RemoveCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid remove community: %v", err)
 		}
@@ -590,8 +594,11 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	// Render the template and write to buffer
 	var b bytes.Buffer
 	log.Debugf("[%s] Writing config", peerName)
-	err = templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{Name: peerName, Peer: *peerData, Config: *c})
-	if err != nil {
+	if err := templating.Template.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{
+		Name:   peerName,
+		Peer:   *peerData,
+		Config: *c,
+	}); err != nil {
 		log.Fatalf("Execute template: %v", err)
 	}
 
@@ -669,8 +676,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 
 	// Render the global template and write to buffer
 	log.Debug("Writing global config file")
-	err = templating.GlobalTemplate.ExecuteTemplate(globalFile, "global.tmpl", c)
-	if err != nil {
+	if err := templating.Template.ExecuteTemplate(globalFile, "global.tmpl", c); err != nil {
 		log.Fatalf("Execute global template: %v", err)
 	}
 	log.Debug("Finished writing global config file")

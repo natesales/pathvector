@@ -160,6 +160,8 @@ func parseStatics(all map[string]string, v4 map[string]string, v6 map[string]str
 }
 
 // Load loads a configuration file from a YAML file
+//
+//gocyclo:ignore
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
 	c.Init()
@@ -618,9 +620,8 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	return nil
 }
 
-// Run runs the full data generation procedure
-func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw bool) {
-	// Check lockfile
+// lock prevents multiple instances of Pathvector from running
+func lock(lockFile string) {
 	if lockFile != "" {
 		if _, err := os.Stat(lockFile); err == nil {
 			log.Fatal("Lockfile exists, exiting")
@@ -635,6 +636,11 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 			log.Fatalf("Accessing lockfile: %v", err)
 		}
 	}
+}
+
+// Run runs the full data generation procedure
+func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw bool) {
+	lock(lockFile)
 
 	log.Infof("Starting Pathvector %s", version)
 	startTime := time.Now()

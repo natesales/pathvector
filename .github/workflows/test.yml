@@ -17,17 +17,29 @@ jobs:
 
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.20'
-          cache: false
+          go-version: '1.21'
 
       - uses: actions/checkout@v3
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          args: -E gosec
+      - name: Install pre-commit Dependency
+        run: |
+          pip install --user pre-commit
+          # go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
-      - run: go get -v -t -d ./...
+      - name: Hash key for Cache pre-commit
+        uses: seepine/hash-files@v1
+        id: key-hash
+        with:
+          patterns: ".pre-commit-config.yaml"
+
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit/
+          key: pre-commit-${{ steps.key-hash.outputs.hash }}
+
+      - run: pre-commit run --all-files
+
       - run: sudo chown $(whoami):$(whoami) /run/bird/bird.ctl
       - run: sudo chown -R $(whoami):$(whoami) /etc/bird/
       - run: go generate -x

@@ -1,0 +1,51 @@
+exclude: '^\.idea/'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # TODO: upstream
+  - repo: https://github.com/natesales/goimports-reviser
+    rev: a807b1af1da00a44880668d880ef7d4ce51feb42
+    hooks:
+      - id: goimports-reviser
+
+  #  - repo: https://github.com/igorshubovych/markdownlint-cli
+  #    rev: v0.35.0
+  #    hooks:
+  #      - id: markdownlint
+  #        # MD013: line too long
+  #        # MD033: no inline HTML
+  #        # MD041: first line in a file should be a top-level heading
+  #        args: [ --disable, MD013, MD033, MD041, "--" ]
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args: [
+          --skip, "go.*",
+          -L, "statics,socio-economic"
+        ]
+        stages: [ commit, commit-msg ]
+        exclude_types: [ json ]
+
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      - id: go-vet
+      - id: go-imports
+      - id: go-cyclo
+        args: [ -over=25 ]
+      - id: golangci-lint
+      - id: go-critic
+      - id: go-build
+      - id: go-mod-tidy

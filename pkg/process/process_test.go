@@ -247,46 +247,22 @@ peers:
 
 	for peerName, peerData := range globalConfig.Peers {
 		if peerName == "Upstream 1" {
-			if *peerData.ASN != 65510 {
-				t.Errorf("peer %s expected ASN 65510 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 90 {
-				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != false {
-				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
+			assert.Equal(t, 65510, *peerData.ASN)
+			assert.Equal(t, 90, *peerData.LocalPref)
+			assert.False(t, *peerData.FilterIRR)
+			assert.True(t, *peerData.FilterRPKI)
 		} else if peerName == "Upstream 2" {
-			if *peerData.ASN != 65520 {
-				t.Errorf("peer %s expected ASN 65520 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 90 {
-				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != true {
-				t.Errorf("peer %s expected filter-irr true got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
+			assert.Equal(t, 65520, *peerData.ASN)
+			assert.Equal(t, 90, *peerData.LocalPref)
+			assert.True(t, *peerData.FilterIRR)
+			assert.True(t, *peerData.FilterRPKI)
 		} else if peerName == "Upstream 3" {
-			if *peerData.ASN != 65530 {
-				t.Errorf("peer %s expected ASN 65530 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 2 {
-				t.Errorf("peer %s expected local-pref 2 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != false {
-				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
+			assert.Equal(t, 65530, *peerData.ASN)
+			assert.Equal(t, 2, *peerData.LocalPref)
+			assert.False(t, *peerData.FilterIRR)
+			assert.True(t, *peerData.FilterRPKI)
 		} else {
-			t.Errorf("")
+			t.Errorf("unexpected peer %s", peerName)
 		}
 	}
 }

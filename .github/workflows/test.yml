@@ -24,7 +24,7 @@ jobs:
       - name: Install pre-commit Dependency
         run: |
           pip install --user pre-commit
-          # go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
       - name: Hash key for Cache pre-commit
         uses: seepine/hash-files@v1

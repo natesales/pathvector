@@ -611,9 +611,9 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	// Render the template and write to buffer
 	var b bytes.Buffer
 	log.Debugf("[%s] Writing config", peerName)
-	if err := templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{
-		Name: peerName,
-		Peer: *peerData,
+	if err := templating.Template.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{
+		Name:   peerName,
+		Peer:   *peerData,
 		Config: *c,
 	}); err != nil {
 		return fmt.Errorf("execute template: %v", err)
@@ -699,7 +699,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 
 	// Render the global template and write to buffer
 	var globalBuffer bytes.Buffer
-	if err := templating.GlobalTemplate.ExecuteTemplate(&globalBuffer, "global.tmpl", c); err != nil {
+	if err := templating.Template.ExecuteTemplate(&globalBuffer, "global.tmpl", c); err != nil {
 		log.Fatalf("Execute global template: %v", err)
 	}
 

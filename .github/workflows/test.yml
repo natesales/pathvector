@@ -21,10 +21,13 @@ jobs:
 
       - uses: actions/checkout@v3
 
-      - name: Install pre-commit Dependency
+      - name: Install pre-commit deps
         run: |
           pip install --user pre-commit
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          go install -v github.com/go-critic/go-critic/cmd/gocritic@latest
 
       - name: Hash key for Cache pre-commit
         uses: seepine/hash-files@v1

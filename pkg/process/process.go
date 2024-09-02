@@ -100,8 +100,12 @@ func sortCommunities(communities []string) (standard []string, large []string, e
 	return standard, large, nil
 }
 
-func sortCommunitiesPtr(communities []string) (*[]string, *[]string, error) {
-	standard, large, err := sortCommunities(communities)
+func sortCommunitiesPtr(communitiesPtr *[]string) (*[]string, *[]string, error) {
+	if communitiesPtr == nil {
+		return nil, nil, nil
+	}
+
+	standard, large, err := sortCommunities(*communitiesPtr)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -258,9 +262,10 @@ func Load(configBlob []byte) (*config.Config, error) {
 			fieldName := templateValueType.Field(i).Name
 			fieldValue := peerValue.FieldByName(fieldName)
 			defaultString := templateValueType.Field(i).Tag.Get("default")
-			if defaultString == "" {
+			switch {
+			case defaultString == "":
 				log.Fatalf("Code error: field %s has no default value", fieldName)
-			} else if defaultString != "-" {
+			case defaultString != "-":
 				log.Tracef("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
 				if fieldValue.IsNil() {
 					elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
@@ -292,7 +297,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 				} else if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
 					*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
 				}
-			} else {
+			default:
 				log.Tracef("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
@@ -466,11 +471,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Validate vrrpInstance
-		if vrrpInstance.State == "primary" {
+		switch {
+		case vrrpInstance.State == "primary":
 			vrrpInstance.State = "MASTER"
-		} else if vrrpInstance.State == "backup" {
+		case vrrpInstance.State == "backup":
 			vrrpInstance.State = "BACKUP"
-		} else {
+		default:
 			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
 		}
 	}
@@ -515,19 +521,19 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Categorize communities
-		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(*peerData.ImportCommunities)
+		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(peerData.ImportCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid import community: %v", err)
 		}
-		peerData.ExportStandardCommunities, peerData.ExportLargeCommunities, err = sortCommunitiesPtr(*peerData.ExportCommunities)
+		peerData.ExportStandardCommunities, peerData.ExportLargeCommunities, err = sortCommunitiesPtr(peerData.ExportCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid export community: %v", err)
 		}
-		peerData.AnnounceStandardCommunities, peerData.AnnounceLargeCommunities, err = sortCommunitiesPtr(*peerData.AnnounceCommunities)
+		peerData.AnnounceStandardCommunities, peerData.AnnounceLargeCommunities, err = sortCommunitiesPtr(peerData.AnnounceCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid announce community: %v", err)
 		}
-		peerData.RemoveStandardCommunities, peerData.RemoveLargeCommunities, err = sortCommunitiesPtr(*peerData.RemoveCommunities)
+		peerData.RemoveStandardCommunities, peerData.RemoveLargeCommunities, err = sortCommunitiesPtr(peerData.RemoveCommunities)
 		if err != nil {
 			return nil, fmt.Errorf("invalid remove community: %v", err)
 		}

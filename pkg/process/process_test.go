@@ -34,12 +34,10 @@ func TestCategorizeCommunity(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		cType := categorizeCommunity(tc.input)
-		if cType != "" && tc.shouldError {
-			t.Errorf("categorizeCommunity should have errored on '%s' but didn't. expected error, got '%s'", tc.input, cType)
-		} else if cType == "" && !tc.shouldError {
-			t.Errorf("categorizeCommunity shouldn't have errored on '%s' but did. expected '%s'", tc.input, tc.expectedOutput)
-		} else if cType != tc.expectedOutput {
-			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
+		if tc.shouldError {
+			assert.Equal(t, "", cType)
+		} else {
+			assert.Equal(t, tc.expectedOutput, cType)
 		}
 	}
 }
@@ -111,22 +109,18 @@ peers:
 	assert.NoError(t, err)
 
 	assert.Len(t, globalConfig.Peers, 2)
-	for peerName, peerData := range globalConfig.Peers {
-		switch peerName {
-		case "Peer 10":
-			assert.Equal(t, 65510, util.Deref(peerData.ASN))
-			assert.Equal(t, 110, util.Deref(peerData.LocalPref))
-			assert.True(t, util.Deref(peerData.SetLocalPref))
-			assert.Nil(t, peerData.DefaultLocalPref)
-		case "Peer 20":
-			assert.Equal(t, 65520, util.Deref(peerData.ASN))
-			assert.Equal(t, 100, util.Deref(peerData.LocalPref))
-			assert.False(t, util.Deref(peerData.SetLocalPref))
-			assert.Equal(t, 120, util.Deref(peerData.DefaultLocalPref))
-		default:
-			t.Errorf("peer %s unexpected", peerName)
-		}
-	}
+
+	peer10 := globalConfig.Peers["Peer 10"]
+	assert.Equal(t, 65510, util.Deref(peer10.ASN))
+	assert.Equal(t, 110, util.Deref(peer10.LocalPref))
+	assert.True(t, util.Deref(peer10.SetLocalPref))
+	assert.Nil(t, peer10.DefaultLocalPref)
+
+	peer20 := globalConfig.Peers["Peer 20"]
+	assert.Equal(t, 65520, util.Deref(peer20.ASN))
+	assert.Equal(t, 100, util.Deref(peer20.LocalPref))
+	assert.False(t, util.Deref(peer20.SetLocalPref))
+	assert.Equal(t, 120, util.Deref(peer20.DefaultLocalPref))
 }
 
 func TestLoadConfigInvalidYAML(t *testing.T) {
@@ -186,9 +180,8 @@ kernel:
     "2001:db8:2::/64" : "2001:db8::1"
 `
 	_, err := Load([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "Invalid static prefix") {
-		t.Errorf("expected invalid static prefix error, got %+v", err)
-	}
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Invalid static prefix")
 }
 
 func TestLoadConfigInvalidVIP(t *testing.T) {

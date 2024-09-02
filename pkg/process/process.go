@@ -440,10 +440,10 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 
 	if err := parseStatics(c.Kernel.Statics, c.Kernel.Statics4, c.Kernel.Statics6); err != nil {
-		log.Fatalf("parsing statics: %s", err)
+		return nil, fmt.Errorf("parsing statics: %s", err)
 	}
 	if err := parseStatics(c.Kernel.KStatics, c.Kernel.KStatics4, c.Kernel.KStatics6); err != nil {
-		log.Fatalf("parsing kstatics: %s", err)
+		return nil, fmt.Errorf("parsing kstatics: %s", err)
 	}
 
 	// Parse BFD configs
@@ -485,12 +485,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 	if c.RTRServer != "" {
 		rtrServerParts := strings.Split(c.RTRServer, ":")
 		if len(rtrServerParts) != 2 {
-			log.Fatalf("Invalid rtr-server '%s' format should be host:port", rtrServerParts)
+			return nil, fmt.Errorf("invalid rtr-server '%s' format should be host:port", rtrServerParts)
 		}
 		c.RTRServerHost = rtrServerParts[0]
 		rtrServerPort, err := strconv.Atoi(rtrServerParts[1])
 		if err != nil {
-			log.Fatalf("Invalid RTR server port %s", rtrServerParts[1])
+			return nil, fmt.Errorf("invalid RTR server port %s", rtrServerParts[1])
 		}
 		c.RTRServerPort = rtrServerPort
 	}

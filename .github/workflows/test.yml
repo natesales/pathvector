@@ -23,7 +23,7 @@ jobs:
 
       - name: Install pre-commit deps
         run: |
-          pip install --user pre-commit
+          pip install --user pre-commit flask
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
           go install golang.org/x/tools/cmd/goimports@latest
           go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
@@ -47,7 +47,6 @@ jobs:
       - run: sudo chown -R $(whoami):$(whoami) /etc/bird/
       - run: go generate -x
       - run: go build -v .
-      - run: make dep
       - run: make test-setup
       - run: make test
 

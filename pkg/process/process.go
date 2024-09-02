@@ -100,12 +100,12 @@ func sortCommunities(communities []string) (standard []string, large []string, e
 	return standard, large, nil
 }
 
-func sortCommunitiesPtr(communitiesPtr *[]string) (*[]string, *[]string, error) {
-	if communitiesPtr == nil {
-		return nil, nil, nil
+func sortCommunitiesPtr(communities *[]string) (*[]string, *[]string, error) {
+	if communities == nil {
+		return &[]string{}, &[]string{}, nil
 	}
 
-	standard, large, err := sortCommunities(*communitiesPtr)
+	standard, large, err := sortCommunities(*communities)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -611,8 +611,11 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	// Render the template and write to buffer
 	var b bytes.Buffer
 	log.Debugf("[%s] Writing config", peerName)
-	err = templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{Name: peerName, Peer: *peerData, Config: *c})
-	if err != nil {
+	if err := templating.PeerTemplate.ExecuteTemplate(&b, "peer.tmpl", &templating.Wrapper{
+		Name: peerName,
+		Peer: *peerData,
+		Config: *c,
+	}); err != nil {
 		return fmt.Errorf("execute template: %v", err)
 	}
 

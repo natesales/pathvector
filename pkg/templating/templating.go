@@ -256,40 +256,13 @@ var funcMap = template.FuncMap{
 
 // Templates
 
-var PeerTemplate *template.Template
-var GlobalTemplate *template.Template
-var UITemplate *template.Template
-var VRRPTemplate *template.Template
+var Template *template.Template
 
 // Load loads the templates from the embedded filesystem
 func Load(fs embed.FS) error {
 	var err error
-
-	// Generate peer template
-	PeerTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/peer.tmpl")
-	if err != nil {
-		return fmt.Errorf("reading peer template: %v", err)
-	}
-
-	// Generate global template
-	GlobalTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/global.tmpl")
-	if err != nil {
-		return fmt.Errorf("reading global template: %v", err)
-	}
-
-	// Generate UI template
-	UITemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/ui.tmpl")
-	if err != nil {
-		return fmt.Errorf("reading UI template: %v", err)
-	}
-
-	// Generate VRRP template
-	VRRPTemplate, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/vrrp.tmpl")
-	if err != nil {
-		return fmt.Errorf("reading VRRP template: %v", err)
-	}
-
-	return nil // nil error
+	Template, err = template.New("").Funcs(funcMap).ParseFS(fs, "templates/*.tmpl")
+	return err
 }
 
 // WriteVRRPConfig writes the VRRP config to a keepalived config file
@@ -306,8 +279,7 @@ func WriteVRRPConfig(instances map[string]*config.VRRPInstance, keepalivedConfig
 	}
 
 	// Render the template and write to disk
-	err = VRRPTemplate.ExecuteTemplate(keepalivedFile, "vrrp.tmpl", instances)
-	if err != nil {
+	if err := Template.ExecuteTemplate(keepalivedFile, "vrrp.tmpl", instances); err != nil {
 		log.Fatalf("Execute template: %v", err)
 	}
 }
@@ -324,8 +296,7 @@ func WriteUIFile(config *config.Config) {
 
 	// Render the UI template and write to disk
 	log.Debug("Writing UI file")
-	err = UITemplate.ExecuteTemplate(uiFileObj, "ui.tmpl", config)
-	if err != nil {
+	if err := Template.ExecuteTemplate(uiFileObj, "ui.tmpl", config); err != nil {
 		log.Fatalf("Execute UI template: %v", err)
 	}
 	log.Debug("Finished writing UI file")

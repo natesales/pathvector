@@ -280,21 +280,22 @@ func restoreIndent(input string) string {
 	for i := range lines {
 		line := strings.TrimSpace(lines[i])
 
-		if line == "" || line == "\n" {
+		switch {
+		case line == "" || line == "\n":
 			continue
-		} else if strings.HasSuffix(line, "{") && strings.HasPrefix(line, "}") {
+		case strings.HasSuffix(line, "{") && strings.HasPrefix(line, "}"):
 			if indent == 0 {
 				formatted += strings.Repeat("  ", indent) + line + "\n"
 			} else {
 				formatted += strings.Repeat("  ", indent-1) + line + "\n"
 			}
-		} else if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") { // Opening
+		case strings.HasSuffix(line, "{") || strings.HasSuffix(line, "["): // Opening
 			formatted += strings.Repeat("  ", indent) + line + "\n"
 			indent++
-		} else if strings.HasPrefix(line, "}") || strings.HasPrefix(line, "]") {
+		case strings.HasPrefix(line, "}") || strings.HasPrefix(line, "]"):
 			indent--
 			formatted += strings.Repeat("  ", indent) + line + "\n"
-		} else {
+		default:
 			formatted += strings.Repeat("  ", indent) + line + "\n"
 		}
 	}

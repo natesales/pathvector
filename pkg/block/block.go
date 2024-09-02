@@ -68,13 +68,15 @@ func Parse(blocklist []string) ([]uint32, []string, error) {
 		// Remove whitespace
 		token = strings.TrimSpace(token)
 
-		if asn := parseASN(token); asn != -1 {
+		asn := parseASN(token)
+		switch {
+		case asn != -1:
 			log.Debugf("Adding ASN to blocklist: %d", asn)
 			asns = append(asns, uint32(asn))
-		} else if validPrefix(token) {
+		case validPrefix(token):
 			log.Debugf("Adding prefix to blocklist: %s", token)
 			prefixes = append(prefixes, token)
-		} else if validIP(token) {
+		case validIP(token):
 			log.Debugf("Adding IP to blocklist: %s", token)
 
 			afiSuffix := "/32"
@@ -82,7 +84,7 @@ func Parse(blocklist []string) ([]uint32, []string, error) {
 				afiSuffix = "/128"
 			}
 			prefixes = append(prefixes, token+afiSuffix)
-		} else {
+		default:
 			return nil, nil, fmt.Errorf("invalid blocklist token: %s", token)
 		}
 	}

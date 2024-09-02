@@ -245,24 +245,23 @@ peers:
 		t.Error(err)
 	}
 
-	for peerName, peerData := range globalConfig.Peers {
-		if peerName == "Upstream 1" {
-			assert.Equal(t, 65510, *peerData.ASN)
-			assert.Equal(t, 90, *peerData.LocalPref)
-			assert.False(t, *peerData.FilterIRR)
-			assert.True(t, *peerData.FilterRPKI)
-		} else if peerName == "Upstream 2" {
-			assert.Equal(t, 65520, *peerData.ASN)
-			assert.Equal(t, 90, *peerData.LocalPref)
-			assert.True(t, *peerData.FilterIRR)
-			assert.True(t, *peerData.FilterRPKI)
-		} else if peerName == "Upstream 3" {
-			assert.Equal(t, 65530, *peerData.ASN)
-			assert.Equal(t, 2, *peerData.LocalPref)
-			assert.False(t, *peerData.FilterIRR)
-			assert.True(t, *peerData.FilterRPKI)
-		} else {
-			t.Errorf("unexpected peer %s", peerName)
-		}
-	}
+	assert.Len(t, globalConfig.Peers, 3)
+
+	upstream1 := globalConfig.Peers["Upstream 1"]
+	assert.Equal(t, 65510, *upstream1.ASN)
+	assert.Equal(t, 90, *upstream1.LocalPref)
+	assert.False(t, *upstream1.FilterIRR)
+	assert.True(t, *upstream1.FilterRPKI)
+
+	upstream2 := globalConfig.Peers["Upstream 2"]
+	assert.Equal(t, 65520, *upstream2.ASN)
+	assert.Equal(t, 90, *upstream2.LocalPref)
+	assert.True(t, *upstream2.FilterIRR)
+	assert.True(t, *upstream2.FilterRPKI)
+
+	upstream3 := globalConfig.Peers["Upstream 3"]
+	assert.Equal(t, 65530, *upstream3.ASN)
+	assert.Equal(t, 2, *upstream3.LocalPref)
+	assert.False(t, *upstream3.FilterIRR)
+	assert.True(t, *upstream3.FilterRPKI)
 }

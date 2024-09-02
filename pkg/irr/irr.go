@@ -81,11 +81,12 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqBin,
 	var hasNeighbor4, hasNeighbor6 bool
 	if peerData.NeighborIPs != nil {
 		for _, n := range *peerData.NeighborIPs {
-			if strings.Contains(n, ".") {
+			switch {
+			case strings.Contains(n, "."):
 				hasNeighbor4 = true
-			} else if strings.Contains(n, ":") {
+			case strings.Contains(n, ":"):
 				hasNeighbor6 = true
-			} else {
+			default:
 				log.Fatalf("Invalid neighbor IP %s", n)
 			}
 		}

@@ -145,12 +145,14 @@ func parseTableInt(i int) string {
 }
 
 func colorStatus(s string) string {
-	if s == "up" || s == "Established" {
+	switch {
+	case s == "up" || s == "Established":
 		return color.GreenString(s)
-	} else if strings.Contains(s, "Error") || s == "down" {
+	case strings.Contains(s, "Error") || s == "down":
 		return color.RedString(s)
-	} else if strings.Contains(s, "Connect") || s == "start" {
+	case strings.Contains(s, "Connect") || s == "start":
 		return color.YellowString(s)
+	default:
+		return s
 	}
-	return s
 }

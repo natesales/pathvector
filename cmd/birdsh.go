@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"net"
 	"os"
 	"strings"
@@ -50,7 +49,7 @@ var birdshCmd = &cobra.Command{
 
 		r := bufio.NewReader(os.Stdin)
 		for {
-			fmt.Print("bird> ")
+			log.Printf("bird> ")
 			cmd, _ := r.ReadString('\n')
 			cmd = strings.ReplaceAll(cmd, "\n", "")
 			if cmd != "" {

@@ -34,7 +34,7 @@ var dumpCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(string(yamlBytes))
+			log.Println(string(yamlBytes))
 		} else {
 			var data [][]string
 			for peerName, peerData := range c.Peers {

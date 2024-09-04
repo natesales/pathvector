@@ -59,7 +59,7 @@ var statusCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(commandOutput)
+			log.Println(commandOutput)
 		} else {
 			commandOutput, _, err := bird.RunCommand("show protocols all", c.BIRDSocket)
 			if err != nil {

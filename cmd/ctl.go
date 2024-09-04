@@ -10,6 +10,7 @@ import (
 	"github.com/lithammer/fuzzysearch/fuzzy"
 
 	"github.com/natesales/pathvector/pkg/templating"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func protocols(birdDirectory string) (map[string]*templating.Protocol, error) {
@@ -60,7 +61,7 @@ func protocolByQuery(query string, protocols map[string]*templating.Protocol) (s
 
 // confirmYesNo asks a [y/N] question and returns true if the user selects yes
 func confirmYesNo(question string) bool {
-	fmt.Printf("%s [y/N] ", question)
+	log.Printf("%s [y/N] ", question)
 	var response string
 	_, _ = fmt.Scanln(&response)
 	return response == "y" || response == "Y"

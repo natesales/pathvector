@@ -34,7 +34,7 @@ Built %s on %s
 }
 
 func printVersionBanner() {
-	fmt.Println(versionBanner())
+	log.Println(versionBanner())
 }
 
 var versionCmd = &cobra.Command{
@@ -58,6 +58,6 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("BIRD: %s\n", birdVersion)
+		log.Printf("BIRD: %s\n", birdVersion)
 	},
 }

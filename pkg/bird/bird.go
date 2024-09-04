@@ -92,7 +92,7 @@ func ReadClean(r io.Reader) {
 	resp = strings.ReplaceAll(resp, "\n\n", "\n")
 	resp = strings.TrimSuffix(resp, "\n")
 
-	fmt.Println(resp)
+	log.Println(resp)
 }
 
 // RunCommand runs a BIRD command and returns the output, version, and error

@@ -1,7 +1,9 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/charmbracelet/log"
@@ -18,10 +20,34 @@ const (
 	FatalLevel = Level(log.FatalLevel)
 )
 
-var logger = log.Default()
+var (
+	logger           = log.Default()
+	writer io.Writer = os.Stdout
+)
 
 func SetLevel(l Level) {
 	logger.SetLevel(log.Level(l))
+}
+
+func Capture() *bytes.Buffer {
+	var buf bytes.Buffer
+	writer = &buf
+	logger.SetOutput(writer)
+	return &buf
+}
+
+func ResetCapture() {
+	logger.SetOutput(os.Stderr)
+	writer = os.Stdout
+}
+
+// Println prints a line with no formatting or timestamp or anything
+func Println(msg ...any) {
+	_, _ = fmt.Fprintln(writer, msg...)
+}
+
+func Printf(format string, args ...any) {
+	_, _ = fmt.Fprintf(writer, format, args...)
 }
 
 // Trace logs a trace message.

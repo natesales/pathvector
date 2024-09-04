@@ -75,7 +75,7 @@ var configCmd = &cobra.Command{
 			buf += "# Config"
 		}
 		buf += fmt.Sprintf(" exported from %s on %s\n", configFile, time.Now().Format(time.RFC822Z))
-		fmt.Println(buf)
+		log.Println(buf)
 
 		if sanitize {
 			// Apply sanitized keys
@@ -86,7 +86,7 @@ var configCmd = &cobra.Command{
 
 			logknife.Knife(bytes.NewBuffer([]byte(config)), false, true, false, "")
 		} else {
-			fmt.Print(config)
+			log.Println(config)
 		}
 	},
 }

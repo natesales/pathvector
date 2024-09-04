@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -47,6 +46,6 @@ var matchCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println(match.CommonIXs(uint32(matchLocalASN), uint32(peerASN), yamlFormat, peeringDbTimeout, c.PeeringDBAPIKey))
+		log.Println(match.CommonIXs(uint32(matchLocalASN), uint32(peerASN), yamlFormat, peeringDbTimeout, c.PeeringDBAPIKey))
 	},
 }

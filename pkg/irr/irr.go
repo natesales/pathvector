@@ -8,53 +8,37 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
-// withSourceFilter returns the AS set or AS set with the IRR source replaced with the -S SOURCE syntax
-// AS34553 -> AS34553
-// RIPE::AS34553 -> -S RIPE AS34553
-func withSourceFilter(asSet string) string {
-	if strings.Contains(asSet, "::") {
-		log.Debugf("Using IRRDB source from AS set %s", asSet)
-		tokens := strings.Split(asSet, "::")
-		return fmt.Sprintf("-S %s %s", tokens[0], tokens[1])
+func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, bgpqBin, bgpqArgs string) ([]string, error) {
+	// Run bgpq4 for BIRD format with aggregation enabled
+	cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, asSet)
+	if bgpqArgs != "" {
+		cmdArgs = bgpqArgs + " " + cmdArgs
 	}
-	return asSet
-}
+	log.Debugf("Running %s %s", bgpqBin, cmdArgs)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
+	defer cancel()
 
-// PrefixSet uses bgpq4 to generate a prefix filter and return only the filter lines
-func PrefixSet(macro string, family uint8, irrServer string, queryTimeout uint, bgpqArgs string) ([]string, error) {
+	//nolint:golint,gosec
+	cmd := exec.CommandContext(ctx, bgpqBin, strings.Split(cmdArgs, " ")...)
+	stdout, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+
 	var prefixes []string
-
-	for _, asSet := range strings.Split(macro, " ") {
-		// Run bgpq4 for BIRD format with aggregation enabled
-		cmdArgs := fmt.Sprintf("-h %s -Ab%d %s", irrServer, family, withSourceFilter(asSet))
-		if bgpqArgs != "" {
-			cmdArgs = bgpqArgs + " " + cmdArgs
+	for i, line := range strings.Split(string(stdout), "\n") {
+		if i == 0 { // Skip first line, as it is the definition line
+			continue
 		}
-		log.Debugf("Running bgpq4 %s", cmdArgs)
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(queryTimeout))
-		defer cancel()
-		//nolint:golint,gosec
-		cmd := exec.CommandContext(ctx, "bgpq4", strings.Split(cmdArgs, " ")...)
-		stdout, err := cmd.Output()
-		if err != nil {
-			return nil, err
+		if strings.Contains(line, "];") { // Skip last line and return
+			break
 		}
-
-		for i, line := range strings.Split(string(stdout), "\n") {
-			if i == 0 { // Skip first line, as it is the definition line
-				continue
-			}
-			if strings.Contains(line, "];") { // Skip last line and return
-				break
-			}
-			// Trim whitespace and remove the comma, then append to the prefixes slice
-			prefixes = append(prefixes, strings.TrimSpace(strings.TrimRight(line, ",")))
-		}
+		// Trim whitespace and remove the comma, then append to the prefixes slice
+		prefixes = append(prefixes, strings.TrimSpace(strings.TrimRight(line, ",")))
 	}
 
 	return prefixes, nil
@@ -63,7 +47,7 @@ func PrefixSet(macro string, family uint8, irrServer string, queryTimeout uint, 
 // ASMembers uses bgpq4 to generate an AS member set
 func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs string) ([]uint32, error) {
 	// Run bgpq4 for BIRD format with aggregation enabled
-	cmdArgs := fmt.Sprintf("-h %s -tj %s", irrServer, withSourceFilter(asSet))
+	cmdArgs := fmt.Sprintf("-h %s -tj %s", irrServer, asSet)
 	if bgpqArgs != "" {
 		cmdArgs = bgpqArgs + " " + cmdArgs
 	}
@@ -86,7 +70,7 @@ func ASMembers(asSet string, irrServer string, queryTimeout uint, bgpqArgs strin
 }
 
 // Update updates a peer's IRR prefix set
-func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs string) error {
+func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqBin, bgpqArgs string) error {
 	// Check for empty as-set
 	if peerData.ASSet == nil || *peerData.ASSet == "" {
 		return fmt.Errorf("peer has filter-irr enabled and no as-set defined")
@@ -96,11 +80,12 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs
 	var hasNeighbor4, hasNeighbor6 bool
 	if peerData.NeighborIPs != nil {
 		for _, n := range *peerData.NeighborIPs {
-			if strings.Contains(n, ".") {
+			switch {
+			case strings.Contains(n, "."):
 				hasNeighbor4 = true
-			} else if strings.Contains(n, ":") {
+			case strings.Contains(n, ":"):
 				hasNeighbor6 = true
-			} else {
+			default:
 				log.Fatalf("Invalid neighbor IP %s", n)
 			}
 		}
@@ -121,7 +106,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs
 		bgpqArgs6 += "-R 48"
 	}
 
-	prefixesFromIRR4, err := PrefixSet(*peerData.ASSet, 4, irrServer, queryTimeout, bgpqArgs4)
+	prefixesFromIRR4, err := PrefixSet(*peerData.ASSet, 4, irrServer, queryTimeout, bgpqBin, bgpqArgs4)
 	if err != nil {
 		return fmt.Errorf("unable to get IPv4 IRR prefix list from %s: %s", *peerData.ASSet, err)
 	}
@@ -134,7 +119,7 @@ func Update(peerData *config.Peer, irrServer string, queryTimeout uint, bgpqArgs
 		log.Warnf("peer has IPv4 session(s) but no IPv4 prefixes")
 	}
 
-	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout, bgpqArgs6)
+	prefixesFromIRR6, err := PrefixSet(*peerData.ASSet, 6, irrServer, queryTimeout, bgpqBin, bgpqArgs6)
 	if err != nil {
 		return fmt.Errorf("unable to get IPv6 IRR prefix list from %s: %s", *peerData.ASSet, err)
 	}

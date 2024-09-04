@@ -22,10 +22,10 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		{"AS112", 4, []string{"192.31.196.0/24", "192.175.48.0/24"}, false},
 		{"AS112", 6, []string{"2001:4:112::/48", "2620:4f:8000::/48"}, false},
 		{"AS112", 9, []string{"2001:4:112::/48", "2620:4f:8000::/48"}, true}, // Invalid address family
-		{"AS-LROOT", 6, []string{"2001:500:3::/48", "2001:500:8c::/48", "2001:500:9c::/47{47,48}", "2001:500:9e::/47", "2001:500:9f::/48", "2602:800:9004::/47{48,48}", "2620:0:22b0::/48", "2620:0:2ee0::/48"}, false},
+		{"AS-FROOT", 4, []string{"192.5.4.0/23{23,24}"}, false},
 	}
 	for _, tc := range testCases {
-		out, err := PrefixSet(tc.asSet, tc.family, "rr.ntt.net", irrQueryTimeout, "")
+		out, err := PrefixSet(tc.asSet, tc.family, "rr.ntt.net", irrQueryTimeout, "bgpq4", "")
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		} else if err == nil && tc.shouldError {
@@ -49,7 +49,7 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		peer := config.Peer{ASSet: util.Ptr(tc.asSet)}
-		err := Update(&peer, "rr.ntt.net", irrQueryTimeout, "")
+		err := Update(&peer, "rr.ntt.net", irrQueryTimeout, "bgpq4", "")
 		if err != nil && tc.shouldError {
 			return
 		}

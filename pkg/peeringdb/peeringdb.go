@@ -10,9 +10,8 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // Endpoint is a public value to allow setting to a cache server
@@ -179,10 +178,8 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
-	} else {
-		if os.Getenv("PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
-		}
+	} else if os.Getenv("PEERINGDB_API_KEY") != "" {
+		req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 	}
 
 	res, err := httpClient.Do(req)
@@ -225,10 +222,8 @@ func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData,
 
 	if apiKey != "" {
 		req.Header.Add("AUTHORIZATION", "Api-Key "+apiKey)
-	} else {
-		if os.Getenv("PEERINGDB_API_KEY") != "" {
-			req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
-		}
+	} else if os.Getenv("PEERINGDB_API_KEY") != "" {
+		req.Header.Add("AUTHORIZATION", "Api-Key "+os.Getenv("PEERINGDB_API_KEY"))
 	}
 
 	res, err := httpClient.Do(req)

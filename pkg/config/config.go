@@ -230,6 +230,7 @@ type Peer struct {
 	OptimizeInbound       *bool     `yaml:"optimize-inbound" description:"Should the optimizer modify inbound policy?" default:"false"`
 
 	ProtocolName                *string   `yaml:"-" description:"-" default:"-"`
+	UserSpecifiedName           *string   `yaml:"-" description:"-" default:"-"`
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet6                  *[]string `yaml:"-" description:"-" default:"-"`
@@ -280,6 +281,7 @@ type Kernel struct {
 	Reject4         []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
 	Reject6         []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
 	Statics         map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+	KStatics        map[string]string `yaml:"kstatics" description:"List of static routes to include in BIRD and send to the kernel"`
 	SRDCommunities  []string          `yaml:"srd-communities" description:"List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)"`
 	Learn           bool              `yaml:"learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
 	Export          bool              `yaml:"export" description:"Export routes to kernel routing table" default:"true"`
@@ -291,6 +293,8 @@ type Kernel struct {
 	SRDLargeCommunities    []string          `yaml:"-" description:"-"`
 	Statics4               map[string]string `yaml:"-" description:"-"`
 	Statics6               map[string]string `yaml:"-" description:"-"`
+	KStatics4              map[string]string `yaml:"-" description:"-"`
+	KStatics6              map[string]string `yaml:"-" description:"-"`
 }
 
 // ProbeResult stores a single probe result
@@ -357,6 +361,7 @@ type Config struct {
 	IRRServer     string `yaml:"irr-server" description:"Internet routing registry server" default:"rr.ntt.net"`
 	RTRServer     string `yaml:"rtr-server" description:"RPKI-to-router server" default:"rtr.rpki.cloudflare.com:8282"`
 	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
+	BGPQBin       string `yaml:"bgpq-binary" description:"Path to bgpq4 binary" default:"bgpq4"`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
 	Source4       string `yaml:"source4" description:"Source IPv4 address"`

@@ -14,10 +14,10 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/mod/semver"
 
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // Minimum supported BIRD version
@@ -92,12 +92,12 @@ func ReadClean(r io.Reader) {
 	resp = strings.ReplaceAll(resp, "\n\n", "\n")
 	resp = strings.TrimSuffix(resp, "\n")
 
-	fmt.Println(resp)
+	log.Println(resp)
 }
 
 // RunCommand runs a BIRD command and returns the output, version, and error
 func RunCommand(command string, socket string) (string, string, error) {
-	log.Debugln("Connecting to BIRD socket")
+	log.Debug("Connecting to BIRD socket")
 	conn, err := net.Dial("unix", socket)
 	if err != nil {
 		return "", "", err
@@ -125,18 +125,18 @@ func RunCommand(command string, socket string) (string, string, error) {
 		return "", "", err
 	}
 
-	log.Debugln("Reading from socket")
+	log.Debug("Reading from socket")
 	resp, err = Read(conn)
 	if err != nil {
 		return "", "", err
 	}
-	log.Debugln("Done reading from socket")
+	log.Debug("Done reading from socket")
 
 	return resp, birdVersion, nil // nil error
 }
 
 // Validate checks if the cached configuration is syntactically valid
-func Validate(binary string, cacheDir string) {
+func Validate(binary string, cacheDir string) error {
 	log.Debugf("Validating BIRD config")
 	var outb, errb bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
@@ -152,7 +152,7 @@ func Validate(binary string, cacheDir string) {
 		// bird: ./AS65530_EXAMPLE.conf:20:43 syntax error, unexpected '%'
 		match, err := regexp.MatchString(`bird:.*:\d+:\d+.*`, errbT)
 		if err != nil {
-			log.Fatalf("BIRD error regex match: %s", err)
+			return fmt.Errorf("BIRD error regex match: %s", err)
 		}
 		errorMessageToLog := errbT
 		if match {
@@ -163,18 +163,18 @@ func Validate(binary string, cacheDir string) {
 			errorFile := respPartsColon[0]
 			errorLine, err := strconv.Atoi(respPartsColon[1])
 			if err != nil {
-				log.Fatalf("BIRD error line int parse: %s", err)
+				return fmt.Errorf("BIRD error line int parse: %s", err)
 			}
 			errorChar, err := strconv.Atoi(respPartsColon[2])
 			if err != nil {
-				log.Fatalf("BIRD error line int parse: %s", err)
+				return fmt.Errorf("BIRD error line int parse: %s", err)
 			}
 			log.Debugf("Found error in %s:%d:%d message %s", errorFile, errorLine, errorChar, errorMessage)
 
 			// Read output file
 			file, err := os.Open(path.Join(cacheDir, errorFile))
 			if err != nil {
-				log.Fatalf("unable to read BIRD output file for error parsing: %s", err)
+				return fmt.Errorf("unable to read BIRD output file for error parsing: %s", err)
 			}
 			defer file.Close()
 
@@ -190,16 +190,17 @@ func Validate(binary string, cacheDir string) {
 				line++
 			}
 			if err := scanner.Err(); err != nil {
-				log.Fatalf("BIRD output file scan: %s", err)
+				return fmt.Errorf("BIRD output file scan: %s", err)
 			}
 		}
 		if errorMessageToLog == "" {
 			errorMessageToLog = origErr.Error()
 		}
-		log.Fatalf("BIRD: %s\n", errorMessageToLog)
+		return fmt.Errorf("BIRD: %s", errorMessageToLog)
 	}
 
 	log.Infof("BIRD config validation passed")
+	return nil
 }
 
 // MoveCacheAndReconfigure moves cached files to the production BIRD directory and reconfigures
@@ -249,31 +250,104 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 		}
 		// Print bird output as multiple lines
 		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-			log.Printf("BIRD response (multiline): %s", line)
+			log.Infof("BIRD response (multiline): %s", line)
 		}
 	}
 }
 
-// Reformat takes a BIRD config file as a string and outputs a nicely formatted version as a string
-func Reformat(input string) string {
+// noSpace removes all leading/trailing whitespace from every line, and every empty line
+func noSpace(input string) string {
 	formatted := ""
-	for _, line := range strings.Split(input, "\n") {
-		if strings.HasSuffix(line, "{") || strings.HasSuffix(line, "[") {
-			formatted += "\n"
-		}
+	lines := strings.Split(input, "\n")
 
-		if !func(input string) bool {
-			for _, chr := range input {
-				if string(chr) != " " {
-					return false
-				}
-			}
-			return true
-		}(line) {
-			formatted += line + "\n"
+	for i := range lines {
+		line := lines[i]
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
 		}
+		formatted += line + "\n"
 	}
 	return formatted
+}
+
+// restoreIndent indents a file, one tab per curly brace or bracket
+func restoreIndent(input string) string {
+	formatted := ""
+	lines := strings.Split(input, "\n")
+
+	indent := 0
+	for i := range lines {
+		line := strings.TrimSpace(lines[i])
+
+		switch {
+		case line == "" || line == "\n":
+			continue
+		case strings.HasSuffix(line, "{") && strings.HasPrefix(line, "}"):
+			if indent == 0 {
+				formatted += strings.Repeat("  ", indent) + line + "\n"
+			} else {
+				formatted += strings.Repeat("  ", indent-1) + line + "\n"
+			}
+		case strings.HasSuffix(line, "{") || strings.HasSuffix(line, "["): // Opening
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+			indent++
+		case strings.HasPrefix(line, "}") || strings.HasPrefix(line, "]"):
+			indent--
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+		default:
+			formatted += strings.Repeat("  ", indent) + line + "\n"
+		}
+	}
+
+	return formatted
+}
+
+// restoreNewlines adds a newline after every comment and after every zero indented curly brace or bracket
+func restoreNewlines(input string) string {
+	out := ""
+	for _, line := range strings.Split(input, "\n") {
+		if strings.HasPrefix(line, "#") {
+			line += "\n"
+		} else if line == "}" || line == "];" {
+			line += "\n"
+		}
+
+		out += line + "\n"
+	}
+	return out
+}
+
+// fixStatementBracket spacing adds a newline between statements and open braces/brackets
+func fixStatementBracketSpacing(input string) string {
+	out := ""
+	lines := strings.Split(input, "\n")
+	for i := range lines {
+		line := lines[i]
+		nextLine := ""
+		if i+1 < len(lines) {
+			nextLine = lines[i+1]
+		}
+		nextLine = strings.TrimSpace(nextLine)
+
+		if (strings.HasSuffix(line, ";") || strings.HasSuffix(line, "}")) &&
+			((strings.HasSuffix(nextLine, "{") && !strings.HasPrefix(nextLine, "}")) || strings.HasSuffix(nextLine, "[")) {
+			line += "\n"
+		}
+
+		out += line + "\n"
+	}
+	return out
+}
+
+// Reformat takes a BIRD config file as a string and outputs a nicely formatted version as a string
+func Reformat(input string) string {
+	input = noSpace(input)
+	input = restoreIndent(input)
+	input = restoreNewlines(input)
+	input = fixStatementBracketSpacing(input)
+	input = strings.TrimRight(input, "\n") + "\n"
+	return input
 }
 
 type Routes struct {

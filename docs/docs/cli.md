@@ -10,6 +10,7 @@ Usage:
   pathvector [command]
 
 Available Commands:
+  bird-fmt    Format BIRD config
   birdsh      Lightweight BIRD shell
   completion  Generate the autocompletion script for the specified shell
   config      Export configuration, optionally sanitized with logknife
@@ -18,6 +19,8 @@ Available Commands:
   help        Help about any command
   match       Find common IXPs for a given ASN
   optimizer   Start optimization daemon
+  reload      Reload a session
+  restart     Restart a session
   status      Show protocol status
   version     Show version information
 

@@ -8,9 +8,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func PrefixSet(asSet string, family uint8, irrServer string, queryTimeout uint, bgpqBin, bgpqArgs string) ([]string, error) {

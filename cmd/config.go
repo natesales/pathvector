@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/natesales/logknife"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/process"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var sensitiveKeys = []string{

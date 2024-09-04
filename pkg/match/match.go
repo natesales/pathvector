@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/peeringdb"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // CommonIXs gets common IXPs from PeeringDB

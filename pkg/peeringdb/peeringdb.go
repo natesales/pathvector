@@ -10,9 +10,8 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // Endpoint is a public value to allow setting to a cache server

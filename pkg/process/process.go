@@ -16,7 +16,6 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/block"
@@ -27,6 +26,7 @@ import (
 	"github.com/natesales/pathvector/pkg/plugin"
 	"github.com/natesales/pathvector/pkg/templating"
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid

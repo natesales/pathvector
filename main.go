@@ -5,9 +5,8 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/cmd"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // Build process flags

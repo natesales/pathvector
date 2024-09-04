@@ -11,9 +11,8 @@ import (
 	"text/template"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var (

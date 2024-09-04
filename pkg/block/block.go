@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // parseASN parses an ASN into a string and returns -1 if invalid

@@ -7,9 +7,8 @@ import (
 	"strings"
 	"unicode"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func sanitizeConfigName(s string) string {

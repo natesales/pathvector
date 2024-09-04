@@ -52,8 +52,6 @@ github.com/mattn/go-runewidth v0.0.15 h1:UNAjwbU9l54TA3KzvqLGxwWjHmMgBUVhBiTjelZ
 github.com/mattn/go-runewidth v0.0.15/go.mod h1:Jdepj2loyihRzMpdS35Xk/zdY8IAYHsh153qUoGf23w=
 github.com/muesli/termenv v0.15.2 h1:GohcuySI0QmI3wN8Ok9PtKGkgkFIk7y6Vpb5PvrY+Wo=
 github.com/muesli/termenv v0.15.2/go.mod h1:Epx+iuz8sNs7mNKhxzH4fWXGNpZwUaJKRS1noLXviQ8=
-github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b h1:oDEZbVwq3gZzqimMCrxDUWrn2e9RWws0q48mdsvUz7g=
-github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b/go.mod h1:tQLjEyj4CHMjYpG5icbEKjWtByZxU7b6CU1wEVIdp2k=
 github.com/natesales/logknife v0.0.4-0.20240904212444-784fa10b2080 h1:x0IxtZknLd9Zx7IVzbV4TKsYMW3LDP0/AYclZfkXO3A=
 github.com/natesales/logknife v0.0.4-0.20240904212444-784fa10b2080/go.mod h1:tQLjEyj4CHMjYpG5icbEKjWtByZxU7b6CU1wEVIdp2k=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=

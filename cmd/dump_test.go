@@ -1,15 +1,14 @@
 package cmd
 
 import (
-	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func TestDumpTable(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
-
 	mkTmpCache(t)
 
 	args := []string{
@@ -23,21 +22,19 @@ func TestDumpTable(t *testing.T) {
 			"--config", testFile,
 		}...)
 		t.Logf("running dump integration with args %v", args)
-		rootCmd.SetArgs(args)
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
-	})
 
-	w.Close()
-	os.Stdout = old
+		out := log.Capture()
+		defer log.ResetCapture()
+
+		rootCmd.SetArgs(args)
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "PREPENDS")
+		assert.Contains(t, out.String(), "NAME")
+		assert.Contains(t, out.String(), "ASN")
+	})
 }
 
 func TestDumpYAML(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
-
 	mkTmpCache(t)
 
 	args := []string{
@@ -51,12 +48,12 @@ func TestDumpYAML(t *testing.T) {
 			"--config", testFile,
 		}...)
 		t.Logf("running dump integration with args %v", args)
-		rootCmd.SetArgs(args)
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
-	})
 
-	w.Close()
-	os.Stdout = old
+		out := log.Capture()
+		defer log.ResetCapture()
+
+		rootCmd.SetArgs(args)
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "global-config: \"\"")
+	})
 }

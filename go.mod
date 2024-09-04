@@ -9,7 +9,7 @@ require (
 	github.com/go-ping/ping v1.1.0
 	github.com/go-playground/validator/v10 v10.22.0
 	github.com/lithammer/fuzzysearch v1.1.8
-	github.com/natesales/logknife v0.0.4-0.20230403055117-5e928ad4153b
+	github.com/natesales/logknife v0.0.4-0.20240904212444-784fa10b2080
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0

@@ -84,7 +84,9 @@ var configCmd = &cobra.Command{
 				config = re.ReplaceAllString(config, fmt.Sprintf("${1}%s: REDACTED", key))
 			}
 
-			logknife.Knife(bytes.NewBuffer([]byte(config)), false, true, false, "")
+			var outBuf bytes.Buffer
+			logknife.Knife(bytes.NewBuffer([]byte(config)), &outBuf, false, true, false, "")
+			log.Println(outBuf.String())
 		} else {
 			log.Println(config)
 		}

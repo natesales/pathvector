@@ -93,7 +93,9 @@ func PrintStructInfo(label string, instance interface{}) {
 
 // PrintTable prints a table of data
 func PrintTable(header []string, data [][]string) {
-	table := tablewriter.NewWriter(os.Stdout)
+	var buf bytes.Buffer
+
+	table := tablewriter.NewWriter(&buf)
 	table.SetHeader(header)
 	table.SetAutoFormatHeaders(true)
 	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
@@ -108,6 +110,8 @@ func PrintTable(header []string, data [][]string) {
 	table.SetAutoWrapText(false)
 	table.AppendBulk(data)
 	table.Render()
+
+	log.Println(buf.String())
 }
 
 // RemoveFileGlob removes files by glob

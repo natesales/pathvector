@@ -1,6 +1,10 @@
 # Binary
 pathvector
 
+# Test Build
+build-test.sh
+pathvector-test
+
 # Output files
 output/*
 

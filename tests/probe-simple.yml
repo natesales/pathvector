@@ -5,7 +5,7 @@ source6: 2001:db8::1
 prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48
-cache-directory: test-cache
+cache-directory: /tmp/test-cache
 peeringdb-url: http://localhost:5000/api
 
 optimizer:

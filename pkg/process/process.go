@@ -763,7 +763,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		if err != nil {
 			log.Fatalf("Marshalling protocol names: %v", err)
 		}
-		file := path.Join(c.BIRDDirectory, "protocols.json")
+		file := path.Join(c.CacheDirectory, "protocols.json")
 		log.Debugf("Writing protocol names to %s", file)
 		//nolint:golint,gosec
 		if err := os.WriteFile(file, j, 0644); err != nil {

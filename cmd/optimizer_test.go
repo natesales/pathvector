@@ -7,9 +7,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/bird"
 )
 
 func TestOptimizer(t *testing.T) {
+	bird.Validate = bird.DockerValidate
+	defer func() {
+		bird.Validate = bird.LocalValidate
+	}()
+
 	args := []string{
 		"--verbose",
 	}
@@ -35,7 +42,7 @@ func TestOptimizer(t *testing.T) {
 		assert.Nil(t, rootCmd.Execute())
 
 		// Check if local pref is lowered
-		checkFile, err := os.ReadFile("test-cache/AS65510_EXAMPLE.conf")
+		checkFile, err := os.ReadFile("/tmp/test-cache/AS65510_EXAMPLE.conf")
 		assert.Nil(t, err)
 		if !strings.Contains(string(checkFile), "bgp_local_pref = 80; # pathvector:localpref") {
 			t.Errorf("expected bgp_local_pref = 80 but not found in file")

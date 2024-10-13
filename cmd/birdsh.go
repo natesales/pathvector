@@ -2,15 +2,14 @@ package cmd
 
 import (
 	"bufio"
-	"fmt"
 	"net"
 	"os"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var socket = ""
@@ -50,7 +49,7 @@ var birdshCmd = &cobra.Command{
 
 		r := bufio.NewReader(os.Stdin)
 		for {
-			fmt.Print("bird> ")
+			log.Printf("bird> ")
 			cmd, _ := r.ReadString('\n')
 			cmd = strings.ReplaceAll(cmd, "\n", "")
 			if cmd != "" {

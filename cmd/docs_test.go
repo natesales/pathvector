@@ -1,20 +1,19 @@
 package cmd
 
 import (
-	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func TestDocs(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
 	rootCmd.SetArgs([]string{
 		"docs",
 	})
-	if err := rootCmd.Execute(); err != nil {
-		t.Error(err)
-	}
-	w.Close()
-	os.Stdout = old
+	out := log.Capture()
+	defer log.ResetCapture()
+	assert.Nil(t, rootCmd.Execute())
+	assert.Contains(t, out.String(), "# Configuration\n")
 }

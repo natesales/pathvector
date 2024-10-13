@@ -1,6 +1,3 @@
-dep:
-	pip3 install flask
-
 dummy-iface:
 	# Allow UDP ping. For more information, see https://github.com/go-ping/ping#linux
 	sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
@@ -23,3 +20,6 @@ test-teardown:
 	rm -f nohup.out
 
 test-sequence: test-setup test test-teardown
+
+snapshot:
+	goreleaser --snapshot --clean

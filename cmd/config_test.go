@@ -2,6 +2,10 @@ package cmd
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func TestConfig(t *testing.T) {
@@ -9,9 +13,12 @@ func TestConfig(t *testing.T) {
 		"config",
 		"-c", "../tests/generate-complex.yml",
 	})
-	if err := rootCmd.Execute(); err != nil {
-		t.Error(err)
-	}
+
+	out := log.Capture()
+	defer log.ResetCapture()
+	assert.Nil(t, rootCmd.Execute())
+	assert.Contains(t, out.String(), "# Pathvector devel")
+	assert.Contains(t, out.String(), "asn: 65530")
 }
 
 func TestSanitizeConfig(t *testing.T) {
@@ -20,7 +27,11 @@ func TestSanitizeConfig(t *testing.T) {
 		"-c", "../tests/generate-complex.yml",
 		"--sanitize",
 	})
-	if err := rootCmd.Execute(); err != nil {
-		t.Error(err)
-	}
+
+	out := log.Capture()
+	defer log.ResetCapture()
+	assert.Nil(t, rootCmd.Execute())
+	assert.Contains(t, out.String(), "# Pathvector devel")
+	assert.Contains(t, out.String(), "asn: 65530")
+	assert.Contains(t, out.String(), "- 2001:db8:")
 }

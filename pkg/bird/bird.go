@@ -135,18 +135,47 @@ func RunCommand(command string, socket string) (string, string, error) {
 	return resp, birdVersion, nil // nil error
 }
 
-// Validate checks if the cached configuration is syntactically valid
-func Validate(binary string, cacheDir string) error {
+var Validate = LocalValidate
+
+func DockerValidate(binary string, cacheDir string) error {
+	const birdVersion = "2.15"
+
+	// Get absolute path
+	absCacheDir, err := filepath.Abs(cacheDir)
+	if err != nil {
+		return fmt.Errorf("parsing absolute path: %v", err)
+	}
+
+	args := []string{
+		"docker", "run", "--rm",
+		"-v", absCacheDir + ":/etc/bird/",
+		"pierky/bird:" + birdVersion,
+		"bird", "-c", "/etc/bird/bird.conf", "-p",
+	}
+	log.Infof("Running command: %s", strings.Join(args, " "))
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stdout
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("BIRD docker validation: %s", err)
+	}
+
+	log.Infof("BIRD config validation passed")
+	return nil
+}
+
+// LocalValidate checks if the cached configuration is syntactically valid
+func LocalValidate(binary string, cacheDir string) error {
 	log.Debugf("Validating BIRD config")
-	var outb, errb bytes.Buffer
+	var outBuf, errBuf bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")
 	birdCmd.Dir = cacheDir
-	birdCmd.Stdout = &outb
-	birdCmd.Stderr = &errb
+	birdCmd.Stdout = &outBuf
+	birdCmd.Stderr = &errBuf
 	var errbT string
 	if err := birdCmd.Run(); err != nil {
 		origErr := err
-		errbT = strings.TrimSuffix(errb.String(), "\n")
+		errbT = strings.TrimSuffix(errBuf.String(), "\n")
 
 		// Check for validation error in format:
 		// bird: ./AS65530_EXAMPLE.conf:20:43 syntax error, unexpected '%'
@@ -222,7 +251,7 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, f := range files {
+	for _, f := range append(files, path.Join(cacheDirectory, "protocols.json")) {
 		fileNameParts := strings.Split(f, "/")
 		fileNameTail := fileNameParts[len(fileNameParts)-1]
 		newFileLoc := path.Join(birdDirectory, fileNameTail)

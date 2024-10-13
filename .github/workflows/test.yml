@@ -23,7 +23,7 @@ jobs:
 
       - name: Install pre-commit deps
         run: |
-          pip install --user pre-commit flask
+          pip install pre-commit flask
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
           go install golang.org/x/tools/cmd/goimports@latest
           go install github.com/fzipp/gocyclo/cmd/gocyclo@latest

@@ -1023,6 +1023,14 @@ Accept prefixes up to /24 and /48 from covering parent IRR objects
 |------|---------|------------|
 | bool   | false      |          |
 
+### `gateway`
+
+The mode in which the gateway is defined for received routes (direct|recursive).
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
 ### `add-on-import`
 
 List of communities to add to all imported routes

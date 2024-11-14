@@ -56,6 +56,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
     {{ if not (BoolDeref $peer.InterpretCommunities) }}interpret communities off;{{ end }}
     {{ if IntDeref $peer.Confederation }}confederation {{ IntDeref $peer.Confederation }};{{ end }}
     {{ if IntDeref $peer.DefaultLocalPref }}default bgp_local_pref {{ IntDeref $peer.DefaultLocalPref }};{{ end }}
+    {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}
     {{ StrDeref $peer.SessionGlobal }}
     {{ $protocols := MakeSlice }}
     {{ if BoolDeref $peer.MPUnicast46 }}
@@ -81,7 +82,6 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
         {{ if BoolDeref $peer.NextHopSelfIBGP }}next hop self ibgp;{{ end }}
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
-        {{ if BoolDeref $peer.AdvertiseHostname }}advertise hostname on;{{ end }}
         {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject; # no-accept: true{{ end }}

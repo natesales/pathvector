@@ -3,6 +3,7 @@ package bird
 import (
 	"bufio"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -140,9 +141,15 @@ func RunCommand(command string, socket string) (string, string, error) {
 	return resp, birdVersion, nil // nil error
 }
 
-var Validate = LocalValidate
+func Validate(binary, cacheDir string) error {
+	if flag.Lookup("test.v") != nil {
+		return dockerValidate(binary, cacheDir)
+	} else {
+		return localValidate(binary, cacheDir)
+	}
+}
 
-func DockerValidate(_, _ string) error {
+func dockerValidate(_, _ string) error {
 	args := []string{
 		"docker", "exec",
 		"pathvector-bird",
@@ -160,8 +167,8 @@ func DockerValidate(_, _ string) error {
 	return nil
 }
 
-// LocalValidate checks if the cached configuration is syntactically valid
-func LocalValidate(binary string, cacheDir string) error {
+// localValidate checks if the cached configuration is syntactically valid
+func localValidate(binary string, cacheDir string) error {
 	log.Debugf("Validating BIRD config")
 	var outBuf, errBuf bytes.Buffer
 	birdCmd := exec.Command(binary, "-c", "bird.conf", "-p")

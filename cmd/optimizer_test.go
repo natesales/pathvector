@@ -7,16 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/natesales/pathvector/pkg/bird"
 )
 
 func TestOptimizer(t *testing.T) {
-	bird.Validate = bird.DockerValidate
-	defer func() {
-		bird.Validate = bird.LocalValidate
-	}()
-
 	args := []string{
 		"--verbose",
 	}

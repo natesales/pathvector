@@ -7,7 +7,7 @@ prefixes:
   - 2001:db8::/48
 web-ui-file: /tmp/test-cache/ui.html
 cache-directory: /tmp/test-cache
-peeringdb-url: http://localhost:5000/api
+peeringdb-url: http://localhost:5001/api
 
 peers:
   Example:

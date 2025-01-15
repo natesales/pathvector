@@ -6,18 +6,22 @@ dummy-iface:
 	sudo ip addr add dev dummy0 2001:db8::1/64
 	sudo ip link set dev dummy0 up
 
-peeringdb-test-harness:
-	nohup python3 tests/peeringdb/peeringdb-test-api.py &
+build-pdb:
+	docker build -t peeringdb-test-api tests/peeringdb
 
-test-setup: dummy-iface peeringdb-test-harness
+run-pdb:
+	docker rm -f peeringdb-test-api || true
+	docker run --name peeringdb-test-api -d -p 5001:5001 peeringdb-test-api
+
+pdb-api: build-pdb run-pdb
+
+test-setup: dummy-iface pdb-api
 
 test:
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
 
 test-teardown:
-	pkill -f tests/peeringdb/peeringdb-test-api.py
 	sudo ip link del dev dummy0
-	rm -f nohup.out
 
 test-sequence: test-setup test test-teardown
 

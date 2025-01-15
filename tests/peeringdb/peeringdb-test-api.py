@@ -1,5 +1,5 @@
 """
-PeeringDB test harness
+PeeringDB test API
 
 Supported queries:
 https://peeringdb.com/api/net?info_never_via_route_servers=1
@@ -13,14 +13,17 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-nvrs = json.loads(open("tests/peeringdb/nvrs.json").read())
-nets = json.loads(open("tests/peeringdb/net.json").read())
-netixlans = json.loads(open("tests/peeringdb/netixlan.json").read())
+nvrs = json.loads(open("nvrs.json").read())
+nets = json.loads(open("net.json").read())
+netixlans = json.loads(open("netixlan.json").read())
 
 
 def response(d):
     return {"data": [d], "meta": {}}
 
+@app.route("/")
+def index():
+    return "PeeringDB test API"
 
 @app.route("/api/net", methods=["GET"])
 def net():
@@ -44,4 +47,4 @@ def netixlan():
 
 
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=5000)
+    app.run("0.0.0.0", port=5001)

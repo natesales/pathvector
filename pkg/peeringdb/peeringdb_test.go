@@ -31,7 +31,6 @@ func TestPeeringDbQuery(t *testing.T) {
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		}
-
 		if tc.shouldError && err == nil {
 			t.Errorf("asn %d should have errored but didn't", tc.asn)
 		}

@@ -3,7 +3,6 @@ package peeringdb
 import (
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,14 +15,7 @@ import (
 )
 
 // Endpoint is a public value to allow setting to a cache server
-var Endpoint = ""
-
-func init() {
-	// Check if running in test
-	if flag.Lookup("test.v") != nil {
-		Endpoint = "http://localhost:5000/api"
-	}
-}
+var Endpoint = "http://localhost:5001/api"
 
 type IxLanResponse struct {
 	Data []IxLanData `json:"data"`

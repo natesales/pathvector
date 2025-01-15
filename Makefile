@@ -1,3 +1,8 @@
+clean:
+	rm -f coverage.txt pathvector
+	docker rm -f pathvector-peeringdb-test-api || true
+	docker rm -f pathvector-bird || true
+
 dummy-iface:
 	# Allow UDP ping. For more information, see https://github.com/go-ping/ping#linux
 	sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"

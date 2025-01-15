@@ -144,15 +144,15 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ if IntDeref $peer.LocalPref4 }}if (net.type = NET_IP4) then { bgp_local_pref = {{ $peer.LocalPref4 }}; }{{ end }}
             {{ if IntDeref $peer.LocalPref6 }}if (net.type = NET_IP6) then { bgp_local_pref = {{ $peer.LocalPref6 }}; }{{ end }}
 
-            {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
-            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
-            {{ end }}
-
             {{ range $community, $pref := StringUint32MapDeref $peer.StandardCommunityPrefs }}
             if (({{ $community }}) ~ bgp_community) then { bgp_local_pref = {{ $pref }}; }
             {{ end }}
             {{ range $community, $pref := StringUint32MapDeref $peer.LargeCommunityPrefs }}
             if (({{ $community }}) ~ bgp_large_community) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+
+            {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
+            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
             {{ end }}
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}

@@ -30,6 +30,7 @@ run-bird:
 		-p 5002:5002 \
 		-v $(shell pwd)/tests/bird-entrypoint.sh:/entrypoint.sh \
 		-v /tmp/bird-conf/:/etc/bird/ \
+		-v /tmp/test-cache/:/tmp/test-cache/ \
 		pierky/bird:2.16 /entrypoint.sh
 
 pdb-api: build-pdb run-pdb
@@ -37,7 +38,7 @@ pdb-api: build-pdb run-pdb
 test-setup: dummy-iface run-bird pdb-api
 
 test:
-	go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
+	go test -v -p 1 -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
 
 test-sequence: test-setup test down
 

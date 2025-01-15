@@ -153,7 +153,7 @@ func dockerValidate(_, _ string) error {
 	args := []string{
 		"docker", "exec",
 		"pathvector-bird",
-		"bird", "-c", "/etc/bird/bird.conf", "-p",
+		"bird", "-c", "/tmp/test-cache/bird.conf", "-p",
 	}
 	log.Infof("[DOCKER] Running command: %s", strings.Join(args, " "))
 	cmd := exec.Command(args[0], args[1:]...)

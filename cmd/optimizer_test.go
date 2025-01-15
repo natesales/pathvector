@@ -12,9 +12,6 @@ import (
 )
 
 func TestOptimizer(t *testing.T) {
-	args := []string{
-		"--verbose",
-	}
 	files, err := filepath.Glob("../tests/probe-*.yml")
 	assert.Nil(t, err)
 	assert.GreaterOrEqual(t, 1, len(files))
@@ -27,20 +24,18 @@ func TestOptimizer(t *testing.T) {
 				}
 			}
 
-			// Run pathvector to generate config first, so there is a config to modify
-			rootCmd.SetArgs(append(args, []string{
-				"generate",
+			baseArgs := []string{
+				"--verbose",
 				"--config", testFile,
-			}...))
-			t.Logf("Running pre-optimizer generate: %v", args)
+			}
+
+			// Run pathvector to generate config first, so there is a config to modify
+			rootCmd.SetArgs(append(baseArgs, "generate"))
+			t.Log("Running pre-optimizer generate")
 			assert.Nil(t, rootCmd.Execute())
 
-			args = append(args, []string{
-				"optimizer",
-				"--config", testFile,
-			}...)
-			t.Logf("running probe integration with args %v", args)
-			rootCmd.SetArgs(args)
+			rootCmd.SetArgs(append(baseArgs, "optimizer"))
+			t.Log("Running probe integration")
 			assert.Nil(t, rootCmd.Execute())
 
 			// Check if local pref is lowered

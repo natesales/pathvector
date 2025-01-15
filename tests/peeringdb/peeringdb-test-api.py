@@ -3,8 +3,8 @@ PeeringDB test harness
 
 Supported queries:
 https://peeringdb.com/api/net?info_never_via_route_servers=1
-https://peeringdb.com/api/netixlan?asn=%d
 https://peeringdb.com/api/net?asn=%d
+https://peeringdb.com/api/netixlan?asn=%d
 """
 
 import json

@@ -7,7 +7,7 @@ jobs:
   lint:
     name: lint
     runs-on: ubuntu-latest
-    concurrency: ci-${{ github.ref }}
+    concurrency: ci-lint-${{ github.ref }}
     steps:
       - uses: actions/checkout@v4
 

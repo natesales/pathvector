@@ -7,7 +7,7 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    concurrency: ci-${{ github.ref }}
+    concurrency: ci-test-${{ github.ref }}
     steps:
       - name: Install bgpq4
         run: |

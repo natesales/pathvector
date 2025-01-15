@@ -172,11 +172,8 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 			modifyPref(peer,
 				global.Peers,
 				o.LocalPrefModifier,
-				global.CacheDirectory,
 				global.BIRDDirectory,
 				global.BIRDSocket,
-				global.BIRDBinary,
-				noConfigure,
 				dryRun,
 			)
 		}
@@ -187,11 +184,8 @@ func modifyPref(
 	peerPair string,
 	peers map[string]*config.Peer,
 	localPrefModifier uint,
-	cacheDirectory string,
 	birdDirectory string,
 	birdSocket string,
-	birdBinary string,
-	noConfigure bool,
 	dryRun bool,
 ) {
 	peerASN, peerName := parsePeerDelimiter(peerPair)
@@ -214,16 +208,13 @@ func modifyPref(
 		if err := os.WriteFile(fileName, []byte(modified), 0644); err != nil {
 			log.Fatal(err)
 		} else {
-			log.Infof("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
+			log.Infof("[Optimizer] Lowered AS%s %s local-pref from %d to %d in %s",
+				peerASN, peerName, currentLocalPref, newLocalPref, fileName,
+			)
 		}
 	}
 
-	// Run BIRD config validation
-	if err := bird.Validate(birdBinary, birdDirectory); err != nil {
-		log.Fatalf("bird config validation: %v", err)
-	}
-
 	if !dryRun {
-		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)
+		bird.Configure(birdSocket)
 	}
 }

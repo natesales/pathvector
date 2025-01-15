@@ -31,8 +31,9 @@ func SetLevel(l Level) {
 
 func Capture() *bytes.Buffer {
 	var buf bytes.Buffer
-	//writer = &buf
-	//logger.SetOutput(writer)
+	writer = &buf
+	tee := io.MultiWriter(writer, os.Stdout)
+	logger.SetOutput(tee)
 	return &buf
 }
 

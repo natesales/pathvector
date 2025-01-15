@@ -16,7 +16,6 @@ import (
 
 	"github.com/creasty/defaults"
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/block"
@@ -27,6 +26,7 @@ import (
 	"github.com/natesales/pathvector/pkg/plugin"
 	"github.com/natesales/pathvector/pkg/templating"
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -126,7 +126,7 @@ func templateReplacements(in string, peer *config.Peer) string {
 			key = "<pathvector." + key + ">"
 			if !field.IsZero() {
 				val := fmt.Sprintf("%v", field.Elem().Interface())
-				log.Tracef("Replacing %s with %s\n", key, val)
+				log.Tracef("Replacing %s with %s", key, val)
 				in = strings.ReplaceAll(in, key, val)
 			}
 		}
@@ -134,7 +134,38 @@ func templateReplacements(in string, peer *config.Peer) string {
 	return in
 }
 
+// parseStatics categorizes a multiprotocol statics map into IPv4 and IPv6 maps
+func parseStatics(all map[string]string, v4 map[string]string, v6 map[string]string) error {
+	for prefix, nexthop := range all {
+		// Handle interface suffix
+		var rawNexthop string
+		if strings.Contains(nexthop, "%") {
+			rawNexthop = strings.Split(nexthop, "%")[0]
+		} else {
+			rawNexthop = nexthop
+		}
+
+		pfx, _, err := net.ParseCIDR(prefix)
+		if err != nil {
+			return errors.New("Invalid static prefix: " + prefix)
+		}
+		if net.ParseIP(rawNexthop) == nil {
+			return errors.New("Invalid static nexthop: " + rawNexthop)
+		}
+
+		if pfx.To4() == nil { // If IPv6
+			v6[prefix] = nexthop
+		} else { // If IPv4
+			v4[prefix] = nexthop
+		}
+	}
+
+	return nil
+}
+
 // Load loads a configuration file from a YAML file
+//
+//gocyclo:ignore
 func Load(configBlob []byte) (*config.Config, error) {
 	var c config.Config
 	c.Init()
@@ -181,8 +212,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 	}
 
 	for peerName, peerData := range c.Peers {
-		// Set sanitized peer name
 		peerData.ProtocolName = util.Sanitize(peerName)
+		peerData.UserSpecifiedName = &peerName
 
 		// If any peer has NVRS filtering enabled, mark it for querying.
 		if peerData.FilterNeverViaRouteServers != nil {
@@ -231,9 +262,10 @@ func Load(configBlob []byte) (*config.Config, error) {
 			fieldName := templateValueType.Field(i).Name
 			fieldValue := peerValue.FieldByName(fieldName)
 			defaultString := templateValueType.Field(i).Tag.Get("default")
-			if defaultString == "" {
+			switch {
+			case defaultString == "":
 				log.Fatalf("Code error: field %s has no default value", fieldName)
-			} else if defaultString != "-" {
+			case defaultString != "-":
 				log.Tracef("[%s] (before defaulting, after templating) field %s value %+v", peerName, fieldName, reflect.Indirect(fieldValue))
 				if fieldValue.IsNil() {
 					elemToSwitch := templateValueType.Field(i).Type.Elem().Kind()
@@ -261,13 +293,11 @@ func Load(configBlob []byte) (*config.Config, error) {
 					default:
 						log.Fatalf("Unknown kind %+v for field %s", elemToSwitch, fieldName)
 					}
-				} else {
 					// Add boolean values to the peer's config
-					if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
-						*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
-					}
+				} else if templateValueType.Field(i).Type.Elem().Kind() == reflect.Bool {
+					*peerData.BooleanOptions = append(*peerData.BooleanOptions, templateValueType.Field(i).Tag.Get("yaml"))
 				}
-			} else {
+			default:
 				log.Tracef("[%s] skipping field %s with ignored default (-)", peerName, fieldName)
 			}
 		}
@@ -310,17 +340,18 @@ func Load(configBlob []byte) (*config.Config, error) {
 				for _, community := range communities {
 					community = strings.ReplaceAll(community, ":", ",")
 					communityType := categorizeCommunity(community)
-					if communityType == "standard" {
+					switch communityType {
+					case "standard":
 						if _, ok := (*peerData.PrefixStandardCommunities)[prefix]; !ok {
 							(*peerData.PrefixStandardCommunities)[prefix] = []string{}
 						}
 						(*peerData.PrefixStandardCommunities)[prefix] = append((*peerData.PrefixStandardCommunities)[prefix], community)
-					} else if communityType == "large" {
+					case "large":
 						if _, ok := (*peerData.PrefixLargeCommunities)[prefix]; !ok {
 							(*peerData.PrefixLargeCommunities)[prefix] = []string{}
 						}
 						(*peerData.PrefixLargeCommunities)[prefix] = append((*peerData.PrefixLargeCommunities)[prefix], community)
-					} else {
+					default:
 						return nil, errors.New("Invalid prefix community: " + community)
 					}
 				}
@@ -340,11 +371,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 			for community, pref := range *peerData.CommunityPrefs {
 				community = strings.ReplaceAll(community, ":", ",")
 				communityType := categorizeCommunity(community)
-				if communityType == "standard" {
+				switch communityType {
+				case "standard":
 					(*peerData.StandardCommunityPrefs)[community] = pref
-				} else if communityType == "large" {
+				case "large":
 					(*peerData.LargeCommunityPrefs)[community] = pref
-				} else {
+				default:
 					return nil, errors.New("Invalid community pref: " + community)
 				}
 			}
@@ -381,6 +413,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 	// Initialize static maps
 	c.Kernel.Statics4 = map[string]string{}
 	c.Kernel.Statics6 = map[string]string{}
+	c.Kernel.KStatics4 = map[string]string{}
+	c.Kernel.KStatics6 = map[string]string{}
 
 	// Categorize communities
 	var err error
@@ -405,29 +439,11 @@ func Load(configBlob []byte) (*config.Config, error) {
 		return nil, fmt.Errorf("invalid local community: %v", err)
 	}
 
-	// Parse static routes
-	for prefix, nexthop := range c.Kernel.Statics {
-		// Handle interface suffix
-		var rawNexthop string
-		if strings.Contains(nexthop, "%") {
-			rawNexthop = strings.Split(nexthop, "%")[0]
-		} else {
-			rawNexthop = nexthop
-		}
-
-		pfx, _, err := net.ParseCIDR(prefix)
-		if err != nil {
-			return nil, errors.New("Invalid static prefix: " + prefix)
-		}
-		if net.ParseIP(rawNexthop) == nil {
-			return nil, errors.New("Invalid static nexthop: " + rawNexthop)
-		}
-
-		if pfx.To4() == nil { // If IPv6
-			c.Kernel.Statics6[prefix] = nexthop
-		} else { // If IPv4
-			c.Kernel.Statics4[prefix] = nexthop
-		}
+	if err := parseStatics(c.Kernel.Statics, c.Kernel.Statics4, c.Kernel.Statics6); err != nil {
+		return nil, fmt.Errorf("parsing statics: %s", err)
+	}
+	if err := parseStatics(c.Kernel.KStatics, c.Kernel.KStatics4, c.Kernel.KStatics6); err != nil {
+		return nil, fmt.Errorf("parsing kstatics: %s", err)
 	}
 
 	// Parse BFD configs
@@ -455,11 +471,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Validate vrrpInstance
-		if vrrpInstance.State == "primary" {
+		switch {
+		case vrrpInstance.State == "primary":
 			vrrpInstance.State = "MASTER"
-		} else if vrrpInstance.State == "backup" {
+		case vrrpInstance.State == "backup":
 			vrrpInstance.State = "BACKUP"
-		} else {
+		default:
 			return nil, errors.New("VRRP state must be 'primary' or 'backup', unexpected " + vrrpInstance.State)
 		}
 	}
@@ -468,12 +485,12 @@ func Load(configBlob []byte) (*config.Config, error) {
 	if c.RTRServer != "" {
 		rtrServerParts := strings.Split(c.RTRServer, ":")
 		if len(rtrServerParts) != 2 {
-			log.Fatalf("Invalid rtr-server '%s' format should be host:port", rtrServerParts)
+			return nil, fmt.Errorf("invalid rtr-server '%s' format should be host:port", rtrServerParts)
 		}
 		c.RTRServerHost = rtrServerParts[0]
 		rtrServerPort, err := strconv.Atoi(rtrServerParts[1])
 		if err != nil {
-			log.Fatalf("Invalid RTR server port %s", rtrServerParts[1])
+			return nil, fmt.Errorf("invalid RTR server port %s", rtrServerParts[1])
 		}
 		c.RTRServerPort = rtrServerPort
 	}
@@ -547,7 +564,7 @@ func Load(configBlob []byte) (*config.Config, error) {
 }
 
 // peer processes a single peer
-func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
 	log.Debugf("Processing AS%d %s", *peerData.ASN, peerName)
@@ -561,14 +578,14 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 
 	// Build IRR prefix sets
 	if *peerData.FilterIRR {
-		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
-			log.Fatal(err)
+		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQBin, c.BGPQArgs); err != nil {
+			return err
 		}
 	}
 	if *peerData.AutoASSetMembers {
 		membersFromIRR, err := irr.ASMembers(*peerData.ASSet, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		if peerData.ASSetMembers == nil {
 			peerData.ASSetMembers = &membersFromIRR
@@ -579,7 +596,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 		}
 	}
 	if *peerData.FilterASSet && (peerData.ASSetMembers == nil || len(*peerData.ASSetMembers) < 1) {
-		log.Fatalf("peer has filter-as-set enabled but no members in it's as-set")
+		return fmt.Errorf("peer has filter-as-set enabled but no members in it's as-set")
 	}
 
 	util.PrintStructInfo(peerName, peerData)
@@ -588,7 +605,7 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 	peerFileName := path.Join(c.CacheDirectory, fmt.Sprintf("AS%d_%s.conf", *peerData.ASN, *util.Sanitize(peerName)))
 	peerSpecificFile, err := os.Create(peerFileName)
 	if err != nil {
-		log.Fatalf("Create peer specific output file: %v", err)
+		return fmt.Errorf("create peer output file: %v", err)
 	}
 
 	// Render the template and write to buffer
@@ -599,20 +616,21 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 		Peer:   *peerData,
 		Config: *c,
 	}); err != nil {
-		log.Fatalf("Execute template: %v", err)
+		return fmt.Errorf("execute template: %v", err)
 	}
 
 	// Reformat config and write template to file
 	if _, err := peerSpecificFile.Write([]byte(bird.Reformat(b.String()))); err != nil {
-		log.Fatalf("Write template to file: %v", err)
+		return fmt.Errorf("write template to file: %v", err)
 	}
 
 	log.Debugf("[%s] Wrote config", peerName)
+
+	return nil
 }
 
-// Run runs the full data generation procedure
-func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw bool) {
-	// Check lockfile
+// lock prevents multiple instances of Pathvector from running
+func lock(lockFile string) {
 	if lockFile != "" {
 		if _, err := os.Stat(lockFile); err == nil {
 			log.Fatal("Lockfile exists, exiting")
@@ -627,6 +645,11 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 			log.Fatalf("Accessing lockfile: %v", err)
 		}
 	}
+}
+
+// Run runs the full data generation procedure
+func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw bool) {
+	lock(lockFile)
 
 	log.Infof("Starting Pathvector %s", version)
 	startTime := time.Now()
@@ -660,7 +683,11 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 	log.Debug("Finished loading templates")
 
-	// Create cache directory
+	// Delete and (re)create cache directory
+	log.Debug("Deleting cache directory")
+	if err := os.RemoveAll(c.CacheDirectory); err != nil {
+		log.Warnf("Deleting cache directory: %v", err)
+	}
 	log.Debugf("Making cache directory %s", c.CacheDirectory)
 	if err := os.MkdirAll(c.CacheDirectory, os.FileMode(0755)); err != nil {
 		log.Fatal(err)
@@ -675,9 +702,14 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	log.Debug("Finished creating global config file")
 
 	// Render the global template and write to buffer
-	log.Debug("Writing global config file")
-	if err := templating.Template.ExecuteTemplate(globalFile, "global.tmpl", c); err != nil {
+	var globalBuffer bytes.Buffer
+	if err := templating.Template.ExecuteTemplate(&globalBuffer, "global.tmpl", c); err != nil {
 		log.Fatalf("Execute global template: %v", err)
+	}
+
+	log.Debug("Writing global config file")
+	if _, err := globalFile.Write([]byte(bird.Reformat(globalBuffer.String()))); err != nil {
+		log.Fatalf("Write global template to file: %v", err)
 	}
 	log.Debug("Finished writing global config file")
 
@@ -709,12 +741,18 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	wg := new(sync.WaitGroup)
 	for peerName, peerData := range c.Peers {
 		wg.Add(1)
-		go peer(peerName, peerData, c, wg)
+		go func(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+			if err := peer(peerName, peerData, c, wg); err != nil {
+				log.Fatal(err)
+			}
+		}(peerName, peerData, c, wg)
 	} // end peer loop
 	wg.Wait()
 
 	// Run BIRD config validation
-	bird.Validate(c.BIRDBinary, c.CacheDirectory)
+	if err := bird.Validate(c.BIRDBinary, c.CacheDirectory); err != nil {
+		log.Fatalf("BIRD config validation: %v", err)
+	}
 
 	// Copy config file
 	log.Debug("Copying Pathvector config file to cache directory")
@@ -729,7 +767,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 		if err != nil {
 			log.Fatalf("Marshalling protocol names: %v", err)
 		}
-		file := path.Join(c.BIRDDirectory, "protocols.json")
+		file := path.Join(c.CacheDirectory, "protocols.json")
 		log.Debugf("Writing protocol names to %s", file)
 		//nolint:golint,gosec
 		if err := os.WriteFile(file, j, 0644); err != nil {

@@ -2,6 +2,8 @@ package optimizer
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestOptimizerSameAddressFamily(t *testing.T) {
@@ -16,9 +18,8 @@ func TestOptimizerSameAddressFamily(t *testing.T) {
 		{"2001:db8::1", "192.0.2.1", false},
 	}
 	for _, tc := range testCases {
-		out := sameAddressFamily(tc.a, tc.b)
-		if out != tc.same {
-			t.Errorf("a %s b %s expected same %v got %v", tc.a, tc.b, tc.same, out)
-		}
+		t.Run(tc.a+"=="+tc.b, func(t *testing.T) {
+			assert.Equal(t, tc.same, sameAddressFamily(tc.a, tc.b))
+		})
 	}
 }

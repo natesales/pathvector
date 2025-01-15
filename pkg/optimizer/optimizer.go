@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/go-ping/ping"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/config"
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 // Delimiter is an arbitrary delimiter used to split ASN from peerName
@@ -132,8 +132,8 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 
 		// Calculate average latency and packet loss
 		totalProbes := float64(len(o.Db[peer]))
-		p[peer].PacketLoss = p[peer].PacketLoss / totalProbes
-		p[peer].Latency = p[peer].Latency / time.Duration(totalProbes)
+		p[peer].PacketLoss /= totalProbes
+		p[peer].Latency /= time.Duration(totalProbes)
 
 		// Check thresholds to apply optimizations
 		var alerts []string
@@ -172,11 +172,8 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 			modifyPref(peer,
 				global.Peers,
 				o.LocalPrefModifier,
-				global.CacheDirectory,
 				global.BIRDDirectory,
 				global.BIRDSocket,
-				global.BIRDBinary,
-				noConfigure,
 				dryRun,
 			)
 		}
@@ -187,11 +184,8 @@ func modifyPref(
 	peerPair string,
 	peers map[string]*config.Peer,
 	localPrefModifier uint,
-	cacheDirectory string,
 	birdDirectory string,
 	birdSocket string,
-	birdBinary string,
-	noConfigure bool,
 	dryRun bool,
 ) {
 	peerASN, peerName := parsePeerDelimiter(peerPair)
@@ -214,14 +208,13 @@ func modifyPref(
 		if err := os.WriteFile(fileName, []byte(modified), 0644); err != nil {
 			log.Fatal(err)
 		} else {
-			log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
+			log.Infof("[Optimizer] Lowered AS%s %s local-pref from %d to %d in %s",
+				peerASN, peerName, currentLocalPref, newLocalPref, fileName,
+			)
 		}
 	}
 
-	// Run BIRD config validation
-	bird.Validate(birdBinary, birdDirectory)
-
 	if !dryRun {
-		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)
+		bird.Configure(birdSocket)
 	}
 }

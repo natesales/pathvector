@@ -2,6 +2,7 @@ package util
 
 import (
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestContains(t *testing.T) {
 		{[]string{"foo", "bar"}, "baz", false},
 	}
 	for _, tc := range testCases {
-		if out := Contains(tc.array, tc.element); out != tc.expectedOutput {
+		if out := slices.Contains(tc.array, tc.element); out != tc.expectedOutput {
 			t.Errorf("array %+v element %s failed. expected '%v' got '%v'", tc.array, tc.element, tc.expectedOutput, out)
 		}
 	}
@@ -45,38 +46,30 @@ func TestSanitize(t *testing.T) {
 
 func TestMoveFile(t *testing.T) {
 	// Make temporary cache directory
-	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir("/tmp/test-move", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
 	}
 
 	inputString := "Test File"
 
 	//nolint:golint,gosec
-	if err := os.WriteFile("test-cache/source.txt", []byte(inputString), 0644); err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, os.WriteFile("/tmp/test-move/source.txt", []byte(inputString), 0644))
 
-	if err := MoveFile("test-cache/source.txt", "test-cache/dest.txt"); err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, MoveFile("/tmp/test-move/source.txt", "/tmp/test-move/dest.txt"))
 
-	if _, err := os.Stat("test-cache/dest.txt"); os.IsNotExist(err) {
+	if _, err := os.Stat("/tmp/test-move/dest.txt"); os.IsNotExist(err) {
 		t.Errorf("file text-cache/dest.txt doesn't exist but should")
 	}
 
-	if _, err := os.Stat("test-cache/source.txt"); err == nil {
+	if _, err := os.Stat("/tmp/test-move/source.txt"); err == nil {
 		t.Errorf("file text-cache/source.txt exists but shouldn't")
 	}
 
-	if contents, err := os.ReadFile("test-cache/dest.txt"); err != nil {
-		if string(contents) != inputString {
-			t.Errorf("expected %s got %s", inputString, contents)
-		}
-	}
+	contents, err := os.ReadFile("/tmp/test-move/dest.txt")
+	assert.Nil(t, err)
+	assert.Equal(t, inputString, string(contents))
 
-	if err := os.Remove("test-cache/dest.txt"); err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, os.Remove("/tmp/test-move/dest.txt"))
 }
 
 func TestPrintTable(t *testing.T) {
@@ -95,4 +88,11 @@ func TestUtilPtrDeref(t *testing.T) {
 
 	assert.Equal(t, "foo", StrDeref(Ptr("foo")))
 	assert.Equal(t, "", StrDeref(nil))
+}
+
+func TestUtilIsPrivateASN(t *testing.T) {
+	assert.True(t, IsPrivateASN(65534))
+	assert.True(t, IsPrivateASN(65535))
+	assert.True(t, IsPrivateASN(4200000000))
+	assert.False(t, IsPrivateASN(112))
 }

@@ -1,0 +1,10 @@
+asn: 65003
+router-id: 172.16.97.3
+prefixes:
+  - 172.16.99.0/24
+
+peers:
+  alpha:
+    asn: 65002
+    peers:
+      - 172.16.97.2

@@ -2,37 +2,24 @@ name: Test
 
 on:
   push:
-  pull_request:
 
 jobs:
   test:
     name: test
     runs-on: ubuntu-latest
+    concurrency: ci-test-${{ github.ref }}
     steps:
-      - name: Install bgpq4 and bird2
+      - name: Install bgpq4
         run: |
           wget http://ftp.us.debian.org/debian/pool/main/b/bgpq4/bgpq4_0.0.6-2_amd64.deb
           sudo dpkg -i bgpq4*.deb
-          sudo apt install -y bird2
 
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.20'
-          cache: false
+          go-version-file: go.mod
 
-      - uses: actions/checkout@v3
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          args: -E gosec
-
-      - run: go get -v -t -d ./...
-      - run: sudo chown $(whoami):$(whoami) /run/bird/bird.ctl
-      - run: sudo chown -R $(whoami):$(whoami) /etc/bird/
-      - run: go generate -x
-      - run: go build -v .
-      - run: make dep
       - run: make test-setup
       - run: make test
 

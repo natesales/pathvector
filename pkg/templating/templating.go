@@ -4,16 +4,15 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/natesales/pathvector/pkg/config"
-	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var (
@@ -89,7 +88,7 @@ var funcMap = template.FuncMap{
 		if format == "unix" {
 			return strconv.Itoa(int(time.Now().Unix()))
 		}
-		return time.Now().String()
+		return time.Now().UTC().Format(time.RFC822)
 	},
 
 	"MakeSlice": func(args ...interface{}) []interface{} {
@@ -193,21 +192,22 @@ var funcMap = template.FuncMap{
 
 	// UniqueProtocolName takes a protocol-safe string and address family and returns a unique protocol name
 	"UniqueProtocolName": func(s, userSuppliedName *string, af string, asn *int, tags *[]string) string {
+		protocolNameMapLock.Lock()
+		defer protocolNameMapLock.Unlock()
+
 		protoName := fmt.Sprintf("%s_AS%d_v%s", *s, *asn, af)
 		i := 1
 		for {
-			if !util.Contains(protocolNames, protoName) {
+			if !slices.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
 				var t []string
 				if tags != nil {
 					t = *tags
 				}
-				protocolNameMapLock.Lock()
 				protocolNameMap[protoName] = &Protocol{
 					Name: *userSuppliedName,
 					Tags: t,
 				}
-				protocolNameMapLock.Unlock()
 				return protoName
 			}
 			protoName = fmt.Sprintf("%s_AS%d_v%s_%d", *s, *asn, af, i)

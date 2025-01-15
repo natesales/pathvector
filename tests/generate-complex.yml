@@ -5,10 +5,12 @@ source6: 2001:db8::1
 prefixes:
   - 192.0.2.0/24
   - 2001:db8::/48
-web-ui-file: test-cache/ui.html
-cache-directory: test-cache
+web-ui-file: /tmp/test-cache/ui.html
+cache-directory: /tmp/test-cache
 blackhole-bogon-asns: true
-peeringdb-url: http://localhost:5000/api
+peeringdb-url: http://localhost:5001/api
+bird-directory: /tmp/bird-conf
+bird-socket: tcp://localhost:5002
 
 origin-communities:
   - 34553:10
@@ -32,6 +34,10 @@ kernel:
     - 65530:65530:1
   statics:
     "192.0.2.0/24": "203.0.113.1%eth0"
+    "2001:db8::/48": "2001:db8::1%eth0"
+  kstatics:
+    "192.0.2.30/32": "203.0.113.1"
+    "2001:db8::30/128": "2001:db8::1%eth0"
 
 blocklist: [ "AS65530", "192.0.2.0/24" ]
 blocklist-urls: [ "https://raw.githubusercontent.com/natesales/pathvector/main/tests/blocklist.txt" ]

@@ -34,12 +34,10 @@ func TestCategorizeCommunity(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		cType := categorizeCommunity(tc.input)
-		if cType != "" && tc.shouldError {
-			t.Errorf("categorizeCommunity should have errored on '%s' but didn't. expected error, got '%s'", tc.input, cType)
-		} else if cType == "" && !tc.shouldError {
-			t.Errorf("categorizeCommunity shouldn't have errored on '%s' but did. expected '%s'", tc.input, tc.expectedOutput)
-		} else if cType != tc.expectedOutput {
-			t.Errorf("categorizeCommunity %s failed. expected '%v' got '%v'", tc.input, tc.expectedOutput, cType)
+		if tc.shouldError {
+			assert.Equal(t, "", cType)
+		} else {
+			assert.Equal(t, tc.expectedOutput, cType)
 		}
 	}
 }
@@ -111,22 +109,18 @@ peers:
 	assert.NoError(t, err)
 
 	assert.Len(t, globalConfig.Peers, 2)
-	for peerName, peerData := range globalConfig.Peers {
-		switch peerName {
-		case "Peer 10":
-			assert.Equal(t, 65510, util.Deref(peerData.ASN))
-			assert.Equal(t, 110, util.Deref(peerData.LocalPref))
-			assert.True(t, util.Deref(peerData.SetLocalPref))
-			assert.Nil(t, peerData.DefaultLocalPref)
-		case "Peer 20":
-			assert.Equal(t, 65520, util.Deref(peerData.ASN))
-			assert.Equal(t, 100, util.Deref(peerData.LocalPref))
-			assert.False(t, util.Deref(peerData.SetLocalPref))
-			assert.Equal(t, 120, util.Deref(peerData.DefaultLocalPref))
-		default:
-			t.Errorf("peer %s unexpected", peerName)
-		}
-	}
+
+	peer10 := globalConfig.Peers["Peer 10"]
+	assert.Equal(t, 65510, util.Deref(peer10.ASN))
+	assert.Equal(t, 110, util.Deref(peer10.LocalPref))
+	assert.True(t, util.Deref(peer10.SetLocalPref))
+	assert.Nil(t, peer10.DefaultLocalPref)
+
+	peer20 := globalConfig.Peers["Peer 20"]
+	assert.Equal(t, 65520, util.Deref(peer20.ASN))
+	assert.Equal(t, 100, util.Deref(peer20.LocalPref))
+	assert.False(t, util.Deref(peer20.SetLocalPref))
+	assert.Equal(t, 120, util.Deref(peer20.DefaultLocalPref))
 }
 
 func TestLoadConfigInvalidYAML(t *testing.T) {
@@ -186,9 +180,8 @@ kernel:
     "2001:db8:2::/64" : "2001:db8::1"
 `
 	_, err := Load([]byte(configFile))
-	if err == nil || !strings.Contains(err.Error(), "Invalid static prefix") {
-		t.Errorf("expected invalid static prefix error, got %+v", err)
-	}
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "Invalid static prefix")
 }
 
 func TestLoadConfigInvalidVIP(t *testing.T) {
@@ -241,52 +234,25 @@ peers:
       - 192.0.2.4
 `
 	globalConfig, err := Load([]byte(configFile))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
-	for peerName, peerData := range globalConfig.Peers {
-		if peerName == "Upstream 1" {
-			if *peerData.ASN != 65510 {
-				t.Errorf("peer %s expected ASN 65510 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 90 {
-				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != false {
-				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
-		} else if peerName == "Upstream 2" {
-			if *peerData.ASN != 65520 {
-				t.Errorf("peer %s expected ASN 65520 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 90 {
-				t.Errorf("peer %s expected local-pref 90 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != true {
-				t.Errorf("peer %s expected filter-irr true got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
-		} else if peerName == "Upstream 3" {
-			if *peerData.ASN != 65530 {
-				t.Errorf("peer %s expected ASN 65530 got %d", peerName, *peerData.ASN)
-			}
-			if *peerData.LocalPref != 2 {
-				t.Errorf("peer %s expected local-pref 2 got %d", peerName, *peerData.LocalPref)
-			}
-			if *peerData.FilterIRR != false {
-				t.Errorf("peer %s expected filter-irr false got %v", peerName, *peerData.FilterIRR)
-			}
-			if *peerData.FilterRPKI != true {
-				t.Errorf("peer %s expected filter-rpki true got %v", peerName, *peerData.FilterIRR)
-			}
-		} else {
-			t.Errorf("")
-		}
-	}
+	assert.Len(t, globalConfig.Peers, 3)
+
+	upstream1 := globalConfig.Peers["Upstream 1"]
+	assert.Equal(t, 65510, *upstream1.ASN)
+	assert.Equal(t, 90, *upstream1.LocalPref)
+	assert.False(t, *upstream1.FilterIRR)
+	assert.True(t, *upstream1.FilterRPKI)
+
+	upstream2 := globalConfig.Peers["Upstream 2"]
+	assert.Equal(t, 65520, *upstream2.ASN)
+	assert.Equal(t, 90, *upstream2.LocalPref)
+	assert.True(t, *upstream2.FilterIRR)
+	assert.True(t, *upstream2.FilterRPKI)
+
+	upstream3 := globalConfig.Peers["Upstream 3"]
+	assert.Equal(t, 65530, *upstream3.ASN)
+	assert.Equal(t, 2, *upstream3.LocalPref)
+	assert.False(t, *upstream3.FilterIRR)
+	assert.True(t, *upstream3.FilterRPKI)
 }

@@ -221,6 +221,14 @@ Additional command line arguments to pass to bgpq4
 |------|---------|------------|
 | string   |       |          |
 
+### `bgpq-binary`
+
+Path to bgpq4 binary
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   | bgpq4      |          |
+
 ### `keep-filtered`
 
 Should filtered routes be kept in memory?
@@ -484,6 +492,14 @@ List of BIRD protocols to not import into the IPv6 table
 ### `statics`
 
 List of static routes to include in BIRD
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
+
+### `kstatics`
+
+List of static routes to include in BIRD and send to the kernel
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1528,5 +1544,3 @@ List of virtual IPs
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       | required,cidr         |
-
-

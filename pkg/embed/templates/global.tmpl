@@ -3,21 +3,32 @@
 define ASN = {{ .ASN }};
 router id {{ .RouterID }};
 
-{{ if .Prefixes4 -}}
-define LOCALv4 = [
-{{ BirdSet .Prefixes4 }}
-];
-{{- end }}
+{{ if .Prefixes4 }}
+    define LOCALv4 = [
+        {{ BirdSet .Prefixes4 }}
+    ];
+{{ end }}
+
 {{ if or .Prefixes4 .Kernel.Statics4 }}
-protocol static static4 {
-  ipv4;
-  {{- range $i, $prefix := .Prefixes4 }}
-  route {{ $prefix }} reject;
-  {{- end }}
-  {{- range $prefix, $nexthop := MapDeref .Kernel.Statics4 }}
-  route {{ $prefix }} via {{ $nexthop }};
-  {{- end }}
-}
+    protocol static static4 {
+        ipv4;
+        {{- range $i, $prefix := .Prefixes4 }}
+            route {{ $prefix }} reject;
+        {{- end }}
+
+        {{- range $prefix, $nexthop := MapDeref .Kernel.Statics4 }}
+            route {{ $prefix }} via {{ $nexthop }};
+        {{- end }}
+    }
+{{- end }}
+
+{{ if .Kernel.KStatics4 }}
+    protocol static kstatic4 {
+        ipv4;
+        {{- range $prefix, $nexthop := MapDeref .Kernel.KStatics4 }}
+            route {{ $prefix }} via {{ $nexthop }};
+        {{- end }}
+    }
 {{- end }}
 
 {{ if .Prefixes6 -}}
@@ -32,6 +43,15 @@ protocol static static6 {
   route {{ $prefix }} reject;
   {{- end }}
   {{- range $prefix, $nexthop := .Kernel.Statics6 }}
+  route {{ $prefix }} via {{ $nexthop }};
+  {{- end }}
+}
+{{- end }}
+
+{{ if .Kernel.KStatics6 }}
+protocol static kstatic6 {
+  ipv6;
+  {{- range $prefix, $nexthop := MapDeref .Kernel.KStatics6 }}
   route {{ $prefix }} via {{ $nexthop }};
   {{- end }}
 }
@@ -62,7 +82,7 @@ protocol device {};
 
 protocol direct { ipv4; ipv6; }
 
-protocol kernel {
+protocol kernel kernel4 {
   scan time {{ .Kernel.ScanTime }};
   {{ if .Kernel.Learn }}learn;{{ end }}
   {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}
@@ -104,7 +124,7 @@ protocol kernel {
   {{ if .MergePaths }}merge paths;{{ end }}
 }
 
-protocol kernel {
+protocol kernel kernel6 {
   scan time {{ .Kernel.ScanTime }};
   {{ if .Kernel.Learn }}learn;{{ end }}
   {{ if .Kernel.Table }}kernel table {{ .Kernel.Table }};{{ end }}
@@ -227,7 +247,7 @@ define BLOCKLIST_PREFIXES = [
 # Helper Functions
 
 function _reject(string reason) {
-  reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last;
+  reject "REJECTED [", reason, "] pfx ", net, " session ", proto, " path ", bgp_path, " pathlen ", bgp_path.len, " origin ", bgp_path.last, " nexthop ", bgp_next_hop;
 }
 
 function reject_blocklist() {

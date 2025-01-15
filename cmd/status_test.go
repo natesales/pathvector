@@ -9,7 +9,7 @@ import (
 
 func TestStatus(t *testing.T) {
 	//nolint:golint,gosec
-	err := os.WriteFile("/etc/bird/protocols.json", []byte(`{"EXAMPLE_AS65510_v4":{"Name":"Example","Tags":null},"EXAMPLE_AS65510_v6":{"Name":"Example","Tags":null}}`), 0644)
+	err := os.WriteFile("/tmp/bird-conf/protocols.json", []byte(`{"EXAMPLE_AS65510_v4":{"Name":"Example","Tags":null},"EXAMPLE_AS65510_v6":{"Name":"Example","Tags":null}}`), 0644)
 	assert.Nil(t, err)
 
 	rootCmd.SetArgs([]string{

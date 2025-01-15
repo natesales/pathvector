@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/natesales/logknife"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/process"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var sensitiveKeys = []string{
@@ -75,7 +75,7 @@ var configCmd = &cobra.Command{
 			buf += "# Config"
 		}
 		buf += fmt.Sprintf(" exported from %s on %s\n", configFile, time.Now().Format(time.RFC822Z))
-		fmt.Println(buf)
+		log.Println(buf)
 
 		if sanitize {
 			// Apply sanitized keys
@@ -84,9 +84,11 @@ var configCmd = &cobra.Command{
 				config = re.ReplaceAllString(config, fmt.Sprintf("${1}%s: REDACTED", key))
 			}
 
-			logknife.Knife(bytes.NewBuffer([]byte(config)), false, true, false, "")
+			var outBuf bytes.Buffer
+			logknife.Knife(bytes.NewBuffer([]byte(config)), &outBuf, false, true, false, "")
+			log.Println(outBuf.String())
 		} else {
-			fmt.Print(config)
+			log.Println(config)
 		}
 	},
 }

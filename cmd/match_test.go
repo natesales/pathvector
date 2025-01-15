@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func TestMatch(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
 	baseArgs := []string{
 		"match",
 		"--verbose",
@@ -23,25 +23,25 @@ func TestMatch(t *testing.T) {
 		{112, 44977},
 	}
 	for _, tc := range testCases {
+		out := log.Capture()
 		rootCmd.SetArgs(append(baseArgs, []string{
 			"-l", fmt.Sprintf("%d", tc.asnA),
 			"-c", "../tests/generate-simple.yml",
 			fmt.Sprintf("%d", tc.asnB),
 		}...))
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "Finished loading config")
+		log.ResetCapture()
 
 		// Local ASN from config file
+		out = log.Capture()
 		rootCmd.SetArgs(append(baseArgs, []string{
 			"-c", "../tests/generate-simple.yml",
 			"-l", "0",
 			fmt.Sprintf("%d", tc.asnB),
 		}...))
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "Finished loading config")
+		log.ResetCapture()
 	}
-	w.Close()
-	os.Stdout = old
 }

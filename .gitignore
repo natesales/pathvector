@@ -25,7 +25,6 @@ vendorbuild/cisco/ioxclient
 vendorbuild/mikrotik/docker-buildx
 
 # Testing
-test-cache/
 test-conf.yml
 nohup.out
 coverage.txt

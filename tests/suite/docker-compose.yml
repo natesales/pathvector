@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  alpha:
+    image: pierky/bird:${BIRD_VERSION}
+    container_name: alpha
+    volumes:
+      - ./alpha.conf:/etc/bird/bird.conf
+      - ./alpha-run/:/usr/local/var/run/
+    networks:
+      default:
+        ipv4_address: 172.16.97.2
+
+  bravo:
+    image: pierky/bird:${BIRD_VERSION}
+    container_name: bravo
+    volumes:
+      - ./bravo.conf:/etc/bird/bird.conf
+      - ./bravo-run/:/usr/local/var/run/
+    networks:
+      default:
+        ipv4_address: 172.16.97.3
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.97.0/24

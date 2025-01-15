@@ -5,12 +5,12 @@ import (
 	"os"
 	"reflect"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/natesales/pathvector/pkg/bird"
 	"github.com/natesales/pathvector/pkg/plugin"
 	"github.com/natesales/pathvector/pkg/process"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func init() {
@@ -34,7 +34,7 @@ Built %s on %s
 }
 
 func printVersionBanner() {
-	fmt.Println(versionBanner())
+	log.Println(versionBanner())
 }
 
 var versionCmd = &cobra.Command{
@@ -58,6 +58,6 @@ var versionCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("BIRD: %s\n", birdVersion)
+		log.Printf("BIRD: %s\n", birdVersion)
 	},
 }

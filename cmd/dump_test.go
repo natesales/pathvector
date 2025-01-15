@@ -1,57 +1,41 @@
 package cmd
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 func TestDumpTable(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
-
-	// Make temporary cache directory
-	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
-		t.Error(err)
-	}
+	mkTmpCache(t)
 
 	args := []string{
 		"dump",
 		"--verbose",
 		"--dry-run",
 	}
-	files, err := filepath.Glob("../tests/generate-*.yml")
-	if err != nil {
-		t.Error(err)
-	}
-	if len(files) < 1 {
-		t.Fatal("No test files found")
-	}
-	for _, testFile := range files {
+
+	withGenerateConfigs(t, func(testFile string) {
 		args = append(args, []string{
 			"--config", testFile,
 		}...)
 		t.Logf("running dump integration with args %v", args)
-		rootCmd.SetArgs(args)
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
-	}
 
-	w.Close()
-	os.Stdout = old
+		out := log.Capture()
+		defer log.ResetCapture()
+
+		rootCmd.SetArgs(args)
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "PREPENDS")
+		assert.Contains(t, out.String(), "NAME")
+		assert.Contains(t, out.String(), "ASN")
+	})
 }
 
 func TestDumpYAML(t *testing.T) {
-	old := os.Stdout
-	_, w, _ := os.Pipe()
-	os.Stdout = w
-
-	// Make temporary cache directory
-	if err := os.Mkdir("test-cache", 0755); err != nil && !os.IsExist(err) {
-		t.Error(err)
-	}
+	mkTmpCache(t)
 
 	args := []string{
 		"dump",
@@ -59,24 +43,17 @@ func TestDumpYAML(t *testing.T) {
 		"--verbose",
 		"--dry-run",
 	}
-	files, err := filepath.Glob("../tests/generate-*.yml")
-	if err != nil {
-		t.Error(err)
-	}
-	if len(files) < 1 {
-		t.Fatal("No test files found")
-	}
-	for _, testFile := range files {
+	withGenerateConfigs(t, func(testFile string) {
 		args = append(args, []string{
 			"--config", testFile,
 		}...)
 		t.Logf("running dump integration with args %v", args)
-		rootCmd.SetArgs(args)
-		if err := rootCmd.Execute(); err != nil {
-			t.Error(err)
-		}
-	}
 
-	w.Close()
-	os.Stdout = old
+		out := log.Capture()
+		defer log.ResetCapture()
+
+		rootCmd.SetArgs(args)
+		assert.Nil(t, rootCmd.Execute())
+		assert.Contains(t, out.String(), "global-config: \"\"")
+	})
 }

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/util/log"
 )
 
 var (
@@ -34,7 +34,7 @@ var dumpCmd = &cobra.Command{
 			if err != nil {
 				log.Fatal(err)
 			}
-			fmt.Println(string(yamlBytes))
+			log.Println(string(yamlBytes))
 		} else {
 			var data [][]string
 			for peerName, peerData := range c.Peers {

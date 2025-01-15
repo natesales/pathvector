@@ -97,8 +97,14 @@ func ReadClean(r io.Reader) {
 
 // RunCommand runs a BIRD command and returns the output, version, and error
 func RunCommand(command string, socket string) (string, string, error) {
-	log.Debug("Connecting to BIRD socket")
-	conn, err := net.Dial("unix", socket)
+	network := "unix"
+	if strings.HasPrefix(socket, "tcp") {
+		network = "tcp"
+		socket = strings.TrimPrefix(socket, "tcp://")
+	}
+
+	log.Debugf("Connecting to BIRD socket %s://%s", network, socket)
+	conn, err := net.Dial(network, socket)
 	if err != nil {
 		return "", "", err
 	}
@@ -110,49 +116,39 @@ func RunCommand(command string, socket string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
-	log.Debugf("BIRD init response: %s", resp)
+	log.Tracef("BIRD init response: %s", resp)
 
 	// Check BIRD version
-	birdVersion := strings.Split(resp, " ")[2]
+	birdVersion := strings.Split(resp, " ")[1]
 	if semver.Compare(birdVersion, supportedMin) == -1 {
 		log.Warnf("BIRD version %s older than minimum supported version %s", birdVersion, supportedMin)
 	}
 
 	log.Debugf("Sending BIRD command: %s", command)
 	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
-	log.Debugf("Sent BIRD command: %s", command)
 	if err != nil {
 		return "", "", err
 	}
 
-	log.Debug("Reading from socket")
+	log.Trace("Reading from socket")
 	resp, err = Read(conn)
 	if err != nil {
 		return "", "", err
 	}
-	log.Debug("Done reading from socket")
+	log.Trace("Done reading from socket")
 
 	return resp, birdVersion, nil // nil error
 }
 
 var Validate = LocalValidate
 
-func DockerValidate(binary string, cacheDir string) error {
-	const birdVersion = "2.15"
-
-	// Get absolute path
-	absCacheDir, err := filepath.Abs(cacheDir)
-	if err != nil {
-		return fmt.Errorf("parsing absolute path: %v", err)
-	}
-
+func DockerValidate(_, _ string) error {
 	args := []string{
-		"docker", "run", "--rm",
-		"-v", absCacheDir + ":/etc/bird/",
-		"pierky/bird:" + birdVersion,
+		"docker", "exec",
+		"pathvector-bird",
 		"bird", "-c", "/etc/bird/bird.conf", "-p",
 	}
-	log.Infof("Running command: %s", strings.Join(args, " "))
+	log.Infof("[DOCKER] Running command: %s", strings.Join(args, " "))
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stdout
@@ -160,7 +156,7 @@ func DockerValidate(binary string, cacheDir string) error {
 		return fmt.Errorf("BIRD docker validation: %s", err)
 	}
 
-	log.Infof("BIRD config validation passed")
+	log.Infof("[DOCKER] BIRD config validation passed")
 	return nil
 }
 

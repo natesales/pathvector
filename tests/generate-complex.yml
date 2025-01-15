@@ -9,6 +9,8 @@ web-ui-file: /tmp/test-cache/ui.html
 cache-directory: /tmp/test-cache
 blackhole-bogon-asns: true
 peeringdb-url: http://localhost:5001/api
+bird-directory: /tmp/bird-conf
+bird-socket: tcp://localhost:5002
 
 origin-communities:
   - 34553:10

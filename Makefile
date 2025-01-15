@@ -1,7 +1,7 @@
-clean:
-	rm -f coverage.txt pathvector
+down:
 	docker rm -f pathvector-peeringdb-test-api || true
 	docker rm -f pathvector-bird || true
+	sudo ip link del dev dummy0 || true
 
 dummy-iface:
 	# Allow UDP ping. For more information, see https://github.com/go-ping/ping#linux
@@ -39,10 +39,7 @@ test-setup: dummy-iface run-bird pdb-api
 test:
 	go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
 
-test-teardown:
-	sudo ip link del dev dummy0
-
-test-sequence: test-setup test test-teardown
+test-sequence: test-setup test down
 
 snapshot:
 	goreleaser --snapshot --clean

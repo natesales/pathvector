@@ -113,7 +113,7 @@ func RunCommand(command string, socket string) (string, string, error) {
 	log.Debugf("BIRD init response: %s", resp)
 
 	// Check BIRD version
-	birdVersion := strings.Split(resp, " ")[2]
+	birdVersion := strings.Split(resp, " ")[1]
 	if semver.Compare(birdVersion, supportedMin) == -1 {
 		log.Warnf("BIRD version %s older than minimum supported version %s", birdVersion, supportedMin)
 	}

@@ -245,11 +245,11 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	for _, f := range birdConfigFiles {
 		log.Debugf("Removing old BIRD config file %s", f)
 		if err := os.Remove(f); err != nil {
-			log.Fatalf("Removing old BIRD config files: %v", err)
+			log.Fatalf("Unable to remove old BIRD config files: %v", err)
 		}
 	}
 
-	// Copy from cache to bird config
+	// Copy from cache dir to bird config dir
 	files, err := filepath.Glob(path.Join(cacheDirectory, "*.conf"))
 	if err != nil {
 		log.Fatal(err)
@@ -275,15 +275,20 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	}
 
 	if !noConfigure {
-		log.Info("Reconfiguring BIRD")
-		resp, _, err := RunCommand("configure", birdSocket)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// Print bird output as multiple lines
-		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-			log.Infof("BIRD response (multiline): %s", line)
-		}
+		Configure(birdSocket)
+	}
+}
+
+// Configure applies a runtime BIRD configuration
+func Configure(birdSocket string) {
+	log.Info("Reconfiguring BIRD")
+	resp, _, err := RunCommand("configure", birdSocket)
+	if err != nil {
+		log.Fatalf("BIRD configure error: %v", err)
+	}
+	// Print bird output as multiple lines
+	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
+		log.Infof("BIRD response (multiline): %s", line)
 	}
 }
 

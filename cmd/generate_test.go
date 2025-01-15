@@ -11,14 +11,14 @@ import (
 func TestGenerate(t *testing.T) {
 	mkTmpCache(t)
 
-	args := []string{
+	baseArgs := []string{
 		"generate",
 		"--verbose",
 		"--dry-run",
 	}
 
 	withGenerateConfigs(t, func(testFile string) {
-		args = append(args, []string{
+		args := append(baseArgs, []string{
 			"--config", testFile,
 		}...)
 		t.Logf("running generate integration with args %v", args)

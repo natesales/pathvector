@@ -23,7 +23,9 @@ func withGenerateConfigs(t *testing.T, callback func(string)) {
 
 // mkTmpCache makes the test-cache directory
 func mkTmpCache(t *testing.T) {
-	if err := os.Mkdir("/tmp/test-cache", 0755); !os.IsExist(err) {
+	dir := "/tmp/test-cache"
+	_ = os.RemoveAll(dir)
+	if err := os.Mkdir(dir, 0755); err != nil {
 		assert.Nil(t, err)
 	}
 }

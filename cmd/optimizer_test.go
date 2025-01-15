@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/natesales/pathvector/pkg/util"
 )
 
 func TestOptimizer(t *testing.T) {
@@ -19,6 +21,12 @@ func TestOptimizer(t *testing.T) {
 
 	for _, testFile := range files {
 		t.Run(testFile, func(t *testing.T) {
+			for _, dir := range []string{"/tmp/test-cache", "/tmp/bird-conf"} {
+				if err := util.RemoveFileGlob(dir + "/*"); err != nil {
+					t.Errorf("failed to remove %s: %v", dir, err)
+				}
+			}
+
 			// Run pathvector to generate config first, so there is a config to modify
 			rootCmd.SetArgs(append(args, []string{
 				"generate",

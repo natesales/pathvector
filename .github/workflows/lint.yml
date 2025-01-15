@@ -1,0 +1,38 @@
+name: Lint
+
+on:
+  push:
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    concurrency: ci-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install pre-commit deps
+        run: |
+          sudo apt install -y pre-commit
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install golang.org/x/tools/cmd/goimports@latest
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          go install -v github.com/go-critic/go-critic/cmd/gocritic@latest
+
+      - name: Hash key for Cache pre-commit
+        uses: seepine/hash-files@v1
+        id: key-hash
+        with:
+          patterns: ".pre-commit-config.yaml"
+
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit/
+          key: pre-commit-${{ steps.key-hash.outputs.hash }}
+
+      - run: pre-commit run --all-files

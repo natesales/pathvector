@@ -683,7 +683,11 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	}
 	log.Debug("Finished loading templates")
 
-	// Create cache directory
+	// Delete and (re)create cache directory
+	log.Debug("Deleting cache directory")
+	if err := os.RemoveAll(c.CacheDirectory); err != nil {
+		log.Warnf("Deleting cache directory: %v", err)
+	}
 	log.Debugf("Making cache directory %s", c.CacheDirectory)
 	if err := os.MkdirAll(c.CacheDirectory, os.FileMode(0755)); err != nil {
 		log.Fatal(err)

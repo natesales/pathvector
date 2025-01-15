@@ -234,9 +234,7 @@ peers:
       - 192.0.2.4
 `
 	globalConfig, err := Load([]byte(configFile))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
 	assert.Len(t, globalConfig.Peers, 3)
 

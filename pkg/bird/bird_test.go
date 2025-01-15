@@ -35,9 +35,7 @@ func TestBirdConn(t *testing.T) {
 	defer l.Close()
 	t.Logf("Accepting connection on %s", unixSocket)
 	conn, err := l.Accept()
-	if err != nil {
-		return
-	}
+	assert.Nil(t, err)
 	defer conn.Close()
 
 	_, err = conn.Write([]byte("0001 Fake BIRD response 1\n"))

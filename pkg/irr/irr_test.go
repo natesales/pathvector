@@ -48,18 +48,20 @@ func TestBuildIRRPrefixSet(t *testing.T) {
 		{"", []string{}, []string{}, true}, // Empty as-set
 	}
 	for _, tc := range testCases {
-		peer := config.Peer{ASSet: util.Ptr(tc.asSet)}
-		err := Update(&peer, "rr.ntt.net", irrQueryTimeout, "bgpq4", "")
-		if err != nil && tc.shouldError {
-			return
-		}
-		if err != nil && !tc.shouldError {
-			t.Error(err)
-		} else if err == nil && tc.shouldError {
-			t.Errorf("as-set %s should error but didn't", tc.asSet)
-		}
-		assert.Equal(t, tc.prefixSet4, *peer.PrefixSet4)
-		assert.Equal(t, tc.prefixSet6, *peer.PrefixSet6)
+		t.Run(tc.asSet, func(t *testing.T) {
+			peer := config.Peer{ASSet: util.Ptr(tc.asSet)}
+			err := Update(&peer, "rr.ntt.net", irrQueryTimeout, "bgpq4", "")
+			if err != nil && tc.shouldError {
+				return
+			}
+			if tc.shouldError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+			assert.Equal(t, tc.prefixSet4, *peer.PrefixSet4)
+			assert.Equal(t, tc.prefixSet6, *peer.PrefixSet6)
+		})
 	}
 }
 

@@ -3,6 +3,7 @@ package peeringdb
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,7 +20,7 @@ var Endpoint = ""
 
 func init() {
 	// Check if running in test
-	if os.Getenv("PATHVECTOR_TEST") == "1" {
+	if flag.Lookup("test.v") != nil {
 		Endpoint = "http://localhost:5000/api"
 	}
 }

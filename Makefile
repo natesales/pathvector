@@ -12,7 +12,7 @@ peeringdb-test-harness:
 test-setup: dummy-iface peeringdb-test-harness
 
 test:
-	export PATHVECTOR_TEST=1 && go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
+	go test -v -race -coverprofile=coverage.txt -covermode=atomic ./pkg/... ./cmd/...
 
 test-teardown:
 	pkill -f tests/peeringdb/peeringdb-test-api.py

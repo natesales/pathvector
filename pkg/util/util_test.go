@@ -46,30 +46,30 @@ func TestSanitize(t *testing.T) {
 
 func TestMoveFile(t *testing.T) {
 	// Make temporary cache directory
-	if err := os.Mkdir("/tmp/test-cache", 0755); err != nil && !os.IsExist(err) {
+	if err := os.Mkdir("/tmp/test-move", 0755); err != nil && !os.IsExist(err) {
 		t.Error(err)
 	}
 
 	inputString := "Test File"
 
 	//nolint:golint,gosec
-	assert.Nil(t, os.WriteFile("/tmp/test-cache/source.txt", []byte(inputString), 0644))
+	assert.Nil(t, os.WriteFile("/tmp/test-move/source.txt", []byte(inputString), 0644))
 
-	assert.Nil(t, MoveFile("/tmp/test-cache/source.txt", "/tmp/test-cache/dest.txt"))
+	assert.Nil(t, MoveFile("/tmp/test-move/source.txt", "/tmp/test-move/dest.txt"))
 
-	if _, err := os.Stat("/tmp/test-cache/dest.txt"); os.IsNotExist(err) {
+	if _, err := os.Stat("/tmp/test-move/dest.txt"); os.IsNotExist(err) {
 		t.Errorf("file text-cache/dest.txt doesn't exist but should")
 	}
 
-	if _, err := os.Stat("/tmp/test-cache/source.txt"); err == nil {
+	if _, err := os.Stat("/tmp/test-move/source.txt"); err == nil {
 		t.Errorf("file text-cache/source.txt exists but shouldn't")
 	}
 
-	contents, err := os.ReadFile("/tmp/test-cache/dest.txt")
+	contents, err := os.ReadFile("/tmp/test-move/dest.txt")
 	assert.Nil(t, err)
 	assert.Equal(t, inputString, string(contents))
 
-	assert.Nil(t, os.Remove("/tmp/test-cache/dest.txt"))
+	assert.Nil(t, os.Remove("/tmp/test-move/dest.txt"))
 }
 
 func TestPrintTable(t *testing.T) {

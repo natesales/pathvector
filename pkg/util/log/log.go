@@ -31,8 +31,8 @@ func SetLevel(l Level) {
 
 func Capture() *bytes.Buffer {
 	var buf bytes.Buffer
-	writer = &buf
-	logger.SetOutput(writer)
+	//writer = &buf
+	//logger.SetOutput(writer)
 	return &buf
 }
 

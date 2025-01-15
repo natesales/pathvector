@@ -83,6 +83,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
         {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
         {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
         {{ if BoolDeref $peer.DisableAfterError }}disable after error on;{{ end }}
+        {{ if StrDeref $peer.Gateway }}gateway "{{ StrDeref $peer.Gateway }}";{{ end }}
         import filter {
             {{ if $global.NoAccept }}reject; # no-accept: true{{ end }}
             {{ if (not (BoolDeref $peer.Import)) }}reject; # import: false{{ end }}

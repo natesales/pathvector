@@ -7,7 +7,7 @@ Pathvector can build certain peer configurations automatically. The `match` comm
 
 ## YAML Config
 
-Generated YAML output will be indented 2 spaces by default to fit within the YAML `peers` key. Plaintext output is selected by default, add the `--generate-config|-g` flag to select YAML generation mode.
+Generated YAML output will be indented 2 spaces by default to fit within the YAML `peers` key. Plaintext output is selected by default, add the `--yaml | -y` flag to select YAML generation mode.
 
 ```bash
 ~ ▴ grep ^asn /etc/pathvector.yml

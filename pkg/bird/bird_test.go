@@ -354,7 +354,7 @@ EXAMPLE_AS65522_v4 BGP        ---        up     2023-03-26 03:53:51  Established
    Preference:     100
    Input filter:   (unnamed)
    Output filter:  (unnamed)
-   Import limit:   1000000
+   Import limit:   1200000
 	 Action:       disable
    Routes:         935534 imported, 0 filtered, 1 exported, 718626 preferred
    Route change stats:     received   rejected   filtered    ignored   accepted

@@ -23,7 +23,7 @@ PeeringDB API key
 
 ### `peeringdb-cache`
 
-Cache PeeringDB results
+Global option to cache PeeringDB network records in memory for the duration of a single run, so peers with the same ASN only query PeeringDB once (this does not disable PeeringDB queries; to stop querying PeeringDB for a peer, disable auto-import-limits and auto-as-set on that peer)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -101,6 +101,30 @@ Global BIRD configuration
 |------|---------|------------|
 | string   |       |          |
 
+### `device-scan-time`
+
+Time in seconds between interface scans of the BIRD device protocol (BIRD default if 0)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   | 0      |          |
+
+### `direct-check-link`
+
+Should the BIRD direct protocol only import routes of interfaces with link up? (check link)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `disable-protocols`
+
+Built-in BIRD protocols to leave out of the configuration so they can be defined in global-config or manual*.conf instead (device, direct, kernel4, kernel6)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []string   |       |          |
+
 ### `peeringdb-url`
 
 PeeringDB API URL, can be set to a local PeeringDB cache server
@@ -132,6 +156,14 @@ List of files to fetch blocklists from
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       |          |
+
+### `communities`
+
+Map of community names to standard or large communities, names can be used in place of communities in any community option
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]string   |       |          |
 
 ### `origin-communities`
 
@@ -239,7 +271,7 @@ Should best and equivalent non-best routes be imported to build ECMP routes?
 
 ### `source4`
 
-Source IPv4 address
+Source IPv4 address of BGP routes installed in the kernel (krt_prefsrc), can be overridden per peer
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -247,7 +279,7 @@ Source IPv4 address
 
 ### `source6`
 
-Source IPv6 address
+Source IPv6 address of BGP routes installed in the kernel (krt_prefsrc), can be overridden per peer
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -263,7 +295,7 @@ Add a default route
 
 ### `accept-default`
 
-Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list.
+Should default routes be accepted from peers? When false, default routes are rejected by filter-prefix-length. When true, learned default routes are preferred over the locally generated default route and installed in the kernel.
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -483,7 +515,7 @@ List of BIRD protocols to not import into the IPv6 table
 
 ### `statics`
 
-List of static routes to include in BIRD
+List of static routes to include in BIRD (always exported to the kernel, BIRD protocols statics4 and statics6)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -528,6 +560,14 @@ Kernel table
 | Type | Default | Validation |
 |------|---------|------------|
 | int   |       |          |
+
+### `tables`
+
+Additional kernel tables to export routes to, with the same export policy as the main kernel table (BIRD protocols kernel4_table<N> and kernel6_table<N>)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| []int   |       |          |
 
 ### `scan-time`
 
@@ -657,11 +697,19 @@ Exit optimizer on cache full
 ## Peer
 ### `template`
 
-Configuration template
+Configuration template (templates may also set a parent template)
 
 | Type | Default | Validation |
 |------|---------|------------|
 | string   |       |          |
+
+### `merge-template-lists`
+
+Merge list and map options configured on both this peer and its template instead of replacing the template's value (lists are appended to the template's, map entries override the template's)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   |       |          |
 
 ### `description`
 
@@ -769,7 +817,7 @@ IPv6 BGP local preference (overrides local-pref, not included in optimizer)
 
 ### `set-local-pref`
 
-Should an explicit local pref be set?
+Should an explicit local pref be set? (iBGP sessions without local-pref, local-pref4/6 or set-local-pref configured keep the local pref received from the neighbor)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -785,7 +833,7 @@ Should BGP multihop be enabled? (255 max hops)
 
 ### `listen4`
 
-IPv4 BGP listen address
+IPv4 BGP listen address (local address the session is sourced from)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -793,7 +841,23 @@ IPv4 BGP listen address
 
 ### `listen6`
 
-IPv6 BGP listen address
+IPv6 BGP listen address (local address the session is sourced from)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `source4`
+
+Source IPv4 address of routes from this peer installed in the kernel (overrides the global source4)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `source6`
+
+Source IPv6 address of routes from this peer installed in the kernel (overrides the global source6)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -903,6 +967,14 @@ Should private ASNs be removed from path before exporting?
 |------|---------|------------|
 | bool   | true      |          |
 
+### `l3vpn`
+
+Should VPNv4 and VPNv6 (MPLS L3VPN, RFC 4364) routes be exchanged with this peer? Routes are kept in the vpntab4 and vpntab6 tables, e.g. for a route reflector
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
 ### `mp-unicast-46`
 
 Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?
@@ -934,6 +1006,22 @@ Enable BGP additional paths on import?
 | Type | Default | Validation |
 |------|---------|------------|
 | bool   | false      |          |
+
+### `gateway`
+
+BGP gateway mode, 'direct' or 'recursive' (BIRD defaults to direct for directly connected eBGP neighbors and recursive otherwise)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
+
+### `cost`
+
+Distance (IGP metric) to the BGP next hop for sessions in direct gateway mode (mainly direct sessions), used in best path selection in place of the IGP metric
+
+| Type | Default | Validation |
+|------|---------|------------|
+| int   |       |          |
 
 ### `import-next-hop`
 
@@ -1071,9 +1159,33 @@ Map of ASN to import local pref (not included in optimizer)
 |------|---------|------------|
 | map[uint32]uint32   |       |          |
 
+### `as-prefs4`
+
+Map of ASN to import local pref for IPv4 routes (overrides as-prefs, not included in optimizer)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[uint32]uint32   |       |          |
+
+### `as-prefs6`
+
+Map of ASN to import local pref for IPv6 routes (overrides as-prefs, not included in optimizer)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[uint32]uint32   |       |          |
+
+### `prefix-prefs`
+
+Map of prefix (BIRD prefix pattern, IPv4 and IPv6 may be mixed) to import local pref (not included in optimizer, takes precedence over as-prefs and community-prefs)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| map[string]uint32   |       |          |
+
 ### `community-prefs`
 
-Map of community to import local pref (not included in optimizer)
+Map of community to import local pref (not included in optimizer, as-prefs take precedence)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1185,7 +1297,7 @@ Rewrite nexthop to peer address
 
 ### `allow-blackhole-community`
 
-Should this peer be allowed to send routes with the blackhole community?
+Should this peer be allowed to send routes with the blackhole community? (Blackholed /32 and /128 routes are exempt from filter-prefix-length)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1313,7 +1425,7 @@ Reject routes that aren't transited by an AS in this list
 
 ### `dont-announce`
 
-Don't announce these prefixes to the peer
+Don't announce these prefixes to the peer (IPv4 and IPv6 may be mixed)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1321,7 +1433,7 @@ Don't announce these prefixes to the peer
 
 ### `only-announce`
 
-Only announce these prefixes to the peer
+Only announce these prefixes to the peer (IPv4 and IPv6 may be mixed, an address family with no prefixes in the list will not be announced)
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1354,6 +1466,14 @@ Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a war
 ### `auto-as-set-members`
 
 Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| bool   | false      |          |
+
+### `verify-irr-policy`
+
+Check the peer's aut-num object in the IRR (irr-server whois) for import (from us ... accept) and export (to us ... announce) policy, with us listed directly or through an as-set, and disable the peer if it's missing. Checked for each address family the peer has neighbors in; as there's one disabled flag per peer, the whole peer is disabled if any of them lacks policy. If the IRR can't be queried, a warning is shown and the peer is left as configured.
 
 | Type | Default | Validation |
 |------|---------|------------|
@@ -1528,5 +1648,13 @@ List of virtual IPs
 | Type | Default | Validation |
 |------|---------|------------|
 | []string   |       | required,cidr         |
+
+### `vip-interface`
+
+Interface to bind virtual IPs to (defaults to the VRRP interface)
+
+| Type | Default | Validation |
+|------|---------|------------|
+| string   |       |          |
 
 

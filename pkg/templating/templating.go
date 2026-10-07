@@ -43,6 +43,11 @@ func ProtocolNames() map[string]*Protocol {
 var funcMap = template.FuncMap{
 	"Contains": strings.Contains,
 
+	// SliceContains checks if a string slice contains a string
+	"SliceContains": func(slice []string, s string) bool {
+		return util.Contains(slice, s)
+	},
+
 	"Iterate": func(count *int) []int {
 		// Create array with `count` entries
 		var i int
@@ -195,6 +200,9 @@ var funcMap = template.FuncMap{
 	"UniqueProtocolName": func(s, userSuppliedName *string, af string, asn *int, tags *[]string) string {
 		protoName := fmt.Sprintf("%s_AS%d_v%s", *s, *asn, af)
 		i := 1
+		// Peers are rendered concurrently, so protocolNames and protocolNameMap must be accessed under the lock
+		protocolNameMapLock.Lock()
+		defer protocolNameMapLock.Unlock()
 		for {
 			if !util.Contains(protocolNames, protoName) {
 				protocolNames = append(protocolNames, protoName)
@@ -202,12 +210,10 @@ var funcMap = template.FuncMap{
 				if tags != nil {
 					t = *tags
 				}
-				protocolNameMapLock.Lock()
 				protocolNameMap[protoName] = &Protocol{
 					Name: *userSuppliedName,
 					Tags: t,
 				}
-				protocolNameMapLock.Unlock()
 				return protoName
 			}
 			protoName = fmt.Sprintf("%s_AS%d_v%s_%d", *s, *asn, af, i)

@@ -77,6 +77,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
         export limit AS{{ $peer.ASN }}_{{ $peer.ProtocolName }}_EXPORT_v{{ $af }} action {{ $peer.ExportLimitTripAction }};
         {{ end }}
 
+        {{ if StrDeref $peer.Gateway }}gateway {{ StrDeref $peer.Gateway }};{{ end }}
+        {{ if IntDeref $peer.Cost }}cost {{ IntDeref $peer.Cost }};{{ end }}
         {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
         {{ if BoolDeref $peer.NextHopSelfEBGP }}next hop self ebgp;{{ end }}
         {{ if BoolDeref $peer.NextHopSelfIBGP }}next hop self ibgp;{{ end }}
@@ -91,7 +93,7 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
 
             {{ if BoolDeref $peer.FilterBogonRoutes }}reject_bogon_routes();{{ end }}
             {{ if BoolDeref $peer.FilterBogonASNs }}reject_bogon_asns();{{ end }}
-            {{ if BoolDeref $peer.FilterPrefixLength }}reject_out_of_bounds_routes();{{ end }}
+            {{ if BoolDeref $peer.FilterPrefixLength }}{{ if BoolDeref $peer.AllowBlackholeCommunity }}if !is_blackhole() then {{ end }}reject_out_of_bounds_routes();{{ end }}
             {{ if BoolDeref $peer.FilterRPKI }}reject_rpki_invalid();{{ end }}
             {{ if BoolDeref $peer.StrictRPKI }}force_rpki_strict();{{ end }}
             {{ if BoolDeref $peer.FilterNeverViaRouteServers }}reject_never_via_route_servers();{{ end }}
@@ -117,6 +119,9 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ StrDeref $peer.PostImportFilter }}
 
             {{ if BoolDeref $peer.ForcePeerNexthop }}bgp_next_hop = {{ $neighborNoIface }};{{ end }}
+
+            {{ if and (eq $af "4") (StrDeref $peer.Source4) }}krt_prefsrc = {{ StrDeref $peer.Source4 }}; # source4{{ end }}
+            {{ if and (eq $af "6") (StrDeref $peer.Source6) }}krt_prefsrc = {{ StrDeref $peer.Source6 }}; # source6{{ end }}
 
             {{ if StrDeref $peer.ImportNextHop }}
             bgp_next_hop = {{ StrDeref $peer.ImportNextHop }};
@@ -144,15 +149,24 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ if IntDeref $peer.LocalPref4 }}if (net.type = NET_IP4) then { bgp_local_pref = {{ $peer.LocalPref4 }}; }{{ end }}
             {{ if IntDeref $peer.LocalPref6 }}if (net.type = NET_IP6) then { bgp_local_pref = {{ $peer.LocalPref6 }}; }{{ end }}
 
-            {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
-            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
-            {{ end }}
-
+            {{/* Local pref precedence (last match wins): local-pref, local-pref4/6, community-prefs, as-prefs, as-prefs4/6, prefix-prefs */}}
             {{ range $community, $pref := StringUint32MapDeref $peer.StandardCommunityPrefs }}
             if (({{ $community }}) ~ bgp_community) then { bgp_local_pref = {{ $pref }}; }
             {{ end }}
             {{ range $community, $pref := StringUint32MapDeref $peer.LargeCommunityPrefs }}
             if (({{ $community }}) ~ bgp_large_community) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+
+            {{ range $asn, $pref := Uint32MapDeref $peer.ASPrefs }}
+            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; }
+            {{ end }}
+            {{ $afASPrefs := $peer.ASPrefs4 }}{{ if eq $af "6" }}{{ $afASPrefs = $peer.ASPrefs6 }}{{ end }}
+            {{ range $asn, $pref := Uint32MapDeref $afASPrefs }}
+            if ({{ $asn }} ~ bgp_path) then { bgp_local_pref = {{ $pref }}; } # as-prefs{{ $af }}
+            {{ end }}
+            {{ $afPrefixPrefs := $peer.PrefixPrefs4 }}{{ if eq $af "6" }}{{ $afPrefixPrefs = $peer.PrefixPrefs6 }}{{ end }}
+            {{ range $prefix, $pref := StringUint32MapDeref $afPrefixPrefs }}
+            if (net ~ [ {{ $prefix }} ]) then { bgp_local_pref = {{ $pref }}; } # prefix-prefs
             {{ end }}
 
             {{ if BoolDeref $peer.AllowBlackholeCommunity }}process_blackholes();{{ end }}
@@ -184,9 +198,10 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ if $global.NoAnnounce }}reject; # no-announce: true{{ end }}
             {{ if (not (BoolDeref $peer.Export)) }}reject; # export: false{{ end }}
 
-            {{ if not (Empty $peer.DontAnnounce) }}
+            {{ $dontAnnounce := $peer.DontAnnounce4 }}{{ if eq $af "6" }}{{ $dontAnnounce = $peer.DontAnnounce6 }}{{ end }}
+            {{ if not (Empty $dontAnnounce) }}
             if (net ~ [
-            {{ BirdSet $peer.DontAnnounce }}
+            {{ BirdSet (StrSliceDeref $dontAnnounce) }}
             ]) then _reject("prefix in dont-announce list");
             {{ end }}
 
@@ -241,9 +256,14 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ end }}
 
             {{ if not (Empty $peer.OnlyAnnounce) }}
+            {{ $onlyAnnounce := $peer.OnlyAnnounce4 }}{{ if eq $af "6" }}{{ $onlyAnnounce = $peer.OnlyAnnounce6 }}{{ end }}
+            {{ if not (Empty $onlyAnnounce) }}
             if !(net ~ [
-            {{ BirdSet $peer.OnlyAnnounce }}
+            {{ BirdSet (StrSliceDeref $onlyAnnounce) }}
             ]) then _reject("prefix not in only-announce list");
+            {{ else }}
+            _reject("no IPv{{ $af }} prefixes in only-announce list");
+            {{ end }}
             {{ end }}
 
             {{ if BoolDeref $peer.AnnounceOriginated }}
@@ -259,8 +279,8 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             {{ end }}
 
             {{ if BoolDeref $peer.AnnounceDefault }}
-            # Send default route
-            if (proto = "default{{ $af }}") then accept;
+            # Send default route (locally generated or learned with accept-default)
+            if (proto = "default{{ $af }}" || net.len = 0) then accept;
             {{ end }}
 
             {{ StrDeref $peer.PreExportFinal }}
@@ -270,6 +290,26 @@ protocol bgp {{ UniqueProtocolName $peer.ProtocolName $peerName $af $peer.ASN $p
             reject;
             {{ end }}
         };
+    };
+    {{ end }}
+    {{ if BoolDeref $peer.L3VPN }}
+    {{ $vpnImport := "all" }}{{ if or $global.NoAccept (not (BoolDeref $peer.Import)) }}{{ $vpnImport = "none" }}{{ end }}
+    {{ $vpnExport := "all" }}{{ if or $global.NoAnnounce (not (BoolDeref $peer.Export)) }}{{ $vpnExport = "none" }}{{ end }}
+    vpn4 mpls {
+        table vpntab4;
+        import {{ $vpnImport }};
+        export {{ $vpnExport }};
+        {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
+        {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
+        {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
+    };
+    vpn6 mpls {
+        table vpntab6;
+        import {{ $vpnImport }};
+        export {{ $vpnExport }};
+        {{ if BoolDeref $peer.NextHopSelf }}next hop self;{{ end }}
+        {{ if BoolDeref $peer.AddPathTx }}add paths tx;{{ end }}
+        {{ if BoolDeref $peer.AddPathRx }}add paths rx;{{ end }}
     };
     {{ end }}
 }

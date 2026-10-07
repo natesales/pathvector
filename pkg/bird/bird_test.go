@@ -1,6 +1,7 @@
 package bird
 
 import (
+	"bufio"
 	"net"
 	"os"
 	"strings"
@@ -17,7 +18,11 @@ func TestBirdConn(t *testing.T) {
 	t.Log("Removing existing socket")
 	_ = os.Remove(unixSocket)
 
+	// The client runs in a goroutine; wait for it before returning so it doesn't log after the test has completed
+	clientDone := make(chan struct{})
+	defer func() { <-clientDone }()
 	go func() {
+		defer close(clientDone)
 		time.Sleep(time.Millisecond * 10) // Wait for the server to start
 		resp, _, err := RunCommand("bird command test\n", unixSocket)
 		assert.Nil(t, err)
@@ -40,7 +45,7 @@ func TestBirdConn(t *testing.T) {
 	}
 	defer conn.Close()
 
-	_, err = conn.Write([]byte("0001 Fake BIRD response 1\n"))
+	_, err = conn.Write([]byte("0001 BIRD 2.14 ready.\n"))
 	assert.Nil(t, err)
 
 	buf := make([]byte, 1024)
@@ -50,6 +55,139 @@ func TestBirdConn(t *testing.T) {
 
 	_, err = conn.Write([]byte("0001 Fake BIRD response 2\n"))
 	assert.Nil(t, err)
+}
+
+func TestParseVersion(t *testing.T) {
+	for in, expected := range map[string]string{
+		"BIRD 2.14 ready.\n":        "2.14",
+		"BIRD 2.0.7 ready.\n":       "2.0.7",
+		"BIRD v2.0.10 ready.\n":     "2.0.10",
+		"BIRD 2.15.1 ready.\n":      "2.15.1",
+		"BIRD ready.\n":             "",
+		"BIRD 2.14\nRouter ID is 1": "2.14",
+		"":                          "",
+	} {
+		assert.Equal(t, expected, ParseVersion(in), in)
+	}
+}
+
+func TestOlderThanSupported(t *testing.T) {
+	for in, expected := range map[string]bool{
+		"1.6.8":    true,
+		"2.0.6":    true,
+		"2.0.7":    false,
+		"2.0.10":   false,
+		"2.14":     false,
+		"3.0.0":    false,
+		"2.0.10.1": false,
+		"unknown":  false,
+		"ready.":   false,
+	} {
+		assert.Equal(t, expected, OlderThanSupported(in), in)
+	}
+}
+
+// fakeBIRD serves a scripted BIRD control session on one end of a net.Pipe.
+// script is a list of (expected command, response) pairs; the first entry's command is ignored and its response is the greeting.
+func fakeBIRD(t *testing.T, script [][2]string) net.Conn {
+	client, server := net.Pipe()
+	go func() {
+		defer server.Close()
+		r := bufio.NewReader(server)
+		for i, step := range script {
+			if i > 0 {
+				line, err := r.ReadString('\n')
+				if err != nil {
+					t.Errorf("reading command: %v", err)
+					return
+				}
+				assert.Equal(t, step[0], strings.TrimRight(line, "\n"))
+			}
+			if _, err := server.Write([]byte(step[1])); err != nil {
+				t.Errorf("writing response: %v", err)
+				return
+			}
+		}
+	}()
+	return client
+}
+
+func TestRunCommandVersion(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		script  [][2]string
+		command string
+		resp    string
+		version string
+	}{
+		{
+			name: "version in greeting",
+			script: [][2]string{
+				{"", "0001 BIRD 2.14 ready.\n"},
+				{"show protocols", "0000 OK\n"},
+			},
+			command: "show protocols",
+			resp:    "OK\n",
+			version: "2.14",
+		},
+		{
+			name: "no version in greeting",
+			script: [][2]string{
+				{"", "0001 BIRD ready.\n"},
+				{"show status", "1000-BIRD 2.0.12\n1011-Router ID is 192.0.2.1\n Hostname is vm\n0013 Daemon is up and running\n"},
+				{"show protocols", "0000 OK\n"},
+			},
+			command: "show protocols",
+			resp:    "OK\n",
+			version: "2.0.12",
+		},
+		{
+			name: "version only",
+			script: [][2]string{
+				{"", "0001 BIRD ready.\n"},
+				{"show status", "1000-BIRD 2.14\n0013 Daemon is up and running\n"},
+			},
+			command: "",
+			resp:    "",
+			version: "2.14",
+		},
+		{
+			name: "unknown version",
+			script: [][2]string{
+				{"", "0001 BIRD ready.\n"},
+				{"show status", "0013 Daemon is up and running\n"},
+			},
+			command: "",
+			resp:    "",
+			version: UnknownVersion,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			conn := fakeBIRD(t, tc.script)
+			defer conn.Close()
+			resp, version, err := runCommand(conn, tc.command)
+			assert.Nil(t, err)
+			assert.Equal(t, tc.resp, resp)
+			assert.Equal(t, tc.version, version)
+		})
+	}
+}
+
+func TestReadMultiLine(t *testing.T) {
+	resp, err := Read(strings.NewReader("0012-s4: restarted\n s6: restarted\n0000 \n"))
+	assert.Nil(t, err)
+	assert.Equal(t, "s4: restarted\ns6: restarted\n", resp)
+
+	resp, err = Read(strings.NewReader("8003 No protocols match\n"))
+	assert.Nil(t, err)
+	assert.Equal(t, "No protocols match\n", resp)
+}
+
+func TestRunCommandClosed(t *testing.T) {
+	client, server := net.Pipe()
+	_ = server.Close()
+	_, _, err := runCommand(client, "show status")
+	assert.NotNil(t, err)
 }
 
 func TestBirdProtocolParseOne(t *testing.T) {

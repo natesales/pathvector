@@ -146,7 +146,7 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 				),
 			)
 		}
-		if p[peer].Latency >= time.Duration(o.LatencyThreshold)*time.Millisecond {
+		if p[peer].Latency >= time.Duration(o.LatencyThreshold)*time.Millisecond { //nolint:gosec // threshold in milliseconds, far below the int64 range
 			alerts = append(
 				alerts,
 				fmt.Sprintf("Peer AS%s %s met or exceeded maximum allowable latency: %v >= %v",
@@ -172,7 +172,6 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 			modifyPref(peer,
 				global.Peers,
 				o.LocalPrefModifier,
-				global.CacheDirectory,
 				global.BIRDDirectory,
 				global.BIRDSocket,
 				global.BIRDBinary,
@@ -183,11 +182,13 @@ func computeMetrics(o *config.Optimizer, global *config.Config, noConfigure bool
 	}
 }
 
+// modifyPref lowers the local pref of a peer in its active BIRD config file (in the BIRD directory) and reconfigures BIRD.
+// The file is edited in place: `pathvector generate` moves the generated configs out of the cache directory, so the
+// cache directory doesn't hold the active config.
 func modifyPref(
 	peerPair string,
 	peers map[string]*config.Peer,
 	localPrefModifier uint,
-	cacheDirectory string,
 	birdDirectory string,
 	birdSocket string,
 	birdBinary string,
@@ -195,33 +196,44 @@ func modifyPref(
 	dryRun bool,
 ) {
 	peerASN, peerName := parsePeerDelimiter(peerPair)
+	peerData := peers[peerName]
+	if peerData == nil || !util.Deref(peerData.OptimizeInbound) {
+		log.Debugf("[Optimizer] AS%s %s doesn't have optimize-inbound enabled, not modifying local pref", peerASN, peerName)
+		return
+	}
+
 	fileName := path.Join(birdDirectory, fmt.Sprintf("AS%s_%s.conf", peerASN, *util.Sanitize(peerName)))
 	peerFile, err := os.ReadFile(fileName)
 	if err != nil {
-		log.Fatalf("reading peer file: %s", err)
+		log.Fatalf("reading peer file (has pathvector generate been run?): %s", err)
 	}
 
-	peerData := peers[peerName]
-	if *peerData.OptimizeInbound {
-		// Calculate new local pref
-		currentLocalPref := *peerData.LocalPref
-		newLocalPref := uint(currentLocalPref) - localPrefModifier
-
-		lpRegex := regexp.MustCompile(`bgp_local_pref = .*; # pathvector:localpref`)
-		modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
-
-		//nolint:golint,gosec
-		if err := os.WriteFile(fileName, []byte(modified), 0644); err != nil {
-			log.Fatal(err)
-		} else {
-			log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
-		}
+	// Calculate new local pref
+	currentLocalPref := *peerData.LocalPref
+	// Clamp at 0: subtracting a modifier larger than the local pref would otherwise wrap around
+	newLocalPref := 0
+	if currentLocalPref > 0 && uint(currentLocalPref) > localPrefModifier {
+		newLocalPref = currentLocalPref - int(localPrefModifier) //nolint:gosec // localPrefModifier < currentLocalPref
 	}
 
-	// Run BIRD config validation
+	lpRegex := regexp.MustCompile(`bgp_local_pref = .*; # pathvector:localpref`)
+	modified := lpRegex.ReplaceAllString(string(peerFile), fmt.Sprintf("bgp_local_pref = %d; # pathvector:localpref", newLocalPref))
+
+	if dryRun {
+		log.Printf("[Optimizer] Dry run, would lower AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
+		return
+	}
+
+	//nolint:golint,gosec
+	if err := os.WriteFile(fileName, []byte(modified), 0644); err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("[Optimizer] Lowered AS%s %s local-pref from %d to %d", peerASN, peerName, currentLocalPref, newLocalPref)
+
+	// Run BIRD config validation on the active config
 	bird.Validate(birdBinary, birdDirectory)
 
-	if !dryRun {
-		bird.MoveCacheAndReconfigure(birdDirectory, cacheDirectory, birdSocket, noConfigure)
+	if !noConfigure {
+		bird.Reconfigure(birdSocket)
 	}
 }

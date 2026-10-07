@@ -57,6 +57,11 @@ func read(r io.Reader, w io.Writer) bool {
 				panic(err)
 			}
 		}
+		// "dddd-" means more lines follow, "dddd " marks the last line of a reply.
+		// Codes 0xxx/8xxx/9xxx are final unless continued, e.g. "0012-s4: restarted\n s6: restarted\n0000 \n"
+		if c[4] == byte('-') {
+			return true
+		}
 		return c[0] != byte('0') && c[0] != byte('8') && c[0] != byte('9')
 	} else {
 		if w != nil {
@@ -69,12 +74,15 @@ func read(r io.Reader, w io.Writer) bool {
 }
 
 // Read reads the full BIRD response as a string
-func Read(r io.Reader) (string, error) {
+func Read(r io.Reader) (resp string, err error) {
+	// read panics on socket errors, so recover and return them as errors
+	defer func() {
+		if rec := recover(); rec != nil {
+			resp, err = "", fmt.Errorf("%v", rec)
+		}
+	}()
 	var buf bytes.Buffer
 	for read(r, &buf) {
-	}
-	if r := recover(); r != nil {
-		return "", fmt.Errorf("%s", r)
 	}
 	return buf.String(), nil
 }
@@ -95,35 +103,80 @@ func ReadClean(r io.Reader) {
 	fmt.Println(resp)
 }
 
-// RunCommand runs a BIRD command and returns the output, version, and error
-func RunCommand(command string, socket string) (string, string, error) {
-	log.Debugln("Connecting to BIRD socket")
-	conn, err := net.Dial("unix", socket)
-	if err != nil {
-		return "", "", err
-	}
-	//noinspection GoUnhandledErrorResult
-	defer conn.Close()
+// versionRegex matches a BIRD version string such as "BIRD 2.14" or "BIRD v2.0.10"
+var versionRegex = regexp.MustCompile(`BIRD\s+v?(\d+(?:\.\d+)+)`)
 
-	log.Debug("Connected to BIRD socket")
+// UnknownVersion is returned as the BIRD version when it can't be determined
+const UnknownVersion = "unknown"
+
+// ParseVersion extracts the BIRD version from a BIRD greeting (e.g. "BIRD 2.14 ready.")
+// or "show status" output (e.g. "BIRD 2.14"), returning an empty string if no version is present
+func ParseVersion(s string) string {
+	m := versionRegex.FindStringSubmatch(s)
+	if len(m) < 2 {
+		return ""
+	}
+	return m[1]
+}
+
+// toSemver converts a BIRD version string to a golang.org/x/mod/semver compatible version
+func toSemver(v string) string {
+	parts := strings.Split(strings.TrimPrefix(v, "v"), ".")
+	if len(parts) > 3 {
+		parts = parts[:3]
+	}
+	return "v" + strings.Join(parts, ".")
+}
+
+// OlderThanSupported checks if a BIRD version is older than the minimum supported version.
+// Unparseable versions are never considered older.
+func OlderThanSupported(birdVersion string) bool {
+	v := toSemver(birdVersion)
+	if !semver.IsValid(v) {
+		return false
+	}
+	return semver.Compare(v, toSemver(supportedMin)) == -1
+}
+
+// runCommand runs a BIRD command over an established BIRD control connection
+func runCommand(conn io.ReadWriter, command string) (string, string, error) {
 	resp, err := Read(conn)
 	if err != nil {
 		return "", "", err
 	}
 	log.Debugf("BIRD init response: %s", resp)
 
-	// Check BIRD version
-	birdVersion := strings.Split(resp, " ")[1]
-	if semver.Compare(birdVersion, supportedMin) == -1 {
+	// Check BIRD version. Some BIRD builds don't include the version in the greeting
+	// (e.g. "0001 BIRD ready."), so fall back to querying "show status".
+	birdVersion := ParseVersion(resp)
+	if birdVersion == "" {
+		log.Debug("BIRD version not found in greeting, querying show status")
+		if _, err := conn.Write([]byte("show status\n")); err != nil {
+			return "", "", err
+		}
+		statusResp, err := Read(conn)
+		if err != nil {
+			return "", "", err
+		}
+		birdVersion = ParseVersion(statusResp)
+	}
+	if birdVersion == "" {
+		birdVersion = UnknownVersion
+	} else if OlderThanSupported(birdVersion) {
 		log.Warnf("BIRD version %s older than minimum supported version %s", birdVersion, supportedMin)
 	}
 
+	// An empty command only queries the version
+	command = strings.Trim(command, "\r\n")
+	if command == "" {
+		return "", birdVersion, nil
+	}
+
 	log.Debugf("Sending BIRD command: %s", command)
-	_, err = conn.Write([]byte(strings.Trim(command, "\n") + "\n"))
-	log.Debugf("Sent BIRD command: %s", command)
-	if err != nil {
+	if _, err := conn.Write([]byte(command + "\n")); err != nil {
 		return "", "", err
 	}
+	log.Debugf("Sent BIRD command: %s", command)
 
 	log.Debugln("Reading from socket")
 	resp, err = Read(conn)
@@ -132,7 +185,22 @@ func RunCommand(command string, socket string) (string, string, error) {
 	}
 	log.Debugln("Done reading from socket")
 
-	return resp, birdVersion, nil // nil error
+	return resp, birdVersion, nil
+}
+
+// RunCommand runs a BIRD command and returns the output, version, and error.
+// If command is empty, only the BIRD version is queried.
+func RunCommand(command string, socket string) (string, string, error) {
+	log.Debugln("Connecting to BIRD socket")
+	conn, err := net.Dial("unix", socket)
+	if err != nil {
+		return "", "", err
+	}
+	//noinspection GoUnhandledErrorResult
+	defer conn.Close()
+	log.Debug("Connected to BIRD socket")
+
+	return runCommand(conn, command)
 }
 
 // Validate checks if the cached configuration is syntactically valid
@@ -185,7 +253,12 @@ func Validate(binary string, cacheDir string) {
 					errorMessageToLog += scanner.Text() + "\n"
 				}
 				if line == errorLine {
-					errorMessageToLog += strings.Repeat(" ", errorChar-1) + "^ " + errorMessage + "\n"
+					// BIRD reports column 0 for errors that aren't tied to a position (e.g. "No protocol is specified")
+					indent := errorChar - 1
+					if indent < 0 {
+						indent = 0
+					}
+					errorMessageToLog += strings.Repeat(" ", indent) + "^ " + errorMessage + "\n"
 				}
 				line++
 			}
@@ -242,15 +315,20 @@ func MoveCacheAndReconfigure(birdDirectory string, cacheDirectory string, birdSo
 	}
 
 	if !noConfigure {
-		log.Info("Reconfiguring BIRD")
-		resp, _, err := RunCommand("configure", birdSocket)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// Print bird output as multiple lines
-		for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
-			log.Printf("BIRD response (multiline): %s", line)
-		}
+		Reconfigure(birdSocket)
+	}
+}
+
+// Reconfigure tells BIRD to reload its configuration files
+func Reconfigure(birdSocket string) {
+	log.Info("Reconfiguring BIRD")
+	resp, _, err := RunCommand("configure", birdSocket)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Print bird output as multiple lines
+	for _, line := range strings.Split(strings.Trim(resp, "\n"), "\n") {
+		log.Printf("BIRD response (multiline): %s", line)
 	}
 }
 

@@ -137,6 +137,47 @@ func TestLoadConfigInvalidYAML(t *testing.T) {
 	}
 }
 
+func TestLoadConfigUnknownFieldHint(t *testing.T) {
+	configFile := `
+asn: 34553
+router-id: 192.0.2.1
+peers:
+  Example:
+    asn: 65510
+    neighbors:
+      - 203.0.113.12
+    peeringdb-cache: false
+`
+	_, err := Load([]byte(configFile))
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "field peeringdb-cache not found in type config.Peer")
+	assert.Contains(t, err.Error(), "(peeringdb-cache is a global option, not a per-peer option)")
+
+	configFile = `
+asn: 34553
+router-id: 192.0.2.1
+auto-import-limits: true
+`
+	_, err = Load([]byte(configFile))
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "(auto-import-limits is a per-peer option, set it under a peer or template)")
+
+	configFile = `
+asn: 34553
+router-id: 192.0.2.1
+peers:
+  Example:
+    asn: 65510
+    neighbors:
+      - 203.0.113.12
+    not-a-real-option: true
+`
+	_, err = Load([]byte(configFile))
+	assert.NotNil(t, err)
+	assert.Contains(t, err.Error(), "field not-a-real-option not found in type config.Peer")
+	assert.NotContains(t, err.Error(), "option, ")
+}
+
 func TestLoadConfigValidationError(t *testing.T) {
 	configFile := "router-id: foo"
 	_, err := Load([]byte(configFile))
@@ -230,6 +271,7 @@ peers:
     asn: 65520
     template: upstream
     filter-irr: true
+    as-set: AS-EXAMPLE
     neighbors:
       - 192.0.2.3
 
@@ -289,4 +331,202 @@ peers:
 			t.Errorf("")
 		}
 	}
+}
+
+func TestSplitPrefixesByAF(t *testing.T) {
+	v4, v6, err := splitPrefixesByAF(&[]string{"2001:db8::/32", "192.0.2.0/24", "198.51.100.0/24{24,32}", "2001:db8:1::/48+"})
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"192.0.2.0/24", "198.51.100.0/24{24,32}"}, *v4)
+	assert.Equal(t, []string{"2001:db8::/32", "2001:db8:1::/48+"}, *v6)
+
+	v4, v6, err = splitPrefixesByAF(nil)
+	assert.Nil(t, err)
+	assert.Nil(t, v4)
+	assert.Nil(t, v6)
+
+	_, _, err = splitPrefixesByAF(&[]string{"not-a-prefix"})
+	assert.NotNil(t, err)
+}
+
+func TestLoadAnnounceOriginatedOriginCommunities(t *testing.T) {
+	base := `
+asn: 34553
+router-id: 192.0.2.1
+peers:
+  iBGP:
+    asn: 34553
+    neighbors:
+      - 192.0.2.10
+`
+	c, err := Load([]byte(base))
+	assert.NoError(t, err)
+	assert.False(t, util.Deref(c.Peers["iBGP"].AnnounceOriginated), "no prefixes or origin communities, nothing to originate")
+
+	c, err = Load([]byte("origin-communities: [\"34553:1:1\"]\n" + base))
+	assert.NoError(t, err)
+	assert.True(t, util.Deref(c.Peers["iBGP"].AnnounceOriginated), "origin communities define locally originated routes")
+}
+
+func TestLoadIBGPLocalPref(t *testing.T) {
+	c, err := Load([]byte(`
+asn: 34553
+router-id: 192.0.2.1
+templates:
+  core:
+    local-pref: 90
+peers:
+  iBGP:
+    asn: 34553
+    neighbors: [192.0.2.10]
+  iBGP explicit:
+    asn: 34553
+    local-pref: 120
+    neighbors: [192.0.2.11]
+  iBGP explicit set:
+    asn: 34553
+    set-local-pref: true
+    neighbors: [192.0.2.12]
+  iBGP template:
+    asn: 34553
+    template: core
+    neighbors: [192.0.2.13]
+  eBGP:
+    asn: 65510
+    neighbors: [192.0.2.14]
+`))
+	assert.NoError(t, err)
+	assert.False(t, util.Deref(c.Peers["iBGP"].SetLocalPref))
+	assert.True(t, util.Deref(c.Peers["iBGP explicit"].SetLocalPref))
+	assert.True(t, util.Deref(c.Peers["iBGP explicit set"].SetLocalPref))
+	assert.True(t, util.Deref(c.Peers["iBGP template"].SetLocalPref))
+	assert.Equal(t, 90, util.Deref(c.Peers["iBGP template"].LocalPref))
+	assert.True(t, util.Deref(c.Peers["eBGP"].SetLocalPref))
+}
+
+func TestLoadJSON(t *testing.T) {
+	// YAML is a superset of JSON, so a JSON document with the YAML structure loads as-is
+	configFile := `{
+  "asn": 34553,
+  "router-id": "192.0.2.1",
+  "prefixes": ["192.0.2.0/24"],
+  "templates": {"upstream": {"local-pref": 80}},
+  "peers": {
+    "Example": {"asn": 65530, "template": "upstream", "neighbors": ["203.0.113.25"]}
+  }
+}`
+	globalConfig, err := Load([]byte(configFile))
+	assert.NoError(t, err)
+	assert.Equal(t, 34553, globalConfig.ASN)
+	assert.Equal(t, 65530, *globalConfig.Peers["Example"].ASN)
+	assert.Equal(t, 80, *globalConfig.Peers["Example"].LocalPref)
+}
+
+func TestLoadRFC7951JSON(t *testing.T) {
+	// RFC 7951 JSON instance of the pathvector YANG module
+	configFile := `{
+  "pathvector:asn": "34553",
+  "pathvector:router-id": "192.0.2.1",
+  "pathvector:prefixes": ["192.0.2.0/24"],
+  "pathvector:templates": [{"name": "upstream", "local-pref": "80"}],
+  "pathvector:peers": [
+    {"name": "Example", "asn": "65530", "template": "upstream", "neighbors": ["203.0.113.25"]}
+  ]
+}`
+	globalConfig, err := Load([]byte(configFile))
+	assert.NoError(t, err)
+	assert.Equal(t, 34553, globalConfig.ASN)
+	assert.Equal(t, 65530, *globalConfig.Peers["Example"].ASN)
+	assert.Equal(t, 80, *globalConfig.Peers["Example"].LocalPref)
+	assert.Equal(t, []string{"203.0.113.25"}, *globalConfig.Peers["Example"].NeighborIPs)
+}
+
+func TestLoadASSetRequired(t *testing.T) {
+	for _, option := range []string{"filter-irr", "auto-as-set-members"} {
+		base := `
+asn: 34553
+router-id: 192.0.2.1
+peers:
+  Example:
+    asn: 65510
+    neighbors: [192.0.2.10]
+    ` + option + `: true
+`
+		_, err := Load([]byte(base))
+		assert.ErrorContains(t, err, option+" requires as-set or auto-as-set")
+
+		_, err = Load([]byte(base + "    as-set: AS-EXAMPLE\n"))
+		assert.NoError(t, err)
+
+		_, err = Load([]byte(base + "    auto-as-set: true\n"))
+		assert.NoError(t, err)
+	}
+}
+
+func TestTemplateParentInheritance(t *testing.T) {
+	c, err := Load([]byte(`
+asn: 34553
+router-id: 192.0.2.1
+templates:
+  base:
+    local-pref: 90
+    filter-transit-asns: true
+    add-on-import: ["34553:0:1"]
+  ix:
+    template: base
+    local-pref: 110
+    add-on-import: ["34553:0:2"]
+  ix-merge:
+    template: base
+    merge-template-lists: true
+    add-on-import: ["34553:0:2"]
+peers:
+  Peer 1:
+    asn: 65510
+    template: ix
+    neighbors: [192.0.2.2]
+  Peer 2:
+    asn: 65520
+    template: ix-merge
+    merge-template-lists: true
+    add-on-import: ["34553:0:3"]
+    neighbors: [192.0.2.3]
+  Peer 3:
+    asn: 65530
+    template: ix-merge
+    neighbors: [192.0.2.4]
+`))
+	assert.NoError(t, err)
+	p1 := c.Peers["Peer 1"]
+	assert.Equal(t, 110, *p1.LocalPref, "child template overrides parent")
+	assert.True(t, *p1.FilterTransitASNs, "inherited from parent template")
+	assert.Equal(t, []string{"34553:0:2"}, *p1.ImportCommunities, "lists replace by default")
+
+	p2 := c.Peers["Peer 2"]
+	assert.Equal(t, 90, *p2.LocalPref)
+	assert.Equal(t, []string{"34553:0:1", "34553:0:2", "34553:0:3"}, *p2.ImportCommunities, "lists merged through the template chain")
+
+	p3 := c.Peers["Peer 3"]
+	assert.Equal(t, []string{"34553:0:1", "34553:0:2"}, *p3.ImportCommunities, "merging into one peer doesn't modify the template")
+}
+
+func TestTemplateInheritanceLoop(t *testing.T) {
+	_, err := Load([]byte(`
+asn: 34553
+router-id: 192.0.2.1
+templates:
+  a:
+    template: b
+  b:
+    template: a
+`))
+	assert.ErrorContains(t, err, "template inheritance loop")
+
+	_, err = Load([]byte(`
+asn: 34553
+router-id: 192.0.2.1
+templates:
+  a:
+    template: missing
+`))
+	assert.ErrorContains(t, err, "parent template missing which is not defined")
 }

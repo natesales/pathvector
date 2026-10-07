@@ -2,6 +2,7 @@ package irr
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		{"AS112", 4, []string{"192.31.196.0/24", "192.175.48.0/24"}, false},
 		{"AS112", 6, []string{"2001:4:112::/48", "2620:4f:8000::/48"}, false},
 		{"AS112", 9, []string{"2001:4:112::/48", "2620:4f:8000::/48"}, true}, // Invalid address family
-		{"AS-LROOT", 6, []string{"2001:500:3::/48", "2001:500:8c::/48", "2001:500:9c::/47{47,48}", "2001:500:9e::/47", "2001:500:9f::/48", "2602:800:9004::/47{48,48}", "2620:0:22b0::/48", "2620:0:2ee0::/48"}, false},
+		{"AS-LROOT", 6, []string{"2001:500:3::/48", "2001:500:8c::/48", "2001:500:9c::/47{48,48}", "2001:500:9e::/47", "2001:500:9f::/48", "2602:800:9004::/47{48,48}", "2620:0:22b0::/48", "2620:0:2ee0::/48"}, false},
 	}
 	for _, tc := range testCases {
 		out, err := PrefixSet(tc.asSet, tc.family, "rr.ntt.net", irrQueryTimeout, "")
@@ -31,10 +32,20 @@ func TestGetIRRPrefixSet(t *testing.T) {
 		} else if err == nil && tc.shouldError {
 			t.Errorf("as-set %s family %d should error but didn't", tc.asSet, tc.family)
 		}
-		if err == nil && !reflect.DeepEqual(out, tc.expectedOutput) {
+		// Compare without BIRD length ranges ({a,b}): they come from live route objects and change without the prefixes changing
+		if err == nil && !reflect.DeepEqual(stripLengthRanges(out), stripLengthRanges(tc.expectedOutput)) {
 			assert.Equalf(t, tc.expectedOutput, out, "as-set %s family %d failed. expected '%s' got '%s'", tc.asSet, tc.family, tc.expectedOutput, out)
 		}
 	}
+}
+
+// stripLengthRanges removes BIRD prefix length ranges (e.g. {48,48}) from a prefix list
+func stripLengthRanges(prefixes []string) []string {
+	out := make([]string, len(prefixes))
+	for i, prefix := range prefixes {
+		out[i] = strings.SplitN(prefix, "{", 2)[0]
+	}
+	return out
 }
 
 func TestBuildIRRPrefixSet(t *testing.T) {

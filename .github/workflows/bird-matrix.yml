@@ -1,0 +1,51 @@
+# BIRD test matrix: validate the generated configuration against every BIRD
+# version listed in tests/bird-matrix/versions.txt. Each version is built from
+# source in Docker by tests/bird-matrix/Dockerfile (see the README there).
+name: BIRD matrix
+
+on:
+  push:
+    # Branches only: release tags run this workflow through release.yml
+    # (workflow_call below), so a tag push does not run it twice.
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+  # Lets release.yml run the matrix and gate the release on it
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  versions:
+    name: read versions
+    runs-on: ubuntu-latest
+    outputs:
+      bird: ${{ steps.versions.outputs.bird }}
+    steps:
+      - uses: actions/checkout@v4
+      # versions.txt is the single source of truth for the matrix (it is also
+      # what `make bird-matrix` uses), so turn it into a JSON array here
+      # instead of duplicating the list in this file.
+      - id: versions
+        run: |
+          bird=$(sed -e 's/#.*//' tests/bird-matrix/versions.txt \
+            | jq -R -s -c 'split("\n") | map(gsub("\\s"; "")) | map(select(length > 0))')
+          echo "BIRD versions: $bird"
+          echo "bird=$bird" >> "$GITHUB_OUTPUT"
+
+  bird-matrix:
+    name: BIRD ${{ matrix.bird }}
+    needs: versions
+    runs-on: ubuntu-latest
+    strategy:
+      # Report every incompatible version, not just the first one
+      fail-fast: false
+      matrix:
+        bird: ${{ fromJSON(needs.versions.outputs.bird) }}
+    steps:
+      - uses: actions/checkout@v4
+      # Same entrypoint as running the matrix locally: builds the image for
+      # this BIRD version and runs tests/bird-matrix/run-tests.sh in it
+      - name: Build and test
+        run: make bird-matrix BIRD_VERSIONS="${{ matrix.bird }}"

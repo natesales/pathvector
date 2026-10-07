@@ -1,0 +1,15 @@
+# Build context exclusions for tests/bird-matrix/Dockerfile (BuildKit picks up
+# <Dockerfile>.dockerignore automatically). Keeps the context small and stops
+# local artifacts from leaking into the image.
+.git
+.idea
+dist
+build
+test-cache
+cmd/test-cache
+pathvector
+coverage.txt
+nohup.out
+# BIRD binaries built locally by build-bird-versions.sh
+tests/bird-matrix/v[0-9]*
+vendorbuild

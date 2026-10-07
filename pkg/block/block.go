@@ -12,15 +12,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// parseASN parses an ASN into a string and returns -1 if invalid
-func parseASN(s string) int {
+// parseASN parses an ASN (with or without the AS prefix) and returns false if it isn't a valid 32-bit ASN
+func parseASN(s string) (uint32, bool) {
 	s = strings.ToLower(s)
 	s = strings.TrimPrefix(s, "as")
-	i, err := strconv.Atoi(s)
+	i, err := strconv.ParseUint(s, 10, 32)
 	if err != nil {
-		return -1
+		return 0, false
 	}
-	return i
+	return uint32(i), true
 }
 
 // validPrefix checks if a string is a valid IP prefix in CIDR notation
@@ -68,9 +68,9 @@ func Parse(blocklist []string) ([]uint32, []string, error) {
 		// Remove whitespace
 		token = strings.TrimSpace(token)
 
-		if asn := parseASN(token); asn != -1 {
+		if asn, ok := parseASN(token); ok {
 			log.Debugf("Adding ASN to blocklist: %d", asn)
-			asns = append(asns, uint32(asn))
+			asns = append(asns, asn)
 		} else if validPrefix(token) {
 			log.Debugf("Adding prefix to blocklist: %s", token)
 			prefixes = append(prefixes, token)

@@ -27,7 +27,7 @@ func TestPeeringDbQuery(t *testing.T) {
 		{65530, "", "", 0, 0, true}, // Private ASN, no PeeringDB page
 	}
 	for _, tc := range testCases {
-		pDbData, err := NetworkInfo(uint32(tc.asn), peeringDbQueryTimeout, "", true)
+		pDbData, err := NetworkInfo(uint32(tc.asn), peeringDbQueryTimeout, "", true) //nolint:gosec // test ASNs are 32-bit
 		if err != nil && !tc.shouldError {
 			t.Error(err)
 		}

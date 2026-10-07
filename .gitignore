@@ -29,4 +29,5 @@ test-cache/
 test-conf.yml
 nohup.out
 coverage.txt
-tests/bird-matrix/v*
+tests/bird-matrix/v[0-9]*
+test-bird/

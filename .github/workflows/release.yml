@@ -6,7 +6,13 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+' # symver vmajor.minor.patch format only
 
 jobs:
+  # Validate the generated BIRD config against all supported BIRD versions
+  # (.github/workflows/bird-matrix.yml) before anything is published
+  bird-matrix:
+    uses: ./.github/workflows/bird-matrix.yml
+
   goreleaser:
+    needs: bird-matrix
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

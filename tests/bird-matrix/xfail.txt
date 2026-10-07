@@ -1,0 +1,13 @@
+# Known incompatibilities between Pathvector's generated config and a BIRD
+# version, one per line: "<bird-version> <config-name>  # reason".
+# <config-name> is the test config's file name without .yml.
+#
+# Listed combinations are expected to fail and are reported as XFAIL. If one
+# starts passing, run-tests.sh reports XPASS and fails, so the entry gets
+# removed. Prefer fixing the template (or raising supportedMin in
+# pkg/bird/bird.go) over adding entries here.
+
+# transit-lock renders AS path masks with the "+" operator ([= 65510+ =]),
+# which BIRD only understands since 2.0.8:
+#   syntax error, unexpected '+'
+2.0.7 generate-complex

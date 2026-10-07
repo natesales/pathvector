@@ -27,6 +27,9 @@ sidebar_position: 1
 ' >docs/docs/about.md
 cat README.md >>docs/docs/about.md
 
+echo Generating YANG model
+/tmp/pathvector yang >docs/static/pathvector.yang
+
 rm /tmp/pathvector
 
 # Generate PDF documentation

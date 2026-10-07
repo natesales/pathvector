@@ -91,7 +91,8 @@ var defaultBogonASNs = []string{
 
 // Peer stores a single peer config
 type Peer struct {
-	Template *string `yaml:"template" description:"Configuration template" default:"-"`
+	Template           *string `yaml:"template" description:"Configuration template (templates may also set a parent template)" default:"-"`
+	MergeTemplateLists *bool   `yaml:"merge-template-lists" description:"Merge list and map options configured on both this peer and its template instead of replacing the template's value (lists are appended to the template's, map entries override the template's)" default:"-"`
 
 	Description *string   `yaml:"description" description:"Peer description" default:"-"`
 	Tags        *[]string `yaml:"tags" description:"Peer tags" default:"-"`
@@ -109,10 +110,12 @@ type Peer struct {
 	LocalPref              *int      `yaml:"local-pref" description:"BGP local preference" default:"100"`
 	LocalPref4             *int      `yaml:"local-pref4" description:"IPv4 BGP local preference (overrides local-pref, not included in optimizer)" default:"-"`
 	LocalPref6             *int      `yaml:"local-pref6" description:"IPv6 BGP local preference (overrides local-pref, not included in optimizer)" default:"-"`
-	SetLocalPref           *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set?" default:"true"`
+	SetLocalPref           *bool     `yaml:"set-local-pref" description:"Should an explicit local pref be set? (iBGP sessions without local-pref, local-pref4/6 or set-local-pref configured keep the local pref received from the neighbor)" default:"true"`
 	Multihop               *bool     `yaml:"multihop" description:"Should BGP multihop be enabled? (255 max hops)" default:"false"`
-	Listen4                *string   `yaml:"listen4" description:"IPv4 BGP listen address" default:"-"`
-	Listen6                *string   `yaml:"listen6" description:"IPv6 BGP listen address" default:"-"`
+	Listen4                *string   `yaml:"listen4" description:"IPv4 BGP listen address (local address the session is sourced from)" default:"-"`
+	Listen6                *string   `yaml:"listen6" description:"IPv6 BGP listen address (local address the session is sourced from)" default:"-"`
+	Source4                *string   `yaml:"source4" description:"Source IPv4 address of routes from this peer installed in the kernel (overrides the global source4)" default:"-"`
+	Source6                *string   `yaml:"source6" description:"Source IPv6 address of routes from this peer installed in the kernel (overrides the global source6)" default:"-"`
 	LocalASN               *int      `yaml:"local-asn" description:"Local ASN as defined in the global ASN field" default:"-"`
 	LocalPort              *int      `yaml:"local-port" description:"Local TCP port" default:"179"`
 	NeighborPort           *int      `yaml:"neighbor-port" description:"Neighbor TCP port" default:"179"`
@@ -126,10 +129,13 @@ type Peer struct {
 	RSClient               *bool     `yaml:"rs-client" description:"Should this peer be a route server client?" default:"false"`
 	RRClient               *bool     `yaml:"rr-client" description:"Should this peer be a route reflector client?" default:"false"`
 	RemovePrivateASNs      *bool     `yaml:"remove-private-asns" description:"Should private ASNs be removed from path before exporting?" default:"true"`
+	L3VPN                  *bool     `yaml:"l3vpn" description:"Should VPNv4 and VPNv6 (MPLS L3VPN, RFC 4364) routes be exchanged with this peer? Routes are kept in the vpntab4 and vpntab6 tables, e.g. for a route reflector" default:"false"`
 	MPUnicast46            *bool     `yaml:"mp-unicast-46" description:"Should this peer be configured with multiprotocol IPv4 and IPv6 unicast?" default:"false"`
 	AllowLocalAS           *bool     `yaml:"allow-local-as" description:"Should routes originated by the local ASN be accepted?" default:"false"`
 	AddPathTx              *bool     `yaml:"add-path-tx" description:"Enable BGP additional paths on export?" default:"false"`
 	AddPathRx              *bool     `yaml:"add-path-rx" description:"Enable BGP additional paths on import?" default:"false"`
+	Gateway                *string   `yaml:"gateway" description:"BGP gateway mode, 'direct' or 'recursive' (BIRD defaults to direct for directly connected eBGP neighbors and recursive otherwise)" default:"-"`
+	Cost                   *int      `yaml:"cost" description:"Distance (IGP metric) to the BGP next hop for sessions in direct gateway mode (mainly direct sessions), used in best path selection in place of the IGP metric" default:"-"`
 	ImportNextHop          *string   `yaml:"import-next-hop" description:"Rewrite the BGP next hop before importing routes learned from this peer" default:"-"`
 	ExportNextHop          *string   `yaml:"export-next-hop" description:"Rewrite the BGP next hop before announcing routes to this peer" default:"-"`
 	Confederation          *int      `yaml:"confederation" description:"BGP confederation (RFC 5065)" default:"-"`
@@ -148,9 +154,15 @@ type Peer struct {
 	RemoveCommunities    *[]string `yaml:"remove-communities" description:"List of communities to remove before from routes announced by this peer" default:"-"`
 	RemoveAllCommunities *int      `yaml:"remove-all-communities" description:"Remove all standard and large communities beginning with this value" default:"-"`
 
-	ASPrefs *map[uint32]uint32 `yaml:"as-prefs" description:"Map of ASN to import local pref (not included in optimizer)" default:"-"`
+	ASPrefs  *map[uint32]uint32 `yaml:"as-prefs" description:"Map of ASN to import local pref (not included in optimizer)" default:"-"`
+	ASPrefs4 *map[uint32]uint32 `yaml:"as-prefs4" description:"Map of ASN to import local pref for IPv4 routes (overrides as-prefs, not included in optimizer)" default:"-"`
+	ASPrefs6 *map[uint32]uint32 `yaml:"as-prefs6" description:"Map of ASN to import local pref for IPv6 routes (overrides as-prefs, not included in optimizer)" default:"-"`
 
-	CommunityPrefs         *map[string]uint32 `yaml:"community-prefs" description:"Map of community to import local pref (not included in optimizer)" default:"-"`
+	PrefixPrefs  *map[string]uint32 `yaml:"prefix-prefs" description:"Map of prefix (BIRD prefix pattern, IPv4 and IPv6 may be mixed) to import local pref (not included in optimizer, takes precedence over as-prefs and community-prefs)" default:"-"`
+	PrefixPrefs4 *map[string]uint32 `yaml:"-" description:"-" default:"-"`
+	PrefixPrefs6 *map[string]uint32 `yaml:"-" description:"-" default:"-"`
+
+	CommunityPrefs         *map[string]uint32 `yaml:"community-prefs" description:"Map of community to import local pref (not included in optimizer, as-prefs take precedence)" default:"-"`
 	StandardCommunityPrefs *map[string]uint32 `yaml:"-" description:"-" default:"-"`
 	LargeCommunityPrefs    *map[string]uint32 `yaml:"-" description:"-" default:"-"`
 
@@ -172,7 +184,7 @@ type Peer struct {
 	EnforceFirstAS          *bool `yaml:"enforce-first-as" description:"Should we only accept routes who's first AS is equal to the configured peer address?" default:"true"`
 	EnforcePeerNexthop      *bool `yaml:"enforce-peer-nexthop" description:"Should we only accept routes with a next hop equal to the configured neighbor address?" default:"true"`
 	ForcePeerNexthop        *bool `yaml:"force-peer-nexthop" description:"Rewrite nexthop to peer address" default:"false"`
-	AllowBlackholeCommunity *bool `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community?" default:"false"`
+	AllowBlackholeCommunity *bool `yaml:"allow-blackhole-community" description:"Should this peer be allowed to send routes with the blackhole community? (Blackholed /32 and /128 routes are exempt from filter-prefix-length)" default:"false"`
 	BlackholeIn             *bool `yaml:"blackhole-in" description:"Should imported routes be blackholed?" default:"false"`
 	BlackholeOut            *bool `yaml:"blackhole-out" description:"Should exported routes be blackholed?" default:"false"`
 
@@ -192,8 +204,8 @@ type Peer struct {
 
 	TransitLock *[]string `yaml:"transit-lock" description:"Reject routes that aren't transited by an AS in this list" default:"-"`
 
-	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer" default:"-"`
-	OnlyAnnounce *[]string `yaml:"only-announce" description:"Only announce these prefixes to the peer" default:"-"`
+	DontAnnounce *[]string `yaml:"dont-announce" description:"Don't announce these prefixes to the peer (IPv4 and IPv6 may be mixed)" default:"-"`
+	OnlyAnnounce *[]string `yaml:"only-announce" description:"Only announce these prefixes to the peer (IPv4 and IPv6 may be mixed, an address family with no prefixes in the list will not be announced)" default:"-"`
 
 	PrefixCommunities         *map[string][]string `yaml:"prefix-communities" description:"Map of prefix to community list to add to the prefix" default:"-"`
 	PrefixStandardCommunities *map[string][]string `yaml:"-" description:"-" default:"-"`
@@ -202,6 +214,8 @@ type Peer struct {
 	AutoImportLimits *bool `yaml:"auto-import-limits" description:"Get import limits automatically from PeeringDB?" default:"false"`
 	AutoASSet        *bool `yaml:"auto-as-set" description:"Get as-set automatically from PeeringDB? If no as-set exists in PeeringDB, a warning will be shown and the peer ASN used instead." default:"false"`
 	AutoASSetMembers *bool `yaml:"auto-as-set-members" description:"Get AS set members automatically from the peer's IRR as-set? (independent from auto-as-set)" default:"false"`
+	// Added for natesales/pathvector#165
+	VerifyIRRPolicy *bool `yaml:"verify-irr-policy" description:"Check the peer's aut-num object in the IRR (irr-server whois) for import (from us ... accept) and export (to us ... announce) policy, with us listed directly or through an as-set, and disable the peer if it's missing. Checked for each address family the peer has neighbors in; as there's one disabled flag per peer, the whole peer is disabled if any of them lacks policy. If the IRR can't be queried, a warning is shown and the peer is left as configured." default:"false"`
 
 	HonorGracefulShutdown *bool `yaml:"honor-graceful-shutdown" description:"Should RFC8326 graceful shutdown be enabled?" default:"true"`
 
@@ -233,6 +247,10 @@ type Peer struct {
 	Protocols                   *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet4                  *[]string `yaml:"-" description:"-" default:"-"`
 	PrefixSet6                  *[]string `yaml:"-" description:"-" default:"-"`
+	DontAnnounce4               *[]string `yaml:"-" description:"-" default:"-"`
+	DontAnnounce6               *[]string `yaml:"-" description:"-" default:"-"`
+	OnlyAnnounce4               *[]string `yaml:"-" description:"-" default:"-"`
+	OnlyAnnounce6               *[]string `yaml:"-" description:"-" default:"-"`
 	ImportStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
 	ImportLargeCommunities      *[]string `yaml:"-" description:"-" default:"-"`
 	ExportStandardCommunities   *[]string `yaml:"-" description:"-" default:"-"`
@@ -251,6 +269,8 @@ type VRRPInstance struct {
 	VRID      uint     `yaml:"vrid" description:"RFC3768 VRRP Virtual Router ID (1-255)" validate:"required"`
 	Priority  uint     `yaml:"priority" description:"RFC3768 VRRP Priority" validate:"required"`
 	VIPs      []string `yaml:"vips" description:"List of virtual IPs" validate:"required,cidr"`
+
+	VIPInterface string `yaml:"vip-interface" description:"Interface to bind virtual IPs to (defaults to the VRRP interface)"`
 
 	VIPs4 []string `yaml:"-" description:"-"`
 	VIPs6 []string `yaml:"-" description:"-"`
@@ -279,12 +299,13 @@ type Kernel struct {
 	Accept6         []string          `yaml:"accept6" description:"List of BIRD protocols to import into the IPv6 table"`
 	Reject4         []string          `yaml:"reject4" description:"List of BIRD protocols to not import into the IPv4 table"`
 	Reject6         []string          `yaml:"reject6" description:"List of BIRD protocols to not import into the IPv6 table"`
-	Statics         map[string]string `yaml:"statics" description:"List of static routes to include in BIRD"`
+	Statics         map[string]string `yaml:"statics" description:"List of static routes to include in BIRD (always exported to the kernel, BIRD protocols statics4 and statics6)"`
 	SRDCommunities  []string          `yaml:"srd-communities" description:"List of communities to filter routes exported to kernel (if list is not empty, all other prefixes will not be exported)"`
 	Learn           bool              `yaml:"learn" description:"Should routes from the kernel be learned into BIRD?" default:"false"`
 	Export          bool              `yaml:"export" description:"Export routes to kernel routing table" default:"true"`
 	RejectConnected bool              `yaml:"reject-connected" description:"Don't export connected routes (RTS_DEVICE) to kernel?'" default:"false"`
 	Table           int               `yaml:"table" description:"Kernel table"`
+	Tables          []int             `yaml:"tables" description:"Additional kernel tables to export routes to, with the same export policy as the main kernel table (BIRD protocols kernel4_table<N> and kernel6_table<N>)"`
 	ScanTime        int               `yaml:"scan-time" description:"Time in seconds between scans of the kernel routing table" default:"10"`
 
 	SRDStandardCommunities []string          `yaml:"-" description:"-"`
@@ -324,7 +345,7 @@ type Optimizer struct {
 type Config struct {
 	PeeringDBQueryTimeout uint   `yaml:"peeringdb-query-timeout" description:"PeeringDB query timeout in seconds" default:"10"`
 	PeeringDBAPIKey       string `yaml:"peeringdb-api-key" description:"PeeringDB API key"`
-	PeeringDBCache        bool   `yaml:"peeringdb-cache" description:"Cache PeeringDB results" default:"true"`
+	PeeringDBCache        bool   `yaml:"peeringdb-cache" description:"Global option to cache PeeringDB network records in memory for the duration of a single run, so peers with the same ASN only query PeeringDB once (this does not disable PeeringDB queries; to stop querying PeeringDB for a peer, disable auto-import-limits and auto-as-set on that peer)" default:"true"`
 	IRRQueryTimeout       uint   `yaml:"irr-query-timeout" description:"IRR query timeout in seconds" default:"30"`
 	BIRDDirectory         string `yaml:"bird-directory" description:"Directory to store BIRD configs" default:"/etc/bird/"`
 	BIRDBinary            string `yaml:"bird-binary" description:"Path to BIRD binary" default:"/usr/sbin/bird"`
@@ -334,7 +355,11 @@ type Config struct {
 	WebUIFile             string `yaml:"web-ui-file" description:"File to write web UI to (disabled if empty)" default:""`
 	LogFile               string `yaml:"log-file" description:"Log file location" default:"syslog"`
 	GlobalConfig          string `yaml:"global-config" description:"Global BIRD configuration" default:""`
-	PeeringDBURL          string `yaml:"peeringdb-url" description:"PeeringDB API URL, can be set to a local PeeringDB cache server" default:"https://peeringdb.com/api/"`
+
+	DeviceScanTime   int      `yaml:"device-scan-time" description:"Time in seconds between interface scans of the BIRD device protocol (BIRD default if 0)" default:"0"`
+	DirectCheckLink  bool     `yaml:"direct-check-link" description:"Should the BIRD direct protocol only import routes of interfaces with link up? (check link)" default:"false"`
+	DisableProtocols []string `yaml:"disable-protocols" description:"Built-in BIRD protocols to leave out of the configuration so they can be defined in global-config or manual*.conf instead (device, direct, kernel4, kernel6)" default:""`
+	PeeringDBURL     string   `yaml:"peeringdb-url" description:"PeeringDB API URL, can be set to a local PeeringDB cache server" default:"https://peeringdb.com/api/"`
 
 	Blocklist      []string `yaml:"blocklist" description:"List of ASNs, prefixes, and IP addresses to block" default:""`
 	BlocklistURLs  []string `yaml:"blocklist-urls" description:"List of URLs to fetch blocklists from" default:""`
@@ -343,10 +368,11 @@ type Config struct {
 	BlocklistASNs     []uint32 `yaml:"-" description:"-"`
 	BlocklistPrefixes []string `yaml:"-" description:"-"`
 
-	OriginCommunities []string `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
-	LocalCommunities  []string `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`
-	ImportCommunities []string `yaml:"add-on-import" description:"List of communities to add to all imported routes" default:"-"`
-	ExportCommunities []string `yaml:"add-on-export" description:"List of communities to add to all exported routes" default:"-"`
+	Communities       map[string]string `yaml:"communities" description:"Map of community names to standard or large communities, names can be used in place of communities in any community option" default:"-"`
+	OriginCommunities []string          `yaml:"origin-communities" description:"List of communities to accept as locally originated routes" default:""`
+	LocalCommunities  []string          `yaml:"local-communities" description:"List of communities to add to locally originated prefixes" default:""`
+	ImportCommunities []string          `yaml:"add-on-import" description:"List of communities to add to all imported routes" default:"-"`
+	ExportCommunities []string          `yaml:"add-on-export" description:"List of communities to add to all exported routes" default:"-"`
 
 	Hostname string `yaml:"hostname" description:"Router hostname (default system hostname)" default:""`
 
@@ -359,10 +385,10 @@ type Config struct {
 	BGPQArgs      string `yaml:"bgpq-args" description:"Additional command line arguments to pass to bgpq4" default:""`
 	KeepFiltered  bool   `yaml:"keep-filtered" description:"Should filtered routes be kept in memory?" default:"false"`
 	MergePaths    bool   `yaml:"merge-paths" description:"Should best and equivalent non-best routes be imported to build ECMP routes?" default:"false"`
-	Source4       string `yaml:"source4" description:"Source IPv4 address"`
-	Source6       string `yaml:"source6" description:"Source IPv6 address"`
+	Source4       string `yaml:"source4" description:"Source IPv4 address of BGP routes installed in the kernel (krt_prefsrc), can be overridden per peer"`
+	Source6       string `yaml:"source6" description:"Source IPv6 address of BGP routes installed in the kernel (krt_prefsrc), can be overridden per peer"`
 	DefaultRoute  bool   `yaml:"default-route" description:"Add a default route" default:"true"`
-	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted? Setting to false adds 0.0.0.0/0 and ::/0 to the global bogon list." default:"false"`
+	AcceptDefault bool   `yaml:"accept-default" description:"Should default routes be accepted from peers? When false, default routes are rejected by filter-prefix-length. When true, learned default routes are preferred over the locally generated default route and installed in the kernel." default:"false"`
 	RPKIEnable    bool   `yaml:"rpki-enable" description:"Enable RPKI protocol" default:"true"`
 
 	TransitASNs        []uint32 `yaml:"transit-asns" description:"List of ASNs to consider transit providers for filter-transit-asns (default list in config)" default:""`
@@ -389,6 +415,7 @@ type Config struct {
 	RTRServerHost             string   `yaml:"-" description:"-"`
 	RTRServerPort             int      `yaml:"-" description:"-"`
 	Prefixes4                 []string `yaml:"-" description:"-"`
+	L3VPN                     bool     `yaml:"-" description:"-"`
 	Prefixes6                 []string `yaml:"-" description:"-"`
 	QueryNVRS                 bool     `yaml:"-" description:"-"`
 	NVRSASNs                  []uint32 `yaml:"-" description:"-"`

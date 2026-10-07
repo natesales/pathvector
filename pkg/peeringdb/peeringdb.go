@@ -68,7 +68,7 @@ var (
 
 // networkInfo returns PeeringDB for an ASN
 func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
-	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
+	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)} //nolint:gosec // configured timeout in seconds, far below the int64 range
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(Endpoint+"/net?asn=%d", asn), nil)
 
 	if apiKey != "" {
@@ -87,7 +87,7 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	}
 
 	if res.StatusCode == 404 {
-		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page", asn)
+		return nil, fmt.Errorf("peer %d %w", asn, errNoPage)
 	}
 
 	if res.StatusCode != 200 {
@@ -110,7 +110,7 @@ func networkInfo(asn uint32, queryTimeout uint, apiKey string) (*Data, error) {
 	}
 
 	if len(pDbResponse.Data) < 1 {
-		return nil, fmt.Errorf("peer %d doesn't have a PeeringDB page", asn)
+		return nil, fmt.Errorf("peer %d %w", asn, errNoPage)
 	}
 
 	return &pDbResponse.Data[0], nil // nil error
@@ -140,10 +140,18 @@ func NetworkInfo(asn uint32, queryTimeout uint, apiKey string, useCache bool) (*
 
 // Update updates peer values from PeeringDB
 func Update(peerData *config.Peer, queryTimeout uint, apiKey string, useCache bool) {
-	pDbData, err := NetworkInfo(uint32(*peerData.ASN), queryTimeout, apiKey, useCache)
+	pDbData, err := NetworkInfo(uint32(*peerData.ASN), queryTimeout, apiKey, useCache) //nolint:gosec // ASNs are 32-bit by definition
 	if err != nil {
 		log.Fatalf("unable to get PeeringDB data: %+v", err)
 	}
+	UpdateFromData(peerData, pDbData)
+}
+
+// UpdateFromData updates peer values from already retrieved PeeringDB data
+func UpdateFromData(peerData *config.Peer, pDbData *Data) {
+	// Work on a copy, as pDbData may be shared through the in-memory cache
+	d := *pDbData
+	pDbData = &d
 
 	// Set import limits
 	if *peerData.AutoImportLimits {
@@ -171,7 +179,7 @@ func Update(peerData *config.Peer, queryTimeout uint, apiKey string, useCache bo
 
 // NeverViaRouteServers gets a list of networks that report should never be reachable via route servers
 func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
-	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)}
+	httpClient := http.Client{Timeout: time.Second * time.Duration(queryTimeout)} //nolint:gosec // configured timeout in seconds, far below the int64 range
 	req, err := http.NewRequest(http.MethodGet, Endpoint+"/net?info_never_via_route_servers=1", nil)
 	if err != nil {
 		return nil, fmt.Errorf("PeeringDB GET: %s", err)
@@ -217,7 +225,7 @@ func NeverViaRouteServers(queryTimeout uint, apiKey string) ([]uint32, error) {
 
 // IXLANs gets PeeringDB IX LANs for an ASN
 func IXLANs(asn uint32, peeringDbQueryTimeout uint, apiKey string) ([]IxLanData, error) {
-	httpClient := http.Client{Timeout: time.Second * time.Duration(peeringDbQueryTimeout)}
+	httpClient := http.Client{Timeout: time.Second * time.Duration(peeringDbQueryTimeout)} //nolint:gosec // configured timeout in seconds, far below the int64 range
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(Endpoint+"/netixlan?asn=%d", asn), nil)
 	if err != nil {
 		return nil, fmt.Errorf("PeeringDB GET (This peer might not have a PeeringDB page): %s", err)

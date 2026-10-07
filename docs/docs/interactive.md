@@ -3,7 +3,7 @@ title: Interactive CLI
 sidebar_position: 7
 ---
 
-Pathvector supports an interactive CLI for configuration.
+Pathvector supports an interactive CLI for configuration. It is distributed as a [plugin](/docs/plugins); when the plugin isn't installed, `pathvector cli` is an alias of the [`birdsh` BIRD shell](/docs/cli#birdsh).
 
 ```
 $ pathvector cli

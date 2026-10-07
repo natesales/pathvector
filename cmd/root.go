@@ -62,7 +62,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "/etc/pathvector.yml", "YAML configuration file")
 	rootCmd.PersistentFlags().StringVar(&lockFile, "lock", "", "Lock file (check disabled if empty)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose log messages")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "trace", "t", false, "Show trace log messages")
+	rootCmd.PersistentFlags().BoolVarP(&trace, "trace", "t", false, "Show trace log messages")
 	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dry-run", "d", false, "Don't modify configuration")
 	rootCmd.PersistentFlags().BoolVarP(&noConfigure, "no-configure", "n", false, "Don't configure BIRD")
 
@@ -70,9 +70,26 @@ func init() {
 	for _, p := range plugin.Get() {
 		pluginCommand := p.Command()
 		if pluginCommand != nil {
-			rootCmd.AddCommand(p.Command())
+			// A plugin may provide its own "cli" command (the interactive configuration CLI,
+			// documented as `pathvector cli`, was moved to a plugin). Cobra resolves a name to the
+			// first matching command, so drop birdsh's "cli" alias to let the plugin's command win.
+			if pluginCommand.Name() == "cli" || pluginCommand.HasAlias("cli") {
+				birdshCmd.Aliases = removeString(birdshCmd.Aliases, "cli")
+			}
+			rootCmd.AddCommand(pluginCommand)
 		}
 	}
+}
+
+// removeString returns s without any elements equal to r
+func removeString(s []string, r string) []string {
+	var out []string
+	for _, v := range s {
+		if v != r {
+			out = append(out, v)
+		}
+	}
+	return out
 }
 
 func Execute(v, c, d string) error {

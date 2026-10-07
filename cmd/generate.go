@@ -8,10 +8,12 @@ import (
 
 var (
 	withdraw bool
+	offline  bool
 )
 
 func init() {
 	generateCmd.Flags().BoolVarP(&withdraw, "withdraw", "w", false, "Withdraw all routes")
+	generateCmd.Flags().BoolVar(&offline, "offline", false, "Don't query IRR or PeeringDB, only use data cached by previous runs")
 	rootCmd.AddCommand(generateCmd)
 }
 
@@ -20,6 +22,6 @@ var generateCmd = &cobra.Command{
 	Short:   "Generate router configuration",
 	Aliases: []string{"gen", "g"},
 	Run: func(cmd *cobra.Command, args []string) {
-		process.Run(configFile, lockFile, version, noConfigure, dryRun, withdraw)
+		process.Run(configFile, lockFile, version, noConfigure, dryRun, withdraw, offline)
 	},
 }

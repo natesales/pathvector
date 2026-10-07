@@ -23,3 +23,31 @@ test-teardown:
 	rm -f nohup.out
 
 test-sequence: test-setup test test-teardown
+
+# BIRD test matrix (see tests/bird-matrix/README.md)
+# Builds one Docker image per BIRD version and runs the generate/validate
+# tests in it. Defaults to the versions listed in tests/bird-matrix/versions.txt.
+BIRD_VERSIONS ?= $(shell sed -e 's/\#.*//' tests/bird-matrix/versions.txt)
+BIRD_MATRIX_DOCKERFILE ?= tests/bird-matrix/Dockerfile
+BIRD_MATRIX_IMAGE ?= pathvector-bird-matrix
+DOCKER_BUILD_ARGS ?=
+
+bird-matrix:
+	@# Keep going after a failing version so one run reports every failure
+	@failed=""; for v in $(BIRD_VERSIONS); do \
+		echo "### BIRD $$v"; \
+		docker build $(DOCKER_BUILD_ARGS) -f $(BIRD_MATRIX_DOCKERFILE) \
+			--build-arg BIRD_VERSION=$$v -t $(BIRD_MATRIX_IMAGE):$$v . \
+		&& docker run --rm $(BIRD_MATRIX_IMAGE):$$v \
+		|| failed="$$failed $$v"; \
+	done; \
+	if [ -n "$$failed" ]; then echo "### BIRD matrix failed for:$$failed"; exit 1; fi; \
+	echo "### BIRD matrix passed for: $(strip $(BIRD_VERSIONS))"
+
+# Same tests without Docker: builds BIRD into tests/bird-matrix/<version>/
+# (needs the BIRD build dependencies, Go and python3-flask on the host)
+bird-matrix-local:
+	tests/bird-matrix/build-bird-versions.sh $(BIRD_VERSIONS)
+	tests/bird-matrix/run-tests.sh $(addprefix tests/bird-matrix/,$(BIRD_VERSIONS))
+
+.PHONY: bird-matrix bird-matrix-local

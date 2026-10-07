@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ import (
 	"github.com/natesales/pathvector/pkg/plugin"
 	"github.com/natesales/pathvector/pkg/templating"
 	"github.com/natesales/pathvector/pkg/util"
+	"github.com/natesales/pathvector/pkg/yang"
 )
 
 // categorizeCommunity checks if the community is in standard or large form, or an empty string if invalid
@@ -113,6 +115,139 @@ func sortCommunitiesPtr(communities *[]string) (*[]string, *[]string, error) {
 	return &standard, &large, nil
 }
 
+// resolveCommunity returns the community for a community name defined in the global communities map, or the input unchanged
+func resolveCommunity(names map[string]string, community string) string {
+	if resolved, ok := names[community]; ok {
+		return resolved
+	}
+	return community
+}
+
+// resolveCommunities returns a copy of a community list with community names replaced by their communities
+func resolveCommunities(names map[string]string, communities []string) []string {
+	if communities == nil {
+		return nil
+	}
+	out := make([]string, len(communities))
+	for i, community := range communities {
+		out[i] = resolveCommunity(names, community)
+	}
+	return out
+}
+
+// resolveCommunitiesPtr is resolveCommunities for optional (pointer) lists. A new list is returned so lists shared with
+// a template aren't modified.
+func resolveCommunitiesPtr(names map[string]string, communities *[]string) *[]string {
+	if communities == nil {
+		return nil
+	}
+	out := resolveCommunities(names, *communities)
+	return &out
+}
+
+// applyTemplate copies the fields configured on a template to a peer (or child template) that doesn't configure them.
+// If merge-template-lists is enabled (on the peer or the template), list and map fields configured on both are merged:
+// lists are concatenated (template entries first) and map entries from the peer override the template's.
+// Merged values are newly allocated so values shared with the template aren't modified.
+func applyTemplate(peer *config.Peer, template *config.Peer) {
+	merge := util.Deref(template.MergeTemplateLists)
+	if peer.MergeTemplateLists != nil {
+		merge = *peer.MergeTemplateLists
+	}
+
+	templateValue := reflect.ValueOf(template).Elem()
+	peerValue := reflect.ValueOf(peer).Elem()
+	for i := 0; i < templateValue.NumField(); i++ {
+		fieldName := templateValue.Type().Field(i).Name
+		if fieldName == "Template" { // Ignore the template field
+			continue
+		}
+		tValue := templateValue.Field(i)
+		pValue := peerValue.Field(i)
+		if tValue.IsNil() {
+			continue
+		}
+		if pValue.IsNil() {
+			// Use the template's value
+			pValue.Set(tValue)
+			continue
+		}
+		if !merge {
+			continue
+		}
+		switch tValue.Elem().Kind() {
+		case reflect.Slice:
+			merged := reflect.MakeSlice(tValue.Elem().Type(), 0, tValue.Elem().Len()+pValue.Elem().Len())
+			merged = reflect.AppendSlice(merged, tValue.Elem())
+			merged = reflect.AppendSlice(merged, pValue.Elem())
+			ptr := reflect.New(merged.Type())
+			ptr.Elem().Set(merged)
+			pValue.Set(ptr)
+		case reflect.Map:
+			merged := reflect.MakeMap(tValue.Elem().Type())
+			for _, src := range []reflect.Value{tValue.Elem(), pValue.Elem()} {
+				iter := src.MapRange()
+				for iter.Next() {
+					merged.SetMapIndex(iter.Key(), iter.Value())
+				}
+			}
+			ptr := reflect.New(merged.Type())
+			ptr.Elem().Set(merged)
+			pValue.Set(ptr)
+		}
+	}
+}
+
+// resolveTemplate applies a template's parent templates to it, recursively. resolved tracks templates that have
+// already been resolved and chain is used to detect inheritance loops.
+func resolveTemplate(templates map[string]*config.Peer, name string, resolved map[string]bool, chain []string) error {
+	if resolved[name] {
+		return nil
+	}
+	for _, n := range chain {
+		if n == name {
+			return fmt.Errorf("template inheritance loop: %s -> %s", strings.Join(chain, " -> "), name)
+		}
+	}
+	template := templates[name]
+	if template.Template != nil && *template.Template != "" {
+		parentName := *template.Template
+		parent, ok := templates[parentName]
+		if !ok {
+			return fmt.Errorf("template %s has parent template %s which is not defined", name, parentName)
+		}
+		if err := resolveTemplate(templates, parentName, resolved, append(chain, name)); err != nil {
+			return err
+		}
+		applyTemplate(template, parent)
+	}
+	resolved[name] = true
+	return nil
+}
+
+// splitPrefixesByAF splits a list of BIRD prefix set entries (optionally with a length range or +/- suffix) into IPv4 and IPv6 lists
+func splitPrefixesByAF(prefixes *[]string) (*[]string, *[]string, error) {
+	if prefixes == nil {
+		return nil, nil, nil
+	}
+	v4 := []string{}
+	v6 := []string{}
+	for _, prefix := range *prefixes {
+		// Strip BIRD prefix pattern suffixes such as {24,32}, + and -
+		bare := strings.TrimRight(strings.SplitN(prefix, "{", 2)[0], "+-")
+		pfx, _, err := net.ParseCIDR(strings.TrimSpace(bare))
+		if err != nil {
+			return nil, nil, fmt.Errorf("%s", prefix)
+		}
+		if pfx.To4() == nil {
+			v6 = append(v6, prefix)
+		} else {
+			v4 = append(v4, prefix)
+		}
+	}
+	return &v4, &v6, nil
+}
+
 func templateReplacements(in string, peer *config.Peer) string {
 	v := reflect.ValueOf(peer)
 	for v.Kind() == reflect.Ptr { // Dereference pointer types
@@ -134,14 +269,65 @@ func templateReplacements(in string, peer *config.Peer) string {
 	return in
 }
 
-// Load loads a configuration file from a YAML file
+// unknownFieldRegex matches yaml.v3 strict decoding errors for unknown fields
+var unknownFieldRegex = regexp.MustCompile(`field (\S+) not found in type config\.(\w+)`)
+
+// yamlKeys returns the set of YAML keys defined on a struct type
+func yamlKeys(v interface{}) map[string]bool {
+	keys := map[string]bool{}
+	t := reflect.TypeOf(v)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	for i := 0; i < t.NumField(); i++ {
+		key := strings.Split(t.Field(i).Tag.Get("yaml"), ",")[0]
+		if key != "" && key != "-" {
+			keys[key] = true
+		}
+	}
+	return keys
+}
+
+// addUnknownFieldHints appends a hint to unknown field errors when the field
+// exists at the other level of the config (global vs per-peer)
+func addUnknownFieldHints(errMsg string) string {
+	globalKeys := yamlKeys(config.Config{})
+	peerKeys := yamlKeys(config.Peer{})
+
+	lines := strings.Split(errMsg, "\n")
+	for i, line := range lines {
+		match := unknownFieldRegex.FindStringSubmatch(line)
+		if match == nil {
+			continue
+		}
+		field, typ := match[1], match[2]
+		switch {
+		case typ == "Peer" && globalKeys[field]:
+			lines[i] += fmt.Sprintf(" (%s is a global option, not a per-peer option)", field)
+		case typ == "Config" && peerKeys[field]:
+			lines[i] += fmt.Sprintf(" (%s is a per-peer option, set it under a peer or template)", field)
+		}
+	}
+	return strings.Join(lines, "\n")
+}
+
+// Load loads a configuration file from a YAML file, or a JSON file (either in
+// the same structure as the YAML file or as RFC 7951 JSON of the YANG model)
 func Load(configBlob []byte) (*config.Config, error) {
+	if yang.IsRFC7951(configBlob) {
+		converted, err := yang.FromRFC7951(configBlob)
+		if err != nil {
+			return nil, fmt.Errorf("RFC 7951 JSON conversion: %s", err)
+		}
+		configBlob = converted
+	}
+
 	var c config.Config
 	c.Init()
 	defaults.MustSet(&c)
 
 	if err := util.YAMLUnmarshalStrict(configBlob, &c); err != nil {
-		return nil, fmt.Errorf("YAML unmarshal: %s", err)
+		return nil, fmt.Errorf("YAML unmarshal: %s", addUnknownFieldHints(err.Error()))
 	}
 
 	validate := validator.New()
@@ -149,10 +335,35 @@ func Load(configBlob []byte) (*config.Config, error) {
 		return nil, fmt.Errorf("validation: %s", err)
 	}
 
-	// Check for invalid templates
-	for templateName, templateData := range c.Templates {
-		if templateData.Template != nil && *templateData.Template != "" {
-			log.Fatalf("Templates must not have a template field set, but %s does", templateName)
+	// Validate additional kernel tables
+	for _, table := range c.Kernel.Tables {
+		if table <= 0 || table == c.Kernel.Table {
+			return nil, fmt.Errorf("invalid kernel table %d in kernel.tables (must be positive and differ from kernel.table)", table)
+		}
+	}
+
+	// Validate disabled built-in protocols
+	for _, protocol := range c.DisableProtocols {
+		if protocol != "device" && protocol != "direct" && protocol != "kernel4" && protocol != "kernel6" {
+			return nil, fmt.Errorf("invalid disable-protocols entry %s (must be one of device, direct, kernel4, kernel6)", protocol)
+		}
+	}
+
+	// Validate community names
+	for name, community := range c.Communities {
+		if categorizeCommunity(name) != "" {
+			return nil, fmt.Errorf("invalid community name %s: community names must not be communities themselves", name)
+		}
+		if categorizeCommunity(community) == "" {
+			return nil, fmt.Errorf("invalid community %s for community name %s", community, name)
+		}
+	}
+
+	// Resolve template inheritance (templates may set a parent template)
+	resolvedTemplates := map[string]bool{}
+	for templateName := range c.Templates {
+		if err := resolveTemplate(c.Templates, templateName, resolvedTemplates, nil); err != nil {
+			return nil, err
 		}
 	}
 
@@ -200,29 +411,13 @@ func Load(configBlob []byte) (*config.Config, error) {
 			template := c.Templates[*peerData.Template]
 			if template == nil {
 				log.Fatalf("Template %s not found", *peerData.Template)
-			} else {
-				templateValue := reflect.ValueOf(*template)
-				peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
-
-				templateValueType := templateValue.Type()
-				for i := 0; i < templateValueType.NumField(); i++ {
-					fieldName := templateValueType.Field(i).Name
-					peerFieldValue := peerValue.FieldByName(fieldName)
-					if fieldName != "Template" { // Ignore the template field
-						pVal := reflect.Indirect(peerFieldValue)
-						peerHasValueConfigured := pVal.IsValid()
-						tValue := templateValue.Field(i)
-						templateHasValueConfigured := !tValue.IsNil()
-						if templateHasValueConfigured && !peerHasValueConfigured {
-							// Use the template's value
-							peerFieldValue.Set(templateValue.Field(i))
-						}
-
-						log.Tracef("[%s] field: %s template's value: %+v kind: %T templateHasValueConfigured: %v", peerName, fieldName, reflect.Indirect(tValue), tValue.Kind().String(), templateHasValueConfigured)
-					}
-				}
 			}
+			applyTemplate(peerData, template)
 		} // end peer template processor
+
+		// Record whether local pref options were configured (on the peer or its template) before defaults are applied
+		localPrefConfigured := peerData.LocalPref != nil || peerData.LocalPref4 != nil || peerData.LocalPref6 != nil
+		setLocalPrefConfigured := peerData.SetLocalPref != nil
 
 		// Set default values
 		peerValue := reflect.ValueOf(c.Peers[peerName]).Elem()
@@ -272,6 +467,13 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
+		// Preserve local pref learned over iBGP unless a local pref is explicitly configured
+		isIBGP := *peerData.ASN == c.ASN || (peerData.LocalASN != nil && *peerData.LocalASN == *peerData.ASN)
+		if isIBGP && !localPrefConfigured && !setLocalPrefConfigured && !*peerData.OptimizeInbound {
+			log.Debugf("[%s] iBGP session without local-pref configured, not setting local pref on import", peerName)
+			peerData.SetLocalPref = util.Ptr(false)
+		}
+
 		if peerData.PreImportFilter != nil {
 			peerData.PreImportFilter = util.Ptr(templateReplacements(*peerData.PreImportFilter, peerData))
 		}
@@ -294,6 +496,26 @@ func Load(configBlob []byte) (*config.Config, error) {
 
 		if peerData.OnlyAnnounce != nil && util.Deref(peerData.AnnounceAll) {
 			log.Fatalf("[%s] only-announce and announce-all cannot both be true", peerName)
+		}
+
+		// Replace community names with their communities
+		peerData.ImportCommunities = resolveCommunitiesPtr(c.Communities, peerData.ImportCommunities)
+		peerData.ExportCommunities = resolveCommunitiesPtr(c.Communities, peerData.ExportCommunities)
+		peerData.AnnounceCommunities = resolveCommunitiesPtr(c.Communities, peerData.AnnounceCommunities)
+		peerData.RemoveCommunities = resolveCommunitiesPtr(c.Communities, peerData.RemoveCommunities)
+		if peerData.PrefixCommunities != nil {
+			resolved := map[string][]string{}
+			for prefix, communities := range *peerData.PrefixCommunities {
+				resolved[prefix] = resolveCommunities(c.Communities, communities)
+			}
+			peerData.PrefixCommunities = &resolved
+		}
+		if peerData.CommunityPrefs != nil {
+			resolved := map[string]uint32{}
+			for community, pref := range *peerData.CommunityPrefs {
+				resolved[resolveCommunity(c.Communities, community)] = pref
+			}
+			peerData.CommunityPrefs = &resolved
 		}
 
 		// Categorize prefix-communities
@@ -350,6 +572,37 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
+		// filter-irr and auto-as-set-members need an as-set, either configured or from PeeringDB (auto-as-set)
+		hasASSet := (peerData.ASSet != nil && *peerData.ASSet != "") || *peerData.AutoASSet
+		if !hasASSet && *peerData.FilterIRR {
+			return nil, fmt.Errorf("[%s] filter-irr requires as-set or auto-as-set", peerName)
+		}
+		if !hasASSet && *peerData.AutoASSetMembers {
+			return nil, fmt.Errorf("[%s] auto-as-set-members requires as-set or auto-as-set", peerName)
+		}
+
+		// VPN tables are only defined if at least one peer exchanges L3VPN routes
+		if *peerData.L3VPN {
+			c.L3VPN = true
+		}
+
+		// Validate per-peer kernel source addresses
+		if peerData.Source4 != nil {
+			if ip := net.ParseIP(*peerData.Source4); ip == nil || ip.To4() == nil {
+				return nil, fmt.Errorf("[%s] invalid source4 address: %s", peerName, *peerData.Source4)
+			}
+		}
+		if peerData.Source6 != nil {
+			if ip := net.ParseIP(*peerData.Source6); ip == nil || ip.To4() != nil {
+				return nil, fmt.Errorf("[%s] invalid source6 address: %s", peerName, *peerData.Source6)
+			}
+		}
+
+		// Validate gateway mode
+		if peerData.Gateway != nil && *peerData.Gateway != "direct" && *peerData.Gateway != "recursive" {
+			return nil, fmt.Errorf("[%s] invalid gateway mode: %s (must be direct or recursive)", peerName, *peerData.Gateway)
+		}
+
 		// Validate RFC 9234 BGP role
 		if peerData.Role != nil {
 			peerData.Role = util.Ptr(strings.ReplaceAll(*peerData.Role, "-", "_"))
@@ -384,6 +637,13 @@ func Load(configBlob []byte) (*config.Config, error) {
 
 	// Categorize communities
 	var err error
+	// Replace community names with their communities
+	c.Kernel.SRDCommunities = resolveCommunities(c.Communities, c.Kernel.SRDCommunities)
+	c.OriginCommunities = resolveCommunities(c.Communities, c.OriginCommunities)
+	c.ImportCommunities = resolveCommunities(c.Communities, c.ImportCommunities)
+	c.ExportCommunities = resolveCommunities(c.Communities, c.ExportCommunities)
+	c.LocalCommunities = resolveCommunities(c.Communities, c.LocalCommunities)
+
 	c.Kernel.SRDStandardCommunities, c.Kernel.SRDLargeCommunities, err = sortCommunities(c.Kernel.SRDCommunities)
 	if err != nil {
 		return nil, fmt.Errorf("invalid SRD community: %v", err)
@@ -503,6 +763,33 @@ func Load(configBlob []byte) (*config.Config, error) {
 			}
 		}
 
+		// Split dont-announce and only-announce lists by address family
+		peerData.DontAnnounce4, peerData.DontAnnounce6, err = splitPrefixesByAF(peerData.DontAnnounce)
+		if err != nil {
+			return nil, fmt.Errorf("invalid dont-announce prefix: %v", err)
+		}
+		peerData.OnlyAnnounce4, peerData.OnlyAnnounce6, err = splitPrefixesByAF(peerData.OnlyAnnounce)
+		if err != nil {
+			return nil, fmt.Errorf("invalid only-announce prefix: %v", err)
+		}
+
+		// Split prefix-prefs by address family
+		if peerData.PrefixPrefs != nil {
+			peerData.PrefixPrefs4 = &map[string]uint32{}
+			peerData.PrefixPrefs6 = &map[string]uint32{}
+			for prefix, pref := range *peerData.PrefixPrefs {
+				v4, _, err := splitPrefixesByAF(&[]string{prefix})
+				if err != nil {
+					return nil, fmt.Errorf("invalid prefix-prefs prefix: %v", err)
+				}
+				if len(*v4) > 0 {
+					(*peerData.PrefixPrefs4)[prefix] = pref
+				} else {
+					(*peerData.PrefixPrefs6)[prefix] = pref
+				}
+			}
+		}
+
 		// Categorize communities
 		peerData.ImportStandardCommunities, peerData.ImportLargeCommunities, err = sortCommunitiesPtr(peerData.ImportCommunities)
 		if err != nil {
@@ -522,8 +809,8 @@ func Load(configBlob []byte) (*config.Config, error) {
 		}
 
 		// Check for no originated prefixes but announce-originated enabled
-		if len(c.Prefixes) < 1 && *peerData.AnnounceOriginated {
-			// No locally originated prefixes are defined, so there's nothing to originate
+		if len(c.Prefixes) < 1 && len(c.OriginCommunities) < 1 && *peerData.AnnounceOriginated {
+			// No locally originated prefixes or origin communities are defined, so there's nothing to originate
 			*peerData.AnnounceOriginated = false
 		}
 	} // end peer loop
@@ -546,31 +833,102 @@ func Load(configBlob []byte) (*config.Config, error) {
 	return &c, nil // nil error
 }
 
-// peer processes a single peer
-func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.WaitGroup) {
+// emptyPtrSlice returns true if a slice pointer is nil or the slice has no elements
+func emptyPtrSlice[T any](s *[]T) bool {
+	return s == nil || len(*s) == 0
+}
+
+// rejectImports fails a peer safe by rejecting all routes imported from it
+func rejectImports(peerName string, peerData *config.Peer, reason string) {
+	log.Errorf("[%s] %s; rejecting all imports from AS%d", peerName, reason, *peerData.ASN)
+	peerData.Import = util.Ptr(false)
+}
+
+// verifyIRRPolicy disables a peer whose IRR aut-num object no longer documents import from and export to our ASN
+// (natesales/pathvector#165). If the policy can't be checked, the peer is left as configured.
+func verifyIRRPolicy(peerName string, peerData *config.Peer, c *config.Config, offline bool) {
+	if offline {
+		log.Warnf("[%s] offline mode, skipping verify-irr-policy", peerName)
+		return
+	}
+
+	// Only check the address families the peer has sessions in
+	var v4, v6 bool
+	for _, n := range *peerData.NeighborIPs {
+		if strings.Contains(n, ":") {
+			v6 = true
+		} else {
+			v4 = true
+		}
+	}
+
+	//nolint:gosec // ASNs are 32-bit by definition
+	missing, err := irr.VerifyPolicy(uint32(*peerData.ASN), uint32(c.ASN), v4, v6, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs)
+	if err != nil {
+		log.Warnf("[%s] unable to verify IRR policy of AS%d, leaving peer unchanged: %v", peerName, *peerData.ASN, err)
+		return
+	}
+	if len(missing) > 0 {
+		log.Warnf("[%s] disabling peer: aut-num AS%d is missing IRR policy: %s", peerName, *peerData.ASN, strings.Join(missing, ", "))
+		peerData.Disabled = util.Ptr(true)
+	} else {
+		log.Debugf("[%s] IRR policy of AS%d verified", peerName, *peerData.ASN)
+	}
+}
+
+// peer processes a single peer. If offline is true, no live IRR or PeeringDB queries are made and only data
+// cached by previous runs is used.
+func peer(peerName string, peerData *config.Peer, c *config.Config, offline bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	log.Debugf("Processing AS%d %s", *peerData.ASN, peerName)
 
 	// If a PeeringDB query is required
+	// These are the only per-peer options that trigger a PeeringDB query; disabling
+	// both on a peer stops PeeringDB lookups for it. The global peeringdb-cache
+	// option only controls whether results are shared between peers in this run.
 	if *peerData.AutoImportLimits || *peerData.AutoASSet {
 		log.Debugf("[%s] has auto-import-limits or auto-as-set, querying PeeringDB", peerName)
 
-		peeringdb.Update(peerData, c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, true)
+		// Falls back to the data cached on disk by the last successful query if PeeringDB is unreachable
+		//nolint:gosec // ASNs are 32-bit by definition
+		pDbData, err := peeringdb.NetworkInfoWithFallback(uint32(*peerData.ASN), c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, c.PeeringDBCache, c.CacheDirectory, offline)
+		if err != nil {
+			log.Fatalf("[%s] unable to get PeeringDB data: %+v", peerName, err)
+		}
+		peeringdb.UpdateFromData(peerData, pDbData)
 	} // end peeringdb query enabled
 
-	// Build IRR prefix sets
+	// Results of successful IRR queries are cached per peer, and used if a later query fails (natesales/pathvector#188).
+	// The cached data takes precedence over rejecting all imports below.
+	irrCache := irr.LoadCache(irr.CachePath(c.CacheDirectory, *peerData.ASN, *util.Sanitize(peerName)))
+	defer func() {
+		if err := irrCache.Save(); err != nil {
+			log.Warnf("[%s] %v", peerName, err)
+		}
+	}()
+
+	// Build IRR prefix sets. IRR failures don't abort the whole run; instead the affected peer fails safe
+	// by rejecting all imports while every other peer is generated normally.
 	if *peerData.FilterIRR {
-		if err := irr.Update(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs); err != nil {
-			log.Fatal(err)
+		if err := irr.UpdateWithCache(peerData, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs, irrCache, offline); err != nil {
+			rejectImports(peerName, peerData, fmt.Sprintf("IRR prefix set generation failed: %v", err))
+		} else if emptyPtrSlice(peerData.PrefixSet4) && emptyPtrSlice(peerData.PrefixSet6) {
+			// With no prefixes at all the template skips the prefix set check entirely, so this would otherwise accept everything
+			rejectImports(peerName, peerData, fmt.Sprintf("filter-irr is enabled but no IPv4 or IPv6 prefixes were found for %s", *peerData.ASSet))
 		}
 	}
 	if *peerData.AutoASSetMembers {
-		membersFromIRR, err := irr.ASMembers(*peerData.ASSet, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs)
-		if err != nil {
-			log.Fatal(err)
+		var membersFromIRR []uint32
+		var err error
+		if peerData.ASSet == nil || *peerData.ASSet == "" {
+			err = errors.New("peer has auto-as-set-members enabled and no as-set defined")
+		} else {
+			membersFromIRR, err = irr.ASMembersWithCache(*peerData.ASSet, c.IRRServer, c.IRRQueryTimeout, c.BGPQArgs, irrCache, offline)
 		}
-		if peerData.ASSetMembers == nil {
+		if err != nil {
+			rejectImports(peerName, peerData, fmt.Sprintf("unable to get AS set members: %v", err))
+		} else if peerData.ASSetMembers == nil {
 			peerData.ASSetMembers = &membersFromIRR
 		} else {
 			newASSetMembers := *peerData.ASSetMembers
@@ -579,7 +937,16 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 		}
 	}
 	if *peerData.FilterASSet && (peerData.ASSetMembers == nil || len(*peerData.ASSetMembers) < 1) {
-		log.Fatalf("peer has filter-as-set enabled but no members in it's as-set")
+		if !*peerData.AutoASSetMembers {
+			log.Fatalf("peer has filter-as-set enabled but no members in it's as-set")
+		}
+		rejectImports(peerName, peerData, "filter-as-set is enabled but no as-set members were found")
+		// An empty AS set member list would render an invalid BIRD set; all imports are rejected anyway
+		peerData.FilterASSet = util.Ptr(false)
+	}
+
+	if *peerData.VerifyIRRPolicy {
+		verifyIRRPolicy(peerName, peerData, c, offline)
 	}
 
 	util.PrintStructInfo(peerName, peerData)
@@ -611,7 +978,8 @@ func peer(peerName string, peerData *config.Peer, c *config.Config, wg *sync.Wai
 }
 
 // Run runs the full data generation procedure
-func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw bool) {
+// If offline is true, no live IRR or PeeringDB queries are made and only data cached by previous runs is used.
+func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw, offline bool) {
 	// Check lockfile
 	if lockFile != "" {
 		if _, err := os.Stat(lockFile); err == nil {
@@ -646,7 +1014,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	// Run NVRS query
 	if c.QueryNVRS {
 		var err error
-		c.NVRSASNs, err = peeringdb.NeverViaRouteServers(c.PeeringDBQueryTimeout, c.PeeringDBAPIKey)
+		c.NVRSASNs, err = peeringdb.NeverViaRouteServersWithFallback(c.PeeringDBQueryTimeout, c.PeeringDBAPIKey, c.CacheDirectory, offline)
 		if err != nil {
 			log.Fatalf("PeeringDB NVRS query: %s", err)
 		}
@@ -709,7 +1077,7 @@ func Run(configFilename, lockFile, version string, noConfigure, dryRun, withdraw
 	wg := new(sync.WaitGroup)
 	for peerName, peerData := range c.Peers {
 		wg.Add(1)
-		go peer(peerName, peerData, c, wg)
+		go peer(peerName, peerData, c, offline, wg)
 	} // end peer loop
 	wg.Wait()
 

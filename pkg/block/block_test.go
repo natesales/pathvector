@@ -37,3 +37,17 @@ func TestBlockCombine(t *testing.T) {
 	combined := Combine([]string{"AS65530"}, []string{"https://raw.githubusercontent.com/natesales/pathvector/main/tests/blocklist.txt"}, []string{"../../tests/blocklist.txt"})
 	assert.Len(t, combined, 19) // This only combines, doesn't sanitize so newlines and comments are included
 }
+
+func TestParseASN(t *testing.T) {
+	for in, expected := range map[string]uint32{"AS65530": 65530, "as112": 112, "4294967295": 4294967295} {
+		asn, ok := parseASN(in)
+		if !ok || asn != expected {
+			t.Errorf("parseASN(%s) = %d, %v; want %d", in, asn, ok, expected)
+		}
+	}
+	for _, in := range []string{"AS-5", "4294967296", "192.0.2.0/24", "foo"} {
+		if asn, ok := parseASN(in); ok {
+			t.Errorf("parseASN(%s) = %d, want invalid", in, asn)
+		}
+	}
+}

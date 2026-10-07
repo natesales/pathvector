@@ -5,17 +5,18 @@ vrrp_instance VRRP{{ $instanceId }} {
     virtual_router_id {{ .VRID }}
     priority {{ .Priority }}
     advert_int 1
+    {{- /* vip-interface binds VIPs to a different interface than the VRRP one, using keepalived's "dev" keyword */}}
     {{- if .VIPs4 }}
     virtual_ipaddress {
         {{- range $i, $vip := .VIPs4 }}
-        {{ $vip }}
+        {{ $vip }}{{ if $instance.VIPInterface }} dev {{ $instance.VIPInterface }}{{ end }}
         {{- end }}
     }
     {{- end }}
     {{- if .VIPs6 }}
     virtual_ipaddress_excluded {
         {{- range $i, $vip := .VIPs6 }}
-        {{ $vip }}
+        {{ $vip }}{{ if $instance.VIPInterface }} dev {{ $instance.VIPInterface }}{{ end }}
         {{- end }}
     }
     {{- end }}

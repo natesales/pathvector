@@ -21,8 +21,10 @@ func init() {
 }
 
 var birdshCmd = &cobra.Command{
-	Use:   "birdsh",
-	Short: "Lightweight BIRD shell",
+	Use: "birdsh",
+	// "cli" was the original name of this command before it was renamed to birdsh
+	Aliases: []string{"cli"},
+	Short:   "Lightweight BIRD shell",
 	Run: func(cmd *cobra.Command, args []string) {
 		if socket == "" {
 			conf, err := loadConfig()

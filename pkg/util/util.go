@@ -225,3 +225,24 @@ func YAMLUnmarshalStrict(y []byte, v interface{}) error {
 	decoder.KnownFields(true)
 	return decoder.Decode(v)
 }
+
+// WriteFileAtomic writes a file via a temporary file in the same directory and a rename, creating parent
+// directories as needed, so concurrent readers never see a partially written file
+func WriteFileAtomic(path string, b []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".*")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp.Name()) // no-op after a successful rename
+	if _, err := tmp.Write(b); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmp.Name(), path)
+}
